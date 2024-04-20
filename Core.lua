@@ -251,7 +251,6 @@ function WP:OnEnable()
   self:RegisterEvent("ITEM_COUNT_CHANGED", "Run")
   self:RegisterEvent("BAG_UPDATE", "Run")
   self:RegisterEvent("TRAIT_CONFIG_UPDATED", "Run")
-  self:ToggleWindow()
   self:Run()
 end
 
@@ -296,7 +295,7 @@ function WP:ToggleWindow()
     frame.closeButton:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
     frame.closeButton:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
     frame.closeButton:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-    frame.closeButton:SetScript("OnClick", function() DevTools_Dump("test") end)
+    frame.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
   end
 
   if not st then
