@@ -1,7 +1,7 @@
-## Interface: 100206
+## Interface: 100207
 ## Title: WeeklyProfessions
 ## Notes: Track your profession quests across characters
-## Version: v1.0
+## Version: v1.1
 ## SavedVariables: WeeklyProfessionsDB
 
 Libs\LibStub\LibStub.lua
