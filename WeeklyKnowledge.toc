@@ -7,6 +7,7 @@
 ## X-Website: https://github.com/DennisRas/WeeklyKnowledge
 ## X-Curse-Project-ID: 1092009
 ## X-Wago-ID: qKQx0o6x
+## X-WoWI-ID: 26821
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
