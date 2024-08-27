@@ -1,0 +1,18 @@
+## Interface: 110002
+## Title: WeeklyKnowledge
+## Notes: Track your profession knowledge across your characters
+## Version: @project-version@
+## IconTexture: Interface\AddOns\WeeklyKnowledge\Media\Icon.blp
+## SavedVariables: WeeklyKnowledgeDB
+## X-Website: https://www.curseforge.com/wow/addons/weeklyknowledge
+## X-Curse-Project-ID: 1092009
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\lib.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\lib-st\lib-st.xml
+
+Core.lua
