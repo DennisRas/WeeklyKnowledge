@@ -1,6 +1,7 @@
 local WP = LibStub("AceAddon-3.0"):NewAddon("WeeklyKnowledge", "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 WP.Libs = {}
 WP.Libs.AceDB = LibStub:GetLibrary("AceDB-3.0")
+WP.Libs.AceConfig = LibStub:GetLibrary("AceConfig-3.0")
 WP.Libs.LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 WP.Libs.LDBIcon = LibStub("LibDBIcon-1.0")
 WP.Libs.ST = LibStub("ScrollingTable")
@@ -364,11 +365,44 @@ local WP_DATA = {
   }
 }
 
+local options = {
+  name = "WeeklyKnowledge",
+  handler = WP,
+  type = "group",
+  args = {
+    minimap = {
+      type = "toggle",
+      name = "Minimap Icon",
+      desc = "Toggles the display of the minimap icon.",
+      get = "IsMinimapIconShown",
+      set = "SetMinimapIconShown"
+    }
+  }
+}
+
+function WP:IsMinimapIconShown()
+  return not self.db.global.minimap.hide
+end
+
+function WP:SetMinimapIconShown(_, value)
+  self.db.global.minimap.hide = not value
+  self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+end
+
+function WP:HandleChatCmd(msg)
+  if msg == "minimap" then
+    self:SetMinimapIconShown(nil, self.db.global.minimap.hide)
+  else
+    self:ToggleWindow()
+  end
+end
+
 local frame, st
 function WP:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
-  self:RegisterChatCommand("wk", "ToggleWindow")
-  self:RegisterChatCommand("weeklyknowledge", "ToggleWindow")
+  self:RegisterChatCommand("wk", "HandleChatCmd")
+  self:RegisterChatCommand("weeklyknowledge", "HandleChatCmd")
+  self.Libs.AceConfig:RegisterOptionsTable("WeeklyKnowledge", options)
   self.db = self.Libs.AceDB:New("WeeklyKnowledgeDB", defaultDB, true)
   local libDataObject = {
     label = "WeeklyKnowledge",

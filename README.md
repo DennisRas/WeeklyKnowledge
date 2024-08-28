@@ -6,7 +6,10 @@ Download WeeklyKnowledge today and take control of your gaming experience like n
 
 ## Slash Commands
 
-- **/weeklyknowledge** (or /wk) - shows/hides the main window
+- **/weeklyknowledge** - toggles the main window
+- **/weeklyknowledge minimap** - toggles the minimap icon
+
+You can also use the short command **/wk**
 
 ## Feedback
 
