@@ -364,6 +364,7 @@ local WP_DATA = {
   }
 }
 
+local frame, st
 function WP:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
   self:RegisterChatCommand("wk", "ToggleWindow")
@@ -390,24 +391,10 @@ function WP:OnInitialize()
   self.Libs.LDB:NewDataObject("WeeklyKnowledge", libDataObject)
   self.Libs.LDBIcon:Register("WeeklyKnowledge", libDataObject, self.db.global.minimap)
   self.Libs.LDBIcon:AddButtonToCompartment("WeeklyKnowledge")
-end
 
-function WP:OnEnable()
-  self:RegisterEvent("CHAT_MSG_LOOT", "Run")
-  self:RegisterEvent("BAG_UPDATE", "Run")
-  self:RegisterEvent("QUEST_COMPLETE", "Run")
-  self:RegisterEvent("QUEST_TURNED_IN", "Run")
-  self:RegisterEvent("UNIT_INVENTORY_CHANGED", "Run")
-  self:RegisterEvent("ITEM_COUNT_CHANGED", "Run")
-  self:RegisterEvent("BAG_UPDATE", "Run")
-  self:RegisterEvent("TRAIT_CONFIG_UPDATED", "Run")
-  self:Run()
-end
-
-local frame, st
-function WP:ToggleWindow()
   if not frame then
-    frame = CreateFrame("Frame", "WeeklyKnowledgeFrame", UIParent, "BackdropTemplate")
+    local frameName = "WeeklyKnowledgeMainWindow"
+    frame = CreateFrame("Frame", frameName, UIParent, "BackdropTemplate")
     frame:SetSize(1000, 500)
     frame:SetFrameStrata("HIGH")
     frame:SetFrameLevel(8000)
@@ -446,8 +433,24 @@ function WP:ToggleWindow()
     frame.closeButton:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
     frame.closeButton:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
     frame.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
-  end
 
+    table.insert(UISpecialFrames, frameName)
+  end
+end
+
+function WP:OnEnable()
+  self:RegisterEvent("CHAT_MSG_LOOT", "Run")
+  self:RegisterEvent("BAG_UPDATE", "Run")
+  self:RegisterEvent("QUEST_COMPLETE", "Run")
+  self:RegisterEvent("QUEST_TURNED_IN", "Run")
+  self:RegisterEvent("UNIT_INVENTORY_CHANGED", "Run")
+  self:RegisterEvent("ITEM_COUNT_CHANGED", "Run")
+  self:RegisterEvent("BAG_UPDATE", "Run")
+  self:RegisterEvent("TRAIT_CONFIG_UPDATED", "Run")
+  self:Run()
+end
+
+function WP:ToggleWindow()
   if not st then
     st = self.Libs.ST:CreateST(
       {},
