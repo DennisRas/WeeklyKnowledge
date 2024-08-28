@@ -63,7 +63,7 @@ local WP_CATEGORIES_TOOLTIPS = {
   ["Knowledge"] = "Your current knowledge points.",
   [WP_CATEGORY_UNIQUE] = "These are one-time knowledge point items found in treasures around the world and sold by Artisan/Renown/Kej vendors.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("No"),
   [WP_CATEGORY_TREATISE] = "These can be crafted by inscribers. Send a Crafting Order if you don't have the inscription profession.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
-  [WP_CATEGORY_ARTISANQUEST] = "Quest: Kala Clayhoof of the Artisan's Consortium wants you to fulfill Crafting Orders.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
+  [WP_CATEGORY_ARTISANQUEST] = "Quest: Kala Clayhoof from Artisan's Consortium wants you to fulfill Crafting Orders.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
   [WP_CATEGORY_TREASURE] = "These are randomly looted from treasures and dirt around the world.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
   [WP_CATEGORY_GATHERING] = "These are randomly looted from gathering nodes around the world. You may (not confirmed) randomly find additional items beyond the weekly limit.\n\nThese are also looted from Disenchanting.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
   [WP_CATEGORY_TRAINER] = "Quest: Complete a quest at your profession trainer.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
@@ -470,30 +470,89 @@ function WP:OnInitialize()
 
     table.insert(UISpecialFrames, frameName)
   end
-end
 
-function WP:OnEnable()
-  self:RegisterEvent("CHAT_MSG_LOOT", "Run")
-  self:RegisterEvent("BAG_UPDATE", "Run")
-  self:RegisterEvent("QUEST_COMPLETE", "Run")
-  self:RegisterEvent("QUEST_TURNED_IN", "Run")
-  self:RegisterEvent("UNIT_INVENTORY_CHANGED", "Run")
-  self:RegisterEvent("ITEM_COUNT_CHANGED", "Run")
-  self:RegisterEvent("BAG_UPDATE", "Run")
-  self:RegisterEvent("TRAIT_CONFIG_UPDATED", "Run")
-  self:Run()
-end
-
-function WP:ToggleWindow()
   if not st then
+    local header = {
+      {
+        name = "Name",
+        tooltip = function(_, _, cellFrame)
+          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+          GameTooltip:SetText("Name", 1, 1, 1);
+          GameTooltip:AddLine("Your characters.")
+          GameTooltip:AddLine(" ")
+          GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
+          GameTooltip:Show()
+        end,
+        width = 80,
+      },
+      {
+        name = "Profession",
+        tooltip = function(_, _, cellFrame)
+          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+          GameTooltip:SetText("Profession", 1, 1, 1);
+          GameTooltip:AddLine("Your professions.")
+          GameTooltip:AddLine(" ")
+          GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
+          GameTooltip:Show()
+        end,
+        width = 80
+      },
+      {
+        name = "Skill",
+        tooltip = function(_, _, cellFrame)
+          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+          GameTooltip:SetText("Skill", 1, 1, 1);
+          GameTooltip:AddLine("Current skill levels.")
+          GameTooltip:AddLine(" ")
+          GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
+          GameTooltip:Show()
+        end,
+        width = 80,
+        align = "CENTER"
+      },
+      {
+        name = "Knowledge",
+        tooltip = function(_, _, cellFrame)
+          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+          GameTooltip:SetText("Knowledge", 1, 1, 1);
+          GameTooltip:AddLine("Current knowledge gained.")
+          GameTooltip:AddLine(" ")
+          GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
+          GameTooltip:Show()
+        end,
+        width = 80,
+        align = "CENTER"
+      },
+    }
+
+    for _, categoryName in ipairs(WP_CATEGORIES) do
+      table.insert(header, {
+        name = categoryName,
+        tooltip = function(_, _, cellFrame)
+          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+          GameTooltip:SetText(categoryName, 1, 1, 1);
+          GameTooltip:AddLine(WP_CATEGORIES_TOOLTIPS[categoryName], nil, nil, nil, true)
+          GameTooltip:AddLine(" ")
+          GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
+          GameTooltip:Show()
+        end,
+        width = 90,
+        align = "CENTER"
+      })
+    end
+
     st = self.Libs.ST:CreateST(
-      {},
+      header,
       nil,
       ROW_HEIGHT,
-      nil,
+      {
+        ["r"] = 1,
+        ["g"] = 1,
+        ["b"] = 1,
+        ["a"] = 0.075,
+      },
       frame
     )
-    st:SetDefaultHighlight(1, 1, 1, 0.075)
     st.frame:SetBackdrop(nil)
     st.frame:SetBackdropColor(0, 0, 0, 0)
     st.frame:SetBackdropBorderColor(0, 0, 0, 0)
@@ -503,16 +562,16 @@ function WP:ToggleWindow()
     end
     st:RegisterEvents({
       ["OnEnter"] = function(rowFrame, cellFrame, data, cols, row, realRow, column, tbl, ...)
-        local col = cols[column]
-        if col and col.name and not (row or realRow) then
-          GameTooltip:SetOwner(cellFrame, "ANCHOR_TOP")
-          GameTooltip:SetText(col.name, 1, 1, 1);
-          if col.tooltip then
-            GameTooltip:AddLine(col.tooltip, nil, nil, nil, true)
+        local cell = cols[column]
+        if (row or realRow) then
+          if data[realRow or row].cols[column] then
+            cell = data[realRow or row].cols[column]
           end
-          GameTooltip:AddLine(" ")
-          GameTooltip:AddLine("<Click to Sort>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-          GameTooltip:Show()
+        end
+        if not cell then return end
+
+        if cell.tooltip then
+          cell.tooltip(cell, rowFrame, cellFrame, data, cols, row, realRow, column, tbl)
         end
       end,
       ["OnLeave"] = function()
@@ -552,16 +611,36 @@ function WP:ToggleWindow()
       end,
     })
   end
+end
 
+function WP:OnEnable()
+  self:RegisterEvent("CHAT_MSG_LOOT", "OnEvent")
+  self:RegisterEvent("BAG_UPDATE", "OnEvent")
+  self:RegisterEvent("QUEST_COMPLETE", "OnEvent")
+  self:RegisterEvent("QUEST_TURNED_IN", "OnEvent")
+  self:RegisterEvent("UNIT_INVENTORY_CHANGED", "OnEvent")
+  self:RegisterEvent("ITEM_COUNT_CHANGED", "OnEvent")
+  self:RegisterEvent("BAG_UPDATE", "OnEvent")
+  self:RegisterEvent("TRAIT_CONFIG_UPDATED", "OnEvent")
+  self:ScanCharacter()
+  self:Render()
+end
+
+function WP:OnEvent()
+  self:ScanCharacter()
+  self:Render()
+end
+
+function WP:ToggleWindow()
   if frame:IsVisible() then
     frame:Hide()
   else
     frame:Show()
-    self:Run()
+    self:Render()
   end
 end
 
-function WP:Run()
+function WP:ScanCharacter()
   local _, playerClassFile, playerClassID = UnitClass("player")
   local characterData = {
     name = UnitName("player"),
@@ -633,40 +712,12 @@ function WP:Run()
   end
 
   self.db.global.characters[UnitGUID("player")] = characterData
+end
 
-  -- Build table data
+function WP:Render()
+  if not st then return end
   local rows = {}
-  local cols = {
-    {
-      name = "Name",
-      width = 80
-    },
-    {
-      name = "Profession",
-      width = 80
-    },
-    {
-      name = "Skill",
-      width = 80,
-      align = "CENTER"
-    },
-    {
-      name = "Knowledge",
-      width = 80,
-      align = "CENTER"
-    },
-  }
 
-  for _, categoryName in ipairs(WP_CATEGORIES) do
-    table.insert(cols, {
-      name = categoryName,
-      tooltip = WP_CATEGORIES_TOOLTIPS[categoryName],
-      width = 90,
-      align = "CENTER"
-    })
-  end
-
-  -- Data rows
   for _, savedCharacter in pairs(self.db.global.characters) do
     local playerName = savedCharacter.name
     if savedCharacter.color then
@@ -676,17 +727,23 @@ function WP:Run()
       for _, dataProfession in ipairs(WP_DATA) do
         if dataProfession.skillLineID == savedProfession.skillLineID and savedProfession.latestExpansion then
           local row = {
-            playerName,
-            dataProfession.name,
-            savedProfession.level > 0 and savedProfession.level == savedProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.level .. " / " .. savedProfession.maxLevel) or savedProfession.level .. " / " .. savedProfession.maxLevel,
+            cols = {
+              {value = playerName,},
+              {value = dataProfession.name,},
+              {value = savedProfession.level > 0 and savedProfession.level == savedProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.level .. " / " .. savedProfession.maxLevel) or savedProfession.level .. " / " .. savedProfession.maxLevel,},
+            }
           }
 
           if savedProfession.knowledgeMaxLevel > 0 then
-            table.insert(row, savedProfession.knowledgeLevel > 0 and savedProfession.knowledgeLevel == savedProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel) or savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel)
+            table.insert(row.cols, {
+              value = savedProfession.knowledgeLevel > 0 and savedProfession.knowledgeLevel == savedProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel) or savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel
+            })
 
             for _, categoryName in ipairs(WP_CATEGORIES) do
               local completed = 0
               local total = 0
+              local points = 0
+              local pointsTotal = 0
 
               for _, objective in ipairs(dataProfession.objectives) do
                 if objective.category == categoryName then
@@ -697,11 +754,13 @@ function WP:Run()
                       local limit = 0
                       for _, questID in ipairs(objective.quests) do
                         total = total + 1
+                        pointsTotal = pointsTotal + objective.points
                         if objective.limit and total > objective.limit then
                           total = objective.limit
                         end
                         if savedCharacter.completed[questID] then
                           completed = completed + 1
+                          points = points + objective.points
                         end
                       end
                     end
@@ -715,10 +774,23 @@ function WP:Run()
               elseif completed == total then
                 result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
               end
-              table.insert(row, result)
+              if total == 0 then
+                table.insert(row.cols, {value = ""})
+              else
+                table.insert(row.cols, {
+                  value = result,
+                  tooltip = function(cell, rowFrame, cellFrame)
+                    GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                    GameTooltip:SetText(categoryName, 1, 1, 1);
+                    GameTooltip:AddDoubleLine("Items:", format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
+                    GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
+                    GameTooltip:Show()
+                  end
+                })
+              end
             end
           else
-            table.insert(row, "")
+            table.insert(row.cols, {value = ""})
           end
           table.insert(rows, row)
         end
@@ -726,12 +798,9 @@ function WP:Run()
     end
   end
 
-  if st then
-    st:SetDisplayCols(cols)
-    st:SetData(rows, true)
-    st:Refresh()
-    frame:SetWidth(st.frame:GetWidth() + WINDOW_PADDING)
-    frame:SetHeight(st.frame:GetHeight() + ROW_HEIGHT + 5 + WINDOW_PADDING)
-    st.frame:SetPoint("TOPLEFT", frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + 5))
-  end
+  st:SetData(rows)
+  st:Refresh()
+  frame:SetWidth(st.frame:GetWidth() + WINDOW_PADDING)
+  frame:SetHeight(st.frame:GetHeight() + ROW_HEIGHT + 5 + WINDOW_PADDING)
+  st.frame:SetPoint("TOPLEFT", frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + 5))
 end
