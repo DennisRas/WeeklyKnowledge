@@ -470,8 +470,8 @@ function WP:ToggleWindow()
         if col and col.name and not (row or realRow) then
           GameTooltip:SetOwner(cellFrame, "ANCHOR_TOP")
           GameTooltip:SetText(col.name, 1, 1, 1);
-          if WP_CATEGORIES_TOOLTIPS[col.name] then
-            GameTooltip:AddLine(WP_CATEGORIES_TOOLTIPS[col.name], nil, nil, nil, true)
+          if col.tooltip then
+            GameTooltip:AddLine(col.tooltip, nil, nil, nil, true)
           end
           GameTooltip:AddLine(" ")
           GameTooltip:AddLine("<Click to Sort>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
@@ -623,6 +623,7 @@ function WP:Run()
   for _, categoryName in ipairs(WP_CATEGORIES) do
     table.insert(cols, {
       name = categoryName,
+      tooltip = WP_CATEGORIES_TOOLTIPS[categoryName],
       width = 90,
       align = "CENTER"
     })
