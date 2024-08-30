@@ -622,6 +622,7 @@ function WP:OnEnable()
   self:RegisterEvent("ITEM_COUNT_CHANGED", "OnEvent")
   self:RegisterEvent("BAG_UPDATE", "OnEvent")
   self:RegisterEvent("TRAIT_CONFIG_UPDATED", "OnEvent")
+  self:RegisterBucketEvent({"PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE", "SKILL_LINES_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED"}, 2, "OnEvent")
   self:ScanCharacter()
   self:Render()
 end

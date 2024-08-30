@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3 - 2024-??-??
+
+### Fixed
+
+- Addon now updates when you learn/unlearn a TWW profession
+
 ## v1.0.2 - 2024-08-28
 
 ### Added
