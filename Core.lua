@@ -614,30 +614,41 @@ function WP:OnInitialize()
 end
 
 function WP:OnEnable()
-  self:RegisterEvent("CHAT_MSG_LOOT", "OnEvent")
-  self:RegisterEvent("BAG_UPDATE", "OnEvent")
-  self:RegisterEvent("QUEST_COMPLETE", "OnEvent")
-  self:RegisterEvent("QUEST_TURNED_IN", "OnEvent")
-  self:RegisterEvent("UNIT_INVENTORY_CHANGED", "OnEvent")
-  self:RegisterEvent("ITEM_COUNT_CHANGED", "OnEvent")
-  self:RegisterEvent("BAG_UPDATE", "OnEvent")
-  self:RegisterEvent("TRAIT_CONFIG_UPDATED", "OnEvent")
-  self:RegisterBucketEvent({"PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE", "SKILL_LINES_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED"}, 2, "OnEvent")
+  self:RegisterBucketEvent(
+    {
+      "ACTIVE_TALENT_GROUP_CHANGED",
+      "BAG_UPDATE_DELAYED",
+      "CHAT_MSG_LOOT",
+      "ITEM_COUNT_CHANGED",
+      "PLAYER_SPECIALIZATION_CHANGED",
+      "PLAYER_TALENT_UPDATE",
+      "QUEST_COMPLETE",
+      "QUEST_TURNED_IN",
+      "SKILL_LINES_CHANGED",
+      "TRAIT_CONFIG_UPDATED",
+      "UNIT_INVENTORY_CHANGED",
+    },
+    3,
+    function()
+      self:ScanCharacter()
+      self:Render()
+    end
+  )
   self:ScanCharacter()
   self:Render()
 end
 
-function WP:OnEvent()
-  self:ScanCharacter()
-  self:Render()
+function WP:OnDisable()
+  self:UnregisterAllEvents()
+  self:UnregisterAllBuckets()
 end
 
 function WP:ToggleWindow()
   if frame:IsVisible() then
     frame:Hide()
   else
-    frame:Show()
     self:Render()
+    frame:Show()
   end
 end
 
