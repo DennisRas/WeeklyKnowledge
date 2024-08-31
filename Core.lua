@@ -5,42 +5,18 @@ WP.Libs.AceConfig = LibStub:GetLibrary("AceConfig-3.0")
 WP.Libs.LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 WP.Libs.LDBIcon = LibStub("LibDBIcon-1.0")
 WP.Libs.ST = LibStub("ScrollingTable")
-
-local defaultDB = {
-  global = {
-    minimap = {
-      minimapPos = 235,
-      hide = false,
-      lock = false
-    },
-    characters = {}
-  }
+WP.cache = {
+  playerName = "",
+  playerRealm = "",
+  playerLevel = 0,
+  playerClassID = 0,
+  playerClassColor = "",
+  isDarkmoonOpen = false,
 }
 
 local DARKMOON_EVENT_ID = 479
 local ROW_HEIGHT = 20
 local WINDOW_PADDING = 20
-
-local function CheckDarkmoonOpen()
-  local date = C_DateAndTime.GetCurrentCalendarTime()
-  if date and date.monthDay then
-    local today = date.monthDay
-    local numEvents = C_Calendar.GetNumDayEvents(0, today)
-    if numEvents then
-      for i = 1, numEvents do
-        local event = C_Calendar.GetDayEvent(0, today, i)
-        if event and event.id == DARKMOON_EVENT_ID then
-          return true
-        end
-      end
-    end
-  end
-  return false
-end
-
-
-local isDarkmoonOpen = CheckDarkmoonOpen()
-
 local WP_CATEGORY_UNIQUE = "Uniques"
 local WP_CATEGORY_TREATISE = "Treatise"
 local WP_CATEGORY_ARTISANQUEST = "Artisan"
@@ -48,7 +24,6 @@ local WP_CATEGORY_TREASURE = "Treasure"
 local WP_CATEGORY_GATHERING = "Gathering"
 local WP_CATEGORY_TRAINER = "Trainer"
 local WP_CATEGORY_DARKMOON = "Darkmoon"
-
 local WP_CATEGORIES = {
   WP_CATEGORY_UNIQUE,
   WP_CATEGORY_TREATISE,
@@ -57,7 +32,6 @@ local WP_CATEGORIES = {
   WP_CATEGORY_GATHERING,
   WP_CATEGORY_TRAINER,
 }
-
 local WP_CATEGORIES_TOOLTIPS = {
   ["Skill"] = "Your current profession skill progress.",
   ["Knowledge"] = "Your current knowledge points.",
@@ -69,11 +43,6 @@ local WP_CATEGORIES_TOOLTIPS = {
   [WP_CATEGORY_TRAINER] = "Quest: Complete a quest at your profession trainer.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),
   [WP_CATEGORY_DARKMOON] = "Quest: Complete a quest at the Darkmoon Faire.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Monthly")
 }
-
-if isDarkmoonOpen then
-  table.insert(WP_CATEGORIES, WP_CATEGORY_DARKMOON)
-end
-
 local WP_DATA = {
   {
     name = "Alchemy",
@@ -365,21 +334,6 @@ local WP_DATA = {
   }
 }
 
-local options = {
-  name = "WeeklyKnowledge",
-  handler = WP,
-  type = "group",
-  args = {
-    minimap = {
-      type = "toggle",
-      name = "Minimap Icon",
-      desc = "Toggles the display of the minimap icon.",
-      get = "IsMinimapIconShown",
-      set = "SetMinimapIconShown"
-    }
-  }
-}
-
 function WP:IsMinimapIconShown()
   return not self.db.global.minimap.hide
 end
@@ -397,13 +351,46 @@ function WP:HandleChatCmd(msg)
   end
 end
 
-local frame, st
 function WP:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
   self:RegisterChatCommand("wk", "HandleChatCmd")
   self:RegisterChatCommand("weeklyknowledge", "HandleChatCmd")
-  self.Libs.AceConfig:RegisterOptionsTable("WeeklyKnowledge", options)
-  self.db = self.Libs.AceDB:New("WeeklyKnowledgeDB", defaultDB, true)
+
+  -- Options
+  self.Libs.AceConfig:RegisterOptionsTable(
+    "WeeklyKnowledge",
+    {
+      name = "WeeklyKnowledge",
+      handler = WP,
+      type = "group",
+      args = {
+        minimap = {
+          type = "toggle",
+          name = "Minimap Icon",
+          desc = "Toggles the display of the minimap icon.",
+          get = "IsMinimapIconShown",
+          set = "SetMinimapIconShown"
+        }
+      }
+    }
+  )
+
+  -- Database
+  self.db = self.Libs.AceDB:New(
+    "WeeklyKnowledgeDB",
+    {
+      global = {
+        minimap = {
+          minimapPos = 235,
+          hide = false,
+          lock = false
+        },
+        characters = {}
+      }
+    },
+    true
+  )
+
   local libDataObject = {
     label = "WeeklyKnowledge",
     tocname = "WeeklyKnowledge",
@@ -422,56 +409,55 @@ function WP:OnInitialize()
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end
   }
+
   self.Libs.LDB:NewDataObject("WeeklyKnowledge", libDataObject)
   self.Libs.LDBIcon:Register("WeeklyKnowledge", libDataObject, self.db.global.minimap)
   self.Libs.LDBIcon:AddButtonToCompartment("WeeklyKnowledge")
 
-  if not frame then
+  -- Main window + scrolling table
+  if not self.frame then
     local frameName = "WeeklyKnowledgeMainWindow"
-    frame = CreateFrame("Frame", frameName, UIParent, "BackdropTemplate")
-    frame:SetSize(1000, 500)
-    frame:SetFrameStrata("HIGH")
-    frame:SetFrameLevel(8000)
-    frame:SetClampedToScreen(true)
-    frame:SetMovable(true)
-    frame:SetPoint("CENTER")
-    frame:SetUserPlaced(true)
-    frame:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    frame:SetBackdropColor(0, 0, 0, 0.95)
-    frame:SetBackdropBorderColor(0, 0, 0, .5)
-    frame:RegisterForDrag("LeftButton")
-    frame:EnableMouse(true)
-    frame:SetScript("OnDragStart", function() frame:StartMoving() end)
-    frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
-    frame:Hide()
-    frame.title = CreateFrame("Frame", "$parentTitle", frame, "BackdropTemplate")
-    frame.title:SetPoint("BOTTOM", frame, "TOP", 0, -8)
-    frame.title:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    frame.title:SetBackdropColor(0, 0, 0, 1)
-    frame.title:SetBackdropBorderColor(0, 0, 0, .5)
-    frame.title:SetSize(150, 30)
-    frame.title:RegisterForDrag("LeftButton")
-    frame.title:EnableMouse(true)
-    frame.title:SetScript("OnDragStart", function() frame:StartMoving() end)
-    frame.title:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
-    frame.title.text = frame.title:CreateFontString("$parentText", "OVERLAY")
-    frame.title.text:SetFontObject("GameFontHighlight_NoShadow")
-    frame.title.text:SetAllPoints()
-    frame.title.text:SetJustifyH("CENTER")
-    frame.title.text:SetJustifyV("MIDDLE")
-    frame.title.text:SetText("WeeklyKnowledge")
-    frame.closeButton = CreateFrame("Button", "$parentCloseButton", frame)
-    frame.closeButton:SetSize(32, 32)
-    frame.closeButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-    frame.closeButton:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-    frame.closeButton:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-    frame.closeButton:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-    frame.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
-
+    self.frame = CreateFrame("Frame", frameName, UIParent, "BackdropTemplate")
+    self.frame:SetSize(1000, 500)
+    self.frame:SetFrameStrata("HIGH")
+    self.frame:SetFrameLevel(8000)
+    self.frame:SetClampedToScreen(true)
+    self.frame:SetMovable(true)
+    self.frame:SetPoint("CENTER")
+    self.frame:SetUserPlaced(true)
+    self.frame:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
+    self.frame:SetBackdropColor(0, 0, 0, 0.95)
+    self.frame:SetBackdropBorderColor(0, 0, 0, .5)
+    self.frame:RegisterForDrag("LeftButton")
+    self.frame:EnableMouse(true)
+    self.frame:SetScript("OnDragStart", function() self.frame:StartMoving() end)
+    self.frame:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
+    self.frame:Hide()
+    self.frame.title = CreateFrame("Frame", "$parentTitle", self.frame, "BackdropTemplate")
+    self.frame.title:SetPoint("BOTTOM", self.frame, "TOP", 0, -8)
+    self.frame.title:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
+    self.frame.title:SetBackdropColor(0, 0, 0, 1)
+    self.frame.title:SetBackdropBorderColor(0, 0, 0, .5)
+    self.frame.title:SetSize(150, 30)
+    self.frame.title:RegisterForDrag("LeftButton")
+    self.frame.title:EnableMouse(true)
+    self.frame.title:SetScript("OnDragStart", function() self.frame:StartMoving() end)
+    self.frame.title:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
+    self.frame.title.text = self.frame.title:CreateFontString("$parentText", "OVERLAY")
+    self.frame.title.text:SetFontObject("GameFontHighlight_NoShadow")
+    self.frame.title.text:SetAllPoints()
+    self.frame.title.text:SetJustifyH("CENTER")
+    self.frame.title.text:SetJustifyV("MIDDLE")
+    self.frame.title.text:SetText("WeeklyKnowledge")
+    self.frame.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame)
+    self.frame.closeButton:SetSize(32, 32)
+    self.frame.closeButton:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", 0, 0)
+    self.frame.closeButton:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
+    self.frame.closeButton:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
+    self.frame.closeButton:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+    self.frame.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
     table.insert(UISpecialFrames, frameName)
-  end
 
-  if not st then
     local header = {
       {
         name = "Name",
@@ -541,7 +527,7 @@ function WP:OnInitialize()
       })
     end
 
-    st = self.Libs.ST:CreateST(
+    self.scrollingTable = self.Libs.ST:CreateST(
       header,
       nil,
       ROW_HEIGHT,
@@ -551,16 +537,16 @@ function WP:OnInitialize()
         ["b"] = 1,
         ["a"] = 0.075,
       },
-      frame
+      self.frame
     )
-    st.frame:SetBackdrop(nil)
-    st.frame:SetBackdropColor(0, 0, 0, 0)
-    st.frame:SetBackdropBorderColor(0, 0, 0, 0)
-    local ScrollTroughBorder = _G[st.frame:GetName() .. "ScrollTroughBorder"]
+    self.scrollingTable.frame:SetBackdrop(nil)
+    self.scrollingTable.frame:SetBackdropColor(0, 0, 0, 0)
+    self.scrollingTable.frame:SetBackdropBorderColor(0, 0, 0, 0)
+    local ScrollTroughBorder = _G[self.scrollingTable.frame:GetName() .. "ScrollTroughBorder"]
     if ScrollTroughBorder then
       ScrollTroughBorder.background:Hide()
     end
-    st:RegisterEvents({
+    self.scrollingTable:RegisterEvents({
       ["OnEnter"] = function(rowFrame, cellFrame, data, cols, row, realRow, column, tbl, ...)
         local cell = cols[column]
         if (row or realRow) then
@@ -580,7 +566,7 @@ function WP:OnInitialize()
       ["OnClick"] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, button, ...) -- LS: added "button" argument
         if button == "LeftButton" then                                                                  -- LS: only handle on LeftButton click (right passes thru)
           if not (row or realrow) then
-            for i, col in ipairs(st.cols) do
+            for i, col in ipairs(self.scrollingTable.cols) do
               if i ~= column then -- clear out all other sort marks
                 cols[i].sort = nil;
               end
@@ -611,6 +597,31 @@ function WP:OnInitialize()
       end,
     })
   end
+
+  -- Is the Darkmoon Faire open?
+  local date = C_DateAndTime.GetCurrentCalendarTime()
+  if date and date.monthDay then
+    local today = date.monthDay
+    local numEvents = C_Calendar.GetNumDayEvents(0, today)
+    if numEvents then
+      for i = 1, numEvents do
+        local event = C_Calendar.GetDayEvent(0, today, i)
+        if event and event.id == DARKMOON_EVENT_ID then
+          self.cache.isDarkmoonOpen = true
+        end
+      end
+    end
+  end
+
+  if self.cache.isDarkmoonOpen then
+    table.insert(WP_CATEGORIES, WP_CATEGORY_DARKMOON)
+  end
+
+  local _, playerClassFile, playerClassID = UnitClass("player")
+  self.cache.playerName = UnitName("player")
+  self.cache.playerRealm = GetRealmName()
+  self.cache.playerClassID = playerClassID
+  self.cache.playerClassColor = C_ClassColor.GetClassColor(playerClassFile):GenerateHexColor()
 end
 
 function WP:OnEnable()
@@ -644,21 +655,20 @@ function WP:OnDisable()
 end
 
 function WP:ToggleWindow()
-  if frame:IsVisible() then
-    frame:Hide()
+  if self.frame:IsVisible() then
+    self.frame:Hide()
   else
     self:Render()
-    frame:Show()
+    self.frame:Show()
   end
 end
 
 function WP:ScanCharacter()
-  local _, playerClassFile, playerClassID = UnitClass("player")
-  local characterData = {
-    name = UnitName("player"),
-    realm = GetRealmName(),
-    class = playerClassID,
-    color = C_ClassColor.GetClassColor(playerClassFile):GenerateHexColor(),
+  local playerData = {
+    name = self.cache.playerName,
+    realm = self.cache.playerRealm,
+    class = self.cache.playerClassID,
+    color = self.cache.playerClassColor,
     professions = {},
     completed = {},
   }
@@ -702,7 +712,7 @@ function WP:ScanCharacter()
             end
           end
 
-          table.insert(characterData.professions, characterProfession)
+          table.insert(playerData.professions, characterProfession)
         end
       end
     end
@@ -715,7 +725,7 @@ function WP:ScanCharacter()
         if objective.quests then
           for _, questID in ipairs(objective.quests) do
             if C_QuestLog.IsQuestFlaggedCompleted(questID) then
-              characterData.completed[questID] = true
+              playerData.completed[questID] = true
             end
           end
         end
@@ -723,11 +733,12 @@ function WP:ScanCharacter()
     end
   end
 
-  self.db.global.characters[UnitGUID("player")] = characterData
+  self.db.global.characters[UnitGUID("player")] = playerData
 end
 
 function WP:Render()
-  if not st then return end
+  if not self.frame then return end
+  if not self.scrollingTable then return end
   local rows = {}
 
   for _, savedCharacter in pairs(self.db.global.characters) do
@@ -759,7 +770,7 @@ function WP:Render()
 
               for _, objective in ipairs(dataProfession.objectives) do
                 if objective.category == categoryName then
-                  if objective.category == WP_CATEGORY_DARKMOON and not isDarkmoonOpen then
+                  if objective.category == WP_CATEGORY_DARKMOON and not self.cache.isDarkmoonOpen then
                     total = 0
                   else
                     if objective.quests then
@@ -810,9 +821,9 @@ function WP:Render()
     end
   end
 
-  st:SetData(rows)
-  st:Refresh()
-  frame:SetWidth(st.frame:GetWidth() + WINDOW_PADDING)
-  frame:SetHeight(st.frame:GetHeight() + ROW_HEIGHT + 5 + WINDOW_PADDING)
-  st.frame:SetPoint("TOPLEFT", frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + 5))
+  self.scrollingTable:SetData(rows)
+  self.scrollingTable:Refresh()
+  self.frame:SetWidth(self.scrollingTable.frame:GetWidth() + WINDOW_PADDING)
+  self.frame:SetHeight(self.scrollingTable.frame:GetHeight() + ROW_HEIGHT + 5 + WINDOW_PADDING)
+  self.scrollingTable.frame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + 5))
 end
