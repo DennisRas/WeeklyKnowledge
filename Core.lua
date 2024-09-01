@@ -730,7 +730,9 @@ function WP:GetColumns(unfiltered)
             if objective.quests then
               local limit = 0
 
-              itemList[objective.itemID] = false
+              if objective.itemID and objective.itemID > 0 then
+                itemList[objective.itemID] = false
+              end
               for _, questID in ipairs(objective.quests) do
                 total = total + 1
                 pointsTotal = pointsTotal + objective.points
@@ -739,7 +741,9 @@ function WP:GetColumns(unfiltered)
                   total = objective.limit
                 end
                 if character.completed[questID] then
-                  itemList[objective.itemID] = true
+                  if objective.itemID and objective.itemID > 0 then
+                    itemList[objective.itemID] = true
+                  end
                   completed = completed + 1
                   points = points + objective.points
                 end
@@ -775,7 +779,6 @@ function WP:GetColumns(unfiltered)
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
-
         if total == 0 then
           return {text = ""}
         else
@@ -793,13 +796,15 @@ function WP:GetColumns(unfiltered)
                 GameTooltip:SetText(categoryName, 1, 1, 1);
                 GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddLine(" ")
-                for itemID, itemLooted in pairs(itemList) do
-                  local item = itemCache[itemID]
-                  GameTooltip:AddDoubleLine(
-                    item and item:GetItemLink() or "Loading...",
-                    CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
-                  )
+                if self:TableCount(itemList) > 0 then
+                  GameTooltip:AddLine(" ")
+                  for itemID, itemLooted in pairs(itemList) do
+                    local item = itemCache[itemID]
+                    GameTooltip:AddDoubleLine(
+                      item and item:GetItemLink() or "Loading...",
+                      CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
+                    )
+                  end
                 end
                 GameTooltip:Show()
               end
