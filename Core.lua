@@ -759,22 +759,8 @@ function WP:GetColumns(unfiltered)
                 end
               end
 
-              local isDarkmoonOpen = false
               if objective.category == WP_CATEGORY_DARKMOON then
-                local date = C_DateAndTime.GetCurrentCalendarTime()
-                if date and date.monthDay then
-                  local today = date.monthDay
-                  local numEvents = C_Calendar.GetNumDayEvents(0, today)
-                  if numEvents then
-                    for i = 1, numEvents do
-                      local event = C_Calendar.GetDayEvent(0, today, i)
-                      if event and event.eventID == DARKMOON_EVENT_ID then
-                        isDarkmoonOpen = true
-                      end
-                    end
-                  end
-                end
-                if not isDarkmoonOpen then
+                if not self.cache.isDarkmoonOpen then
                   total = 0
                 end
               end
@@ -1212,36 +1198,30 @@ function WP:OnEnable()
     end
   )
 
-  -- Is the Darkmoon Faire open?
-  local date = C_DateAndTime.GetCurrentCalendarTime()
-  if date and date.monthDay then
-    local today = date.monthDay
-    local numEvents = C_Calendar.GetNumDayEvents(0, today)
-    if numEvents then
-      for i = 1, numEvents do
-        local event = C_Calendar.GetDayEvent(0, today, i)
-        if event and event.eventID == DARKMOON_EVENT_ID then
-          self.cache.isDarkmoonOpen = true
+  self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
+    local date = C_DateAndTime.GetCurrentCalendarTime()
+    if date and date.monthDay then
+      local today = date.monthDay
+      local numEvents = C_Calendar.GetNumDayEvents(0, today)
+      if numEvents then
+        for i = 1, numEvents do
+          local event = C_Calendar.GetDayEvent(0, today, i)
+          if event and event.eventID == DARKMOON_EVENT_ID then
+            self.cache.isDarkmoonOpen = true
+          end
         end
       end
     end
-  end
+    self:ScanCharacter()
+    self:Render()
+  end)
 
-  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
-  local localizedClassName, classFile, classID = UnitClass("player")
-  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
-  self.cache.GUID = UnitGUID("player")
-  self.cache.name = UnitName("player")
-  self.cache.realmName = GetRealmName()
-  self.cache.level = UnitLevel("player")
-  self.cache.raceID = raceID
-  self.cache.raceEnglish = englishRaceName
-  self.cache.raceName = localizedRaceName
-  self.cache.classID = classID
-  self.cache.classFile = classFile
-  self.cache.className = localizedClassName
-  self.cache.factionEnglish = englishFactionName
-  self.cache.factionName = localizedFactionName
+  if not C_AddOns.IsAddOnLoaded("Blizzard_Calendar") then
+    local loaded = UIParentLoadAddOn("Blizzard_Calendar")
+    if loaded then
+      C_Calendar.OpenCalendar()
+    end
+  end
 
   self:ScanCharacter()
   self:Render()
