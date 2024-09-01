@@ -157,6 +157,7 @@
         "GetProfessionInfo",
         "MenuUtil",
         "GameTooltip_SetTitle",
-        "GameTooltip_AddInstructionLine"
+        "GameTooltip_AddInstructionLine",
+        "UIParentLoadAddOn"
     ]
 }

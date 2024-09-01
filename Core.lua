@@ -961,6 +961,7 @@ function WP:OnInitialize()
       self.frame.titlebar.SettingsButton:SetScript("OnEnter", function()
         self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         self:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0.05)
+        ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.frame.titlebar.SettingsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
@@ -1061,6 +1062,7 @@ function WP:OnInitialize()
         self:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0.05)
         GameTooltip:ClearAllPoints()
         GameTooltip:ClearLines()
+        ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.frame.titlebar.CharactersButton, "ANCHOR_TOP")
         GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Enable/Disable your characters.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
@@ -1109,6 +1111,7 @@ function WP:OnInitialize()
         self:SetBackgroundColor(self.frame.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         GameTooltip:ClearAllPoints()
         GameTooltip:ClearLines()
+        ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.frame.titlebar.ColumnsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
