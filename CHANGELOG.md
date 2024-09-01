@@ -1,10 +1,31 @@
 # Changelog
 
-## v1.0.3 - 2024-??-??
+## v1.0.3 - 2024-09-01
+
+### Added
+
+- New column: Realm
+- New setting: You can now show/hide characters
+- New setting: You can now show/hide columns
+- New setting: You can now show/hide the minimap icon
+- New setting: You can now lock the minimap icon
+- New setting: You can now scale the main window
+- New setting: You can now change the base color of the main window
+
+### Updated
+
+- Addon interface has been fully rewritten with a new design
+- Column sorting is disabled for now. Will be back soon!
+- Characters are sorted by most recent activity for now.
 
 ### Fixed
 
 - Addon now updates when you learn/unlearn a TWW profession
+- Darkmoon Faire column is now visible
+- Characters with old expansion professions are no longer saved/shown
+- Fixed incorrect Darkmoon KP values
+- The addon performance has been improved using 100x less memory
+- Weekly progress will now reset for all characters on weekly reset
 
 ## v1.0.2 - 2024-08-28
 
