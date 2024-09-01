@@ -546,6 +546,8 @@ function WP:SetBackgroundColor(parent, r, g, b, a)
   parent.Background:SetVertexColor(r, g, b, a)
 end
 
+local itemCache = {}
+
 ---Set the highlight color for a parent frame
 ---@param parent any
 ---@param r number?
@@ -721,11 +723,14 @@ function WP:GetColumns(unfiltered)
         local total = 0
         local points = 0
         local pointsTotal = 0
+        local itemList = {}
 
         for _, objective in ipairs(dataProfession.objectives) do
           if objective.category == categoryName then
             if objective.quests then
               local limit = 0
+
+              itemList[objective.itemID] = false
               for _, questID in ipairs(objective.quests) do
                 total = total + 1
                 pointsTotal = pointsTotal + objective.points
@@ -734,6 +739,7 @@ function WP:GetColumns(unfiltered)
                   total = objective.limit
                 end
                 if character.completed[questID] then
+                  itemList[objective.itemID] = true
                   completed = completed + 1
                   points = points + objective.points
                 end
@@ -769,21 +775,41 @@ function WP:GetColumns(unfiltered)
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
+
         if total == 0 then
           return {text = ""}
         else
           return {
             text = result,
             onEnter = function(cellFrame)
-              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText(categoryName, 1, 1, 1);
               local label = "Items:"
+              -- Todo: Turn this into a flag/shared attribute instead of this nonsense
               if categoryName == WP_CATEGORY_ARTISANQUEST or categoryName == WP_CATEGORY_DARKMOON or categoryName == WP_CATEGORY_TRAINER then
                 label = "Quests:"
               end
-              GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
-              GameTooltip:Show()
+
+              local showTooltip = function()
+                GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetText(categoryName, 1, 1, 1);
+                GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddLine(" ")
+                for itemID, itemLooted in pairs(itemList) do
+                  local item = itemCache[itemID]
+                  GameTooltip:AddDoubleLine(
+                    item and item:GetItemLink() or "Loading...",
+                    CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
+                  )
+                end
+                GameTooltip:Show()
+              end
+
+              for itemID in pairs(itemList) do
+                itemCache[itemID] = Item:CreateFromItemID(itemID)
+                itemCache[itemID]:ContinueOnItemLoad(showTooltip)
+              end
+
+              showTooltip()
             end,
             onLeave = function()
               GameTooltip:Hide()
