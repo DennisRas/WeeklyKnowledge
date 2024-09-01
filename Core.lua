@@ -730,6 +730,7 @@ function WP:GetColumns(unfiltered)
                 total = total + 1
                 pointsTotal = pointsTotal + objective.points
                 if objective.limit and total > objective.limit then
+                  pointsTotal = objective.limit * objective.points
                   total = objective.limit
                 end
                 if character.completed[questID] then
