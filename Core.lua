@@ -100,7 +100,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84133}, itemID = 228773, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83253}, itemID = 225234, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83255}, itemID = 225235, points = 2},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29506}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29506}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83840}, itemID = 226265, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83841}, itemID = 226266, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83842}, itemID = 226267, points = 3},
@@ -126,7 +126,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84127}, itemID = 228774, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83256}, itemID = 225233, points = 1},
       {category = WP_CATEGORY_TREASURE,     quests = {83257}, itemID = 225232, points = 1},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29508}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29508}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83848}, itemID = 226276, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83849}, itemID = 226277, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83850}, itemID = 226278, points = 3},
@@ -154,7 +154,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_GATHERING, quests = {84295},                             itemID = 227661, points = 4},
       {category = WP_CATEGORY_TREASURE,  quests = {83258},                             itemID = 225231, points = 1},
       {category = WP_CATEGORY_TREASURE,  quests = {83259},                             itemID = 225230, points = 1},
-      {category = WP_CATEGORY_DARKMOON,  quests = {29510},                             itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,  quests = {29510},                             itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83856},                             itemID = 226284, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83859},                             itemID = 226285, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83860},                             itemID = 226286, points = 3},
@@ -180,7 +180,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84128}, itemID = 228775, points = 1},
       {category = WP_CATEGORY_TREASURE,     quests = {83260}, itemID = 225228, points = 1},
       {category = WP_CATEGORY_TREASURE,     quests = {83261}, itemID = 225229, points = 1},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29511}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29511}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83866}, itemID = 226292, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83867}, itemID = 226293, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83868}, itemID = 226294, points = 3},
@@ -206,7 +206,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_TRAINER,   quests = {82970, 82958, 82965, 82916, 82962}, itemID = 224817, points = 3, limit = 1},
       {category = WP_CATEGORY_GATHERING, quests = {81416, 81417, 81418, 81419, 81420}, itemID = 224264, points = 1},
       {category = WP_CATEGORY_GATHERING, quests = {81421},                             itemID = 224265, points = 4},
-      {category = WP_CATEGORY_DARKMOON,  quests = {29514},                             itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,  quests = {29514},                             itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83874},                             itemID = 226300, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83875},                             itemID = 226301, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83876},                             itemID = 226302, points = 3},
@@ -232,7 +232,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84129}, itemID = 228776, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83262}, itemID = 225227, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83264}, itemID = 225226, points = 2},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29515}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29515}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83882}, itemID = 226308, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83883}, itemID = 226309, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83884}, itemID = 226310, points = 3},
@@ -258,7 +258,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84130}, itemID = 228777, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83265}, itemID = 225224, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83266}, itemID = 225225, points = 2},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29516}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29516}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83890}, itemID = 226316, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83891}, itemID = 226317, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83892}, itemID = 226318, points = 3},
@@ -284,7 +284,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84131}, itemID = 228778, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83267}, itemID = 225223, points = 1},
       {category = WP_CATEGORY_TREASURE,     quests = {83268}, itemID = 225222, points = 1},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29517}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29517}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83898}, itemID = 226324, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83899}, itemID = 226325, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83900}, itemID = 226326, points = 3},
@@ -310,7 +310,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_TRAINER,   quests = {83104, 83105, 83103, 83106, 83102}, itemID = 224818, points = 3, limit = 1},
       {category = WP_CATEGORY_GATHERING, quests = {83050, 83051, 83052, 83053, 83054}, itemID = 224583, points = 1},
       {category = WP_CATEGORY_GATHERING, quests = {83049},                             itemID = 224584, points = 3},
-      {category = WP_CATEGORY_DARKMOON,  quests = {29518},                             itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,  quests = {29518},                             itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83906},                             itemID = 226332, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83907},                             itemID = 226333, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83908},                             itemID = 226334, points = 3},
@@ -336,7 +336,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_TRAINER,   quests = {83097, 83098, 83100, 82992, 82993}, itemID = 224807, points = 3, limit = 1},
       {category = WP_CATEGORY_GATHERING, quests = {81459, 81460, 81461, 81462, 81463}, itemID = 224780, points = 1},
       {category = WP_CATEGORY_GATHERING, quests = {81464},                             itemID = 224781, points = 2},
-      {category = WP_CATEGORY_DARKMOON,  quests = {29519},                             itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,  quests = {29519},                             itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83914},                             itemID = 226340, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83915},                             itemID = 226341, points = 3},
       {category = WP_CATEGORY_UNIQUE,    quests = {83916},                             itemID = 226342, points = 3},
@@ -362,7 +362,7 @@ local WP_DATA = {
       {category = WP_CATEGORY_ARTISANQUEST, quests = {84132}, itemID = 228779, points = 2},
       {category = WP_CATEGORY_TREASURE,     quests = {83269}, itemID = 225221, points = 1},
       {category = WP_CATEGORY_TREASURE,     quests = {83270}, itemID = 225220, points = 1},
-      {category = WP_CATEGORY_DARKMOON,     quests = {29520}, itemID = 0,      points = 0},
+      {category = WP_CATEGORY_DARKMOON,     quests = {29520}, itemID = 0,      points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83922}, itemID = 226348, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83923}, itemID = 226349, points = 3},
       {category = WP_CATEGORY_UNIQUE,       quests = {83924}, itemID = 226350, points = 3},
@@ -776,7 +776,11 @@ function WP:GetColumns(unfiltered)
             onEnter = function(cellFrame)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText(categoryName, 1, 1, 1);
-              GameTooltip:AddDoubleLine("Items:", format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
+              local label = "Items:"
+              if categoryName == WP_CATEGORY_ARTISANQUEST or categoryName == WP_CATEGORY_DARKMOON or categoryName == WP_CATEGORY_TRAINER then
+                label = "Quests:"
+              end
+              GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
               GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
               GameTooltip:Show()
             end,
