@@ -149,7 +149,7 @@ local WP_DATA = {
     spellID = 423334,
     objectives = {
       {category = WP_CATEGORY_TREATISE,  quests = {83727},                             itemID = 222550, points = 1},
-      {category = WP_CATEGORY_TRAINER,   quests = {84085, 84086},                      itemID = 227667, points = 3, limit = 1},
+      {category = WP_CATEGORY_TRAINER,   quests = {84084, 84085, 84086},               itemID = 227667, points = 3, limit = 1},
       {category = WP_CATEGORY_GATHERING, quests = {84290, 84291, 84292, 84293, 84294}, itemID = 227659, points = 1},
       {category = WP_CATEGORY_GATHERING, quests = {84295},                             itemID = 227661, points = 4},
       {category = WP_CATEGORY_TREASURE,  quests = {83258},                             itemID = 225231, points = 1},

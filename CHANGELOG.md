@@ -26,6 +26,7 @@
 - Fixed incorrect Darkmoon KP values
 - The addon performance has been improved using 100x less memory
 - Weekly progress will now reset for all characters on weekly reset
+- Added missing quest from the Enchanting trainer
 
 ## v1.0.2 - 2024-08-28
 
