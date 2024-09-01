@@ -1202,9 +1202,9 @@ function WP:OnEnable()
   )
 
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
-    local date = C_DateAndTime.GetCurrentCalendarTime()
-    if date and date.monthDay then
-      local today = date.monthDay
+    local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
+    if currentCalendarTime and currentCalendarTime.monthDay then
+      local today = currentCalendarTime.monthDay
       local numEvents = C_Calendar.GetNumDayEvents(0, today)
       if numEvents then
         for i = 1, numEvents do
@@ -1219,12 +1219,9 @@ function WP:OnEnable()
     self:Render()
   end)
 
-  if not C_AddOns.IsAddOnLoaded("Blizzard_Calendar") then
-    local loaded = UIParentLoadAddOn("Blizzard_Calendar")
-    if loaded then
-      C_Calendar.OpenCalendar()
-    end
-  end
+  local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
+  C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
+  C_Calendar.OpenCalendar()
 
   self:ScanCharacter()
   self:Render()
