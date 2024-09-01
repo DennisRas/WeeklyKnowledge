@@ -24,7 +24,7 @@ WP.cache = {
 _G.WP = WP;
 --@end-debug@
 
-WP.DBVersion = 2
+WP.DBVersion = 3
 WP.defaultDB = {
   global = {
     minimap = {
@@ -385,6 +385,7 @@ function WP:MigrateDB()
     self.db.global.DBVersion = 1
   end
   if self.db.global.DBVersion < WP.DBVersion then
+    -- Old version to new data structure
     if self.db.global.DBVersion == 1 then
       for characterGUID, character in pairs(self.db.global.characters) do
         character.GUID = characterGUID
@@ -405,6 +406,14 @@ function WP:MigrateDB()
         end
       end
     end
+    -- Fix race condition with self.cache.GUID being empty
+    if self.db.global.DBVersion == 2 then
+      for characterGUID, character in pairs(self.db.global.characters) do
+        if not characterGUID or strlen(characterGUID) == 0 or not character.GUID or strlen(character.GUID) == 0 then
+          self.db.global.characters[""] = nil
+        end
+      end
+    end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
@@ -420,6 +429,7 @@ function WP:TaskWeeklyReset()
 end
 
 function WP:ScanCharacter()
+  if not self.cache.GUID then return end
   local character = self.db.global.characters[self.cache.GUID]
   if not character then
     character = CopyTable(self.defaultCharacter)
@@ -1165,6 +1175,22 @@ function WP:OnInitialize()
 end
 
 function WP:OnEnable()
+  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
+  local localizedClassName, classFile, classID = UnitClass("player")
+  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
+  self.cache.GUID = UnitGUID("player")
+  self.cache.name = UnitName("player")
+  self.cache.realmName = GetRealmName()
+  self.cache.level = UnitLevel("player")
+  self.cache.raceID = raceID
+  self.cache.raceEnglish = englishRaceName
+  self.cache.raceName = localizedRaceName
+  self.cache.classID = classID
+  self.cache.classFile = classFile
+  self.cache.className = localizedClassName
+  self.cache.factionEnglish = englishFactionName
+  self.cache.factionName = localizedFactionName
+
   self:RegisterBucketEvent(
     {
       "ACTIVE_TALENT_GROUP_CHANGED",
