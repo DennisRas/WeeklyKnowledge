@@ -17,6 +17,7 @@
 - Addon interface has been fully rewritten with a new design
 - Column sorting is disabled for now. Will be back soon!
 - Characters are sorted by most recent activity for now.
+- Tooltips now show whether you are finding items or doing quests
 
 ### Fixed
 
