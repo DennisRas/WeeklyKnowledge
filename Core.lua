@@ -6,17 +6,46 @@ WP.Libs.LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 WP.Libs.LDBIcon = LibStub("LibDBIcon-1.0")
 WP.Libs.ST = LibStub("ScrollingTable")
 WP.cache = {
-  playerName = "",
-  playerRealm = "",
-  playerLevel = 0,
-  playerClassID = 0,
-  playerClassColor = "",
+  characterGUID = "",
+  characterName = "",
+  characterRealm = "",
+  characterLevel = 0,
+  characterClassID = 0,
+  characterClassColor = "",
   isDarkmoonOpen = false,
+}
+
+WP.defaultDB = {
+  global = {
+    minimap = {
+      minimapPos = 235,
+      hide = false,
+      lock = false
+    },
+    showRealmNames = true,
+    windowScale = 100,
+    windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
+    characters = {},
+  }
+}
+
+WP.defaultCharacter = {
+  enabled = true,
+  GUID = "",
+  name = "",
+  realm = "",
+  level = 0,
+  class = 0,
+  color = "",
+  professions = {},
+  completed = {}
 }
 
 local DARKMOON_EVENT_ID = 479
 local ROW_HEIGHT = 20
 local WINDOW_PADDING = 20
+local TITLEBAR_HEIGHT = 30
+local MAX_ROWS = 16
 local WP_CATEGORY_UNIQUE = "Uniques"
 local WP_CATEGORY_TREATISE = "Treatise"
 local WP_CATEGORY_ARTISANQUEST = "Artisan"
@@ -334,6 +363,22 @@ local WP_DATA = {
   }
 }
 
+---Set the background color for a parent frame
+---@param parent any
+---@param r number
+---@param g number
+---@param b number
+---@param a number
+function WP:SetBackgroundColor(parent, r, g, b, a)
+  if not parent.Background then
+    parent.Background = parent:CreateTexture("Background", "BACKGROUND")
+    parent.Background:SetTexture("Interface/BUTTONS/WHITE8X8")
+    parent.Background:SetAllPoints()
+  end
+
+  parent.Background:SetVertexColor(r, g, b, a)
+end
+
 function WP:IsMinimapIconShown()
   return not self.db.global.minimap.hide
 end
@@ -378,16 +423,7 @@ function WP:OnInitialize()
   -- Database
   self.db = self.Libs.AceDB:New(
     "WeeklyKnowledgeDB",
-    {
-      global = {
-        minimap = {
-          minimapPos = 235,
-          hide = false,
-          lock = false
-        },
-        characters = {}
-      }
-    },
+    self.defaultDB,
     true
   )
 
@@ -414,7 +450,6 @@ function WP:OnInitialize()
   self.Libs.LDBIcon:Register("WeeklyKnowledge", libDataObject, self.db.global.minimap)
   self.Libs.LDBIcon:AddButtonToCompartment("WeeklyKnowledge")
 
-  -- Main window + scrolling table
   if not self.frame then
     local frameName = "WeeklyKnowledgeMainWindow"
     self.frame = CreateFrame("Frame", frameName, UIParent, "BackdropTemplate")
@@ -426,36 +461,212 @@ function WP:OnInitialize()
     self.frame:SetPoint("CENTER")
     self.frame:SetUserPlaced(true)
     self.frame:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    self.frame:SetBackdropColor(0, 0, 0, 0.95)
+    self.frame:SetBackdropColor(self.db.global.windowBackgroundColor.r, self.db.global.windowBackgroundColor.g, self.db.global.windowBackgroundColor.b, self.db.global.windowBackgroundColor.a)
     self.frame:SetBackdropBorderColor(0, 0, 0, .5)
     self.frame:RegisterForDrag("LeftButton")
     self.frame:EnableMouse(true)
     self.frame:SetScript("OnDragStart", function() self.frame:StartMoving() end)
     self.frame:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
     self.frame:Hide()
-    self.frame.title = CreateFrame("Frame", "$parentTitle", self.frame, "BackdropTemplate")
-    self.frame.title:SetPoint("BOTTOM", self.frame, "TOP", 0, -8)
-    self.frame.title:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    self.frame.title:SetBackdropColor(0, 0, 0, 1)
-    self.frame.title:SetBackdropBorderColor(0, 0, 0, .5)
-    self.frame.title:SetSize(150, 30)
-    self.frame.title:RegisterForDrag("LeftButton")
-    self.frame.title:EnableMouse(true)
-    self.frame.title:SetScript("OnDragStart", function() self.frame:StartMoving() end)
-    self.frame.title:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
-    self.frame.title.text = self.frame.title:CreateFontString("$parentText", "OVERLAY")
-    self.frame.title.text:SetFontObject("GameFontHighlight_NoShadow")
-    self.frame.title.text:SetAllPoints()
-    self.frame.title.text:SetJustifyH("CENTER")
-    self.frame.title.text:SetJustifyV("MIDDLE")
-    self.frame.title.text:SetText("WeeklyKnowledge")
-    self.frame.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame)
-    self.frame.closeButton:SetSize(32, 32)
-    self.frame.closeButton:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", 0, 0)
-    self.frame.closeButton:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-    self.frame.closeButton:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-    self.frame.closeButton:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-    self.frame.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
+    self.frame.titlebar = CreateFrame("Frame", "$parentTitle", self.frame, "BackdropTemplate")
+    self.frame.titlebar:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 4, -4)
+    self.frame.titlebar:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -4, -4)
+    self.frame.titlebar:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeSize = 0, insets = {left = 0, right = 0, top = 0, bottom = 0}})
+    self.frame.titlebar:SetBackdropColor(0, 0, 0, 0.5)
+    self.frame.titlebar:SetHeight(TITLEBAR_HEIGHT)
+    self.frame.titlebar:RegisterForDrag("LeftButton")
+    self.frame.titlebar:EnableMouse(true)
+    self.frame.titlebar:SetScript("OnDragStart", function() self.frame:StartMoving() end)
+    self.frame.titlebar:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
+    self.frame.titlebar.icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+    self.frame.titlebar.icon:SetPoint("LEFT", self.frame.titlebar, "LEFT", 6, 0)
+    self.frame.titlebar.icon:SetSize(20, 20)
+    self.frame.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
+    self.frame.titlebar.title = self.frame.titlebar:CreateFontString("$parentText", "OVERLAY")
+    self.frame.titlebar.title:SetFontObject("SystemFont_Med2")
+    self.frame.titlebar.title:SetPoint("LEFT", self.frame.titlebar, 28, 0)
+    self.frame.titlebar.title:SetJustifyH("LEFT")
+    self.frame.titlebar.title:SetJustifyV("MIDDLE")
+    self.frame.titlebar.title:SetText("WeeklyKnowledge")
+    self.frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame.titlebar)
+    self.frame.titlebar.closeButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
+    self.frame.titlebar.closeButton:SetPoint("RIGHT", self.frame.titlebar, "RIGHT", 0, 0)
+    self.frame.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
+    self.frame.titlebar.closeButton.Icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+    self.frame.titlebar.closeButton.Icon:SetPoint("CENTER", self.frame.titlebar.closeButton, "CENTER")
+    self.frame.titlebar.closeButton.Icon:SetSize(10, 10)
+    self.frame.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/AlterEgo/Media/Icon_Close.blp")
+    self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    self.frame.titlebar.closeButton:SetScript("OnEnter", function()
+      self.frame.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
+      self:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 0, 0, 0.2)
+      GameTooltip:ClearAllPoints()
+      GameTooltip:ClearLines()
+      GameTooltip:SetOwner(self.frame.titlebar.closeButton, "ANCHOR_TOP")
+      GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+      GameTooltip:Show()
+    end)
+    self.frame.titlebar.closeButton:SetScript("OnLeave", function()
+      self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 1, 1, 0)
+      GameTooltip:Hide()
+    end)
+
+    do -- Settings
+      self.frame.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.frame.titlebar)
+      self.frame.titlebar.SettingsButton:SetPoint("RIGHT", self.frame.titlebar.closeButton, "LEFT", 0, 0)
+      self.frame.titlebar.SettingsButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
+      self.frame.titlebar.SettingsButton:SetScript("OnEnter", function()
+        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0.05)
+        GameTooltip:SetOwner(self.frame.titlebar.SettingsButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
+        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:Show()
+      end)
+      self.frame.titlebar.SettingsButton:SetScript("OnLeave", function()
+        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      self.frame.titlebar.SettingsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
+      self.frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.frame.titlebar.SettingsButton, "CENTER")
+      self.frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
+      self.frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/AlterEgo/Media/Icon_Settings.blp")
+      self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        local showRealmNames = rootMenu:CreateCheckbox(
+          "Show realm names",
+          function() return self.db.global.showRealmNames end,
+          function()
+            self.db.global.showRealmNames = not self.db.global.showRealmNames
+            self:Render()
+          end
+        )
+        showRealmNames:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddInstructionLine(tooltip, "One big party!");
+        end)
+
+        local showMinimapIcon = rootMenu:CreateCheckbox(
+          "Show the minimap button",
+          function() return not self.db.global.minimap.hide end,
+          function()
+            self.db.global.minimap.hide = not self.db.global.minimap.hide
+            self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+          end
+        )
+        showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddInstructionLine(tooltip, "It does get crowded around the minimap sometimes.");
+        end)
+
+        local lockMinimapIcon = rootMenu:CreateCheckbox(
+          "Lock the minimap button",
+          function() return self.db.global.minimap.lock end,
+          function()
+            self.db.global.minimap.lock = not self.db.global.minimap.lock
+            self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+          end
+        )
+        lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddInstructionLine(tooltip, "No more moving the button around accidentally!");
+        end)
+
+        local interfaceTitle = rootMenu:CreateTitle("Interface")
+        local windowScale = rootMenu:CreateButton("Window scale")
+        for i = 80, 200, 10 do
+          windowScale:CreateRadio(
+            i .. "%",
+            function() return self.db.global.windowScale == i end,
+            function(data)
+              self.db.global.windowScale = data
+              self:Render()
+            end,
+            i
+          )
+        end
+
+        local colorInfo = {
+          r = self.db.global.windowBackgroundColor.r,
+          g = self.db.global.windowBackgroundColor.g,
+          b = self.db.global.windowBackgroundColor.b,
+          opacity = self.db.global.windowBackgroundColor.a,
+          swatchFunc = function()
+            local r, g, b = ColorPickerFrame:GetColorRGB();
+            if r then
+              self.db.global.windowBackgroundColor.r = r
+              self.db.global.windowBackgroundColor.g = g
+              self.db.global.windowBackgroundColor.b = b
+              self.frame:SetBackdropColor(self.db.global.windowBackgroundColor.r, self.db.global.windowBackgroundColor.g, self.db.global.windowBackgroundColor.b, self.db.global.windowBackgroundColor.a)
+            end
+          end,
+          opacityFunc = function() end,
+          cancelFunc = function(color)
+            if color.r then
+              self.db.global.windowBackgroundColor.r = color.r
+              self.db.global.windowBackgroundColor.g = color.g
+              self.db.global.windowBackgroundColor.b = color.b
+              self.frame:SetBackdropColor(self.db.global.windowBackgroundColor.r, self.db.global.windowBackgroundColor.g, self.db.global.windowBackgroundColor.b, self.db.global.windowBackgroundColor.a)
+            end
+          end,
+          hasOpacity = 0,
+        }
+        rootMenu:CreateColorSwatch(
+          "Window color",
+          function()
+            ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
+          end,
+          colorInfo
+        )
+      end)
+    end
+
+    do -- Characters
+      self.frame.titlebar.CharactersButton = CreateFrame("DropdownButton", "$parentCharactersButton", self.frame.titlebar)
+      self.frame.titlebar.CharactersButton:SetPoint("RIGHT", self.frame.titlebar.SettingsButton, "LEFT", 0, 0)
+      self.frame.titlebar.CharactersButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
+      self.frame.titlebar.CharactersButton:SetScript("OnEnter", function()
+        self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0.05)
+        GameTooltip:ClearAllPoints()
+        GameTooltip:ClearLines()
+        GameTooltip:SetOwner(self.frame.titlebar.CharactersButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
+        GameTooltip:AddLine("Enable/Disable your characters.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:Show()
+      end)
+      self.frame.titlebar.CharactersButton:SetScript("OnLeave", function()
+        self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      self.frame.titlebar.CharactersButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.CharactersButton:GetName() .. "Icon", "ARTWORK")
+      self.frame.titlebar.CharactersButton.Icon:SetPoint("CENTER", self.frame.titlebar.CharactersButton, "CENTER")
+      self.frame.titlebar.CharactersButton.Icon:SetSize(14, 14)
+      self.frame.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/AlterEgo/Media/Icon_Characters.blp")
+      self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.frame.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
+        for characterGUID, character in pairs(self.db.global.characters) do
+          local nameColor = "ffffffff"
+          if character.color ~= nil then
+            nameColor = character.color
+          end
+
+          rootMenu:CreateCheckbox(
+            "|c" .. nameColor .. character.name .. " - " .. character.realm .. "|r",
+            function() return character.enabled or false end,
+            function(data)
+              self.db.global.characters[data].enabled = not self.db.global.characters[data].enabled
+              self:Render()
+            end,
+            characterGUID
+          )
+        end
+      end)
+    end
+
     table.insert(UISpecialFrames, frameName)
 
     local header = {
@@ -529,7 +740,7 @@ function WP:OnInitialize()
 
     self.scrollingTable = self.Libs.ST:CreateST(
       header,
-      nil,
+      4,
       ROW_HEIGHT,
       {
         ["r"] = 1,
@@ -543,7 +754,7 @@ function WP:OnInitialize()
     self.scrollingTable.frame:SetBackdropColor(0, 0, 0, 0)
     self.scrollingTable.frame:SetBackdropBorderColor(0, 0, 0, 0)
     local ScrollTroughBorder = _G[self.scrollingTable.frame:GetName() .. "ScrollTroughBorder"]
-    if ScrollTroughBorder then
+    if ScrollTroughBorder and ScrollTroughBorder.background then
       ScrollTroughBorder.background:Hide()
     end
     self.scrollingTable:RegisterEvents({
@@ -617,11 +828,13 @@ function WP:OnInitialize()
     table.insert(WP_CATEGORIES, WP_CATEGORY_DARKMOON)
   end
 
-  local _, playerClassFile, playerClassID = UnitClass("player")
-  self.cache.playerName = UnitName("player")
-  self.cache.playerRealm = GetRealmName()
-  self.cache.playerClassID = playerClassID
-  self.cache.playerClassColor = C_ClassColor.GetClassColor(playerClassFile):GenerateHexColor()
+  local _, characterClassFile, characterClassID = UnitClass("player")
+  self.cache.characterGUID = UnitGUID("player")
+  self.cache.characterName = UnitName("player")
+  self.cache.characterRealm = GetRealmName()
+  self.cache.characterLevel = UnitLevel("player")
+  self.cache.characterClassID = characterClassID
+  self.cache.characterClassColor = C_ClassColor.GetClassColor(characterClassFile):GenerateHexColor()
 end
 
 function WP:OnEnable()
@@ -664,19 +877,33 @@ function WP:ToggleWindow()
 end
 
 function WP:ScanCharacter()
-  local playerData = {
-    name = self.cache.playerName,
-    realm = self.cache.playerRealm,
-    class = self.cache.playerClassID,
-    color = self.cache.playerClassColor,
-    professions = {},
-    completed = {},
-  }
+  local character = self.db.global.characters[self.cache.characterGUID]
+  if not character then
+    -- Default character data
+    character = {
+      enabled = true
+    }
+  end
+
+  -- Update character info
+  character.GUID = self.cache.characterGUID
+  character.name = self.cache.characterName
+  character.realm = self.cache.characterRealm
+  character.level = self.cache.characterLevel
+  character.class = self.cache.characterClassID
+  character.color = self.cache.characterClassColor
+
+  -- Reset character data
+  character.professions = {}
+  character.completed = {}
+  if character.enabled == nil then
+    character.enabled = true
+  end
 
   -- Profession Tree tracking
   local prof1, prof2 = GetProfessions()
-  for _, playerProfessionID in pairs({prof1, prof2}) do
-    local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(playerProfessionID)
+  for _, characterProfessionID in pairs({prof1, prof2}) do
+    local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
     if skillLineID then
       for _, dataProfession in ipairs(WP_DATA) do
         if dataProfession.skillLineID == skillLineID then
@@ -712,7 +939,7 @@ function WP:ScanCharacter()
             end
           end
 
-          table.insert(playerData.professions, characterProfession)
+          table.insert(character.professions, characterProfession)
         end
       end
     end
@@ -725,7 +952,7 @@ function WP:ScanCharacter()
         if objective.quests then
           for _, questID in ipairs(objective.quests) do
             if C_QuestLog.IsQuestFlaggedCompleted(questID) then
-              playerData.completed[questID] = true
+              character.completed[questID] = true
             end
           end
         end
@@ -733,33 +960,39 @@ function WP:ScanCharacter()
     end
   end
 
-  self.db.global.characters[UnitGUID("player")] = playerData
+  self.db.global.characters[self.cache.characterGUID] = character
 end
 
 function WP:Render()
   if not self.frame then return end
   if not self.scrollingTable then return end
   local rows = {}
-
-  for _, savedCharacter in pairs(self.db.global.characters) do
-    local playerName = savedCharacter.name
-    if savedCharacter.color then
-      playerName = WrapTextInColorCode(playerName, savedCharacter.color)
+  local characters = {}
+  for _, character in pairs(self.db.global.characters) do
+    if character.enabled == nil or character.enabled then
+      table.insert(characters, character)
     end
-    for _, savedProfession in ipairs(savedCharacter.professions) do
+  end
+
+  for _, character in pairs(characters) do
+    local characterName = character.name
+    if character.color then
+      characterName = WrapTextInColorCode(characterName .. (self.db.global.showRealmNames and " - " .. character.realm or ""), character.color)
+    end
+    for _, characterProfession in ipairs(character.professions) do
       for _, dataProfession in ipairs(WP_DATA) do
-        if dataProfession.skillLineID == savedProfession.skillLineID and savedProfession.latestExpansion then
+        if dataProfession.skillLineID == characterProfession.skillLineID and characterProfession.latestExpansion then
           local row = {
             cols = {
-              {value = playerName,},
+              {value = characterName,},
               {value = dataProfession.name,},
-              {value = savedProfession.level > 0 and savedProfession.level == savedProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.level .. " / " .. savedProfession.maxLevel) or savedProfession.level .. " / " .. savedProfession.maxLevel,},
+              {value = characterProfession.level > 0 and characterProfession.level == characterProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.level .. " / " .. characterProfession.maxLevel) or characterProfession.level .. " / " .. characterProfession.maxLevel,},
             }
           }
 
-          if savedProfession.knowledgeMaxLevel > 0 then
+          if characterProfession.knowledgeMaxLevel > 0 then
             table.insert(row.cols, {
-              value = savedProfession.knowledgeLevel > 0 and savedProfession.knowledgeLevel == savedProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel) or savedProfession.knowledgeLevel .. " / " .. savedProfession.knowledgeMaxLevel
+              value = characterProfession.knowledgeLevel > 0 and characterProfession.knowledgeLevel == characterProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel) or characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel
             })
 
             for _, categoryName in ipairs(WP_CATEGORIES) do
@@ -781,7 +1014,7 @@ function WP:Render()
                         if objective.limit and total > objective.limit then
                           total = objective.limit
                         end
-                        if savedCharacter.completed[questID] then
+                        if character.completed[questID] then
                           completed = completed + 1
                           points = points + objective.points
                         end
@@ -821,9 +1054,11 @@ function WP:Render()
     end
   end
 
+  self.frame:SetScale(self.db.global.windowScale / 100)
+  self.scrollingTable:SetDisplayRows(math.min(MAX_ROWS, #rows), ROW_HEIGHT)
   self.scrollingTable:SetData(rows)
   self.scrollingTable:Refresh()
   self.frame:SetWidth(self.scrollingTable.frame:GetWidth() + WINDOW_PADDING)
-  self.frame:SetHeight(self.scrollingTable.frame:GetHeight() + ROW_HEIGHT + 5 + WINDOW_PADDING)
-  self.scrollingTable.frame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + 5))
+  self.frame:SetHeight(self.scrollingTable.frame:GetHeight() + ROW_HEIGHT + WINDOW_PADDING + TITLEBAR_HEIGHT) -- ST height + ST header + frame padding + titlebar
+  self.scrollingTable.frame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", WINDOW_PADDING / 2, -(WINDOW_PADDING / 2 + ROW_HEIGHT + TITLEBAR_HEIGHT))
 end
