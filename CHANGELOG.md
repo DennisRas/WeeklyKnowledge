@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fixed a bug with Darkmoon values not showing on login (Thansk @Lombra)
+- Fixed a bug with ghost characters showing up on the list (scary!)
 
 ## v1.0.3 - 2024-09-01
 
