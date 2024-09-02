@@ -61,7 +61,7 @@ end
 ---@param callback fun(value: T, index: number): boolean
 ---@return T|nil, number|nil
 function Utils:TableFind(tbl, callback)
-  for i, v in ipairs(tbl) do
+  for i, v in pairs(tbl) do
     if callback(v, i) then
       return v, i
     end
@@ -88,7 +88,7 @@ end
 ---@return T[]
 function Utils:TableFilter(tbl, callback)
   local t = {}
-  for i, v in ipairs(tbl) do
+  for i, v in pairs(tbl) do
     if callback(v, i) then
       table.insert(t, v)
     end

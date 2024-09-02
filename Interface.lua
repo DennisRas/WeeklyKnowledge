@@ -757,7 +757,7 @@ function UI:CreateTableFrame(config)
 
       function rowFrame:onEnterHandler(arg1, arg2, arg3)
         if rowIndex > 1 then
-          self:SetHighlightColor(rowFrame, 1, 1, 1, .03)
+          Utils:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
         if row.onEnter then
           row:onEnter(arg1, arg2, arg3)
@@ -766,7 +766,7 @@ function UI:CreateTableFrame(config)
 
       function rowFrame:onLeaveHandler(...)
         if rowIndex > 1 then
-          self:SetHighlightColor(rowFrame, 1, 1, 1, 0)
+          Utils:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
         if row.onLeave then
           row:onLeave(...)
