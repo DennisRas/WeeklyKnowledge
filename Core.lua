@@ -1,10 +1,21 @@
-local WP = LibStub("AceAddon-3.0"):NewAddon("WeeklyKnowledge", "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
-WP.Libs = {}
-WP.Libs.AceDB = LibStub:GetLibrary("AceDB-3.0")
-WP.Libs.AceConfig = LibStub:GetLibrary("AceConfig-3.0")
-WP.Libs.LDB = LibStub:GetLibrary("LibDataBroker-1.1")
-WP.Libs.LDBIcon = LibStub("LibDBIcon-1.0")
-WP.cache = {
+---@type string
+local addonName = select(1, ...)
+---@class WK_Addon
+local addon = select(2, ...)
+
+--@debug@
+_G.WK = addon
+--@end-debug@
+
+local LibDataBroker = LibStub("LibDataBroker-1.1")
+local LibDBIcon = LibStub("LibDBIcon-1.0")
+local AceDB = LibStub("AceDB-3.0")
+local AceConfig = LibStub:GetLibrary("AceConfig-3.0")
+
+local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
+addon.Core = Core
+
+Core.cache = {
   GUID = "",
   name = "",
   realmName = "",
@@ -20,12 +31,8 @@ WP.cache = {
   isDarkmoonOpen = false,
 }
 
---@debug@
-_G.WP = WP;
---@end-debug@
-
-WP.DBVersion = 3
-WP.defaultDB = {
+Core.DBVersion = 3
+Core.defaultDB = {
   global = {
     minimap = {
       minimapPos = 235,
@@ -39,7 +46,7 @@ WP.defaultDB = {
   }
 }
 
-WP.defaultCharacter = {
+Core.defaultCharacter = {
   enabled = true,
   lastUpdate = 0,
   GUID = "",
@@ -380,11 +387,11 @@ local WP_DATA = {
   }
 }
 
-function WP:MigrateDB()
+function Core:MigrateDB()
   if type(self.db.global.DBVersion) ~= "number" then
     self.db.global.DBVersion = 1
   end
-  if self.db.global.DBVersion < WP.DBVersion then
+  if self.db.global.DBVersion < Core.DBVersion then
     -- Old version to new data structure
     if self.db.global.DBVersion == 1 then
       for characterGUID, character in pairs(self.db.global.characters) do
@@ -419,7 +426,7 @@ function WP:MigrateDB()
   end
 end
 
-function WP:TaskWeeklyReset()
+function Core:TaskWeeklyReset()
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= time() then
     for _, character in pairs(self.db.global.characters) do
       wipe(character.completed or {})
@@ -428,7 +435,7 @@ function WP:TaskWeeklyReset()
   self.db.global.weeklyReset = time() + C_DateAndTime.GetSecondsUntilWeeklyReset()
 end
 
-function WP:ScanCharacter()
+function Core:ScanCharacter()
   if not self.cache.GUID then return end
   local character = self.db.global.characters[self.cache.GUID]
   if not character then
@@ -518,7 +525,7 @@ function WP:ScanCharacter()
   end
 end
 
-function WP:GetCharacters(unfiltered)
+function Core:GetCharacters(unfiltered)
   local characters = {}
   for characterGUID, character in pairs(self.db.global.characters) do
     local include = true
@@ -546,7 +553,7 @@ end
 ---@param g number
 ---@param b number
 ---@param a number
-function WP:SetBackgroundColor(parent, r, g, b, a)
+function Core:SetBackgroundColor(parent, r, g, b, a)
   if not parent.Background then
     parent.Background = parent:CreateTexture("Background", "BACKGROUND")
     parent.Background:SetTexture("Interface/BUTTONS/WHITE8X8")
@@ -564,7 +571,7 @@ local itemCache = {}
 ---@param g number?
 ---@param b number?
 ---@param a number?
-function WP:SetHighlightColor(parent, r, g, b, a)
+function Core:SetHighlightColor(parent, r, g, b, a)
   if not parent.Highlight then
     parent.Highlight = parent:CreateTexture("Highlight", "OVERLAY")
     parent.Highlight:SetTexture("Interface/BUTTONS/WHITE8X8")
@@ -582,16 +589,16 @@ function WP:SetHighlightColor(parent, r, g, b, a)
   parent.Highlight:SetVertexColor(r, g, b, a)
 end
 
-function WP:IsMinimapIconShown()
+function Core:IsMinimapIconShown()
   return not self.db.global.minimap.hide
 end
 
-function WP:SetMinimapIconShown(_, value)
+function Core:SetMinimapIconShown(_, value)
   self.db.global.minimap.hide = not value
-  self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+  LibDBIcon:Refresh(addonName, self.db.global.minimap)
 end
 
-function WP:HandleChatCmd(msg)
+function Core:HandleChatCmd(msg)
   if msg == "minimap" then
     self:SetMinimapIconShown(nil, self.db.global.minimap.hide)
   else
@@ -599,7 +606,7 @@ function WP:HandleChatCmd(msg)
   end
 end
 
-function WP:GetColumns(unfiltered)
+function Core:GetColumns(unfiltered)
   local hidden = self.db.global.hiddenColumns
   local filteredColumns = {}
   local columns = {
@@ -834,17 +841,17 @@ function WP:GetColumns(unfiltered)
   return filteredColumns
 end
 
-function WP:OnInitialize()
+function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
   self:RegisterChatCommand("wk", "HandleChatCmd")
   self:RegisterChatCommand("weeklyknowledge", "HandleChatCmd")
 
   -- Options
-  self.Libs.AceConfig:RegisterOptionsTable(
-    "WeeklyKnowledge",
+  AceConfig:RegisterOptionsTable(
+    addonName,
     {
-      name = "WeeklyKnowledge",
-      handler = WP,
+      name = addonName,
+      handler = Core,
       type = "group",
       args = {
         minimap = {
@@ -859,7 +866,7 @@ function WP:OnInitialize()
   )
 
   -- Database
-  self.db = self.Libs.AceDB:New(
+  self.db = AceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
     true
@@ -867,15 +874,15 @@ function WP:OnInitialize()
   self:MigrateDB()
 
   local libDataObject = {
-    label = "WeeklyKnowledge",
-    tocname = "WeeklyKnowledge",
+    label = addonName,
+    tocname = addonName,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
       self:ToggleWindow()
     end,
     OnTooltipShow = function(tooltip)
-      tooltip:SetText("WeeklyKnowledge", 1, 1, 1)
+      tooltip:SetText(addonName, 1, 1, 1)
       tooltip:AddLine("Click to open WeeklyKnowledge", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
       local dragText = "Drag to move this icon"
       if self.db.global.minimap.lock then
@@ -885,9 +892,9 @@ function WP:OnInitialize()
     end
   }
 
-  self.Libs.LDB:NewDataObject("WeeklyKnowledge", libDataObject)
-  self.Libs.LDBIcon:Register("WeeklyKnowledge", libDataObject, self.db.global.minimap)
-  self.Libs.LDBIcon:AddButtonToCompartment("WeeklyKnowledge")
+  LibDataBroker:NewDataObject(addonName, libDataObject)
+  LibDBIcon:Register(addonName, libDataObject, self.db.global.minimap)
+  LibDBIcon:AddButtonToCompartment(addonName)
 
   if not self.frame then
     local frameName = "WeeklyKnowledgeMainWindow"
@@ -899,7 +906,7 @@ function WP:OnInitialize()
     self.frame:SetMovable(true)
     self.frame:SetPoint("CENTER")
     self.frame:SetUserPlaced(true)
-    WP:SetBackgroundColor(self.frame, self.db.global.windowBackgroundColor.r, self.db.global.windowBackgroundColor.g, self.db.global.windowBackgroundColor.b, self.db.global.windowBackgroundColor.a)
+    Core:SetBackgroundColor(self.frame, self.db.global.windowBackgroundColor.r, self.db.global.windowBackgroundColor.g, self.db.global.windowBackgroundColor.b, self.db.global.windowBackgroundColor.a)
     self.frame:RegisterForDrag("LeftButton")
     self.frame:EnableMouse(true)
     self.frame:SetScript("OnDragStart", function() self.frame:StartMoving() end)
@@ -914,7 +921,7 @@ function WP:OnInitialize()
     self.frame.titlebar = CreateFrame("Frame", "$parentTitle", self.frame)
     self.frame.titlebar:SetPoint("TOPLEFT", self.frame, "TOPLEFT")
     self.frame.titlebar:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT")
-    WP:SetBackgroundColor(self.frame.titlebar, 0, 0, 0, 0.5)
+    Core:SetBackgroundColor(self.frame.titlebar, 0, 0, 0, 0.5)
     self.frame.titlebar:SetHeight(TITLEBAR_HEIGHT + 1)
     self.frame.titlebar:RegisterForDrag("LeftButton")
     self.frame.titlebar:EnableMouse(true)
@@ -929,7 +936,7 @@ function WP:OnInitialize()
     self.frame.titlebar.title:SetPoint("LEFT", self.frame.titlebar, 28, 0)
     self.frame.titlebar.title:SetJustifyH("LEFT")
     self.frame.titlebar.title:SetJustifyV("MIDDLE")
-    self.frame.titlebar.title:SetText("WeeklyKnowledge")
+    self.frame.titlebar.title:SetText(addonName)
     self.frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame.titlebar)
     self.frame.titlebar.closeButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
     self.frame.titlebar.closeButton:SetPoint("RIGHT", self.frame.titlebar, "RIGHT", 0, 0)
@@ -983,7 +990,7 @@ function WP:OnInitialize()
           function() return not self.db.global.minimap.hide end,
           function()
             self.db.global.minimap.hide = not self.db.global.minimap.hide
-            self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+            LibDBIcon:Refresh(addonName, self.db.global.minimap)
           end
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
@@ -996,7 +1003,7 @@ function WP:OnInitialize()
           function() return self.db.global.minimap.lock end,
           function()
             self.db.global.minimap.lock = not self.db.global.minimap.lock
-            self.Libs.LDBIcon:Refresh("WeeklyKnowledge", self.db.global.minimap)
+            LibDBIcon:Refresh(addonName, self.db.global.minimap)
           end
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
@@ -1163,7 +1170,7 @@ function WP:OnInitialize()
   end
 end
 
-function WP:OnEnable()
+function Core:OnEnable()
   local localizedRaceName, englishRaceName, raceID = UnitRace("player")
   local localizedClassName, classFile, classID = UnitClass("player")
   local englishFactionName, localizedFactionName = UnitFactionGroup("player")
@@ -1227,12 +1234,12 @@ function WP:OnEnable()
   self:Render()
 end
 
-function WP:OnDisable()
+function Core:OnDisable()
   self:UnregisterAllEvents()
   self:UnregisterAllBuckets()
 end
 
-function WP:ToggleWindow()
+function Core:ToggleWindow()
   if self.frame:IsVisible() then
     self.frame:Hide()
   else
@@ -1241,7 +1248,7 @@ function WP:ToggleWindow()
   end
 end
 
-function WP:Render()
+function Core:Render()
   if not self.frame then return end
   local columns = self:GetColumns()
   local tableWidth = 0
@@ -1252,7 +1259,7 @@ function WP:Render()
   }
 
   do -- Column config
-    WP:TableForEach(columns, function(column)
+    Core:TableForEach(columns, function(column)
       table.insert(data.columns, {
         width = column.width,
         align = column.align or "LEFT",
@@ -1265,7 +1272,7 @@ function WP:Render()
     local row = {
       columns = {}
     }
-    WP:TableForEach(columns, function(column)
+    Core:TableForEach(columns, function(column)
       table.insert(row.columns, {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.name),
         onEnter = column.onEnter,
@@ -1304,8 +1311,8 @@ end
 
 local TableCollection = {}
 
-function WP:NewTable(config)
-  local frame = WP:CreateScrollFrame("WeeklyKnowledgeTable" .. (WP:TableCount(TableCollection) + 1))
+function Core:NewTable(config)
+  local frame = Core:CreateScrollFrame("WeeklyKnowledgeTable" .. (Core:TableCount(TableCollection) + 1))
   frame.config = CreateFromMixins(
     {
       header = {
@@ -1352,8 +1359,8 @@ function WP:NewTable(config)
     local offsetY = 0
     local offsetX = 0
 
-    WP:TableForEach(frame.rows, function(rowFrame) rowFrame:Hide() end)
-    WP:TableForEach(frame.data.rows, function(row, rowIndex)
+    Core:TableForEach(frame.rows, function(rowFrame) rowFrame:Hide() end)
+    Core:TableForEach(frame.data.rows, function(row, rowIndex)
       local rowFrame = frame.rows[rowIndex]
       local rowHeight = rowIndex == 1 and 30 or frame.config.rows.height
 
@@ -1373,16 +1380,16 @@ function WP:NewTable(config)
       rowFrame:Show()
 
       if frame.config.rows.striped and rowIndex % 2 == 1 then
-        WP:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
+        Core:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
       end
 
       if row.backgroundColor then
-        WP:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
+        Core:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
       end
 
       function rowFrame:onEnterHandler(arg1, arg2, arg3)
         if rowIndex > 1 then
-          WP:SetHighlightColor(rowFrame, 1, 1, 1, .03)
+          Core:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
         if row.OnEnter then
           row:OnEnter(arg1, arg2, arg3)
@@ -1391,7 +1398,7 @@ function WP:NewTable(config)
 
       function rowFrame:onLeaveHandler(...)
         if rowIndex > 1 then
-          WP:SetHighlightColor(rowFrame, 1, 1, 1, 0)
+          Core:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
         if row.OnLeave then
           row:OnLeave(...)
@@ -1413,13 +1420,13 @@ function WP:NewTable(config)
           rowFrame:SetFrameStrata("HIGH")
         end
         if not row.backgroundColor then
-          WP:SetBackgroundColor(rowFrame, 0.0784, 0.0980, 0.1137, 1)
+          Core:SetBackgroundColor(rowFrame, 0.0784, 0.0980, 0.1137, 1)
         end
       end
 
       offsetX = 0
-      WP:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
-      WP:TableForEach(row.columns, function(column, columnIndex)
+      Core:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
+      Core:TableForEach(row.columns, function(column, columnIndex)
         local columnFrame = rowFrame.columns[columnIndex]
         local columnConfig = frame.data.columns[columnIndex]
         local columnWidth = columnConfig and columnConfig.width or frame.config.columns.width
@@ -1447,7 +1454,7 @@ function WP:NewTable(config)
         columnFrame:Show()
 
         if column.backgroundColor then
-          WP:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
+          Core:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
         end
 
         function columnFrame:onEnterHandler(...)
@@ -1495,7 +1502,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): boolean
 ---@return T|nil, number|nil
-function WP:TableFind(tbl, callback)
+function Core:TableFind(tbl, callback)
   for i, v in ipairs(tbl) do
     if callback(v, i) then
       return v, i
@@ -1510,8 +1517,8 @@ end
 ---@param key string
 ---@param val any
 ---@return T|nil
-function WP:TableGet(tbl, key, val)
-  return WP:TableFind(tbl, function(elm)
+function Core:TableGet(tbl, key, val)
+  return Core:TableFind(tbl, function(elm)
     return elm[key] and elm[key] == val
   end)
 end
@@ -1521,7 +1528,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): boolean
 ---@return T[]
-function WP:TableFilter(tbl, callback)
+function Core:TableFilter(tbl, callback)
   local t = {}
   for i, v in ipairs(tbl) do
     if callback(v, i) then
@@ -1534,7 +1541,7 @@ end
 ---Count table items
 ---@param tbl table
 ---@return number
-function WP:TableCount(tbl)
+function Core:TableCount(tbl)
   local n = 0
   for _ in pairs(tbl) do
     n = n + 1
@@ -1547,7 +1554,7 @@ end
 ---@param tbl T[]
 ---@param cache table?
 ---@return T[]
-function WP:TableCopy(tbl, cache)
+function Core:TableCopy(tbl, cache)
   local t = {}
   cache = cache or {}
   cache[tbl] = t
@@ -1566,7 +1573,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): any
 ---@return T[]
-function WP:TableMap(tbl, callback)
+function Core:TableMap(tbl, callback)
   local t = {}
   self:TableForEach(tbl, function(v, k)
     local newv, newk = callback(v, k)
@@ -1580,7 +1587,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number)
 ---@return T[]
-function WP:TableForEach(tbl, callback)
+function Core:TableForEach(tbl, callback)
   assert(tbl, "Must be a table!")
   for ik, iv in pairs(tbl) do
     callback(iv, ik)
@@ -1588,7 +1595,7 @@ function WP:TableForEach(tbl, callback)
   return tbl
 end
 
-function WP:CreateScrollFrame(name, parent)
+function Core:CreateScrollFrame(name, parent)
   local frame = CreateFrame("ScrollFrame", name, parent)
   frame.content = CreateFrame("Frame", "$parentContent", frame)
   frame.scrollbarH = CreateFrame("Slider", "$parentScrollbarH", frame, "UISliderTemplate")
