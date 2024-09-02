@@ -710,7 +710,7 @@ function UI:CreateTableFrame(config)
 
   function frame:SetRowHeight(height)
     self.config.rows.height = height
-    self:Update()
+    self:RenderTable()
   end
 
   function frame:RenderTable()
