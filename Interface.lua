@@ -130,7 +130,7 @@ function UI:GetColumns(unfiltered)
       name = dataObjective.name,
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText(dataObjective, 1, 1, 1);
+        GameTooltip:SetText(dataObjective.name, 1, 1, 1);
         GameTooltip:AddLine(dataObjective.description, nil, nil, nil, true)
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
@@ -205,7 +205,7 @@ function UI:GetColumns(unfiltered)
 
               local showTooltip = function()
                 GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                GameTooltip:SetText(dataObjective, 1, 1, 1);
+                GameTooltip:SetText(dataObjective.name, 1, 1, 1);
                 GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
                 if Utils:TableCount(itemList) > 0 then
