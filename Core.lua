@@ -20,6 +20,7 @@ function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
   self:RegisterChatCommand("wk", UI.ToggleWindow)
   self:RegisterChatCommand("weeklyknowledge", UI.ToggleWindow)
+
   Data:InitDB()
   Data:MigrateDB()
 
@@ -48,22 +49,6 @@ function Core:OnInitialize()
 end
 
 function Core:OnEnable()
-  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
-  local localizedClassName, classFile, classID = UnitClass("player")
-  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
-  Data.cache.GUID = UnitGUID("player")
-  Data.cache.name = UnitName("player")
-  Data.cache.realmName = GetRealmName()
-  Data.cache.level = UnitLevel("player")
-  Data.cache.raceID = raceID
-  Data.cache.raceEnglish = englishRaceName
-  Data.cache.raceName = localizedRaceName
-  Data.cache.classID = classID
-  Data.cache.classFile = classFile
-  Data.cache.className = localizedClassName
-  Data.cache.factionEnglish = englishFactionName
-  Data.cache.factionName = localizedFactionName
-
   self:RegisterBucketEvent(
     {
       "ACTIVE_TALENT_GROUP_CHANGED",

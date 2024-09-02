@@ -11,18 +11,6 @@ local Data = {}
 addon.Data = Data
 
 Data.cache = {
-  GUID = "",
-  name = "",
-  realmName = "",
-  level = 0,
-  factionEnglish = "",
-  factionName = "",
-  raceID = 0,
-  raceEnglish = "",
-  raceName = "",
-  classID = 0,
-  classFile = "",
-  className = "",
   isDarkmoonOpen = false,
   items = {},
 }
@@ -501,18 +489,21 @@ function Data:ScanCharacter()
   if not character then return end
 
   -- Update character info
-  character.GUID = Data.cache.GUID
-  character.name = Data.cache.name
-  character.realmName = Data.cache.realmName
-  character.level = Data.cache.level
-  character.factionEnglish = Data.cache.factionEnglish
-  character.factionName = Data.cache.factionName
-  character.raceID = Data.cache.raceID
-  character.raceEnglish = Data.cache.raceEnglish
-  character.raceName = Data.cache.raceName
-  character.classID = Data.cache.classID
-  character.classFile = Data.cache.classFile
-  character.className = Data.cache.className
+  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
+  local localizedClassName, classFile, classID = UnitClass("player")
+  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
+  character.GUID = UnitGUID("player")
+  character.name = UnitName("player")
+  character.realmName = GetRealmName()
+  character.level = UnitLevel("player")
+  character.factionEnglish = englishFactionName
+  character.factionName = localizedFactionName
+  character.raceID = raceID
+  character.raceEnglish = englishRaceName
+  character.raceName = localizedRaceName
+  character.classID = classID
+  character.classFile = classFile
+  character.className = localizedClassName
   character.lastUpdate = GetServerTime()
 
   -- Reset character data
@@ -578,8 +569,8 @@ function Data:ScanCharacter()
     end
   end
 
-  if #character.professions then
-    self.db.global.characters[Data.cache.GUID] = character
+  if Utils:TableCount(character.professions) < 1 then
+    self.db.global.characters[character.GUID] = nil
   end
 end
 
