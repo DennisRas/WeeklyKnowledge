@@ -17,7 +17,6 @@ local MAX_WINDOW_HEIGHT = 600
 
 function UI:GetColumns(unfiltered)
   local hidden = Data.db.global.hiddenColumns
-  local filteredColumns = {}
   local columns = {
     {
       name = "Name",
@@ -124,7 +123,8 @@ function UI:GetColumns(unfiltered)
     },
   }
 
-  for _, dataObjective in ipairs(Data.Objectives) do
+  Utils:TableForEach(Data.Objectives, function(dataObjective)
+    -- for _, dataObjective in ipairs(Data.Objectives) do
     table.insert(columns, {
       name = dataObjective.name,
       onEnter = function(cellFrame)
@@ -234,29 +234,28 @@ function UI:GetColumns(unfiltered)
         end
       end
     })
-  end
+    -- end
+  end)
 
   if unfiltered then
     return columns
   end
 
-  for _, column in pairs(columns) do
-    if not hidden[column.name] then
-      table.insert(filteredColumns, column)
-    end
-  end
+  local filteredColumns = Utils:TableFilter(columns, function(column)
+    return not hidden[column.name]
+  end)
 
   return filteredColumns
 end
 
 function UI:ToggleWindow()
   if not self.frame then return end
-  UI:Render()
   if self.frame:IsVisible() then
     self.frame:Hide()
   else
     self.frame:Show()
   end
+  self:Render()
 end
 
 function UI:Render()
@@ -269,71 +268,77 @@ function UI:Render()
   }
 
   if not self.frame then
-    local frameName = "WeeklyKnowledgeMainWindow"
+    local frameName = addonName .. "MainWindow"
     self.frame = CreateFrame("Frame", frameName, UIParent)
-    self.frame:SetSize(1000, 500)
+    self.frame:SetSize(500, 500)
     self.frame:SetFrameStrata("HIGH")
     self.frame:SetFrameLevel(8000)
     self.frame:SetClampedToScreen(true)
     self.frame:SetMovable(true)
     self.frame:SetPoint("CENTER")
     self.frame:SetUserPlaced(true)
-    Utils:SetBackgroundColor(self.frame, Data.db.global.windowBackgroundColor.r, Data.db.global.windowBackgroundColor.g, Data.db.global.windowBackgroundColor.b, Data.db.global.windowBackgroundColor.a)
     self.frame:RegisterForDrag("LeftButton")
     self.frame:EnableMouse(true)
     self.frame:SetScript("OnDragStart", function() self.frame:StartMoving() end)
     self.frame:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
     self.frame:Hide()
+    Utils:SetBackgroundColor(self.frame, Data.db.global.windowBackgroundColor.r, Data.db.global.windowBackgroundColor.g, Data.db.global.windowBackgroundColor.b, Data.db.global.windowBackgroundColor.a)
+
     self.frame.border = CreateFrame("Frame", "$parentBorder", self.frame, "BackdropTemplate")
     self.frame.border:SetPoint("TOPLEFT", self.frame, "TOPLEFT", -3, 3)
     self.frame.border:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 3, -3)
     self.frame.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
     self.frame.border:SetBackdropBorderColor(0, 0, 0, .5)
     self.frame.border:Show()
+
     self.frame.titlebar = CreateFrame("Frame", "$parentTitle", self.frame)
     self.frame.titlebar:SetPoint("TOPLEFT", self.frame, "TOPLEFT")
     self.frame.titlebar:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT")
-    Utils:SetBackgroundColor(self.frame.titlebar, 0, 0, 0, 0.5)
     self.frame.titlebar:SetHeight(TITLEBAR_HEIGHT + 1)
     self.frame.titlebar:RegisterForDrag("LeftButton")
     self.frame.titlebar:EnableMouse(true)
     self.frame.titlebar:SetScript("OnDragStart", function() self.frame:StartMoving() end)
     self.frame.titlebar:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
+    Utils:SetBackgroundColor(self.frame.titlebar, 0, 0, 0, 0.5)
+
     self.frame.titlebar.icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
     self.frame.titlebar.icon:SetPoint("LEFT", self.frame.titlebar, "LEFT", 6, 0)
     self.frame.titlebar.icon:SetSize(20, 20)
     self.frame.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
+
     self.frame.titlebar.title = self.frame.titlebar:CreateFontString("$parentText", "OVERLAY")
     self.frame.titlebar.title:SetFontObject("SystemFont_Med2")
     self.frame.titlebar.title:SetPoint("LEFT", self.frame.titlebar, 28, 0)
     self.frame.titlebar.title:SetJustifyH("LEFT")
     self.frame.titlebar.title:SetJustifyV("MIDDLE")
     self.frame.titlebar.title:SetText(addonName)
-    self.frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame.titlebar)
-    self.frame.titlebar.closeButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
-    self.frame.titlebar.closeButton:SetPoint("RIGHT", self.frame.titlebar, "RIGHT", 0, 0)
-    self.frame.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
-    self.frame.titlebar.closeButton.Icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-    self.frame.titlebar.closeButton.Icon:SetPoint("CENTER", self.frame.titlebar.closeButton, "CENTER")
-    self.frame.titlebar.closeButton.Icon:SetSize(10, 10)
-    self.frame.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
-    self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    self.frame.titlebar.closeButton:SetScript("OnEnter", function()
-      self.frame.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
-      Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 0, 0, 0.2)
-      GameTooltip:ClearAllPoints()
-      GameTooltip:ClearLines()
-      GameTooltip:SetOwner(self.frame.titlebar.closeButton, "ANCHOR_TOP")
-      GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
-      GameTooltip:Show()
-    end)
-    self.frame.titlebar.closeButton:SetScript("OnLeave", function()
-      self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-      Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 1, 1, 0)
-      GameTooltip:Hide()
-    end)
 
-    do -- Settings
+    do -- Close Button
+      self.frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame.titlebar)
+      self.frame.titlebar.closeButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
+      self.frame.titlebar.closeButton:SetPoint("RIGHT", self.frame.titlebar, "RIGHT", 0, 0)
+      self.frame.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
+      self.frame.titlebar.closeButton:SetScript("OnEnter", function()
+        self.frame.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
+        Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 0, 0, 0.2)
+        GameTooltip:SetOwner(self.frame.titlebar.closeButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+        GameTooltip:Show()
+      end)
+      self.frame.titlebar.closeButton:SetScript("OnLeave", function()
+        self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+
+      self.frame.titlebar.closeButton.Icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+      self.frame.titlebar.closeButton.Icon:SetPoint("CENTER", self.frame.titlebar.closeButton, "CENTER")
+      self.frame.titlebar.closeButton.Icon:SetSize(10, 10)
+      self.frame.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
+      self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
+
+    do -- Settings Button
       self.frame.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.frame.titlebar)
       self.frame.titlebar.SettingsButton:SetPoint("RIGHT", self.frame.titlebar.closeButton, "LEFT", 0, 0)
       self.frame.titlebar.SettingsButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
@@ -351,11 +356,6 @@ function UI:Render()
         Utils:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.SettingsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.frame.titlebar.SettingsButton, "CENTER")
-      self.frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
-      self.frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
-      self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         local showMinimapIcon = rootMenu:CreateCheckbox(
           "Show the minimap button",
@@ -430,17 +430,21 @@ function UI:Render()
           colorInfo
         )
       end)
+
+      self.frame.titlebar.SettingsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
+      self.frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.frame.titlebar.SettingsButton, "CENTER")
+      self.frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
+      self.frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
+      self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    do -- Characters
+    do -- Characters Button
       self.frame.titlebar.CharactersButton = CreateFrame("DropdownButton", "$parentCharactersButton", self.frame.titlebar)
       self.frame.titlebar.CharactersButton:SetPoint("RIGHT", self.frame.titlebar.SettingsButton, "LEFT", 0, 0)
       self.frame.titlebar.CharactersButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
       self.frame.titlebar.CharactersButton:SetScript("OnEnter", function()
         self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         Utils:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0.05)
-        GameTooltip:ClearAllPoints()
-        GameTooltip:ClearLines()
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.frame.titlebar.CharactersButton, "ANCHOR_TOP")
         GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
@@ -458,7 +462,7 @@ function UI:Render()
       self.frame.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Characters.blp")
       self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.frame.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
-        for _, character in pairs(Data:GetCharacters(true)) do
+        Utils:TableForEach(Data:GetCharacters(true), function(character)
           local text = format("%s - %s", character.name, character.realmName)
           local _, classFile = GetClassInfo(character.classID)
           if classFile then
@@ -477,19 +481,17 @@ function UI:Render()
             end,
             character.GUID
           )
-        end
+        end)
       end)
     end
 
-    do -- Columns
+    do -- Columns Button
       self.frame.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.frame.titlebar)
       self.frame.titlebar.ColumnsButton:SetPoint("RIGHT", self.frame.titlebar.CharactersButton, "LEFT", 0, 0)
       self.frame.titlebar.ColumnsButton:SetSize(TITLEBAR_HEIGHT, TITLEBAR_HEIGHT)
       self.frame.titlebar.ColumnsButton:SetScript("OnEnter", function()
         self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         Utils:SetBackgroundColor(self.frame.titlebar.ColumnsButton, 1, 1, 1, 0.05)
-        GameTooltip:ClearAllPoints()
-        GameTooltip:ClearLines()
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.frame.titlebar.ColumnsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
@@ -501,14 +503,9 @@ function UI:Render()
         Utils:SetBackgroundColor(self.frame.titlebar.ColumnsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.ColumnsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.ColumnsButton.Icon:SetPoint("CENTER", self.frame.titlebar.ColumnsButton, "CENTER")
-      self.frame.titlebar.ColumnsButton.Icon:SetSize(12, 12)
-      self.frame.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
-      self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
         local hidden = Data.db.global.hiddenColumns
-        for _, column in pairs(self:GetColumns(true)) do
+        Utils:TableForEach(self:GetColumns(true), function(column)
           rootMenu:CreateCheckbox(
             column.name,
             function() return not hidden[column.name] end,
@@ -518,11 +515,15 @@ function UI:Render()
             end,
             column.name
           )
-        end
+        end)
       end)
-    end
 
-    table.insert(UISpecialFrames, frameName)
+      self.frame.titlebar.ColumnsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
+      self.frame.titlebar.ColumnsButton.Icon:SetPoint("CENTER", self.frame.titlebar.ColumnsButton, "CENTER")
+      self.frame.titlebar.ColumnsButton.Icon:SetSize(12, 12)
+      self.frame.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
+      self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
 
     self.frame.table = UI:CreateTableFrame({
       header = {
@@ -539,6 +540,8 @@ function UI:Render()
     self.frame.table:SetParent(self.frame)
     self.frame.table:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -TITLEBAR_HEIGHT)
     self.frame.table:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
+
+    table.insert(UISpecialFrames, frameName)
   end
 
   do -- Column config
@@ -566,24 +569,23 @@ function UI:Render()
     tableHeight = tableHeight + self.frame.table.config.header.height
   end
 
-  for _, character in pairs(Data:GetCharacters()) do
-    for _, characterProfession in ipairs(character.professions) do
-      for _, dataProfession in ipairs(Data.Professions) do
-        if dataProfession.skillLineID == characterProfession.skillLineID then
-          local row = {
-            columns = {}
-          }
+  Utils:TableForEach(Data:GetCharacters(), function(character)
+    Utils:TableForEach(character.professions, function(characterProfession)
+      local row = {columns = {}}
 
-          for _, column in pairs(columns) do
-            table.insert(row.columns, column.cell(character, characterProfession, dataProfession))
-          end
+      local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+        return dataProfession.skillLineID == characterProfession.skillLineID
+      end)
+      if not dataProfession then return end
 
-          table.insert(tableData.rows, row)
-          tableHeight = tableHeight + self.frame.table.config.rows.height
-        end
-      end
-    end
-  end
+      Utils:TableForEach(columns, function(column)
+        table.insert(row.columns, column.cell(character, characterProfession, dataProfession))
+      end)
+
+      table.insert(tableData.rows, row)
+      tableHeight = tableHeight + self.frame.table.config.rows.height
+    end)
+  end)
 
   self.frame.table:SetData(tableData)
   self.frame:SetWidth(tableWidth)

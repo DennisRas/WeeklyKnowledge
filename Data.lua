@@ -439,9 +439,9 @@ end
 
 function Data:TaskWeeklyReset()
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= time() then
-    for _, character in pairs(self.db.global.characters) do
+    Utils:TableForEach(self.db.global.characters, function(character)
       wipe(character.completed or {})
-    end
+    end)
   end
   self.db.global.weeklyReset = time() + C_DateAndTime.GetSecondsUntilWeeklyReset()
 end
@@ -512,71 +512,68 @@ function Data:ScanCharacter()
 
   -- Profession Tree tracking
   local prof1, prof2 = GetProfessions()
-  for _, characterProfessionID in pairs({prof1, prof2}) do
+  Utils:TableForEach({prof1, prof2}, function(characterProfessionID)
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
-    if skillLineID then
-      for _, dataProfession in ipairs(Data.Professions) do
-        if dataProfession.skillLineID == skillLineID and dataProfession.spellID and IsPlayerSpell(dataProfession.spellID) then
-          local characterProfession = {
-            skillLineID = skillLineID,
-            level = skillLevel,
-            maxLevel = maxSkillLevel,
-            knowledgeLevel = 0,
-            knowledgeMaxLevel = 0,
-          }
+    if not skillLineID then return end
 
-          -- Scan knowledge spent/max
-          local configID = C_ProfSpecs.GetConfigIDForSkillLine(dataProfession.skillLineVariantID)
-          if configID and configID > 0 then
-            local configInfo = C_Traits.GetConfigInfo(configID)
-            if configInfo then
-              local treeIDs = configInfo.treeIDs
-              if treeIDs then
-                for _, treeID in pairs(treeIDs) do
-                  local treeNodes = C_Traits.GetTreeNodes(treeID)
-                  if treeNodes then
-                    for _, treeNode in pairs(treeNodes) do
-                      local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
-                      if nodeInfo then
-                        characterProfession.knowledgeLevel = nodeInfo.ranksPurchased > 1 and characterProfession.knowledgeLevel + (nodeInfo.currentRank - 1) or characterProfession.knowledgeLevel
-                        characterProfession.knowledgeMaxLevel = characterProfession.knowledgeMaxLevel + (nodeInfo.maxRanks - 1)
-                      end
-                    end
-                  end
-                end
-              end
-            end
-          end
+    local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+      return dataProfession.skillLineID == skillLineID and dataProfession.spellID and IsPlayerSpell(dataProfession.spellID)
+    end)
+    if not dataProfession then return end
 
-          table.insert(character.professions, characterProfession)
+    local characterProfession = {
+      skillLineID = skillLineID,
+      level = skillLevel,
+      maxLevel = maxSkillLevel,
+      knowledgeLevel = 0,
+      knowledgeMaxLevel = 0,
+    }
+
+    -- Scan knowledge spent/max
+    local configID = C_ProfSpecs.GetConfigIDForSkillLine(dataProfession.skillLineVariantID)
+    if configID and configID > 0 then
+      local configInfo = C_Traits.GetConfigInfo(configID)
+      if configInfo then
+        local treeIDs = configInfo.treeIDs
+        if treeIDs then
+          Utils:TableForEach(treeIDs, function(treeID)
+            local treeNodes = C_Traits.GetTreeNodes(treeID)
+            if not treeNodes then return end
+            Utils:TableForEach(treeNodes, function(treeNode)
+              local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
+              if not nodeInfo then return end
+              characterProfession.knowledgeLevel = nodeInfo.ranksPurchased > 1 and characterProfession.knowledgeLevel + (nodeInfo.currentRank - 1) or characterProfession.knowledgeLevel
+              characterProfession.knowledgeMaxLevel = characterProfession.knowledgeMaxLevel + (nodeInfo.maxRanks - 1)
+            end)
+          end)
         end
       end
     end
-  end
+
+    table.insert(character.professions, characterProfession)
+  end)
 
   -- Quest tracking
-  for _, dataProfession in ipairs(Data.Professions) do
-    if dataProfession.objectives then
-      for _, objective in ipairs(dataProfession.objectives) do
-        if objective.quests then
-          for _, questID in ipairs(objective.quests) do
-            if C_QuestLog.IsQuestFlaggedCompleted(questID) then
-              character.completed[questID] = true
-            end
-          end
+  Utils:TableForEach(Data.Professions, function(dataProfession)
+    if not dataProfession.objectives then return end
+    Utils:TableForEach(dataProfession.objectives, function(objective)
+      if not objective.quests then return end
+      Utils:TableForEach(objective.quests, function(questID)
+        if C_QuestLog.IsQuestFlaggedCompleted(questID) then
+          character.completed[questID] = true
         end
-      end
-    end
-  end
+      end)
+    end)
+  end)
 
+  -- Let's not track a character without a TWW profession
   if Utils:TableCount(character.professions) < 1 then
     self.db.global.characters[character.GUID] = nil
   end
 end
 
 function Data:GetCharacters(unfiltered)
-  local characters = {}
-  for characterGUID, character in pairs(self.db.global.characters) do
+  local characters = Utils:TableFilter(self.db.global.characters, function(character)
     local include = true
     if not unfiltered then
       if not character.enabled then
@@ -584,10 +581,8 @@ function Data:GetCharacters(unfiltered)
       end
     end
 
-    if include then
-      table.insert(characters, character)
-    end
-  end
+    return include
+  end)
 
   table.sort(characters, function(a, b)
     return a.lastUpdate > b.lastUpdate
