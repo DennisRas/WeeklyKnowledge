@@ -17,7 +17,8 @@ local MAX_WINDOW_HEIGHT = 600
 
 function UI:GetColumns(unfiltered)
   local hidden = Data.db.global.hiddenColumns
-  local columns = {
+  ---@type WK_DataColumn[]
+  local dataColumns = {
     {
       name = "Name",
       onEnter = function(cellFrame)
@@ -32,7 +33,7 @@ function UI:GetColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
-      cell = function(character, characterProfession, dataProfession)
+      cell = function(character)
         local characterName = character.name
         local _, classFile = GetClassInfo(character.classID)
         if classFile then
@@ -58,7 +59,7 @@ function UI:GetColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
-      cell = function(character, characterProfession, dataProfession)
+      cell = function(character)
         return {text = character.realmName}
       end,
     },
@@ -76,7 +77,7 @@ function UI:GetColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 80,
-      cell = function(character, characterProfession, dataProfession)
+      cell = function(_, _, dataProfession)
         return {text = dataProfession.name}
       end,
     },
@@ -95,7 +96,7 @@ function UI:GetColumns(unfiltered)
       end,
       width = 80,
       align = "CENTER",
-      cell = function(character, characterProfession, dataProfession)
+      cell = function(_, characterProfession)
         return {text = characterProfession.level > 0 and characterProfession.level == characterProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.level .. " / " .. characterProfession.maxLevel) or characterProfession.level .. " / " .. characterProfession.maxLevel}
       end,
     },
@@ -114,7 +115,7 @@ function UI:GetColumns(unfiltered)
       end,
       width = 80,
       align = "CENTER",
-      cell = function(character, characterProfession, dataProfession)
+      cell = function(_, characterProfession)
         if characterProfession.knowledgeMaxLevel > 0 then
           return {text = characterProfession.knowledgeLevel > 0 and characterProfession.knowledgeLevel == characterProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel) or characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel}
         end
@@ -124,8 +125,8 @@ function UI:GetColumns(unfiltered)
   }
 
   Utils:TableForEach(Data.Objectives, function(dataObjective)
-    -- for _, dataObjective in ipairs(Data.Objectives) do
-    table.insert(columns, {
+    ---@type WK_DataColumn
+    local dataColumn = {
       name = dataObjective.name,
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
@@ -233,15 +234,15 @@ function UI:GetColumns(unfiltered)
           }
         end
       end
-    })
-    -- end
+    }
+    table.insert(dataColumns, dataColumn)
   end)
 
   if unfiltered then
-    return columns
+    return dataColumns
   end
 
-  local filteredColumns = Utils:TableFilter(columns, function(column)
+  local filteredColumns = Utils:TableFilter(dataColumns, function(column)
     return not hidden[column.name]
   end)
 
@@ -259,9 +260,10 @@ function UI:ToggleWindow()
 end
 
 function UI:Render()
-  local columns = self:GetColumns()
+  local dataColumns = self:GetColumns()
   local tableWidth = 0
   local tableHeight = 0
+  ---@type WK_TableData
   local tableData = {
     columns = {},
     rows = {}
@@ -475,11 +477,10 @@ function UI:Render()
           rootMenu:CreateCheckbox(
             text,
             function() return character.enabled or false end,
-            function(data)
-              Data.db.global.characters[data].enabled = not Data.db.global.characters[data].enabled
+            function()
+              character.enabled = not character.enabled
               self:Render()
-            end,
-            character.GUID
+            end
           )
         end)
       end)
@@ -509,8 +510,8 @@ function UI:Render()
           rootMenu:CreateCheckbox(
             column.name,
             function() return not hidden[column.name] end,
-            function(data)
-              Data.db.global.hiddenColumns[data] = not Data.db.global.hiddenColumns[data]
+            function(columnName)
+              hidden[columnName] = not hidden[columnName]
               self:Render()
             end,
             column.name
@@ -545,25 +546,28 @@ function UI:Render()
   end
 
   do -- Column config
-    Utils:TableForEach(columns, function(column)
-      table.insert(tableData.columns, {
-        width = column.width,
-        align = column.align or "LEFT",
-      })
-      tableWidth = tableWidth + column.width
+    Utils:TableForEach(dataColumns, function(dataColumn)
+      ---@type WK_TableDataColumn
+      local column = {
+        width = dataColumn.width,
+        align = dataColumn.align or "LEFT",
+      }
+      table.insert(tableData.columns, column)
+      tableWidth = tableWidth + dataColumn.width
     end)
   end
 
   do -- Header row
-    local row = {
-      columns = {}
-    }
-    Utils:TableForEach(columns, function(column)
-      table.insert(row.columns, {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.name),
-        onEnter = column.onEnter,
-        onLeave = column.onLeave,
-      })
+    ---@type WK_TableDataRow
+    local row = {columns = {}}
+    Utils:TableForEach(dataColumns, function(dataColumn)
+      ---@type WK_TableDataCell
+      local cell = {
+        text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.name),
+        onEnter = dataColumn.onEnter,
+        onLeave = dataColumn.onLeave,
+      }
+      table.insert(row.columns, cell)
     end)
     table.insert(tableData.rows, row)
     tableHeight = tableHeight + self.frame.table.config.header.height
@@ -571,6 +575,7 @@ function UI:Render()
 
   Utils:TableForEach(Data:GetCharacters(), function(character)
     Utils:TableForEach(character.professions, function(characterProfession)
+      ---@type WK_TableDataRow
       local row = {columns = {}}
 
       local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
@@ -578,8 +583,10 @@ function UI:Render()
       end)
       if not dataProfession then return end
 
-      Utils:TableForEach(columns, function(column)
-        table.insert(row.columns, column.cell(character, characterProfession, dataProfession))
+      Utils:TableForEach(dataColumns, function(dataColumn)
+        ---@type WK_TableDataCell
+        local cell = dataColumn.cell(character, characterProfession, dataProfession)
+        table.insert(row.columns, cell)
       end)
 
       table.insert(tableData.rows, row)
@@ -694,6 +701,7 @@ function UI:CreateTableFrame(config)
         padding = 8,
         highlight = false
       },
+      ---@type WK_TableData
       data = {
         columns = {},
         rows = {},
@@ -751,8 +759,8 @@ function UI:CreateTableFrame(config)
         if rowIndex > 1 then
           self:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
-        if row.OnEnter then
-          row:OnEnter(arg1, arg2, arg3)
+        if row.onEnter then
+          row:onEnter(arg1, arg2, arg3)
         end
       end
 
@@ -760,14 +768,14 @@ function UI:CreateTableFrame(config)
         if rowIndex > 1 then
           self:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
-        if row.OnLeave then
-          row:OnLeave(...)
+        if row.onLeave then
+          row:onLeave(...)
         end
       end
 
       function rowFrame:onClickHandler(...)
-        if row.OnClick then
-          row:OnClick(...)
+        if row.onClick then
+          row:onClick(...)
         end
       end
 

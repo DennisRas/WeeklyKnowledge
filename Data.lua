@@ -10,15 +10,18 @@ local AceDB = LibStub("AceDB-3.0")
 local Data = {}
 addon.Data = Data
 
+---@type WK_DataCache
 Data.cache = {
   isDarkmoonOpen = false,
   items = {},
 }
 
-Data.DBVersion = 3
+Data.DBVersion = 4
 Data.defaultDB = {
   ---@type WK_DefaultDBGlobal
   global = {
+    DBVersion = Data.DBVersion,
+    weeklyReset = 0,
     minimap = {
       minimapPos = 235,
       hide = false,
@@ -45,12 +48,13 @@ Data.defaultCharacter = {
   raceEnglish = "",
   raceName = "",
   classID = 0,
-  classFile = "",
+  classFile = nil,
   className = "",
   professions = {},
   completed = {},
 }
 
+---@type table<string, WK_Objective>
 Data.Objectives = {
   Unique = {
     name = "Uniques",
@@ -96,6 +100,7 @@ Data.Objectives = {
   },
 }
 
+---@type WK_Profession[]
 Data.Professions = {
   {
     name = "Alchemy",
@@ -390,7 +395,7 @@ Data.Professions = {
 -- TODO: Add field type for defaultDB
 function Data:InitDB()
   ---@class AceDBObject-3.0
-  ---@field global table
+  ---@field global WK_DefaultDBGlobal
   self.db = AceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
@@ -400,7 +405,7 @@ end
 
 function Data:MigrateDB()
   if type(self.db.global.DBVersion) ~= "number" then
-    self.db.global.DBVersion = 1
+    self.db.global.DBVersion = self.DBVersion
   end
   if self.db.global.DBVersion < self.DBVersion then
     -- Old version to new data structure
@@ -409,12 +414,16 @@ function Data:MigrateDB()
         character.GUID = characterGUID
         character.lastUpdate = 0
         character.enabled = true
+        ---@diagnostic disable-next-line: undefined-field
         character.classID = character.class
+        ---@diagnostic disable-next-line: undefined-field
         character.realmName = character.realm
+        ---@diagnostic disable-next-line: inject-field
         character.color = nil
 
         local remove = true
         for _, characterProfession in pairs(character.professions) do
+          ---@diagnostic disable-next-line: undefined-field
           if characterProfession.latestExpansion then
             remove = false
           end
@@ -438,7 +447,7 @@ function Data:MigrateDB()
 end
 
 function Data:TaskWeeklyReset()
-  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= time() then
+  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset > 0 and self.db.global.weeklyReset <= time() then
     Utils:TableForEach(self.db.global.characters, function(character)
       wipe(character.completed or {})
     end)
@@ -465,7 +474,7 @@ end
 
 ---Get stored character by GUID
 ---@param GUID WOWGUID?
----@return table|nil
+---@return WK_Character|nil
 function Data:GetCharacter(GUID)
   if GUID == nil then
     GUID = UnitGUID("player")
@@ -492,7 +501,6 @@ function Data:ScanCharacter()
   local localizedRaceName, englishRaceName, raceID = UnitRace("player")
   local localizedClassName, classFile, classID = UnitClass("player")
   local englishFactionName, localizedFactionName = UnitFactionGroup("player")
-  character.GUID = UnitGUID("player")
   character.name = UnitName("player")
   character.realmName = GetRealmName()
   character.level = UnitLevel("player")
@@ -521,6 +529,7 @@ function Data:ScanCharacter()
     end)
     if not dataProfession then return end
 
+    ---@type WK_CharacterProfession
     local characterProfession = {
       skillLineID = skillLineID,
       level = skillLevel,
@@ -572,6 +581,9 @@ function Data:ScanCharacter()
   end
 end
 
+---Get characters
+---@param unfiltered boolean?
+---@return WK_Character[]
 function Data:GetCharacters(unfiltered)
   local characters = Utils:TableFilter(self.db.global.characters, function(character)
     local include = true
