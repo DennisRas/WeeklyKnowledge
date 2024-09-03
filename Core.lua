@@ -5,6 +5,7 @@ local addon = select(2, ...)
 
 local Data = addon.Data
 local UI = addon.UI
+local Main = addon.Main
 
 --@debug@
 _G.WK = addon
@@ -18,8 +19,8 @@ addon.Core = Core
 
 function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
-  self:RegisterChatCommand("wk", UI.ToggleWindow)
-  self:RegisterChatCommand("weeklyknowledge", UI.ToggleWindow)
+  self:RegisterChatCommand("wk", Main.ToggleWindow)
+  self:RegisterChatCommand("weeklyknowledge", Main.ToggleWindow)
 
   Data:InitDB()
   Data:MigrateDB()
@@ -30,7 +31,7 @@ function Core:OnInitialize()
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
-      UI:ToggleWindow()
+      Main:ToggleWindow()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
@@ -46,6 +47,8 @@ function Core:OnInitialize()
   LibDataBroker:NewDataObject(addonName, libDataObject)
   LibDBIcon:Register(addonName, libDataObject, Data.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
+
+  UI:Render()
 end
 
 function Core:OnEnable()

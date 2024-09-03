@@ -1,12 +1,28 @@
----@class WK_DefaultDBGlobal
+---@class WK_DefaultGlobal
 ---@field DBVersion integer
 ---@field weeklyReset integer
 ---@field minimap {minimapPos: number, hide: boolean, lock: boolean }
+---@field characters table<string, WK_Character>
+---@field main WK_DefaultGlobalMain
+---@field checklist WK_DefaultGlobalhecklist
+
+---@class WK_DefaultGlobalMain
 ---@field hiddenColumns table<string, boolean>
 ---@field windowScale integer
 ---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
----@field characters table<string, WK_Character>
+---@field windowBorder boolean Show the border?
+---@field fontSize integer?
 ---@field checklistHelpTipClosed boolean?
+
+---@class WK_DefaultGlobalhecklist
+---@field hiddenColumns table<string, boolean>
+---@field windowScale integer
+---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
+---@field windowBorder boolean Show the border?
+---@field fontSize integer?
+---@field open boolean
+---@field hideCompletedObjectives boolean
+---@field hideInCombat boolean
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID

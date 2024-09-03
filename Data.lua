@@ -16,9 +16,9 @@ Data.cache = {
   items = {},
 }
 
-Data.DBVersion = 4
+Data.DBVersion = 5
 Data.defaultDB = {
-  ---@type WK_DefaultDBGlobal
+  ---@type WK_DefaultGlobal
   global = {
     DBVersion = Data.DBVersion,
     weeklyReset = 0,
@@ -27,10 +27,23 @@ Data.defaultDB = {
       hide = false,
       lock = false
     },
-    hiddenColumns = {},
-    windowScale = 100,
-    windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
     characters = {},
+    main = {
+      hiddenColumns = {},
+      windowScale = 100,
+      windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
+      windowBorder = true,
+      checklistHelpTipClosed = false,
+    },
+    checklist = {
+      open = false,
+      hiddenColumns = {},
+      windowScale = 100,
+      windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
+      windowBorder = true,
+      hideCompletedObjectives = false,
+      hideInCombat = false,
+    },
   }
 }
 
@@ -395,7 +408,7 @@ Data.Professions = {
 -- TODO: Add field type for defaultDB
 function Data:InitDB()
   ---@class AceDBObject-3.0
-  ---@field global WK_DefaultDBGlobal
+  ---@field global WK_DefaultGlobal
   self.db = AceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
@@ -440,6 +453,33 @@ function Data:MigrateDB()
           self.db.global.characters[""] = nil
         end
       end
+    end
+    -- Add new window settings
+    if self.db.global.DBVersion == 4 then
+      self.db.global.main = {
+        hiddenColumns = Utils:TableCopy(self.db.global.hiddenColumns),
+        ---@diagnostic disable-next-line: undefined-field
+        windowScale = self.db.global.windowScale,
+        ---@diagnostic disable-next-line: undefined-field
+        windowBackgroundColor = self.db.global.windowBackgroundColor,
+        windowBorder = true,
+        checklistHelpTipClosed = false,
+      }
+      self.db.global.checklist = {
+        open = false,
+        hiddenColumns = {},
+        windowScale = 100,
+        windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
+        windowBorder = true,
+        hideCompletedObjectives = false,
+        hideInCombat = false,
+      }
+      ---@diagnostic disable-next-line: inject-field
+      self.db.global.hiddenColumns = nil
+      ---@diagnostic disable-next-line: inject-field
+      self.db.global.windowScale = nil
+      ---@diagnostic disable-next-line: inject-field
+      self.db.global.windowBackgroundColor = nil
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()

@@ -11,6 +11,9 @@
         "MenuUtil",
         "ColorPickerFrame",
         "GameTooltip_AddNormalLine",
-        "GameTooltip_SetTitle"
+        "GameTooltip_SetTitle",
+        "ChatFrame_OpenChat",
+        "ChatEdit_InsertLink",
+        "HelpTip"
     ]
 }
