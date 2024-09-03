@@ -150,8 +150,8 @@ function Main:Render()
           GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
         end)
 
-        local interfaceTitle = rootMenu:CreateTitle("Interface")
-        local windowScale = rootMenu:CreateButton("Window scale")
+        local interfaceTitle = rootMenu:CreateTitle("Window")
+        local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
@@ -197,11 +197,20 @@ function Main:Render()
           hasOpacity = 1,
         }
         rootMenu:CreateColorSwatch(
-          "Window color",
+          "Background color",
           function()
             ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
           end,
           colorInfo
+        )
+
+        rootMenu:CreateCheckbox(
+          "Show the border",
+          function() return Data.db.global.main.windowBorder end,
+          function()
+            Data.db.global.main.windowBorder = not Data.db.global.main.windowBorder
+            self:Render()
+          end
         )
       end)
 
@@ -415,6 +424,7 @@ function Main:Render()
     end)
   end)
 
+  self.frame.border:SetShown(Data.db.global.main.windowBorder)
   self.frame.table:SetData(tableData)
   self.frame:SetWidth(tableWidth)
   self.frame:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT))
