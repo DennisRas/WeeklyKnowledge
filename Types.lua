@@ -6,6 +6,7 @@
 ---@field windowScale integer
 ---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
 ---@field characters table<string, WK_Character>
+---@field checklistHelpTipClosed boolean?
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID
