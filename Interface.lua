@@ -1,23 +1,9 @@
 ---@type string
 local addonName = select(1, ...)
----@class WK_Addon
-local addon = select(2, ...)
+local WK = _G.WeeklyKnowledge
+local TableCollection = {}
 
-local Utils = addon.Utils
-local Data = addon.Data
-local Main = addon.Main
-local Checklist = addon.Checklist
-
----@class WK_UI
-local UI = {}
-addon.UI = UI
-
-function UI:Render()
-  Main:Render()
-  Checklist:Render()
-end
-
-function UI:CreateScrollFrame(name, parent)
+function WK:CreateScrollFrame(name, parent)
   local frame = CreateFrame("ScrollFrame", name, parent)
   frame.content = CreateFrame("Frame", "$parentContent", frame)
   frame.scrollbarH = CreateFrame("Slider", "$parentScrollbarH", frame, "UISliderTemplate")
@@ -94,9 +80,8 @@ function UI:CreateScrollFrame(name, parent)
   return frame
 end
 
-local TableCollection = {}
-function UI:CreateTableFrame(config)
-  local frame = self:CreateScrollFrame("WeeklyKnowledgeTable" .. (Utils:TableCount(TableCollection) + 1))
+function WK:CreateTableFrame(config)
+  local frame = self:CreateScrollFrame("WeeklyKnowledgeTable" .. (self:TableCount(TableCollection) + 1))
   frame.config = CreateFromMixins(
     {
       header = {
@@ -144,8 +129,8 @@ function UI:CreateTableFrame(config)
     local offsetY = 0
     local offsetX = 0
 
-    Utils:TableForEach(frame.rows, function(rowFrame) rowFrame:Hide() end)
-    Utils:TableForEach(frame.data.rows, function(row, rowIndex)
+    WK:TableForEach(frame.rows, function(rowFrame) rowFrame:Hide() end)
+    WK:TableForEach(frame.data.rows, function(row, rowIndex)
       local rowFrame = frame.rows[rowIndex]
       local rowHeight = frame.config.rows.height
       if rowIndex == 1 and frame.config.header.enabled then
@@ -168,16 +153,16 @@ function UI:CreateTableFrame(config)
       rowFrame:Show()
 
       if frame.config.rows.striped and rowIndex % 2 == 1 then
-        Utils:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
+        WK:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
       end
 
       if row.backgroundColor then
-        Utils:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
+        WK:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
       end
 
       function rowFrame:onEnterHandler(f)
         if rowIndex > 1 or not frame.config.header.enabled then
-          Utils:SetHighlightColor(rowFrame, 1, 1, 1, .03)
+          WK:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
         if row.onEnter then
           row:onEnter(f)
@@ -186,7 +171,7 @@ function UI:CreateTableFrame(config)
 
       function rowFrame:onLeaveHandler(f)
         if rowIndex > 1 or not frame.config.header.enabled then
-          Utils:SetHighlightColor(rowFrame, 1, 1, 1, 0)
+          WK:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
         if row.onLeave then
           row:onLeave(f)
@@ -208,13 +193,13 @@ function UI:CreateTableFrame(config)
           rowFrame:SetFrameStrata("HIGH")
         end
         if not row.backgroundColor then
-          Utils:SetBackgroundColor(rowFrame, 0.0784, 0.0980, 0.1137, 1)
+          WK:SetBackgroundColor(rowFrame, 0.0784, 0.0980, 0.1137, 1)
         end
       end
 
       offsetX = 0
-      Utils:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
-      Utils:TableForEach(row.columns, function(column, columnIndex)
+      WK:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
+      WK:TableForEach(row.columns, function(column, columnIndex)
         local columnFrame = rowFrame.columns[columnIndex]
         local columnConfig = frame.data.columns[columnIndex]
         local columnWidth = columnConfig and columnConfig.width or frame.config.columns.width
@@ -242,7 +227,7 @@ function UI:CreateTableFrame(config)
         columnFrame:Show()
 
         if column.backgroundColor then
-          Utils:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
+          WK:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
         end
 
         function columnFrame:onEnterHandler(f)

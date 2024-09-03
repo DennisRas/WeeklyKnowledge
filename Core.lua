@@ -1,29 +1,21 @@
 ---@type string
 local addonName = select(1, ...)
----@class WK_Addon
-local addon = select(2, ...)
-
-local Data = addon.Data
-local UI = addon.UI
-local Main = addon.Main
-
---@debug@
-_G.WK = addon
---@end-debug@
-
+local WK = _G.WeeklyKnowledge
 local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibDBIcon = LibStub("LibDBIcon-1.0")
 
-local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
-addon.Core = Core
+function WK:Render()
+  self:RenderMain()
+  self:RenderChecklist()
+end
 
-function Core:OnInitialize()
+function WK:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
-  self:RegisterChatCommand("wk", Main.ToggleWindow)
-  self:RegisterChatCommand("weeklyknowledge", Main.ToggleWindow)
+  self:RegisterChatCommand("wk", self.ToggleMainWindow)
+  self:RegisterChatCommand("weeklyknowledge", self.ToggleMainWindow)
 
-  Data:InitDB()
-  Data:MigrateDB()
+  self:InitDB()
+  self:MigrateDB()
 
   local libDataObject = {
     label = addonName,
@@ -31,13 +23,13 @@ function Core:OnInitialize()
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
-      Main:ToggleWindow()
+      self:ToggleMainWindow()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
       tooltip:AddLine("Click to open WeeklyKnowledge", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
       local dragText = "Drag to move this icon"
-      if Data.db.global.minimap.lock then
+      if self.db.global.minimap.lock then
         dragText = dragText .. " |cffff0000(locked)|r"
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
@@ -45,13 +37,13 @@ function Core:OnInitialize()
   }
 
   LibDataBroker:NewDataObject(addonName, libDataObject)
-  LibDBIcon:Register(addonName, libDataObject, Data.db.global.minimap)
+  LibDBIcon:Register(addonName, libDataObject, self.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
 
-  UI:Render()
+  self:Render()
 end
 
-function Core:OnEnable()
+function WK:OnEnable()
   self:RegisterBucketEvent(
     {
       "ACTIVE_TALENT_GROUP_CHANGED",
@@ -68,24 +60,24 @@ function Core:OnEnable()
     },
     3,
     function()
-      Data:ScanCharacter()
-      UI:Render()
+      self:ScanCharacter()
+      self:Render()
     end
   )
 
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
-    Data:ScanCalendar()
-    UI:Render()
+    self:ScanCalendar()
+    self:Render()
   end)
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
   C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
   C_Calendar.OpenCalendar()
 
-  Data:ScanCharacter()
-  UI:Render()
+  self:ScanCharacter()
+  self:Render()
 end
 
-function Core:OnDisable()
+function WK:OnDisable()
   self:UnregisterAllEvents()
   self:UnregisterAllBuckets()
 end

@@ -1,26 +1,18 @@
 ---@type string
 local addonName = select(1, ...)
----@class WK_Addon
-local addon = select(2, ...)
-
-local Utils = addon.Utils
+local WK = _G.WeeklyKnowledge
 local AceDB = LibStub("AceDB-3.0")
 
----@class WK_Data
-local Data = {}
-addon.Data = Data
-
 ---@type WK_DataCache
-Data.cache = {
+WK.cache = {
   isDarkmoonOpen = false,
   items = {},
 }
 
-Data.DBVersion = 5
-Data.defaultDB = {
+WK.DBVersion = 3
+WK.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
-    DBVersion = Data.DBVersion,
     weeklyReset = 0,
     minimap = {
       minimapPos = 235,
@@ -48,7 +40,7 @@ Data.defaultDB = {
 }
 
 ---@type WK_Character
-Data.defaultCharacter = {
+WK.defaultCharacter = {
   enabled = true,
   lastUpdate = 0,
   GUID = "",
@@ -68,7 +60,7 @@ Data.defaultCharacter = {
 }
 
 ---@type table<string, WK_Objective>
-Data.Objectives = {
+WK.Objectives = {
   Unique = {
     name = "Uniques",
     description = "These are one-time knowledge point items found in treasures around the world and sold by Artisan/Renown/Kej vendors.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("No"),
@@ -114,31 +106,31 @@ Data.Objectives = {
 }
 
 ---@type WK_Profession[]
-Data.Professions = {
+WK.Professions = {
   {
     name = "Alchemy",
     skillLineID = 171,
     skillLineVariantID = 2871,
     spellID = 423321,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {81146}, itemID = 227409, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81147}, itemID = 227420, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81148}, itemID = 227431, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82633}, itemID = 224024, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83058}, itemID = 224645, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83840}, itemID = 226265, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83841}, itemID = 226266, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83842}, itemID = 226267, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83843}, itemID = 226268, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83844}, itemID = 226269, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83845}, itemID = 226270, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83846}, itemID = 226271, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83847}, itemID = 226272, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83725}, itemID = 222546, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84133}, itemID = 228773, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83253}, itemID = 225234, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83255}, itemID = 225235, points = 2},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29506}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {81146}, itemID = 227409, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81147}, itemID = 227420, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81148}, itemID = 227431, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82633}, itemID = 224024, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83058}, itemID = 224645, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83840}, itemID = 226265, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83841}, itemID = 226266, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83842}, itemID = 226267, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83843}, itemID = 226268, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83844}, itemID = 226269, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83845}, itemID = 226270, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83846}, itemID = 226271, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83847}, itemID = 226272, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83725}, itemID = 222546, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84133}, itemID = 228773, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83253}, itemID = 225234, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83255}, itemID = 225235, points = 2},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29506}, itemID = 0,      points = 3},
     }
   },
   {
@@ -147,24 +139,24 @@ Data.Professions = {
     skillLineVariantID = 2872,
     spellID = 423332,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {82631}, itemID = 224038, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83059}, itemID = 224647, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83848}, itemID = 226276, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83849}, itemID = 226277, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83850}, itemID = 226278, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83851}, itemID = 226279, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83852}, itemID = 226280, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83853}, itemID = 226281, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83854}, itemID = 226282, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83855}, itemID = 226283, points = 3},
-      {category = Data.Objectives.Unique,        quests = {84226}, itemID = 227407, points = 10},
-      {category = Data.Objectives.Unique,        quests = {84227}, itemID = 227418, points = 10},
-      {category = Data.Objectives.Unique,        quests = {84228}, itemID = 227429, points = 10},
-      {category = Data.Objectives.Treatise,      quests = {83726}, itemID = 222554, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84127}, itemID = 228774, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83256}, itemID = 225233, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83257}, itemID = 225232, points = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29508}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {82631}, itemID = 224038, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83059}, itemID = 224647, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83848}, itemID = 226276, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83849}, itemID = 226277, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83850}, itemID = 226278, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83851}, itemID = 226279, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83852}, itemID = 226280, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83853}, itemID = 226281, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83854}, itemID = 226282, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83855}, itemID = 226283, points = 3},
+      {category = WK.Objectives.Unique,        quests = {84226}, itemID = 227407, points = 10},
+      {category = WK.Objectives.Unique,        quests = {84227}, itemID = 227418, points = 10},
+      {category = WK.Objectives.Unique,        quests = {84228}, itemID = 227429, points = 10},
+      {category = WK.Objectives.Treatise,      quests = {83726}, itemID = 222554, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84127}, itemID = 228774, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83256}, itemID = 225233, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83257}, itemID = 225232, points = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29508}, itemID = 0,      points = 3},
     }
   },
   {
@@ -173,26 +165,26 @@ Data.Professions = {
     skillLineVariantID = 2874,
     spellID = 423334,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {81076},                             itemID = 227411, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81077},                             itemID = 227422, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81078},                             itemID = 227433, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82635},                             itemID = 224050, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83060},                             itemID = 224652, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83856},                             itemID = 226284, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83859},                             itemID = 226285, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83860},                             itemID = 226286, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83861},                             itemID = 226287, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83862},                             itemID = 226288, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83863},                             itemID = 226289, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83864},                             itemID = 226290, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83865},                             itemID = 226291, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83727},                             itemID = 222550, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83258},                             itemID = 225231, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83259},                             itemID = 225230, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {84290, 84291, 84292, 84293, 84294}, itemID = 227659, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {84295},                             itemID = 227661, points = 4},
-      {category = Data.Objectives.TrainerQuest,  quests = {84084, 84085, 84086},               itemID = 227667, points = 3, limit = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29510},                             itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {81076},                             itemID = 227411, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81077},                             itemID = 227422, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81078},                             itemID = 227433, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82635},                             itemID = 224050, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83060},                             itemID = 224652, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83856},                             itemID = 226284, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83859},                             itemID = 226285, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83860},                             itemID = 226286, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83861},                             itemID = 226287, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83862},                             itemID = 226288, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83863},                             itemID = 226289, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83864},                             itemID = 226290, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83865},                             itemID = 226291, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83727},                             itemID = 222550, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83258},                             itemID = 225231, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83259},                             itemID = 225230, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {84290, 84291, 84292, 84293, 84294}, itemID = 227659, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {84295},                             itemID = 227661, points = 4},
+      {category = WK.Objectives.TrainerQuest,  quests = {84084, 84085, 84086},               itemID = 227667, points = 3, limit = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29510},                             itemID = 0,      points = 3},
     }
   },
   {
@@ -201,24 +193,24 @@ Data.Professions = {
     skillLineVariantID = 2875,
     spellID = 423335,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {82632}, itemID = 224052, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83063}, itemID = 224653, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83866}, itemID = 226292, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83867}, itemID = 226293, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83868}, itemID = 226294, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83869}, itemID = 226295, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83870}, itemID = 226296, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83871}, itemID = 226297, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83872}, itemID = 226298, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83873}, itemID = 226299, points = 3},
-      {category = Data.Objectives.Unique,        quests = {84229}, itemID = 227412, points = 10},
-      {category = Data.Objectives.Unique,        quests = {84230}, itemID = 227423, points = 10},
-      {category = Data.Objectives.Unique,        quests = {84231}, itemID = 227434, points = 10},
-      {category = Data.Objectives.Treatise,      quests = {83728}, itemID = 222621, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84128}, itemID = 228775, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83260}, itemID = 225228, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83261}, itemID = 225229, points = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29511}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {82632}, itemID = 224052, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83063}, itemID = 224653, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83866}, itemID = 226292, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83867}, itemID = 226293, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83868}, itemID = 226294, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83869}, itemID = 226295, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83870}, itemID = 226296, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83871}, itemID = 226297, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83872}, itemID = 226298, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83873}, itemID = 226299, points = 3},
+      {category = WK.Objectives.Unique,        quests = {84229}, itemID = 227412, points = 10},
+      {category = WK.Objectives.Unique,        quests = {84230}, itemID = 227423, points = 10},
+      {category = WK.Objectives.Unique,        quests = {84231}, itemID = 227434, points = 10},
+      {category = WK.Objectives.Treatise,      quests = {83728}, itemID = 222621, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84128}, itemID = 228775, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83260}, itemID = 225228, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83261}, itemID = 225229, points = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29511}, itemID = 0,      points = 3},
     }
   },
   {
@@ -227,24 +219,24 @@ Data.Professions = {
     skillLineVariantID = 2877,
     spellID = 441327,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {81422},                             itemID = 227415, points = 15},
-      {category = Data.Objectives.Unique,        quests = {81423},                             itemID = 227426, points = 15},
-      {category = Data.Objectives.Unique,        quests = {81424},                             itemID = 227437, points = 15},
-      {category = Data.Objectives.Unique,        quests = {82630},                             itemID = 224023, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83066},                             itemID = 224656, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83874},                             itemID = 226300, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83875},                             itemID = 226301, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83876},                             itemID = 226302, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83877},                             itemID = 226303, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83878},                             itemID = 226304, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83879},                             itemID = 226305, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83880},                             itemID = 226306, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83881},                             itemID = 226307, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83729},                             itemID = 222552, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {81416, 81417, 81418, 81419, 81420}, itemID = 224264, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {81421},                             itemID = 224265, points = 4},
-      {category = Data.Objectives.TrainerQuest,  quests = {82970, 82958, 82965, 82916, 82962}, itemID = 224817, points = 3, limit = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29514},                             itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {81422},                             itemID = 227415, points = 15},
+      {category = WK.Objectives.Unique,        quests = {81423},                             itemID = 227426, points = 15},
+      {category = WK.Objectives.Unique,        quests = {81424},                             itemID = 227437, points = 15},
+      {category = WK.Objectives.Unique,        quests = {82630},                             itemID = 224023, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83066},                             itemID = 224656, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83874},                             itemID = 226300, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83875},                             itemID = 226301, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83876},                             itemID = 226302, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83877},                             itemID = 226303, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83878},                             itemID = 226304, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83879},                             itemID = 226305, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83880},                             itemID = 226306, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83881},                             itemID = 226307, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83729},                             itemID = 222552, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {81416, 81417, 81418, 81419, 81420}, itemID = 224264, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {81421},                             itemID = 224265, points = 4},
+      {category = WK.Objectives.TrainerQuest,  quests = {82970, 82958, 82965, 82916, 82962}, itemID = 224817, points = 3, limit = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29514},                             itemID = 0,      points = 3},
     }
   },
   {
@@ -253,24 +245,24 @@ Data.Professions = {
     skillLineVariantID = 2878,
     spellID = 423338,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {80749}, itemID = 227408, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80750}, itemID = 227419, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80751}, itemID = 227430, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82636}, itemID = 224053, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83064}, itemID = 224654, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83882}, itemID = 226308, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83883}, itemID = 226309, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83884}, itemID = 226310, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83885}, itemID = 226311, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83886}, itemID = 226312, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83887}, itemID = 226313, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83888}, itemID = 226314, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83889}, itemID = 226315, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83730}, itemID = 222548, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84129}, itemID = 228776, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83262}, itemID = 225227, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83264}, itemID = 225226, points = 2},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29515}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {80749}, itemID = 227408, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80750}, itemID = 227419, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80751}, itemID = 227430, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82636}, itemID = 224053, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83064}, itemID = 224654, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83882}, itemID = 226308, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83883}, itemID = 226309, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83884}, itemID = 226310, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83885}, itemID = 226311, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83886}, itemID = 226312, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83887}, itemID = 226313, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83888}, itemID = 226314, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83889}, itemID = 226315, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83730}, itemID = 222548, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84129}, itemID = 228776, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83262}, itemID = 225227, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83264}, itemID = 225226, points = 2},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29515}, itemID = 0,      points = 3},
     }
   },
   {
@@ -279,24 +271,24 @@ Data.Professions = {
     skillLineVariantID = 2879,
     spellID = 423339,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {81259}, itemID = 227413, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81260}, itemID = 227424, points = 10},
-      {category = Data.Objectives.Unique,        quests = {81261}, itemID = 227435, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82637}, itemID = 224054, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83065}, itemID = 224655, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83890}, itemID = 226316, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83891}, itemID = 226317, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83892}, itemID = 226318, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83893}, itemID = 226319, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83894}, itemID = 226320, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83895}, itemID = 226321, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83896}, itemID = 226322, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83897}, itemID = 226323, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83731}, itemID = 222551, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84130}, itemID = 228777, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83265}, itemID = 225224, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83266}, itemID = 225225, points = 2},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29516}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {81259}, itemID = 227413, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81260}, itemID = 227424, points = 10},
+      {category = WK.Objectives.Unique,        quests = {81261}, itemID = 227435, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82637}, itemID = 224054, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83065}, itemID = 224655, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83890}, itemID = 226316, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83891}, itemID = 226317, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83892}, itemID = 226318, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83893}, itemID = 226319, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83894}, itemID = 226320, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83895}, itemID = 226321, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83896}, itemID = 226322, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83897}, itemID = 226323, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83731}, itemID = 222551, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84130}, itemID = 228777, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83265}, itemID = 225224, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83266}, itemID = 225225, points = 2},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29516}, itemID = 0,      points = 3},
     }
   },
   {
@@ -305,24 +297,24 @@ Data.Professions = {
     skillLineVariantID = 2880,
     spellID = 423340,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {80978}, itemID = 227414, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80979}, itemID = 227425, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80980}, itemID = 227436, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82626}, itemID = 224056, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83068}, itemID = 224658, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83898}, itemID = 226324, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83899}, itemID = 226325, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83900}, itemID = 226326, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83901}, itemID = 226327, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83902}, itemID = 226328, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83903}, itemID = 226329, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83904}, itemID = 226330, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83905}, itemID = 226331, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83732}, itemID = 222549, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84131}, itemID = 228778, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83267}, itemID = 225223, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83268}, itemID = 225222, points = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29517}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {80978}, itemID = 227414, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80979}, itemID = 227425, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80980}, itemID = 227436, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82626}, itemID = 224056, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83068}, itemID = 224658, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83898}, itemID = 226324, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83899}, itemID = 226325, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83900}, itemID = 226326, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83901}, itemID = 226327, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83902}, itemID = 226328, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83903}, itemID = 226329, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83904}, itemID = 226330, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83905}, itemID = 226331, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83732}, itemID = 222549, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84131}, itemID = 228778, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83267}, itemID = 225223, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83268}, itemID = 225222, points = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29517}, itemID = 0,      points = 3},
     }
   },
   {
@@ -331,24 +323,24 @@ Data.Professions = {
     skillLineVariantID = 2881,
     spellID = 423341,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {81390},                             itemID = 227416, points = 15},
-      {category = Data.Objectives.Unique,        quests = {81391},                             itemID = 227427, points = 15},
-      {category = Data.Objectives.Unique,        quests = {81392},                             itemID = 227438, points = 15},
-      {category = Data.Objectives.Unique,        quests = {82614},                             itemID = 224055, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83062},                             itemID = 224651, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83906},                             itemID = 226332, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83907},                             itemID = 226333, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83908},                             itemID = 226334, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83909},                             itemID = 226335, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83910},                             itemID = 226336, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83911},                             itemID = 226337, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83912},                             itemID = 226338, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83913},                             itemID = 226339, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83733},                             itemID = 222553, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {83050, 83051, 83052, 83053, 83054}, itemID = 224583, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {83049},                             itemID = 224584, points = 3},
-      {category = Data.Objectives.TrainerQuest,  quests = {83104, 83105, 83103, 83106, 83102}, itemID = 224818, points = 3, limit = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29518},                             itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {81390},                             itemID = 227416, points = 15},
+      {category = WK.Objectives.Unique,        quests = {81391},                             itemID = 227427, points = 15},
+      {category = WK.Objectives.Unique,        quests = {81392},                             itemID = 227438, points = 15},
+      {category = WK.Objectives.Unique,        quests = {82614},                             itemID = 224055, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83062},                             itemID = 224651, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83906},                             itemID = 226332, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83907},                             itemID = 226333, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83908},                             itemID = 226334, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83909},                             itemID = 226335, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83910},                             itemID = 226336, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83911},                             itemID = 226337, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83912},                             itemID = 226338, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83913},                             itemID = 226339, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83733},                             itemID = 222553, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {83050, 83051, 83052, 83053, 83054}, itemID = 224583, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {83049},                             itemID = 224584, points = 3},
+      {category = WK.Objectives.TrainerQuest,  quests = {83104, 83105, 83103, 83106, 83102}, itemID = 224818, points = 3, limit = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29518},                             itemID = 0,      points = 3},
     }
   },
   {
@@ -357,24 +349,24 @@ Data.Professions = {
     skillLineVariantID = 2882,
     spellID = 423342,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {82596},                             itemID = 224007, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83067},                             itemID = 224657, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83914},                             itemID = 226340, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83915},                             itemID = 226341, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83916},                             itemID = 226342, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83917},                             itemID = 226343, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83918},                             itemID = 226344, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83919},                             itemID = 226345, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83920},                             itemID = 226346, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83921},                             itemID = 226347, points = 3},
-      {category = Data.Objectives.Unique,        quests = {84232},                             itemID = 227417, points = 15},
-      {category = Data.Objectives.Unique,        quests = {84233},                             itemID = 227428, points = 15},
-      {category = Data.Objectives.Unique,        quests = {84234},                             itemID = 227439, points = 15},
-      {category = Data.Objectives.Treatise,      quests = {83734},                             itemID = 222649, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {81459, 81460, 81461, 81462, 81463}, itemID = 224780, points = 1},
-      {category = Data.Objectives.Gathering,     quests = {81464},                             itemID = 224781, points = 2},
-      {category = Data.Objectives.TrainerQuest,  quests = {83097, 83098, 83100, 82992, 82993}, itemID = 224807, points = 3, limit = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29519},                             itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {82596},                             itemID = 224007, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83067},                             itemID = 224657, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83914},                             itemID = 226340, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83915},                             itemID = 226341, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83916},                             itemID = 226342, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83917},                             itemID = 226343, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83918},                             itemID = 226344, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83919},                             itemID = 226345, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83920},                             itemID = 226346, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83921},                             itemID = 226347, points = 3},
+      {category = WK.Objectives.Unique,        quests = {84232},                             itemID = 227417, points = 15},
+      {category = WK.Objectives.Unique,        quests = {84233},                             itemID = 227428, points = 15},
+      {category = WK.Objectives.Unique,        quests = {84234},                             itemID = 227439, points = 15},
+      {category = WK.Objectives.Treatise,      quests = {83734},                             itemID = 222649, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {81459, 81460, 81461, 81462, 81463}, itemID = 224780, points = 1},
+      {category = WK.Objectives.Gathering,     quests = {81464},                             itemID = 224781, points = 2},
+      {category = WK.Objectives.TrainerQuest,  quests = {83097, 83098, 83100, 82992, 82993}, itemID = 224807, points = 3, limit = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29519},                             itemID = 0,      points = 3},
     }
   },
   {
@@ -383,30 +375,29 @@ Data.Professions = {
     skillLineVariantID = 2883,
     spellID = 423343,
     objectives = {
-      {category = Data.Objectives.Unique,        quests = {80871}, itemID = 227410, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80872}, itemID = 227421, points = 10},
-      {category = Data.Objectives.Unique,        quests = {80873}, itemID = 227432, points = 10},
-      {category = Data.Objectives.Unique,        quests = {82634}, itemID = 224036, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83061}, itemID = 224648, points = 10},
-      {category = Data.Objectives.Unique,        quests = {83922}, itemID = 226348, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83923}, itemID = 226349, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83924}, itemID = 226350, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83925}, itemID = 226351, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83926}, itemID = 226352, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83927}, itemID = 226353, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83928}, itemID = 226354, points = 3},
-      {category = Data.Objectives.Unique,        quests = {83929}, itemID = 226355, points = 3},
-      {category = Data.Objectives.Treatise,      quests = {83735}, itemID = 222547, points = 1},
-      {category = Data.Objectives.ArtisanQuest,  quests = {84132}, itemID = 228779, points = 2},
-      {category = Data.Objectives.Treasure,      quests = {83269}, itemID = 225221, points = 1},
-      {category = Data.Objectives.Treasure,      quests = {83270}, itemID = 225220, points = 1},
-      {category = Data.Objectives.DarkmoonQuest, quests = {29520}, itemID = 0,      points = 3},
+      {category = WK.Objectives.Unique,        quests = {80871}, itemID = 227410, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80872}, itemID = 227421, points = 10},
+      {category = WK.Objectives.Unique,        quests = {80873}, itemID = 227432, points = 10},
+      {category = WK.Objectives.Unique,        quests = {82634}, itemID = 224036, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83061}, itemID = 224648, points = 10},
+      {category = WK.Objectives.Unique,        quests = {83922}, itemID = 226348, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83923}, itemID = 226349, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83924}, itemID = 226350, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83925}, itemID = 226351, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83926}, itemID = 226352, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83927}, itemID = 226353, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83928}, itemID = 226354, points = 3},
+      {category = WK.Objectives.Unique,        quests = {83929}, itemID = 226355, points = 3},
+      {category = WK.Objectives.Treatise,      quests = {83735}, itemID = 222547, points = 1},
+      {category = WK.Objectives.ArtisanQuest,  quests = {84132}, itemID = 228779, points = 2},
+      {category = WK.Objectives.Treasure,      quests = {83269}, itemID = 225221, points = 1},
+      {category = WK.Objectives.Treasure,      quests = {83270}, itemID = 225220, points = 1},
+      {category = WK.Objectives.DarkmoonQuest, quests = {29520}, itemID = 0,      points = 3},
     }
   }
 }
 
--- TODO: Add field type for defaultDB
-function Data:InitDB()
+function WK:InitDB()
   ---@class AceDBObject-3.0
   ---@field global WK_DefaultGlobal
   self.db = AceDB:New(
@@ -416,7 +407,7 @@ function Data:InitDB()
   )
 end
 
-function Data:MigrateDB()
+function WK:MigrateDB()
   if type(self.db.global.DBVersion) ~= "number" then
     self.db.global.DBVersion = self.DBVersion
   end
@@ -446,18 +437,16 @@ function Data:MigrateDB()
         end
       end
     end
-    -- Fix race condition with Data.cache.GUID being empty
+    -- Fix race condition with WK.cache.GUID being empty
+    -- Add new window settings
     if self.db.global.DBVersion == 2 then
       for characterGUID, character in pairs(self.db.global.characters) do
         if not characterGUID or strlen(characterGUID) == 0 or not character.GUID or strlen(character.GUID) == 0 then
           self.db.global.characters[""] = nil
         end
       end
-    end
-    -- Add new window settings
-    if self.db.global.DBVersion == 4 then
       self.db.global.main = {
-        hiddenColumns = Utils:TableCopy(self.db.global.hiddenColumns),
+        hiddenColumns = WK:TableCopy(self.db.global.hiddenColumns),
         ---@diagnostic disable-next-line: undefined-field
         windowScale = self.db.global.windowScale,
         ---@diagnostic disable-next-line: undefined-field
@@ -468,8 +457,8 @@ function Data:MigrateDB()
       self.db.global.checklist = {
         open = false,
         hiddenColumns = {},
-        windowScale = 100,
-        windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
+        windowScale = self.db.global.windowScale,
+        windowBackgroundColor = self.db.global.windowBackgroundColor,
         windowBorder = true,
         hideCompletedObjectives = false,
         hideInCombat = false,
@@ -486,9 +475,10 @@ function Data:MigrateDB()
   end
 end
 
-function Data:TaskWeeklyReset()
+function WK:TaskWeeklyReset()
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset > 0 and self.db.global.weeklyReset <= time() then
-    Utils:TableForEach(self.db.global.characters, function(character)
+    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
+    WK:TableForEach(self.db.global.characters, function(character)
       wipe(character.completed or {})
     end)
   end
@@ -496,7 +486,7 @@ function Data:TaskWeeklyReset()
 end
 
 ---Check to see if the Darkmoon Faire event is live
-function Data:ScanCalendar()
+function WK:ScanCalendar()
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
   if currentCalendarTime and currentCalendarTime.monthDay then
     local today = currentCalendarTime.monthDay
@@ -515,7 +505,7 @@ end
 ---Get stored character by GUID
 ---@param GUID WOWGUID?
 ---@return WK_Character|nil
-function Data:GetCharacter(GUID)
+function WK:GetCharacter(GUID)
   if GUID == nil then
     GUID = UnitGUID("player")
   end
@@ -525,7 +515,7 @@ function Data:GetCharacter(GUID)
   end
 
   if self.db.global.characters[GUID] == nil then
-    self.db.global.characters[GUID] = Utils:TableCopy(self.defaultCharacter)
+    self.db.global.characters[GUID] = WK:TableCopy(self.defaultCharacter)
   end
 
   self.db.global.characters[GUID].GUID = GUID
@@ -533,7 +523,7 @@ function Data:GetCharacter(GUID)
   return self.db.global.characters[GUID]
 end
 
-function Data:ScanCharacter()
+function WK:ScanCharacter()
   local character = self:GetCharacter()
   if not character then return end
 
@@ -560,11 +550,11 @@ function Data:ScanCharacter()
 
   -- Profession Tree tracking
   local prof1, prof2 = GetProfessions()
-  Utils:TableForEach({prof1, prof2}, function(characterProfessionID)
+  WK:TableForEach({prof1, prof2}, function(characterProfessionID)
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
     if not skillLineID then return end
 
-    local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+    local dataProfession = WK:TableFind(WK.Professions, function(dataProfession)
       return dataProfession.skillLineID == skillLineID and dataProfession.spellID and IsPlayerSpell(dataProfession.spellID)
     end)
     if not dataProfession then return end
@@ -585,10 +575,10 @@ function Data:ScanCharacter()
       if configInfo then
         local treeIDs = configInfo.treeIDs
         if treeIDs then
-          Utils:TableForEach(treeIDs, function(treeID)
+          WK:TableForEach(treeIDs, function(treeID)
             local treeNodes = C_Traits.GetTreeNodes(treeID)
             if not treeNodes then return end
-            Utils:TableForEach(treeNodes, function(treeNode)
+            WK:TableForEach(treeNodes, function(treeNode)
               local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
               if not nodeInfo then return end
               characterProfession.knowledgeLevel = nodeInfo.ranksPurchased > 1 and characterProfession.knowledgeLevel + (nodeInfo.currentRank - 1) or characterProfession.knowledgeLevel
@@ -603,11 +593,11 @@ function Data:ScanCharacter()
   end)
 
   -- Quest tracking
-  Utils:TableForEach(Data.Professions, function(dataProfession)
+  WK:TableForEach(WK.Professions, function(dataProfession)
     if not dataProfession.objectives then return end
-    Utils:TableForEach(dataProfession.objectives, function(objective)
+    WK:TableForEach(dataProfession.objectives, function(objective)
       if not objective.quests then return end
-      Utils:TableForEach(objective.quests, function(questID)
+      WK:TableForEach(objective.quests, function(questID)
         if C_QuestLog.IsQuestFlaggedCompleted(questID) then
           character.completed[questID] = true
         end
@@ -616,7 +606,7 @@ function Data:ScanCharacter()
   end)
 
   -- Let's not track a character without a TWW profession
-  if Utils:TableCount(character.professions) < 1 then
+  if WK:TableCount(character.professions) < 1 then
     self.db.global.characters[character.GUID] = nil
   end
 end
@@ -624,8 +614,8 @@ end
 ---Get characters
 ---@param unfiltered boolean?
 ---@return WK_Character[]
-function Data:GetCharacters(unfiltered)
-  local characters = Utils:TableFilter(self.db.global.characters, function(character)
+function WK:GetCharacters(unfiltered)
+  local characters = WK:TableFilter(self.db.global.characters, function(character)
     local include = true
     if not unfiltered then
       if not character.enabled then

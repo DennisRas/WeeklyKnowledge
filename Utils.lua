@@ -1,11 +1,6 @@
 ---@type string
 local addonName = select(1, ...)
----@class WK_Addon
-local addon = select(2, ...)
-
----@class WK_Utils
-local Utils = {}
-addon.Utils = Utils
+local WK = _G.WeeklyKnowledge
 
 ---Set the background color for a parent frame
 ---@param parent any
@@ -13,7 +8,7 @@ addon.Utils = Utils
 ---@param g number?
 ---@param b number?
 ---@param a number?
-function Utils:SetBackgroundColor(parent, r, g, b, a)
+function WK:SetBackgroundColor(parent, r, g, b, a)
   if not parent.Background then
     parent.Background = parent:CreateTexture("Background", "BACKGROUND")
     parent.Background:SetTexture("Interface/BUTTONS/WHITE8X8")
@@ -37,7 +32,7 @@ end
 ---@param g number?
 ---@param b number?
 ---@param a number?
-function Utils:SetHighlightColor(parent, r, g, b, a)
+function WK:SetHighlightColor(parent, r, g, b, a)
   if not parent.Highlight then
     parent.Highlight = parent:CreateTexture("Highlight", "OVERLAY")
     parent.Highlight:SetTexture("Interface/BUTTONS/WHITE8X8")
@@ -60,7 +55,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): boolean
 ---@return T|nil, number|nil
-function Utils:TableFind(tbl, callback)
+function WK:TableFind(tbl, callback)
   for i, v in pairs(tbl) do
     if callback(v, i) then
       return v, i
@@ -75,7 +70,7 @@ end
 ---@param key string
 ---@param val any
 ---@return T|nil
-function Utils:TableGet(tbl, key, val)
+function WK:TableGet(tbl, key, val)
   return self:TableFind(tbl, function(elm)
     return elm[key] and elm[key] == val
   end)
@@ -86,7 +81,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): boolean
 ---@return T[]
-function Utils:TableFilter(tbl, callback)
+function WK:TableFilter(tbl, callback)
   local t = {}
   for i, v in pairs(tbl) do
     if callback(v, i) then
@@ -99,7 +94,7 @@ end
 ---Count table items
 ---@param tbl table
 ---@return number
-function Utils:TableCount(tbl)
+function WK:TableCount(tbl)
   local n = 0
   for _ in pairs(tbl) do
     n = n + 1
@@ -112,7 +107,7 @@ end
 ---@param tbl T[]
 ---@param cache table?
 ---@return T[]
-function Utils:TableCopy(tbl, cache)
+function WK:TableCopy(tbl, cache)
   local t = {}
   cache = cache or {}
   cache[tbl] = t
@@ -131,7 +126,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number): any
 ---@return T[]
-function Utils:TableMap(tbl, callback)
+function WK:TableMap(tbl, callback)
   local t = {}
   self:TableForEach(tbl, function(v, k)
     local newv, newk = callback(v, k)
@@ -145,7 +140,7 @@ end
 ---@param tbl T[]
 ---@param callback fun(value: T, index: number)
 ---@return T[]
-function Utils:TableForEach(tbl, callback)
+function WK:TableForEach(tbl, callback)
   assert(tbl, "Must be a table!")
   for ik, iv in pairs(tbl) do
     callback(iv, ik)

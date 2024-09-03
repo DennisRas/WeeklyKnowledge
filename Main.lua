@@ -1,31 +1,21 @@
 ---@type string
 local addonName = select(1, ...)
----@class WK_Addon
-local addon = select(2, ...)
-
-local Constants = addon.Constants
-local Utils = addon.Utils
-local UI = addon.UI
-local Data = addon.Data
-local Checklist = addon.Checklist
+local WK = _G.WeeklyKnowledge
 local LibDBIcon = LibStub("LibDBIcon-1.0")
+local frame = nil
 
----@class WK_Main
-local Main = {}
-addon.Main = Main
-
-function Main:ToggleWindow()
-  if not self.frame then return end
-  if self.frame:IsVisible() then
-    self.frame:Hide()
+function WK:ToggleMainWindow()
+  if not frame then return end
+  if frame:IsVisible() then
+    frame:Hide()
   else
-    self.frame:Show()
+    frame:Show()
   end
-  self:Render()
+  self:RenderMain()
 end
 
-function Main:Render()
-  local dataColumns = self:GetColumns()
+function WK:RenderMain()
+  local dataColumns = self:GetMainColumns()
   local tableWidth = 0
   local tableHeight = 0
   ---@type WK_TableData
@@ -34,102 +24,102 @@ function Main:Render()
     rows = {}
   }
 
-  if not self.frame then
+  if not frame then
     local frameName = addonName .. "MainWindow"
-    self.frame = CreateFrame("Frame", frameName, UIParent)
-    self.frame:SetSize(500, 500)
-    self.frame:SetFrameStrata("HIGH")
-    self.frame:SetFrameLevel(8000)
-    self.frame:SetClampedToScreen(true)
-    self.frame:SetMovable(true)
-    self.frame:SetPoint("CENTER")
-    self.frame:SetUserPlaced(true)
-    self.frame:RegisterForDrag("LeftButton")
-    self.frame:EnableMouse(true)
-    self.frame:SetScript("OnDragStart", function() self.frame:StartMoving() end)
-    self.frame:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
-    self.frame:Hide()
-    Utils:SetBackgroundColor(self.frame, Data.db.global.main.windowBackgroundColor.r, Data.db.global.main.windowBackgroundColor.g, Data.db.global.main.windowBackgroundColor.b, Data.db.global.main.windowBackgroundColor.a)
+    frame = CreateFrame("Frame", frameName, UIParent)
+    frame:SetSize(500, 500)
+    frame:SetFrameStrata("HIGH")
+    frame:SetFrameLevel(8000)
+    frame:SetClampedToScreen(true)
+    frame:SetMovable(true)
+    frame:SetPoint("CENTER")
+    frame:SetUserPlaced(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:EnableMouse(true)
+    frame:SetScript("OnDragStart", function() frame:StartMoving() end)
+    frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+    frame:Hide()
+    self:SetBackgroundColor(frame, self.db.global.main.windowBackgroundColor.r, self.db.global.main.windowBackgroundColor.g, self.db.global.main.windowBackgroundColor.b, self.db.global.main.windowBackgroundColor.a)
 
-    self.frame.border = CreateFrame("Frame", "$parentBorder", self.frame, "BackdropTemplate")
-    self.frame.border:SetPoint("TOPLEFT", self.frame, "TOPLEFT", -3, 3)
-    self.frame.border:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 3, -3)
-    self.frame.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    self.frame.border:SetBackdropBorderColor(0, 0, 0, .5)
-    self.frame.border:Show()
+    frame.border = CreateFrame("Frame", "$parentBorder", frame, "BackdropTemplate")
+    frame.border:SetPoint("TOPLEFT", frame, "TOPLEFT", -3, 3)
+    frame.border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 3, -3)
+    frame.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
+    frame.border:SetBackdropBorderColor(0, 0, 0, .5)
+    frame.border:Show()
 
-    self.frame.titlebar = CreateFrame("Frame", "$parentTitle", self.frame)
-    self.frame.titlebar:SetPoint("TOPLEFT", self.frame, "TOPLEFT")
-    self.frame.titlebar:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT")
-    self.frame.titlebar:SetHeight(Constants.TITLEBAR_HEIGHT)
-    self.frame.titlebar:RegisterForDrag("LeftButton")
-    self.frame.titlebar:EnableMouse(true)
-    self.frame.titlebar:SetScript("OnDragStart", function() self.frame:StartMoving() end)
-    self.frame.titlebar:SetScript("OnDragStop", function() self.frame:StopMovingOrSizing() end)
-    Utils:SetBackgroundColor(self.frame.titlebar, 0, 0, 0, 0.5)
+    frame.titlebar = CreateFrame("Frame", "$parentTitle", frame)
+    frame.titlebar:SetPoint("TOPLEFT", frame, "TOPLEFT")
+    frame.titlebar:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
+    frame.titlebar:SetHeight(self.Constants.TITLEBAR_HEIGHT)
+    frame.titlebar:RegisterForDrag("LeftButton")
+    frame.titlebar:EnableMouse(true)
+    frame.titlebar:SetScript("OnDragStart", function() frame:StartMoving() end)
+    frame.titlebar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+    self:SetBackgroundColor(frame.titlebar, 0, 0, 0, 0.5)
 
-    self.frame.titlebar.icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-    self.frame.titlebar.icon:SetPoint("LEFT", self.frame.titlebar, "LEFT", 6, 0)
-    self.frame.titlebar.icon:SetSize(20, 20)
-    self.frame.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
+    frame.titlebar.icon = frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+    frame.titlebar.icon:SetPoint("LEFT", frame.titlebar, "LEFT", 6, 0)
+    frame.titlebar.icon:SetSize(20, 20)
+    frame.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
 
-    self.frame.titlebar.title = self.frame.titlebar:CreateFontString("$parentText", "OVERLAY")
-    self.frame.titlebar.title:SetFontObject("SystemFont_Med2")
-    self.frame.titlebar.title:SetPoint("LEFT", self.frame.titlebar, 28, 0)
-    self.frame.titlebar.title:SetJustifyH("LEFT")
-    self.frame.titlebar.title:SetJustifyV("MIDDLE")
-    self.frame.titlebar.title:SetText(addonName)
+    frame.titlebar.title = frame.titlebar:CreateFontString("$parentText", "OVERLAY")
+    frame.titlebar.title:SetFontObject("SystemFont_Med2")
+    frame.titlebar.title:SetPoint("LEFT", frame.titlebar, 28, 0)
+    frame.titlebar.title:SetJustifyH("LEFT")
+    frame.titlebar.title:SetJustifyV("MIDDLE")
+    frame.titlebar.title:SetText(addonName)
 
     do -- Close Button
-      self.frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.frame.titlebar)
-      self.frame.titlebar.closeButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.frame.titlebar.closeButton:SetPoint("RIGHT", self.frame.titlebar, "RIGHT", 0, 0)
-      self.frame.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
-      self.frame.titlebar.closeButton:SetScript("OnEnter", function()
-        self.frame.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 0, 0, 0.2)
-        GameTooltip:SetOwner(self.frame.titlebar.closeButton, "ANCHOR_TOP")
+      frame.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", frame.titlebar)
+      frame.titlebar.closeButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.closeButton:SetPoint("RIGHT", frame.titlebar, "RIGHT", 0, 0)
+      frame.titlebar.closeButton:SetScript("OnClick", function() self:ToggleMainWindow() end)
+      frame.titlebar.closeButton:SetScript("OnEnter", function()
+        frame.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
+        self:SetBackgroundColor(frame.titlebar.closeButton, 1, 0, 0, 0.2)
+        GameTooltip:SetOwner(frame.titlebar.closeButton, "ANCHOR_TOP")
         GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
-      self.frame.titlebar.closeButton:SetScript("OnLeave", function()
-        self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.closeButton, 1, 1, 1, 0)
+      frame.titlebar.closeButton:SetScript("OnLeave", function()
+        frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.closeButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
 
-      self.frame.titlebar.closeButton.Icon = self.frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-      self.frame.titlebar.closeButton.Icon:SetPoint("CENTER", self.frame.titlebar.closeButton, "CENTER")
-      self.frame.titlebar.closeButton.Icon:SetSize(10, 10)
-      self.frame.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
-      self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      frame.titlebar.closeButton.Icon = frame.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+      frame.titlebar.closeButton.Icon:SetPoint("CENTER", frame.titlebar.closeButton, "CENTER")
+      frame.titlebar.closeButton.Icon:SetSize(10, 10)
+      frame.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
+      frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Settings Button
-      self.frame.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.frame.titlebar)
-      self.frame.titlebar.SettingsButton:SetPoint("RIGHT", self.frame.titlebar.closeButton, "LEFT", 0, 0)
-      self.frame.titlebar.SettingsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.frame.titlebar.SettingsButton:SetScript("OnEnter", function()
-        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0.05)
+      frame.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", frame.titlebar)
+      frame.titlebar.SettingsButton:SetPoint("RIGHT", frame.titlebar.closeButton, "LEFT", 0, 0)
+      frame.titlebar.SettingsButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.SettingsButton:SetScript("OnEnter", function()
+        frame.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(frame.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.frame.titlebar.SettingsButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(frame.titlebar.SettingsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      self.frame.titlebar.SettingsButton:SetScript("OnLeave", function()
-        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0)
+      frame.titlebar.SettingsButton:SetScript("OnLeave", function()
+        frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.SettingsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+      frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         local showMinimapIcon = rootMenu:CreateCheckbox(
           "Show the minimap button",
-          function() return not Data.db.global.minimap.hide end,
+          function() return not self.db.global.minimap.hide end,
           function()
-            Data.db.global.minimap.hide = not Data.db.global.minimap.hide
-            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+            self.db.global.minimap.hide = not self.db.global.minimap.hide
+            LibDBIcon:Refresh(addonName, self.db.global.minimap)
           end
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
@@ -139,10 +129,10 @@ function Main:Render()
 
         local lockMinimapIcon = rootMenu:CreateCheckbox(
           "Lock the minimap button",
-          function() return Data.db.global.minimap.lock end,
+          function() return self.db.global.minimap.lock end,
           function()
-            Data.db.global.minimap.lock = not Data.db.global.minimap.lock
-            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+            self.db.global.minimap.lock = not self.db.global.minimap.lock
+            LibDBIcon:Refresh(addonName, self.db.global.minimap)
           end
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
@@ -155,43 +145,43 @@ function Main:Render()
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
-            function() return Data.db.global.main.windowScale == i end,
+            function() return self.db.global.main.windowScale == i end,
             function(data)
-              Data.db.global.main.windowScale = data
-              self:Render()
+              self.db.global.main.windowScale = data
+              self:RenderMain()
             end,
             i
           )
         end
 
         local colorInfo = {
-          r = Data.db.global.main.windowBackgroundColor.r,
-          g = Data.db.global.main.windowBackgroundColor.g,
-          b = Data.db.global.main.windowBackgroundColor.b,
-          opacity = Data.db.global.main.windowBackgroundColor.a,
+          r = self.db.global.main.windowBackgroundColor.r,
+          g = self.db.global.main.windowBackgroundColor.g,
+          b = self.db.global.main.windowBackgroundColor.b,
+          opacity = self.db.global.main.windowBackgroundColor.a,
           swatchFunc = function()
             local r, g, b = ColorPickerFrame:GetColorRGB();
             local a = ColorPickerFrame:GetColorAlpha();
             if r then
-              Data.db.global.main.windowBackgroundColor.r = r
-              Data.db.global.main.windowBackgroundColor.g = g
-              Data.db.global.main.windowBackgroundColor.b = b
+              self.db.global.main.windowBackgroundColor.r = r
+              self.db.global.main.windowBackgroundColor.g = g
+              self.db.global.main.windowBackgroundColor.b = b
               if a then
-                Data.db.global.main.windowBackgroundColor.a = a
+                self.db.global.main.windowBackgroundColor.a = a
               end
-              Utils:SetBackgroundColor(self.frame, Data.db.global.main.windowBackgroundColor.r, Data.db.global.main.windowBackgroundColor.g, Data.db.global.main.windowBackgroundColor.b, Data.db.global.main.windowBackgroundColor.a)
+              self:SetBackgroundColor(frame, self.db.global.main.windowBackgroundColor.r, self.db.global.main.windowBackgroundColor.g, self.db.global.main.windowBackgroundColor.b, self.db.global.main.windowBackgroundColor.a)
             end
           end,
           opacityFunc = function() end,
           cancelFunc = function(color)
             if color.r then
-              Data.db.global.main.windowBackgroundColor.r = color.r
-              Data.db.global.main.windowBackgroundColor.g = color.g
-              Data.db.global.main.windowBackgroundColor.b = color.b
+              self.db.global.main.windowBackgroundColor.r = color.r
+              self.db.global.main.windowBackgroundColor.g = color.g
+              self.db.global.main.windowBackgroundColor.b = color.b
               if color.a then
-                Data.db.global.main.windowBackgroundColor.a = color.a
+                self.db.global.main.windowBackgroundColor.a = color.a
               end
-              Utils:SetBackgroundColor(self.frame, Data.db.global.main.windowBackgroundColor.r, Data.db.global.main.windowBackgroundColor.g, Data.db.global.main.windowBackgroundColor.b, Data.db.global.main.windowBackgroundColor.a)
+              self:SetBackgroundColor(frame, self.db.global.main.windowBackgroundColor.r, self.db.global.main.windowBackgroundColor.g, self.db.global.main.windowBackgroundColor.b, self.db.global.main.windowBackgroundColor.a)
             end
           end,
           hasOpacity = 1,
@@ -206,46 +196,46 @@ function Main:Render()
 
         rootMenu:CreateCheckbox(
           "Show the border",
-          function() return Data.db.global.main.windowBorder end,
+          function() return self.db.global.main.windowBorder end,
           function()
-            Data.db.global.main.windowBorder = not Data.db.global.main.windowBorder
-            self:Render()
+            self.db.global.main.windowBorder = not self.db.global.main.windowBorder
+            self:RenderMain()
           end
         )
       end)
 
-      self.frame.titlebar.SettingsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.frame.titlebar.SettingsButton, "CENTER")
-      self.frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
-      self.frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
-      self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      frame.titlebar.SettingsButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
+      frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", frame.titlebar.SettingsButton, "CENTER")
+      frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
+      frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
+      frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Characters Button
-      self.frame.titlebar.CharactersButton = CreateFrame("DropdownButton", "$parentCharactersButton", self.frame.titlebar)
-      self.frame.titlebar.CharactersButton:SetPoint("RIGHT", self.frame.titlebar.SettingsButton, "LEFT", 0, 0)
-      self.frame.titlebar.CharactersButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.frame.titlebar.CharactersButton:SetScript("OnEnter", function()
-        self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0.05)
+      frame.titlebar.CharactersButton = CreateFrame("DropdownButton", "$parentCharactersButton", frame.titlebar)
+      frame.titlebar.CharactersButton:SetPoint("RIGHT", frame.titlebar.SettingsButton, "LEFT", 0, 0)
+      frame.titlebar.CharactersButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.CharactersButton:SetScript("OnEnter", function()
+        frame.titlebar.CharactersButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(frame.titlebar.CharactersButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.frame.titlebar.CharactersButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(frame.titlebar.CharactersButton, "ANCHOR_TOP")
         GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Enable/Disable your characters.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      self.frame.titlebar.CharactersButton:SetScript("OnLeave", function()
-        self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.CharactersButton, 1, 1, 1, 0)
+      frame.titlebar.CharactersButton:SetScript("OnLeave", function()
+        frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.CharactersButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.CharactersButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.CharactersButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.CharactersButton.Icon:SetPoint("CENTER", self.frame.titlebar.CharactersButton, "CENTER")
-      self.frame.titlebar.CharactersButton.Icon:SetSize(14, 14)
-      self.frame.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Characters.blp")
-      self.frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-      self.frame.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
-        Utils:TableForEach(Data:GetCharacters(true), function(character)
+      frame.titlebar.CharactersButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.CharactersButton:GetName() .. "Icon", "ARTWORK")
+      frame.titlebar.CharactersButton.Icon:SetPoint("CENTER", frame.titlebar.CharactersButton, "CENTER")
+      frame.titlebar.CharactersButton.Icon:SetSize(14, 14)
+      frame.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Characters.blp")
+      frame.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      frame.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
+        self:TableForEach(self:GetCharacters(true), function(character)
           local text = format("%s - %s", character.name, character.realmName)
           local _, classFile = GetClassInfo(character.classID)
           if classFile then
@@ -260,7 +250,7 @@ function Main:Render()
             function() return character.enabled or false end,
             function()
               character.enabled = not character.enabled
-              self:Render()
+              self:RenderMain()
             end
           )
         end)
@@ -268,116 +258,116 @@ function Main:Render()
     end
 
     do -- Columns Button
-      self.frame.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.frame.titlebar)
-      self.frame.titlebar.ColumnsButton:SetPoint("RIGHT", self.frame.titlebar.CharactersButton, "LEFT", 0, 0)
-      self.frame.titlebar.ColumnsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.frame.titlebar.ColumnsButton:SetScript("OnEnter", function()
-        self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.ColumnsButton, 1, 1, 1, 0.05)
+      frame.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", frame.titlebar)
+      frame.titlebar.ColumnsButton:SetPoint("RIGHT", frame.titlebar.CharactersButton, "LEFT", 0, 0)
+      frame.titlebar.ColumnsButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.ColumnsButton:SetScript("OnEnter", function()
+        frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(frame.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.frame.titlebar.ColumnsButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(frame.titlebar.ColumnsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      self.frame.titlebar.ColumnsButton:SetScript("OnLeave", function()
-        self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.ColumnsButton, 1, 1, 1, 0)
+      frame.titlebar.ColumnsButton:SetScript("OnLeave", function()
+        frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.ColumnsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
-        local hidden = Data.db.global.main.hiddenColumns
-        Utils:TableForEach(self:GetColumns(true), function(column)
+      frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
+        local hidden = self.db.global.main.hiddenColumns
+        self:TableForEach(self:GetMainColumns(true), function(column)
           rootMenu:CreateCheckbox(
             column.name,
             function() return not hidden[column.name] end,
             function(columnName)
               hidden[columnName] = not hidden[columnName]
-              self:Render()
+              self:RenderMain()
             end,
             column.name
           )
         end)
       end)
 
-      self.frame.titlebar.ColumnsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.ColumnsButton.Icon:SetPoint("CENTER", self.frame.titlebar.ColumnsButton, "CENTER")
-      self.frame.titlebar.ColumnsButton.Icon:SetSize(12, 12)
-      self.frame.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
-      self.frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      frame.titlebar.ColumnsButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
+      frame.titlebar.ColumnsButton.Icon:SetPoint("CENTER", frame.titlebar.ColumnsButton, "CENTER")
+      frame.titlebar.ColumnsButton.Icon:SetSize(12, 12)
+      frame.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
+      frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Checklist Button
-      self.frame.titlebar.ChecklistButton = CreateFrame("Button", "$parentChecklistButton", self.frame.titlebar)
-      self.frame.titlebar.ChecklistButton:SetPoint("RIGHT", self.frame.titlebar.ColumnsButton, "LEFT", 0, 0)
-      self.frame.titlebar.ChecklistButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.frame.titlebar.ChecklistButton:SetScript("OnEnter", function()
-        self.frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.ChecklistButton, 1, 1, 1, 0.05)
+      frame.titlebar.ChecklistButton = CreateFrame("Button", "$parentChecklistButton", frame.titlebar)
+      frame.titlebar.ChecklistButton:SetPoint("RIGHT", frame.titlebar.ColumnsButton, "LEFT", 0, 0)
+      frame.titlebar.ChecklistButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.ChecklistButton:SetScript("OnEnter", function()
+        frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(frame.titlebar.ChecklistButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.frame.titlebar.ChecklistButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(frame.titlebar.ChecklistButton, "ANCHOR_TOP")
         GameTooltip:SetText("Checklist", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Toggle the Checklist window", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      self.frame.titlebar.ChecklistButton:SetScript("OnLeave", function()
-        self.frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.frame.titlebar.ChecklistButton, 1, 1, 1, 0)
+      frame.titlebar.ChecklistButton:SetScript("OnLeave", function()
+        frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.ChecklistButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.frame.titlebar.ChecklistButton:SetScript("OnClick", function()
-        Data.db.global.main.checklistHelpTipClosed = true
-        Checklist:ToggleWindow()
+      frame.titlebar.ChecklistButton:SetScript("OnClick", function()
+        self.db.global.main.checklistHelpTipClosed = true
+        self:ToggleChecklistWindow()
       end)
 
-      self.frame.titlebar.ChecklistButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.ChecklistButton:GetName() .. "Icon", "ARTWORK")
-      self.frame.titlebar.ChecklistButton.Icon:SetPoint("CENTER", self.frame.titlebar.ChecklistButton, "CENTER")
-      self.frame.titlebar.ChecklistButton.Icon:SetSize(16, 16)
-      self.frame.titlebar.ChecklistButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Checklist.blp")
-      self.frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      frame.titlebar.ChecklistButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.ChecklistButton:GetName() .. "Icon", "ARTWORK")
+      frame.titlebar.ChecklistButton.Icon:SetPoint("CENTER", frame.titlebar.ChecklistButton, "CENTER")
+      frame.titlebar.ChecklistButton.Icon:SetSize(16, 16)
+      frame.titlebar.ChecklistButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Checklist.blp")
+      frame.titlebar.ChecklistButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    self.frame.table = UI:CreateTableFrame({
+    frame.table = self:CreateTableFrame({
       header = {
         enabled = true,
         sticky = true,
-        height = Constants.TABLE_HEADER_HEIGHT,
+        height = self.Constants.TABLE_HEADER_HEIGHT,
       },
       rows = {
-        height = Constants.TABLE_ROW_HEIGHT,
+        height = self.Constants.TABLE_ROW_HEIGHT,
         highlight = true,
         striped = true
       }
     })
-    self.frame.table:SetParent(self.frame)
-    self.frame.table:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
-    self.frame.table:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
+    frame.table:SetParent(frame)
+    frame.table:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -self.Constants.TITLEBAR_HEIGHT)
+    frame.table:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
 
     table.insert(UISpecialFrames, frameName)
   end
 
   do -- Show helptip for new checklist
     local checklistHelpTipText = "Check out the new checklist!"
-    if Data.db.global.main.checklistHelpTipClosed then
-      HelpTip:Hide(self.frame, checklistHelpTipText)
+    if self.db.global.main.checklistHelpTipClosed then
+      HelpTip:Hide(frame, checklistHelpTipText)
     else
       HelpTip:Show(
-        self.frame,
+        frame,
         {
           text = checklistHelpTipText,
           buttonStyle = HelpTip.ButtonStyle.Close,
           targetPoint = HelpTip.Point.TopEdgeCenter,
           onAcknowledgeCallback = function()
-            Data.db.global.main.checklistHelpTipClosed = true
+            self.db.global.main.checklistHelpTipClosed = true
           end,
         },
-        self.frame.titlebar.ChecklistButton
+        frame.titlebar.ChecklistButton
       )
     end
   end
 
   do -- Table Column config
-    Utils:TableForEach(dataColumns, function(dataColumn)
+    self:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn
       local column = {
         width = dataColumn.width,
@@ -391,7 +381,7 @@ function Main:Render()
   do -- Table Header row
     ---@type WK_TableDataRow
     local row = {columns = {}}
-    Utils:TableForEach(dataColumns, function(dataColumn)
+    self:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataCell
       local cell = {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.name),
@@ -401,40 +391,40 @@ function Main:Render()
       table.insert(row.columns, cell)
     end)
     table.insert(tableData.rows, row)
-    tableHeight = tableHeight + self.frame.table.config.header.height
+    tableHeight = tableHeight + frame.table.config.header.height
   end
 
   do -- Table data
-    Utils:TableForEach(Data:GetCharacters(), function(character)
-      Utils:TableForEach(character.professions, function(characterProfession)
-        local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+    self:TableForEach(self:GetCharacters(), function(character)
+      self:TableForEach(character.professions, function(characterProfession)
+        local dataProfession = self:TableFind(self.Professions, function(dataProfession)
           return dataProfession.skillLineID == characterProfession.skillLineID
         end)
         if not dataProfession then return end
 
         ---@type WK_TableDataRow
         local row = {columns = {}}
-        Utils:TableForEach(dataColumns, function(dataColumn)
+        self:TableForEach(dataColumns, function(dataColumn)
           ---@type WK_TableDataCell
           local cell = dataColumn.cell(character, characterProfession, dataProfession)
           table.insert(row.columns, cell)
         end)
 
         table.insert(tableData.rows, row)
-        tableHeight = tableHeight + self.frame.table.config.rows.height
+        tableHeight = tableHeight + frame.table.config.rows.height
       end)
     end)
   end
 
-  self.frame.border:SetShown(Data.db.global.main.windowBorder)
-  self.frame.table:SetData(tableData)
-  self.frame:SetWidth(tableWidth)
-  self.frame:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT))
-  self.frame:SetScale(Data.db.global.main.windowScale / 100)
+  frame.border:SetShown(self.db.global.main.windowBorder)
+  frame.table:SetData(tableData)
+  frame:SetWidth(tableWidth)
+  frame:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT))
+  frame:SetScale(self.db.global.main.windowScale / 100)
 end
 
-function Main:GetColumns(unfiltered)
-  local hidden = Data.db.global.main.hiddenColumns
+function WK:GetMainColumns(unfiltered)
+  local hidden = self.db.global.main.hiddenColumns
   ---@type WK_DataColumn[]
   local columns = {
     {
@@ -542,7 +532,7 @@ function Main:GetColumns(unfiltered)
     },
   }
 
-  Utils:TableForEach(Data.Objectives, function(dataObjective)
+  self:TableForEach(self.Objectives, function(dataObjective)
     ---@type WK_DataColumn
     local dataColumn = {
       name = dataObjective.name,
@@ -594,8 +584,8 @@ function Main:GetColumns(unfiltered)
                 end
               end
 
-              if objective.category == Data.Objectives.DarkmoonQuest then
-                if not Data.cache.isDarkmoonOpen then
+              if objective.category == self.Objectives.DarkmoonQuest then
+                if not self.cache.isDarkmoonOpen then
                   total = 0
                 end
               end
@@ -626,10 +616,10 @@ function Main:GetColumns(unfiltered)
                 GameTooltip:SetText(dataObjective.name, 1, 1, 1);
                 GameTooltip:AddDoubleLine(label, format("%d / %d", completed, total), nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", points, pointsTotal), nil, nil, nil, 1, 1, 1)
-                if Utils:TableCount(itemList) > 0 then
+                if self:TableCount(itemList) > 0 then
                   GameTooltip:AddLine(" ")
                   for itemID, itemLooted in pairs(itemList) do
-                    local item = Data.cache.items[itemID]
+                    local item = self.cache.items[itemID]
                     GameTooltip:AddDoubleLine(
                       item and item:GetItemLink() or "Loading...",
                       CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
@@ -640,8 +630,8 @@ function Main:GetColumns(unfiltered)
               end
 
               for itemID in pairs(itemList) do
-                Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
-                Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
+                self.cache.items[itemID] = Item:CreateFromItemID(itemID)
+                self.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
               end
 
               showTooltip()
@@ -660,7 +650,7 @@ function Main:GetColumns(unfiltered)
     return columns
   end
 
-  local filteredColumns = Utils:TableFilter(columns, function(column)
+  local filteredColumns = self:TableFilter(columns, function(column)
     return not hidden[column.name]
   end)
 
