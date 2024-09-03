@@ -114,6 +114,96 @@ function Checklist:Render()
       self.frame.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
+    do -- Settings Button
+      self.frame.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.frame.titlebar)
+      self.frame.titlebar.SettingsButton:SetPoint("RIGHT", self.frame.titlebar.closeButton, "LEFT", 0, 0)
+      self.frame.titlebar.SettingsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.frame.titlebar.SettingsButton:SetScript("OnEnter", function()
+        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0.05)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        GameTooltip:SetOwner(self.frame.titlebar.SettingsButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
+        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:Show()
+      end)
+      self.frame.titlebar.SettingsButton:SetScript("OnLeave", function()
+        self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.frame.titlebar.SettingsButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      self.frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        rootMenu:CreateTitle("Window")
+        local windowScale = rootMenu:CreateButton("Scaling")
+        for i = 80, 200, 10 do
+          windowScale:CreateRadio(
+            i .. "%",
+            function() return Data.db.global.checklist.windowScale == i end,
+            function(data)
+              Data.db.global.checklist.windowScale = data
+              self:Render()
+            end,
+            i
+          )
+        end
+
+        local colorInfo = {
+          r = Data.db.global.checklist.windowBackgroundColor.r,
+          g = Data.db.global.checklist.windowBackgroundColor.g,
+          b = Data.db.global.checklist.windowBackgroundColor.b,
+          opacity = Data.db.global.checklist.windowBackgroundColor.a,
+          swatchFunc = function()
+            local r, g, b = ColorPickerFrame:GetColorRGB();
+            local a = ColorPickerFrame:GetColorAlpha();
+            if r then
+              Data.db.global.checklist.windowBackgroundColor.r = r
+              Data.db.global.checklist.windowBackgroundColor.g = g
+              Data.db.global.checklist.windowBackgroundColor.b = b
+              if a then
+                Data.db.global.checklist.windowBackgroundColor.a = a
+              end
+              Utils:SetBackgroundColor(self.frame, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
+            end
+          end,
+          opacityFunc = function() end,
+          cancelFunc = function(color)
+            if color.r then
+              Data.db.global.checklist.windowBackgroundColor.r = color.r
+              Data.db.global.checklist.windowBackgroundColor.g = color.g
+              Data.db.global.checklist.windowBackgroundColor.b = color.b
+              if color.a then
+                Data.db.global.checklist.windowBackgroundColor.a = color.a
+              end
+              Utils:SetBackgroundColor(self.frame, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
+            end
+          end,
+          hasOpacity = 1,
+        }
+        rootMenu:CreateColorSwatch(
+          "Background color",
+          function()
+            ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
+          end,
+          colorInfo
+        )
+
+        rootMenu:CreateCheckbox(
+          "Show the border",
+          function() return Data.db.global.checklist.windowBorder end,
+          function()
+            Data.db.global.checklist.windowBorder = not Data.db.global.checklist.windowBorder
+            self:Render()
+          end
+        )
+      end)
+
+      self.frame.titlebar.SettingsButton.Icon = self.frame.titlebar:CreateTexture(self.frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
+      self.frame.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.frame.titlebar.SettingsButton, "CENTER")
+      self.frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
+      self.frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
+      self.frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
+
     self.frame.table = UI:CreateTableFrame({
       header = {
         enabled = true,
@@ -140,7 +230,7 @@ function Checklist:Render()
     return
   end
 
-  do -- Column config
+  do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn
       local column = {
@@ -152,7 +242,7 @@ function Checklist:Render()
     end)
   end
 
-  do -- Header row
+  do -- Table Header row
     ---@type WK_TableDataRow
     local row = {columns = {}}
     Utils:TableForEach(dataColumns, function(dataColumn)
@@ -168,42 +258,41 @@ function Checklist:Render()
     tableHeight = tableHeight + self.frame.table.config.header.height
   end
 
-  Utils:TableForEach(character.professions, function(characterProfession)
-    local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
-      return dataProfession.skillLineID == characterProfession.skillLineID
-    end)
-    if not dataProfession then return end
-
-    Utils:TableForEach(dataProfession.objectives, function(professionObjective)
-      if not professionObjective.itemID then
-        return
-      end
-      local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
-      if not itemName then
-        return
-      end
-      ---@type WK_TableDataRow
-      local row = {columns = {}}
-      local cellData = {
-        character = character,
-        characterProfession = characterProfession,
-        dataProfession = dataProfession,
-        itemName = itemName,
-        itemLink = itemLink,
-        itemTexture = itemTexture,
-      }
-
-      Utils:TableForEach(dataColumns, function(dataColumn)
-        ---@type WK_TableDataCell
-        local cell = dataColumn.cell(cellData)
-        table.insert(row.columns, cell)
+  do -- Table data
+    Utils:TableForEach(character.professions, function(characterProfession)
+      local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+        return dataProfession.skillLineID == characterProfession.skillLineID
       end)
+      if not dataProfession then return end
 
-      table.insert(tableData.rows, row)
-      tableHeight = tableHeight + self.frame.table.config.rows.height
+      Utils:TableForEach(dataProfession.objectives, function(professionObjective)
+        if not professionObjective.itemID then return end
+        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
+        if not itemName then return end
+
+        ---@type WK_TableDataRow
+        local row = {columns = {}}
+        Utils:TableForEach(dataColumns, function(dataColumn)
+          local cellData = {
+            character = character,
+            characterProfession = characterProfession,
+            dataProfession = dataProfession,
+            itemName = itemName,
+            itemLink = itemLink,
+            itemTexture = itemTexture,
+          }
+          ---@type WK_TableDataCell
+          local cell = dataColumn.cell(cellData)
+          table.insert(row.columns, cell)
+        end)
+
+        table.insert(tableData.rows, row)
+        tableHeight = tableHeight + self.frame.table.config.rows.height
+      end)
     end)
-  end)
+  end
 
+  self.frame.border:SetShown(Data.db.global.main.windowBorder)
   self.frame.table:SetData(tableData)
   self.frame:SetWidth(tableWidth)
   self.frame:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))

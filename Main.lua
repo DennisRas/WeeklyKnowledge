@@ -150,7 +150,7 @@ function Main:Render()
           GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
         end)
 
-        local interfaceTitle = rootMenu:CreateTitle("Window")
+        rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
@@ -356,26 +356,27 @@ function Main:Render()
     table.insert(UISpecialFrames, frameName)
   end
 
-  -- Show helptip for new checklist
-  local checklistHelpTipText = "Check out the new checklist!"
-  if Data.db.global.main.checklistHelpTipClosed then
-    HelpTip:Hide(self.frame, checklistHelpTipText)
-  else
-    HelpTip:Show(
-      self.frame,
-      {
-        text = checklistHelpTipText,
-        buttonStyle = HelpTip.ButtonStyle.Close,
-        targetPoint = HelpTip.Point.TopEdgeCenter,
-        onAcknowledgeCallback = function()
-          Data.db.global.main.checklistHelpTipClosed = true
-        end,
-      },
-      self.frame.titlebar.ChecklistButton
-    )
+  do -- Show helptip for new checklist
+    local checklistHelpTipText = "Check out the new checklist!"
+    if Data.db.global.main.checklistHelpTipClosed then
+      HelpTip:Hide(self.frame, checklistHelpTipText)
+    else
+      HelpTip:Show(
+        self.frame,
+        {
+          text = checklistHelpTipText,
+          buttonStyle = HelpTip.ButtonStyle.Close,
+          targetPoint = HelpTip.Point.TopEdgeCenter,
+          onAcknowledgeCallback = function()
+            Data.db.global.main.checklistHelpTipClosed = true
+          end,
+        },
+        self.frame.titlebar.ChecklistButton
+      )
+    end
   end
 
-  do -- Column config
+  do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn
       local column = {
@@ -387,7 +388,7 @@ function Main:Render()
     end)
   end
 
-  do -- Header row
+  do -- Table Header row
     ---@type WK_TableDataRow
     local row = {columns = {}}
     Utils:TableForEach(dataColumns, function(dataColumn)
@@ -403,26 +404,27 @@ function Main:Render()
     tableHeight = tableHeight + self.frame.table.config.header.height
   end
 
-  Utils:TableForEach(Data:GetCharacters(), function(character)
-    Utils:TableForEach(character.professions, function(characterProfession)
-      ---@type WK_TableDataRow
-      local row = {columns = {}}
+  do -- Table data
+    Utils:TableForEach(Data:GetCharacters(), function(character)
+      Utils:TableForEach(character.professions, function(characterProfession)
+        local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+          return dataProfession.skillLineID == characterProfession.skillLineID
+        end)
+        if not dataProfession then return end
 
-      local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
-        return dataProfession.skillLineID == characterProfession.skillLineID
+        ---@type WK_TableDataRow
+        local row = {columns = {}}
+        Utils:TableForEach(dataColumns, function(dataColumn)
+          ---@type WK_TableDataCell
+          local cell = dataColumn.cell(character, characterProfession, dataProfession)
+          table.insert(row.columns, cell)
+        end)
+
+        table.insert(tableData.rows, row)
+        tableHeight = tableHeight + self.frame.table.config.rows.height
       end)
-      if not dataProfession then return end
-
-      Utils:TableForEach(dataColumns, function(dataColumn)
-        ---@type WK_TableDataCell
-        local cell = dataColumn.cell(character, characterProfession, dataProfession)
-        table.insert(row.columns, cell)
-      end)
-
-      table.insert(tableData.rows, row)
-      tableHeight = tableHeight + self.frame.table.config.rows.height
     end)
-  end)
+  end
 
   self.frame.border:SetShown(Data.db.global.main.windowBorder)
   self.frame.table:SetData(tableData)
