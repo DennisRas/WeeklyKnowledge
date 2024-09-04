@@ -275,7 +275,7 @@ function WK:RenderChecklist()
     end)
   end
 
-  frame.border:SetShown(self.db.global.main.windowBorder)
+  frame.border:SetShown(self.db.global.checklist.windowBorder)
   frame.table:SetData(tableData)
   frame:SetWidth(tableWidth)
   frame:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT - 200))
