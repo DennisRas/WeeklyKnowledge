@@ -81,8 +81,10 @@ function WK:CreateScrollFrame(name, parent)
 end
 
 function WK:CreateTableFrame(config)
-  local frame = self:CreateScrollFrame("WeeklyKnowledgeTable" .. (self:TableCount(TableCollection) + 1))
-  frame.config = CreateFromMixins(
+  local tableFrame = CreateFrame("Frame", "WeeklyKnowledgeTable" .. (self:TableCount(TableCollection) + 1))
+  tableFrame.scrollFrame = self:CreateScrollFrame("$parentScrollFrame", tableFrame)
+
+  tableFrame.config = CreateFromMixins(
     {
       header = {
         enabled = true,
@@ -111,57 +113,75 @@ function WK:CreateTableFrame(config)
     },
     config or {}
   )
-  frame.rows = {}
-  frame.data = frame.config.data
+  tableFrame.rows = {}
+  tableFrame.data = tableFrame.config.data
 
   ---Set the table data
-  function frame:SetData(data)
-    frame.data = data
-    frame:RenderTable()
+  function tableFrame:SetData(data)
+    tableFrame.data = data
+    tableFrame:RenderTable()
   end
 
-  function frame:SetRowHeight(height)
+  function tableFrame:SetRowHeight(height)
     self.config.rows.height = height
     self:RenderTable()
   end
 
-  function frame:RenderTable()
+  function tableFrame:RenderTable()
     local offsetY = 0
     local offsetX = 0
 
-    WK:TableForEach(frame.rows, function(rowFrame) rowFrame:Hide() end)
-    WK:TableForEach(frame.data.rows, function(row, rowIndex)
-      local rowFrame = frame.rows[rowIndex]
-      local rowHeight = frame.config.rows.height
-      if rowIndex == 1 and frame.config.header.enabled then
-        rowHeight = frame.config.header.height
-      end
+    WK:TableForEach(tableFrame.rows, function(rowFrame) rowFrame:Hide() end)
+    WK:TableForEach(tableFrame.data.rows, function(row, rowIndex)
+      local rowFrame = tableFrame.rows[rowIndex]
+      local rowHeight = tableFrame.config.rows.height
+      local isStickyRow = false
 
       if not rowFrame then
-        rowFrame = CreateFrame("Button", "$parentRow" .. rowIndex, frame.content)
+        rowFrame = CreateFrame("Button", "$parentRow" .. rowIndex, tableFrame)
         rowFrame.columns = {}
-        frame.rows[rowIndex] = rowFrame
+        tableFrame.rows[rowIndex] = rowFrame
       end
 
-      rowFrame.data = row
-      rowFrame:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 0, -offsetY)
-      rowFrame:SetPoint("TOPRIGHT", frame.content, "TOPRIGHT", 0, -offsetY)
-      rowFrame:SetHeight(rowHeight)
-      rowFrame:SetScript("OnEnter", function() rowFrame:onEnterHandler(rowFrame) end)
-      rowFrame:SetScript("OnLeave", function() rowFrame:onLeaveHandler(rowFrame) end)
-      rowFrame:SetScript("OnClick", function() rowFrame:onClickHandler(rowFrame) end)
-      rowFrame:Show()
+      if rowIndex == 1 then
+        if tableFrame.config.header.enabled then
+          rowHeight = tableFrame.config.header.height
+        end
+        if tableFrame.config.header.sticky then
+          isStickyRow = true
+        end
+      end
 
-      if frame.config.rows.striped and rowIndex % 2 == 1 then
-        WK:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
+      -- Sticky header
+      if isStickyRow then
+        rowFrame:SetParent(tableFrame)
+        rowFrame:SetPoint("TOPLEFT", tableFrame, "TOPLEFT", 0, 0)
+        rowFrame:SetPoint("TOPRIGHT", tableFrame, "TOPRIGHT", 0, 0)
+        if not row.backgroundColor then
+          WK:SetBackgroundColor(rowFrame, 0, 0, 0, 0.3)
+        end
+      else
+        rowFrame:SetParent(tableFrame.scrollFrame.content)
+        rowFrame:SetPoint("TOPLEFT", tableFrame.scrollFrame.content, "TOPLEFT", 0, -offsetY)
+        rowFrame:SetPoint("TOPRIGHT", tableFrame.scrollFrame.content, "TOPRIGHT", 0, -offsetY)
+        if tableFrame.config.rows.striped and rowIndex % 2 == 1 then
+          WK:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
+        end
       end
 
       if row.backgroundColor then
         WK:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
       end
 
+      rowFrame.data = row
+      rowFrame:SetHeight(rowHeight)
+      rowFrame:SetScript("OnEnter", function() rowFrame:onEnterHandler(rowFrame) end)
+      rowFrame:SetScript("OnLeave", function() rowFrame:onLeaveHandler(rowFrame) end)
+      rowFrame:SetScript("OnClick", function() rowFrame:onClickHandler(rowFrame) end)
+      rowFrame:Show()
+
       function rowFrame:onEnterHandler(f)
-        if rowIndex > 1 or not frame.config.header.enabled then
+        if rowIndex > 1 or not tableFrame.config.header.enabled then
           WK:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
         if row.onEnter then
@@ -170,7 +190,7 @@ function WK:CreateTableFrame(config)
       end
 
       function rowFrame:onLeaveHandler(f)
-        if rowIndex > 1 or not frame.config.header.enabled then
+        if rowIndex > 1 or not tableFrame.config.header.enabled then
           WK:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
         if row.onLeave then
@@ -184,25 +204,12 @@ function WK:CreateTableFrame(config)
         end
       end
 
-      -- Sticky header
-      if frame.config.header.sticky and rowIndex == 1 then
-        if frame then
-          rowFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -offsetY)
-          rowFrame:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -offsetY)
-          rowFrame:SetToplevel(true)
-          rowFrame:SetFrameStrata("HIGH")
-        end
-        if not row.backgroundColor then
-          WK:SetBackgroundColor(rowFrame, 0.0784, 0.0980, 0.1137, 1)
-        end
-      end
-
       offsetX = 0
       WK:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
       WK:TableForEach(row.columns, function(column, columnIndex)
         local columnFrame = rowFrame.columns[columnIndex]
-        local columnConfig = frame.data.columns[columnIndex]
-        local columnWidth = columnConfig and columnConfig.width or frame.config.columns.width
+        local columnConfig = tableFrame.data.columns[columnIndex]
+        local columnWidth = columnConfig and columnConfig.width or tableFrame.config.columns.width
         local columnTextAlign = columnConfig and columnConfig.align or "LEFT"
 
         if not columnFrame then
@@ -221,8 +228,8 @@ function WK:CreateTableFrame(config)
         columnFrame:SetScript("OnClick", function() columnFrame:onClickHandler(columnFrame) end)
         columnFrame.text:SetWordWrap(false)
         columnFrame.text:SetJustifyH(columnTextAlign)
-        columnFrame.text:SetPoint("TOPLEFT", columnFrame, "TOPLEFT", frame.config.cells.padding, -frame.config.cells.padding)
-        columnFrame.text:SetPoint("BOTTOMRIGHT", columnFrame, "BOTTOMRIGHT", -frame.config.cells.padding, frame.config.cells.padding)
+        columnFrame.text:SetPoint("TOPLEFT", columnFrame, "TOPLEFT", tableFrame.config.cells.padding, -tableFrame.config.cells.padding)
+        columnFrame.text:SetPoint("BOTTOMRIGHT", columnFrame, "BOTTOMRIGHT", -tableFrame.config.cells.padding, tableFrame.config.cells.padding)
         columnFrame.text:SetText(column.text)
         columnFrame:Show()
 
@@ -254,14 +261,18 @@ function WK:CreateTableFrame(config)
         offsetX = offsetX + columnWidth
       end)
 
-      offsetY = offsetY + rowHeight
+      if not isStickyRow then
+        offsetY = offsetY + rowHeight
+      end
     end)
 
-    frame.content:SetSize(offsetX, offsetY)
+    tableFrame.scrollFrame:SetPoint("TOPLEFT", tableFrame, "TOPLEFT", 0, tableFrame.config.header.sticky and -tableFrame.config.header.height or 0)
+    tableFrame.scrollFrame:SetPoint("BOTTOMRIGHT", tableFrame, "BOTTOMRIGHT")
+    tableFrame.scrollFrame.content:SetSize(offsetX, offsetY)
   end
 
-  frame:HookScript("OnSizeChanged", function() frame:RenderTable() end)
-  frame:RenderTable()
-  table.insert(TableCollection, frame)
-  return frame;
+  tableFrame.scrollFrame:HookScript("OnSizeChanged", function() tableFrame:RenderTable() end)
+  tableFrame:RenderTable()
+  table.insert(TableCollection, tableFrame)
+  return tableFrame;
 end

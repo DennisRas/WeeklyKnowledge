@@ -15,6 +15,7 @@
 
 - Fixed a bug with Darkmoon values not showing on login (Thansk @Lombra)
 - Fixed a bug with ghost characters showing up on the list (scary!)
+- Scrollbars no longer overlap the column headers
 
 ## v1.0.4 - 2024-09-04
 
