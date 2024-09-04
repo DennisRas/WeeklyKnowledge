@@ -100,7 +100,7 @@ function WK:CreateTableFrame(config)
         striped = false
       },
       cells = {
-        padding = 8,
+        padding = self.Constants.TABLE_CELL_PADDING,
         highlight = false
       },
       ---@type WK_TableData

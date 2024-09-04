@@ -197,7 +197,7 @@ function WK:RenderChecklist()
         striped = true
       },
       cells = {
-        padding = 6,
+        padding = self.Constants.TABLE_CELL_PADDING,
         highlight = true
       },
     })
