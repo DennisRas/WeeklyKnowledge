@@ -9,7 +9,7 @@ WK.cache = {
   items = {},
 }
 
-WK.DBVersion = 3
+WK.DBVersion = 4
 WK.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -412,7 +412,7 @@ function WK:MigrateDB()
     self.db.global.DBVersion = self.DBVersion
   end
   if self.db.global.DBVersion < self.DBVersion then
-    -- Old version to new data structure
+    -- Set up new character data structure
     if self.db.global.DBVersion == 1 then
       for characterGUID, character in pairs(self.db.global.characters) do
         character.GUID = characterGUID
@@ -437,38 +437,33 @@ function WK:MigrateDB()
         end
       end
     end
-    -- Fix race condition with WK.cache.GUID being empty
-    -- Add new window settings
+    -- Fix missing weekly reset (week 2 of expansion)
     if self.db.global.DBVersion == 2 then
-      for characterGUID, character in pairs(self.db.global.characters) do
-        if not characterGUID or strlen(characterGUID) == 0 or not character.GUID or strlen(character.GUID) == 0 then
-          self.db.global.characters[""] = nil
-        end
+      if not self.db.global.weeklyReset then
+        self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset() - 604800
       end
-      self.db.global.main = {
-        hiddenColumns = WK:TableCopy(self.db.global.hiddenColumns),
-        ---@diagnostic disable-next-line: undefined-field
-        windowScale = self.db.global.windowScale,
-        ---@diagnostic disable-next-line: undefined-field
-        windowBackgroundColor = self.db.global.windowBackgroundColor,
-        windowBorder = true,
-        checklistHelpTipClosed = false,
-      }
-      self.db.global.checklist = {
-        open = false,
-        hiddenColumns = {},
-        windowScale = self.db.global.windowScale,
-        windowBackgroundColor = self.db.global.windowBackgroundColor,
-        windowBorder = true,
-        hideCompletedObjectives = false,
-        hideInCombat = false,
-      }
-      ---@diagnostic disable-next-line: inject-field
-      self.db.global.hiddenColumns = nil
-      ---@diagnostic disable-next-line: inject-field
-      self.db.global.windowScale = nil
-      ---@diagnostic disable-next-line: inject-field
-      self.db.global.windowBackgroundColor = nil
+    end
+    -- Fix race condition with WK.cache.GUID being empty
+    -- Move to new window settings
+    if self.db.global.DBVersion == 3 then
+      self.db.global.characters[""] = nil
+      if self.db.global.hiddenColumns and self:TableCount(self.db.global.hiddenColumns) > 0 then
+        self.db.global.main.hiddenColumns = WK:TableCopy(self.db.global.hiddenColumns)
+        ---@diagnostic disable-next-line: inject-field
+        self.db.global.hiddenColumns = nil
+      end
+      if self.db.global.windowScale then
+        self.db.global.main.windowScale = self.db.global.windowScale
+        self.db.global.checklist.windowScale = self.db.global.windowScale
+        ---@diagnostic disable-next-line: inject-field
+        self.db.global.windowScale = nil
+      end
+      if self.db.global.windowBackgroundColor then
+        self.db.global.main.windowBackgroundColor = self.db.global.windowBackgroundColor
+        self.db.global.checklist.windowBackgroundColor = self.db.global.windowBackgroundColor
+        ---@diagnostic disable-next-line: inject-field
+        self.db.global.windowBackgroundColor = nil
+      end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
@@ -476,13 +471,29 @@ function WK:MigrateDB()
 end
 
 function WK:TaskWeeklyReset()
-  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset > 0 and self.db.global.weeklyReset <= time() then
+  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
-    WK:TableForEach(self.db.global.characters, function(character)
-      wipe(character.completed or {})
-    end)
+    local questsToReset = {}
+    for _, data in ipairs(self.Professions) do
+      for _, objective in ipairs(data.objectives) do
+        if objective.category.repeatable ~= "Weekly" then
+          for _, questID in ipairs(objective.quests) do
+            questsToReset[questID] = true
+          end
+        end
+      end
+    end
+    for _, character in pairs(self.db.global.characters) do
+      if type(character.lastUpdate) == "number" and character.lastUpdate < self.db.global.weeklyReset then
+        for questID in pairs(character.completed) do
+          if questsToReset[questID] then
+            character.completed[questID] = nil
+          end
+        end
+      end
+    end
   end
-  self.db.global.weeklyReset = time() + C_DateAndTime.GetSecondsUntilWeeklyReset()
+  self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
 end
 
 ---Check to see if the Darkmoon Faire event is live

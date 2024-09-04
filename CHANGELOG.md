@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.4 - 2024-09-04
+
+### Fixed
+
+- Fixed a bug with weekly reset. Character progress should now be reset. A big shout-out to the player community in the comments for showing interest in helping fix these issues. You are much appreciated!
+
 ## v1.0.4 - 2024-09-??
 
 ### Fixed
