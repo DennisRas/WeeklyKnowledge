@@ -322,9 +322,21 @@ function WK:RenderChecklist()
       if not dataProfession then return end
 
       self:TableForEach(dataProfession.objectives, function(professionObjective)
-        if not professionObjective.itemID then return end
-        local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
-        if not itemName then return end
+        local item = {
+          id = professionObjective.itemID,
+          name = "",
+          link = "",
+          texture = "",
+        }
+
+        if professionObjective.itemID then
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
+          if itemName then
+            item.name = itemName
+            item.link = itemLink
+            item.texture = itemTexture
+          end
+        end
 
         local progress = {
           completed = 0,
@@ -369,10 +381,11 @@ function WK:RenderChecklist()
             characterProfession = characterProfession,
             dataProfession = dataProfession,
             professionObjective = professionObjective,
-            itemName = itemName,
-            itemLink = itemLink,
-            itemTexture = itemTexture,
+            -- itemName = itemName,
+            -- itemLink = itemLink,
+            -- itemTexture = itemTexture,
             progress = progress,
+            item = item
           }
           ---@type WK_TableDataCell
           local cell = dataColumn.cell(cellData)
@@ -401,24 +414,35 @@ function WK:GetChecklistColumns(unfiltered)
       name = "Objective",
       width = 260,
       cell = function(data)
+        local text = ""
+        if data.item.link then
+          text = data.item.link
+          if data.item.texture then
+            text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
+          end
+        else
+          text = "Quest"
+        end
         return {
-          text = "|T" .. data.itemTexture .. ":0|t " .. data.itemLink,
+          text = text,
           onEnter = function(columnFrame)
-            GameTooltip:ClearAllPoints()
-            GameTooltip:ClearLines()
             GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetHyperlink(data.itemLink)
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            if data.item.link then
+              GameTooltip:SetHyperlink(data.item.link)
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            end
             GameTooltip:Show()
           end,
           onLeave = function()
             GameTooltip:Hide()
           end,
           onClick = function()
-            if IsModifiedClick("CHATLINK") then
-              if not ChatEdit_InsertLink(data.itemLink) then
-                ChatFrame_OpenChat(data.itemLink);
+            if data.item.link then
+              if IsModifiedClick("CHATLINK") then
+                if not ChatEdit_InsertLink(data.item.link) then
+                  ChatFrame_OpenChat(data.item.link);
+                end
               end
             end
           end,
