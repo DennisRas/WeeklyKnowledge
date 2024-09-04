@@ -279,6 +279,7 @@ function WK:RenderMain()
       frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
         local hidden = self.db.global.main.hiddenColumns
         self:TableForEach(self:GetMainColumns(true), function(column)
+          if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.name,
             function() return not hidden[column.name] end,
@@ -443,6 +444,7 @@ function WK:GetMainColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
+      toggleHidden = true,
       cell = function(character)
         local characterName = character.name
         local _, classFile = GetClassInfo(character.classID)
@@ -469,6 +471,7 @@ function WK:GetMainColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
+      toggleHidden = true,
       cell = function(character)
         return {text = character.realmName}
       end,
@@ -487,6 +490,7 @@ function WK:GetMainColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 80,
+      toggleHidden = true,
       cell = function(_, _, dataProfession)
         return {text = dataProfession.name}
       end,
@@ -506,6 +510,7 @@ function WK:GetMainColumns(unfiltered)
       end,
       width = 80,
       align = "CENTER",
+      toggleHidden = true,
       cell = function(_, characterProfession)
         return {text = characterProfession.level > 0 and characterProfession.level == characterProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.level .. " / " .. characterProfession.maxLevel) or characterProfession.level .. " / " .. characterProfession.maxLevel}
       end,
@@ -525,6 +530,7 @@ function WK:GetMainColumns(unfiltered)
       end,
       width = 80,
       align = "CENTER",
+      toggleHidden = true,
       cell = function(_, characterProfession)
         if characterProfession.knowledgeMaxLevel > 0 then
           return {text = characterProfession.knowledgeLevel > 0 and characterProfession.knowledgeLevel == characterProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel) or characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel}

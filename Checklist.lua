@@ -240,7 +240,7 @@ function WK:RenderChecklist()
       frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
         local hidden = self.db.global.checklist.hiddenColumns
         self:TableForEach(self:GetChecklistColumns(true), function(column)
-          if not column.name or strlen(column.name) == 0 then return end
+          if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.name,
             function() return not hidden[column.name] end,
@@ -393,6 +393,7 @@ function WK:GetChecklistColumns(unfiltered)
     {
       name = "Profession",
       width = 100,
+      toggleHidden = true,
       cell = function(data)
         return {
           text = data.dataProfession.name,
@@ -402,6 +403,7 @@ function WK:GetChecklistColumns(unfiltered)
     {
       name = "Category",
       width = 80,
+      toggleHidden = true,
       cell = function(data)
         local objective = self:GetObjective(data.professionObjective.objectiveID)
         return {
@@ -420,7 +422,8 @@ function WK:GetChecklistColumns(unfiltered)
     },
     {
       name = "Repeat",
-      width = 70,
+      width = 60,
+      toggleHidden = true,
       cell = function(data)
         local objective = self:GetObjective(data.professionObjective.objectiveID)
         return {
@@ -429,12 +432,25 @@ function WK:GetChecklistColumns(unfiltered)
       end,
     },
     {
-      name = "Points",
-      width = 50,
+      name = "Progress",
+      width = 70,
       align = "CENTER",
+      toggleHidden = true,
       cell = function(data)
         return {
-          text = "+" .. tostring(data.professionObjective.points),
+          text = format("? / ?"),
+        }
+      end,
+    },
+    {
+      name = "Points",
+      width = 70,
+      align = "CENTER",
+      toggleHidden = true,
+      cell = function(data)
+        return {
+          -- text = tostring(data.professionObjective.points),
+          text = format("? / ?"),
         }
       end,
     },
