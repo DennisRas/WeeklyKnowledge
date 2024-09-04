@@ -327,6 +327,42 @@ function WK:RenderChecklist()
         local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
         if not itemName then return end
 
+        local progress = {
+          completed = 0,
+          total = 0,
+          points = 0,
+          pointsTotal = 0,
+        }
+
+        local objective = professionObjective
+        if objective.quests then
+          local limit = 0
+
+          for _, questID in ipairs(objective.quests) do
+            progress.total = progress.total + 1
+            progress.pointsTotal = progress.pointsTotal + objective.points
+            if objective.limit and progress.total > objective.limit then
+              progress.pointsTotal = objective.limit * objective.points
+              progress.total = objective.limit
+            end
+            if character.completed[questID] then
+              progress.completed = progress.completed + 1
+              progress.points = progress.points + objective.points
+            end
+          end
+
+          if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
+            if not self.cache.isDarkmoonOpen then
+              progress.total = 0
+            end
+          end
+        end
+
+        DevTools_Dump(self.db.global.checklist.hideCompletedObjectives)
+        if progress.total > 0 and progress.completed == progress.total and self.db.global.checklist.hideCompletedObjectives then
+          return
+        end
+
         ---@type WK_TableDataRow
         local row = {columns = {}}
         self:TableForEach(dataColumns, function(dataColumn)
@@ -338,6 +374,7 @@ function WK:RenderChecklist()
             itemName = itemName,
             itemLink = itemLink,
             itemTexture = itemTexture,
+            progress = progress,
           }
           ---@type WK_TableDataCell
           local cell = dataColumn.cell(cellData)
@@ -437,8 +474,15 @@ function WK:GetChecklistColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
+        local result = format("%d / %d", data.progress.completed, data.progress.total)
+        if data.progress.total == 0 then
+          result = ""
+        elseif data.progress.completed == data.progress.total then
+          result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
+        end
+
         return {
-          text = format("? / ?"),
+          text = result,
         }
       end,
     },
@@ -448,9 +492,15 @@ function WK:GetChecklistColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
+        local result = format("%d / %d", data.progress.points, data.progress.pointsTotal)
+        if data.progress.total == 0 then
+          result = ""
+        elseif data.progress.points == data.progress.pointsTotal then
+          result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
+        end
+
         return {
-          -- text = tostring(data.professionObjective.points),
-          text = format("? / ?"),
+          text = result,
         }
       end,
     },
