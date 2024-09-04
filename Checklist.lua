@@ -294,7 +294,6 @@ function WK:RenderChecklist()
         align = dataColumn.align or "LEFT",
       }
       table.insert(tableData.columns, column)
-      -- DevTools_Dump(dataColumn.width)
       tableWidth = tableWidth + dataColumn.width
     end)
   end
@@ -358,7 +357,6 @@ function WK:RenderChecklist()
           end
         end
 
-        DevTools_Dump(self.db.global.checklist.hideCompletedObjectives)
         if progress.total > 0 and progress.completed == progress.total and self.db.global.checklist.hideCompletedObjectives then
           return
         end
