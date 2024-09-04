@@ -10,6 +10,7 @@ function WK:ToggleChecklistWindow()
   else
     frame:Show()
   end
+  self.db.global.checklist.open = frame:IsVisible()
   self:Render()
 end
 
@@ -38,7 +39,7 @@ function WK:RenderChecklist()
     frame:EnableMouse(true)
     frame:SetScript("OnDragStart", function() frame:StartMoving() end)
     frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
-    frame:Hide()
+    frame:SetShown(self.db.global.checklist.open)
     self:SetBackgroundColor(frame, self.db.global.checklist.windowBackgroundColor.r, self.db.global.checklist.windowBackgroundColor.g, self.db.global.checklist.windowBackgroundColor.b, self.db.global.checklist.windowBackgroundColor.a)
 
     frame.border = CreateFrame("Frame", "$parentBorder", frame, "BackdropTemplate")
