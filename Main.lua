@@ -561,7 +561,7 @@ function WK:GetMainColumns(unfiltered)
         local itemList = {}
 
         for _, objective in ipairs(dataProfession.objectives) do
-          if objective.category == dataObjective then
+          if objective.objectiveID == dataObjective.id then
             if objective.quests then
               local limit = 0
 
@@ -584,7 +584,7 @@ function WK:GetMainColumns(unfiltered)
                 end
               end
 
-              if objective.category == self.Objectives.DarkmoonQuest then
+              if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
                 if not self.cache.isDarkmoonOpen then
                   total = 0
                 end

@@ -361,7 +361,7 @@ function WK:GetChecklistColumns(unfiltered)
   local hidden = self.db.global.checklist.hiddenColumns
   local columns = {
     {
-      name = "Item",
+      name = "Objective",
       width = 260,
       cell = function(data)
         return {
@@ -401,7 +401,7 @@ function WK:GetChecklistColumns(unfiltered)
       name = "Category",
       width = 80,
       cell = function(data)
-        local objective = data.professionObjective.category
+        local objective = self:GetObjective(data.professionObjective.objectiveID)
         return {
           text = objective.name,
           onEnter = function(cellFrame)
@@ -420,8 +420,9 @@ function WK:GetChecklistColumns(unfiltered)
       name = "Repeat",
       width = 70,
       cell = function(data)
+        local objective = self:GetObjective(data.professionObjective.objectiveID)
         return {
-          text = data.professionObjective.category.repeatable,
+          text = objective.repeatable,
         }
       end,
     },

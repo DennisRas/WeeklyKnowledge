@@ -53,6 +53,7 @@
 ---@field knowledgeMaxLevel integer
 
 ---@class WK_Objective
+---@field id Enum.WK_Objectives
 ---@field name string
 ---@field description string
 ---@field type "item" | "quest"
@@ -66,7 +67,7 @@
 ---@field objectives WK_ProfessionObjective[]
 
 ---@class WK_ProfessionObjective
----@field category WK_Objective
+---@field objectiveID Enum.WK_Objectives
 ---@field quests integer[]
 ---@field itemID integer?
 ---@field points integer
@@ -105,3 +106,14 @@
 ---@field onEnter function?
 ---@field onLeave function?
 ---@field onClick function?
+
+---@enum Enum.WK_Objectives
+Enum.WK_Objectives = {
+  Unique = "Unique",
+  Treatise = "Treatise",
+  ArtisanQuest = "ArtisanQuest",
+  Treasure = "Treasure",
+  Gathering = "Gathering",
+  TrainerQuest = "TrainerQuest",
+  DarkmoonQuest = "DarkmoonQuest",
+}
