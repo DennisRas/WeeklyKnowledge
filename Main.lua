@@ -18,6 +18,7 @@ function WK:RenderMain()
   local dataColumns = self:GetMainColumns()
   local tableWidth = 0
   local tableHeight = 0
+  local minWindowWidth = 300
   ---@type WK_TableData
   local tableData = {
     columns = {},
@@ -416,9 +417,10 @@ function WK:RenderMain()
     end)
   end
 
+  frame.titlebar.title:SetShown(tableWidth > minWindowWidth)
   frame.border:SetShown(self.db.global.main.windowBorder)
   frame.table:SetData(tableData)
-  frame:SetWidth(tableWidth)
+  frame:SetWidth(math.max(tableWidth, minWindowWidth))
   frame:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT))
   frame:SetScale(self.db.global.main.windowScale / 100)
 end

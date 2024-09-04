@@ -19,6 +19,7 @@ function WK:RenderChecklist()
   local dataColumns = self:GetChecklistColumns()
   local tableWidth = 0
   local tableHeight = 0
+  local minWindowWidth = 200
   ---@type WK_TableData
   local tableData = {
     columns = {},
@@ -349,10 +350,11 @@ function WK:RenderChecklist()
     end)
   end
 
+  frame.titlebar.title:SetShown(tableWidth > minWindowWidth)
   frame.border:SetShown(self.db.global.checklist.windowBorder)
   frame.titlebar:SetShown(self.db.global.checklist.windowTitlebar)
   frame.table:SetData(tableData)
-  frame:SetWidth(tableWidth)
+  frame:SetWidth(math.max(tableWidth, minWindowWidth))
   frame:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT - 200))
   frame:SetScale(self.db.global.checklist.windowScale / 100)
 end
