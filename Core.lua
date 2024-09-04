@@ -382,7 +382,7 @@ local WP_DATA = {
 
 function WP:MigrateDB()
   if type(self.db.global.DBVersion) ~= "number" then
-    self.db.global.DBVersion = 1
+    self.db.global.DBVersion = self.DBVersion
   end
   if self.db.global.DBVersion < WP.DBVersion then
     if self.db.global.DBVersion == 1 then
@@ -412,7 +412,21 @@ end
 
 function WP:TaskWeeklyReset()
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= time() then
+    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
     for _, character in pairs(self.db.global.characters) do
+      for questID, questState in pairs(character.completed) do
+        for _, wpdata in ipairs(WP_DATA) do
+          for _, objective in ipairs(wpdata.objectives) do
+            for _, objectiveQuest in ipairs(objective.quests) do
+              if objectiveQuest == questID then
+                if objective.category ~= WP_CATEGORY_UNIQUE and objective.category ~= WP_CATEGORY_DARKMOON then
+                  character.completed[questID] = nil
+                end
+              end
+            end
+          end
+        end
+      end
       wipe(character.completed or {})
     end
   end
@@ -838,6 +852,7 @@ function WP:OnInitialize()
     true
   )
   self:MigrateDB()
+  self:TaskWeeklyReset()
 
   local libDataObject = {
     label = "WeeklyKnowledge",
