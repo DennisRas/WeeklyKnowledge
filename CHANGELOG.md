@@ -1,17 +1,26 @@
 # Changelog
 
-## v1.0.4 - 2024-09-04
+## v1.1.0 - 2024-09-??
 
-### Fixed
+### Added
 
-- Fixed a bug with weekly reset. Character progress should now be reset. A big shout-out to the player community in the comments for showing interest in helping fix these issues. You are much appreciated!
+- Added a new Checklist window
 
-## v1.0.4 - 2024-09-??
+### Updated
+
+- You can now see the items missing/needed in tooltips
+- New Setting: Show/hide window border
 
 ### Fixed
 
 - Fixed a bug with Darkmoon values not showing on login (Thansk @Lombra)
 - Fixed a bug with ghost characters showing up on the list (scary!)
+
+## v1.0.4 - 2024-09-04
+
+### Fixed
+
+- Fixed a bug with weekly reset. Character progress should now be reset. A big shout-out to the player community in the comments for showing interest in helping fix these issues. You are much appreciated!
 
 ## v1.0.3 - 2024-09-01
 
