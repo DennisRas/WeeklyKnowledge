@@ -10,7 +10,7 @@ function WK:ToggleChecklistWindow()
   else
     frame:Show()
   end
-  self:RenderChecklist()
+  self:Render()
 end
 
 function WK:RenderChecklist()
@@ -133,7 +133,7 @@ function WK:RenderChecklist()
             function() return self.db.global.checklist.windowScale == i end,
             function(data)
               self.db.global.checklist.windowScale = data
-              self:RenderChecklist()
+              self:Render()
             end,
             i
           )
@@ -184,7 +184,7 @@ function WK:RenderChecklist()
           function() return self.db.global.checklist.windowBorder end,
           function()
             self.db.global.checklist.windowBorder = not self.db.global.checklist.windowBorder
-            self:RenderChecklist()
+            self:Render()
           end
         )
       end)

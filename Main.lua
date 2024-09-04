@@ -11,7 +11,7 @@ function WK:ToggleMainWindow()
   else
     frame:Show()
   end
-  self:RenderMain()
+  self:Render()
 end
 
 function WK:RenderMain()
@@ -148,7 +148,7 @@ function WK:RenderMain()
             function() return self.db.global.main.windowScale == i end,
             function(data)
               self.db.global.main.windowScale = data
-              self:RenderMain()
+              self:Render()
             end,
             i
           )
@@ -199,7 +199,7 @@ function WK:RenderMain()
           function() return self.db.global.main.windowBorder end,
           function()
             self.db.global.main.windowBorder = not self.db.global.main.windowBorder
-            self:RenderMain()
+            self:Render()
           end
         )
       end)
@@ -250,7 +250,7 @@ function WK:RenderMain()
             function() return character.enabled or false end,
             function()
               character.enabled = not character.enabled
-              self:RenderMain()
+              self:Render()
             end
           )
         end)
@@ -283,7 +283,7 @@ function WK:RenderMain()
             function() return not hidden[column.name] end,
             function(columnName)
               hidden[columnName] = not hidden[columnName]
-              self:RenderMain()
+              self:Render()
             end,
             column.name
           )
