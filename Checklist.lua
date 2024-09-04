@@ -114,6 +114,30 @@ function WK:RenderChecklist()
         GameTooltip:Hide()
       end)
       frame.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        rootMenu:CreateCheckbox(
+          "Hide in combat",
+          function() return self.db.global.checklist.hideInCombat end,
+          function()
+            self.db.global.checklist.hideInCombat = not self.db.global.checklist.hideInCombat
+            self:Render()
+          end
+        )
+        rootMenu:CreateCheckbox(
+          "Hide in dungeons",
+          function() return self.db.global.checklist.hideInDungeons end,
+          function()
+            self.db.global.checklist.hideInDungeons = not self.db.global.checklist.hideInDungeons
+            self:Render()
+          end
+        )
+        rootMenu:CreateCheckbox(
+          "Hide completed objectives",
+          function() return self.db.global.checklist.hideCompletedObjectives end,
+          function()
+            self.db.global.checklist.hideCompletedObjectives = not self.db.global.checklist.hideCompletedObjectives
+            self:Render()
+          end
+        )
         rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
@@ -176,6 +200,14 @@ function WK:RenderChecklist()
             self:Render()
           end
         )
+        rootMenu:CreateCheckbox(
+          "Show the title bar",
+          function() return self.db.global.checklist.windowTitlebar end,
+          function()
+            self.db.global.checklist.windowTitlebar = not self.db.global.checklist.windowTitlebar
+            self:Render()
+          end
+        )
       end)
 
       frame.titlebar.SettingsButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
@@ -183,6 +215,47 @@ function WK:RenderChecklist()
       frame.titlebar.SettingsButton.Icon:SetSize(12, 12)
       frame.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
       frame.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
+
+    do -- Columns Button
+      frame.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", frame.titlebar)
+      frame.titlebar.ColumnsButton:SetPoint("RIGHT", frame.titlebar.SettingsButton, "LEFT", 0, 0)
+      frame.titlebar.ColumnsButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
+      frame.titlebar.ColumnsButton:SetScript("OnEnter", function()
+        frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        self:SetBackgroundColor(frame.titlebar.ColumnsButton, 1, 1, 1, 0.05)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        GameTooltip:SetOwner(frame.titlebar.ColumnsButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
+        GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:Show()
+      end)
+      frame.titlebar.ColumnsButton:SetScript("OnLeave", function()
+        frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        self:SetBackgroundColor(frame.titlebar.ColumnsButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      frame.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
+        local hidden = self.db.global.checklist.hiddenColumns
+        self:TableForEach(self:GetChecklistColumns(true), function(column)
+          if not column.name or strlen(column.name) == 0 then return end
+          rootMenu:CreateCheckbox(
+            column.name,
+            function() return not hidden[column.name] end,
+            function(columnName)
+              hidden[columnName] = not hidden[columnName]
+              self:Render()
+            end,
+            column.name
+          )
+        end)
+      end)
+
+      frame.titlebar.ColumnsButton.Icon = frame.titlebar:CreateTexture(frame.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
+      frame.titlebar.ColumnsButton.Icon:SetPoint("CENTER", frame.titlebar.ColumnsButton, "CENTER")
+      frame.titlebar.ColumnsButton.Icon:SetSize(12, 12)
+      frame.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
+      frame.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     frame.table = self:CreateTableFrame({
@@ -276,6 +349,7 @@ function WK:RenderChecklist()
   end
 
   frame.border:SetShown(self.db.global.checklist.windowBorder)
+  frame.titlebar:SetShown(self.db.global.checklist.windowTitlebar)
   frame.table:SetData(tableData)
   frame:SetWidth(tableWidth)
   frame:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT - 200))
@@ -342,7 +416,7 @@ function WK:GetChecklistColumns(unfiltered)
       end,
     },
     {
-      name = "Repeatable",
+      name = "Repeat",
       width = 70,
       cell = function(data)
         return {

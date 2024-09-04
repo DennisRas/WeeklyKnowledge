@@ -33,8 +33,11 @@ WK.defaultDB = {
       windowScale = 100,
       windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
       windowBorder = true,
+      windowTitlebar = true,
       hideCompletedObjectives = false,
       hideInCombat = false,
+      hideInDungeons = true,
+      hideTableHeader = false,
     },
   }
 }

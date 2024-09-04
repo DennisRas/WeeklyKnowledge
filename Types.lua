@@ -19,10 +19,13 @@
 ---@field windowScale integer
 ---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
 ---@field windowBorder boolean Show the border?
+---@field windowTitlebar boolean
 ---@field fontSize integer?
 ---@field open boolean
 ---@field hideCompletedObjectives boolean
 ---@field hideInCombat boolean
+---@field hideInDungeons boolean
+---@field hideTableHeader boolean
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID
