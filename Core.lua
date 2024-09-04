@@ -24,7 +24,7 @@ WP.cache = {
 _G.WP = WP;
 --@end-debug@
 
-WP.DBVersion = 2
+WP.DBVersion = 3
 WP.defaultDB = {
   global = {
     minimap = {
@@ -385,6 +385,7 @@ function WP:MigrateDB()
     self.db.global.DBVersion = self.DBVersion
   end
   if self.db.global.DBVersion < WP.DBVersion then
+    -- Set up new character data structure
     if self.db.global.DBVersion == 1 then
       for characterGUID, character in pairs(self.db.global.characters) do
         character.GUID = characterGUID
@@ -405,32 +406,41 @@ function WP:MigrateDB()
         end
       end
     end
+    -- Fix missing weekly reset (week 2 of expansion)
+    if self.db.global.DBVersion == 2 then
+      if not self.db.global.weeklyReset then
+        self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset() - 604800
+      end
+    end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
 end
 
 function WP:TaskWeeklyReset()
-  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= time() then
+  if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
-    for _, character in pairs(self.db.global.characters) do
-      for questID, questState in pairs(character.completed) do
-        for _, wpdata in ipairs(WP_DATA) do
-          for _, objective in ipairs(wpdata.objectives) do
-            for _, objectiveQuest in ipairs(objective.quests) do
-              if objectiveQuest == questID then
-                if objective.category ~= WP_CATEGORY_UNIQUE and objective.category ~= WP_CATEGORY_DARKMOON then
-                  character.completed[questID] = nil
-                end
-              end
-            end
+    local questsToReset = {}
+    for _, data in ipairs(WP_DATA) do
+      for _, objective in ipairs(data.objectives) do
+        if objective.category ~= WP_CATEGORY_UNIQUE and objective.category ~= WP_CATEGORY_DARKMOON then
+          for _, questID in ipairs(objective.quests) do
+            questsToReset[questID] = true
           end
         end
       end
-      wipe(character.completed or {})
+    end
+    for _, character in pairs(self.db.global.characters) do
+      if type(character.lastUpdate) == "number" and character.lastUpdate < self.db.global.weeklyReset then
+        for questID in pairs(character.completed) do
+          if questsToReset[questID] then
+            character.completed[questID] = nil
+          end
+        end
+      end
     end
   end
-  self.db.global.weeklyReset = time() + C_DateAndTime.GetSecondsUntilWeeklyReset()
+  self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
 end
 
 function WP:ScanCharacter()
