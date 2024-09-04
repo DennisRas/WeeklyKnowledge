@@ -457,17 +457,17 @@ function WK:GetChecklistColumns(unfiltered)
         }
       end,
     },
-    {
-      name = "Repeat",
-      width = 60,
-      toggleHidden = true,
-      cell = function(data)
-        local objective = self:GetObjective(data.professionObjective.objectiveID)
-        return {
-          text = objective.repeatable,
-        }
-      end,
-    },
+    -- {
+    --   name = "Repeat",
+    --   width = 60,
+    --   toggleHidden = true,
+    --   cell = function(data)
+    --     local objective = self:GetObjective(data.professionObjective.objectiveID)
+    --     return {
+    --       text = objective.repeatable,
+    --     }
+    --   end,
+    -- },
     {
       name = "Progress",
       width = 70,
