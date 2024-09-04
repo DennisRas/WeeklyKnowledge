@@ -20,18 +20,7 @@ function WK:RenderChecklist()
   local tableHeight = 0
   ---@type WK_TableData
   local tableData = {
-    columns = {
-      {width = 260,},
-      {width = 100,},
-      {width = 80,},
-      {
-        width = 50,
-        align = "CENTER",
-      },
-      {
-        width = 40,
-      },
-    },
+    columns = {},
     rows = {}
   }
 
@@ -230,6 +219,7 @@ function WK:RenderChecklist()
         align = dataColumn.align or "LEFT",
       }
       table.insert(tableData.columns, column)
+      -- DevTools_Dump(dataColumn.width)
       tableWidth = tableWidth + dataColumn.width
     end)
   end
@@ -336,8 +326,27 @@ function WK:GetChecklistColumns(unfiltered)
       name = "Category",
       width = 80,
       cell = function(data)
+        local objective = data.professionObjective.category
         return {
-          text = data.professionObjective.category.name,
+          text = objective.name,
+          onEnter = function(cellFrame)
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(objective.name, 1, 1, 1);
+            GameTooltip:AddLine(objective.description, nil, nil, nil, true)
+            GameTooltip:Show()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+        }
+      end,
+    },
+    {
+      name = "Repeatable",
+      width = 70,
+      cell = function(data)
+        return {
+          text = data.professionObjective.category.repeatable,
         }
       end,
     },
