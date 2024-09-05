@@ -17,9 +17,8 @@ function WK:OnInitialize()
   self:InitDB()
   self:MigrateDB()
 
-  local libDataObject = {
+  local WKLDB = LibDataBroker:NewDataObject(addonName, {
     label = addonName,
-    tocname = addonName,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
@@ -34,10 +33,8 @@ function WK:OnInitialize()
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end
-  }
-
-  LibDataBroker:NewDataObject(addonName, libDataObject)
-  LibDBIcon:Register(addonName, libDataObject, self.db.global.minimap)
+  })
+  LibDBIcon:Register(addonName, WKLDB, self.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
 
   self:Render()
