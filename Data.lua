@@ -178,8 +178,8 @@ WK.Professions = {
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {81076},                             itemID = 227411, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = "This item can be purchased from the vendor Lyrendal in Dornogal."},                        requires = {{type = "item", id = 210814, amount = 200}}},
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {81077},                             itemID = 227422, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = "This item can be purchased from the vendor Lyrendal in Dornogal."},                        requires = {{type = "item", id = 210814, amount = 300}}},
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {81078},                             itemID = 227433, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = "This item can be purchased from the vendor Lyrendal in Dornogal."},                        requires = {{type = "item", id = 210814, amount = 400}}},
-      {objectiveID = Enum.WK_Objectives.Unique,        quests = {82635},                             itemID = 224050, points = 10, loc = {m = 0, x = 0, y = 0, hint = ""}},
-      {objectiveID = Enum.WK_Objectives.Unique,        quests = {83060},                             itemID = 224652, points = 10, loc = {m = 0, x = 0, y = 0, hint = ""}},
+      {objectiveID = Enum.WK_Objectives.Unique,        quests = {82635},                             itemID = 224050, points = 10, loc = {m = 2213, x = 45.6, y = 33.6, hint = "This item can be purcrashed from the vendor Iliani in City of Threads."},                  requires = {{type = "currency", id = 3056, amount = 565}}},
+      {objectiveID = Enum.WK_Objectives.Unique,        quests = {83060},                             itemID = 224652, points = 10, loc = {m = 2339, x = 39.2, y = 24.2, hint = "This item can be purchased from the vendor Auditor Balwurz in Dornogal."},                 requires = {{type = "renown", id = 2590, amount = 12}, {type = "item", id = 210814, amount = 50}}},
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {83856},                             itemID = 226284, points = 3,  loc = {m = 0, x = 0, y = 0, hint = ""}},
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {83859},                             itemID = 226285, points = 3,  loc = {m = 2339, x = 57.9, y = 56.9, hint = "This item can be found in Dornogal leaning against a wooden pillar next to Clerk Gretal."}},
       {objectiveID = Enum.WK_Objectives.Unique,        quests = {83860},                             itemID = 226286, points = 3,  loc = {m = 0, x = 0, y = 0, hint = ""}},
@@ -194,7 +194,7 @@ WK.Professions = {
       {objectiveID = Enum.WK_Objectives.Gathering,     quests = {84290, 84291, 84292, 84293, 84294}, itemID = 227659, points = 1},
       {objectiveID = Enum.WK_Objectives.Gathering,     quests = {84295},                             itemID = 227661, points = 4},
       {objectiveID = Enum.WK_Objectives.TrainerQuest,  quests = {84084, 84085, 84086},               itemID = 227667, points = 3,  limit = 1},
-      {objectiveID = Enum.WK_Objectives.DarkmoonQuest, quests = {29510},                             itemID = 0,      points = 3},
+      {objectiveID = Enum.WK_Objectives.DarkmoonQuest, quests = {29510},                             itemID = 0,      points = 3,  loc = {m = 407, x = 53.2, y = 76.6, hint = "Talk to Sayge at the Darkmoon Faire and complete the quest."}},
     }
   },
   {

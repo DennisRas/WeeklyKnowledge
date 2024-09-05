@@ -551,12 +551,41 @@ function WK:GetChecklistColumns(unfiltered)
                   GameTooltip:AddLine(" ")
                   GameTooltip:AddLine("Requirements:")
                   self:TableForEach(requires, function(req)
-                    local text = ""
+                    local text = " "
+                    local amount = format("x%d", req.amount)
+                    local completed = false
                     if req.type == "item" then
-                      local itemName, itemLink = C_Item.GetItemInfo(req.id)
-                      text = itemLink
+                      local _, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(req.id)
+                      local itemCount = C_Item.GetItemCount(req.id)
+                      text = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink)
+                      amount = format("%d / %d", itemCount, req.amount)
+                      if itemCount >= req.amount then
+                        completed = true
+                      end
                     end
-                    GameTooltip:AddDoubleLine(text, format("x%d", req.amount), 1, 1, 1, 1, 1, 1)
+                    if req.type == "currency" then
+                      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(req.id)
+                      if currencyInfo then
+                        local _, _, _, hex = C_Item.GetItemQualityColor(currencyInfo.quality)
+                        text = format("%s |c%s%s|r", CreateSimpleTextureMarkup(currencyInfo.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, currencyInfo.name)
+                        amount = format("%d / %d", currencyInfo.quantity, req.amount)
+                        if currencyInfo.quantity > req.amount then
+                          completed = true
+                        end
+                      end
+                    end
+                    if req.type == "renown" then
+                      local renownLevel = C_MajorFactions.GetCurrentRenownLevel(req.id) or 0
+                      local renownInfo = C_MajorFactions.GetMajorFactionData(req.id)
+                      if renownInfo and renownLevel > 0 then
+                        text = renownInfo.name
+                        amount = format("%d / %d", renownLevel, req.amount)
+                        if renownLevel > req.amount then
+                          completed = true
+                        end
+                      end
+                    end
+                    GameTooltip:AddDoubleLine(text, format("%s %s", amount, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
                   end)
                 end
                 if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
