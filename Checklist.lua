@@ -529,21 +529,64 @@ function WK:GetChecklistColumns(unfiltered)
     {
       name = "",
       width = 40,
-      cell = function()
+      cell = function(data)
+        local loc = data.professionObjective.loc
+        local requires = data.professionObjective.requires
+        if data.professionObjective and loc and loc.m and loc.m > 0 then
+          local mapInfo = C_Map.GetMapInfo(loc.m)
+          if mapInfo then
+            local point = UiMapPoint.CreateFromCoordinates(loc.m, loc.x / 100, loc.y / 100)
+            return {
+              text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20),
+              onEnter = function(columnFrame)
+                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+                if loc.hint then
+                  GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
+                  GameTooltip:AddLine(" ")
+                end
+                GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
+                if requires and self:TableCount(requires) > 0 then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddLine("Requirements:")
+                  self:TableForEach(requires, function(req)
+                    local text = ""
+                    if req.type == "item" then
+                      local itemName, itemLink = C_Item.GetItemInfo(req.id)
+                      text = itemLink
+                    end
+                    GameTooltip:AddDoubleLine(text, format("x%d", req.amount), 1, 1, 1, 1, 1, 1)
+                  end)
+                end
+                if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
+                GameTooltip:Show()
+              end,
+              onLeave = function()
+                GameTooltip:Hide()
+              end,
+              onClick = function()
+                if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
+                  if IsModifiedClick("CHATLINK") then
+                    local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", loc.m, loc.x * 100, loc.y * 100, MAP_PIN_HYPERLINK)
+                    if not ChatEdit_InsertLink(hyperlink) then
+                      ChatFrame_OpenChat(hyperlink);
+                    end
+                  else
+                    C_Map.SetUserWaypoint(point)
+                    C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+                  end
+                end
+              end,
+            }
+          end
+        end
         return {
-          text = CreateAtlasMarkup("Waypoint-MapPin-Untracked", 20, 20),
-          onEnter = function(columnFrame)
-            GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText("Do you know de wey?")
-            GameTooltip:AddDoubleLine("Location:", "-", 1, 1, 1, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Coordinates:", "00.00 / 00.00", 1, 1, 1, 1, 1, 1)
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine("<Click to Pin on Map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-            GameTooltip:Show()
-          end,
-          onLeave = function()
-            GameTooltip:Hide()
-          end,
+          text = "",
         }
       end,
     },

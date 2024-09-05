@@ -14,6 +14,7 @@
         "GameTooltip_SetTitle",
         "ChatFrame_OpenChat",
         "ChatEdit_InsertLink",
-        "HelpTip"
+        "HelpTip",
+        "MAP_PIN_HYPERLINK"
     ]
 }
