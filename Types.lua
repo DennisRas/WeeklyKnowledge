@@ -76,6 +76,7 @@
 
 ---@class WK_DataCache
 ---@field isDarkmoonOpen boolean
+---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
 
 ---@class WK_DataColumn

@@ -54,6 +54,14 @@ function Core:OnInitialize()
 end
 
 function Core:OnEnable()
+  self:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+    Data.cache.inCombat = true
+    self:Render()
+  end)
+  self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+    Data.cache.inCombat = false
+    self:Render()
+  end)
   self:RegisterBucketEvent(
     {
       "ACTIVE_TALENT_GROUP_CHANGED",

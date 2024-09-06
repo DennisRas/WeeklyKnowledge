@@ -49,7 +49,6 @@ function Checklist:Render()
     self.window:EnableMouse(true)
     self.window:SetScript("OnDragStart", function() self.window:StartMoving() end)
     self.window:SetScript("OnDragStop", function() self.window:StopMovingOrSizing() end)
-    self.window:SetShown(Data.db.global.checklist.open)
     Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
 
     self.window.border = CreateFrame("Frame", "$parentBorder", self.window, "BackdropTemplate")
@@ -433,6 +432,7 @@ function Checklist:Render()
     end)
   end
 
+  self.window:SetShown(Data.db.global.checklist.open)
   self.window.table:SetShown(not Data.db.global.checklist.hideTable)
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
@@ -441,6 +441,9 @@ function Checklist:Render()
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
   self.window:SetHeight(math.min(Data.db.global.checklist.hideTable and Constants.TITLEBAR_HEIGHT or tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))
   self.window:SetScale(Data.db.global.checklist.windowScale / 100)
+  if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
+    self.window:Hide()
+  end
 end
 
 function Checklist:GetColumns(unfiltered)

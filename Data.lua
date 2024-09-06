@@ -13,6 +13,7 @@ local AceDB = LibStub("AceDB-3.0")
 ---@type WK_DataCache
 Data.cache = {
   isDarkmoonOpen = false,
+  incombat = false,
   items = {},
 }
 
