@@ -1,13 +1,17 @@
 # Changelog
 
-## v1.1.0 - 2024-09-??
+## v1.1.0 - 2024-09-07
+
+A big shout-out to the WoWUIDev Discord community for all the guidance, help and support. You rock!
 
 ### Added
 
 - Added a new Checklist window
 - Added map/location sources to objectives
 - Added hints on how to complete objectives
-- You can now see the items missing/needed in tooltips of the main window
+- Added waypoints for objectives
+- Added requirements for objectives
+- You can now see the items missing/needed in the main window tooltips
 - New Setting: Show/hide window border
 
 ### Updated
