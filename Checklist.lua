@@ -390,9 +390,6 @@ function Checklist:Render()
             characterProfession = characterProfession,
             dataProfession = dataProfession,
             professionObjective = professionObjective,
-            -- itemName = itemName,
-            -- itemLink = itemLink,
-            -- itemTexture = itemTexture,
             progress = progress,
             item = item
           }
@@ -424,22 +421,33 @@ function Checklist:GetColumns(unfiltered)
       width = 260,
       cell = function(data)
         local text = ""
-        if data.item.link then
+        local link = data.item.link
+        local canShare = false
+        if data.item.id and data.item.id > 0 and data.item.link then
           text = data.item.link
+          canShare = true
           if data.item.texture then
             text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
           end
         else
           text = "Quest"
+          local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.professionObjective.quests[1] .. ":-1")
+          if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
+            -- link = format("|cffffff00|Hquest:%d:70|h[%s]|h|r", data.professionObjective.quests[1], questTooltipData.lines[1].leftText) -- Isn't working
+            link = "quest:" .. data.professionObjective.quests[1] .. ":-1"
+            text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
+          end
         end
         return {
           text = text,
           onEnter = function(columnFrame)
             GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-            if data.item.link then
-              GameTooltip:SetHyperlink(data.item.link)
-              GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            if link and strlen(link) > 0 then
+              GameTooltip:SetHyperlink(link)
+              if canShare then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+              end
             end
             GameTooltip:Show()
           end,
@@ -447,10 +455,10 @@ function Checklist:GetColumns(unfiltered)
             GameTooltip:Hide()
           end,
           onClick = function()
-            if data.item.link then
+            if link and strlen(link) > 0 and canShare then
               if IsModifiedClick("CHATLINK") then
-                if not ChatEdit_InsertLink(data.item.link) then
-                  ChatFrame_OpenChat(data.item.link);
+                if not ChatEdit_InsertLink(link) then
+                  ChatFrame_OpenChat(link);
                 end
               end
             end
