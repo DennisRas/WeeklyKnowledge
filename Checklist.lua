@@ -269,6 +269,35 @@ function Checklist:Render()
       self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
+    do -- Toggle Button
+      self.window.titlebar.toggleButton = CreateFrame("Button", "$parentToggleButton", self.window.titlebar)
+      self.window.titlebar.toggleButton:SetPoint("RIGHT", self.window.titlebar.ColumnsButton, "LEFT", 0, 0)
+      self.window.titlebar.toggleButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.toggleButton:SetScript("OnClick", function()
+        Data.db.global.checklist.hideTable = not Data.db.global.checklist.hideTable
+        self:Render()
+      end)
+      self.window.titlebar.toggleButton:SetScript("OnEnter", function()
+        self.window.titlebar.toggleButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0.05)
+        GameTooltip:SetOwner(self.window.titlebar.toggleButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Toggle objectives", 1, 1, 1, 1, true)
+        GameTooltip:AddLine("Expand/Collapse the list.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:Show()
+      end)
+      self.window.titlebar.toggleButton:SetScript("OnLeave", function()
+        self.window.titlebar.toggleButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+
+      self.window.titlebar.toggleButton.Icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+      self.window.titlebar.toggleButton.Icon:SetPoint("CENTER", self.window.titlebar.toggleButton, "CENTER")
+      self.window.titlebar.toggleButton.Icon:SetSize(16, 16)
+      self.window.titlebar.toggleButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Toggle.blp")
+      self.window.titlebar.toggleButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
+
     self.window.table = UI:CreateTableFrame({
       header = {
         enabled = true,
@@ -404,12 +433,13 @@ function Checklist:Render()
     end)
   end
 
+  self.window.table:SetShown(not Data.db.global.checklist.hideTable)
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
   self.window.table:SetData(tableData)
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
-  self.window:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))
+  self.window:SetHeight(math.min(Data.db.global.checklist.hideTable and Constants.TITLEBAR_HEIGHT or tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))
   self.window:SetScale(Data.db.global.checklist.windowScale / 100)
 end
 

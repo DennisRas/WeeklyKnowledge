@@ -25,6 +25,7 @@
 ---@field hideCompletedObjectives boolean
 ---@field hideInCombat boolean
 ---@field hideInDungeons boolean
+---@field hideTable boolean
 ---@field hideTableHeader boolean
 
 ---@class WK_Character

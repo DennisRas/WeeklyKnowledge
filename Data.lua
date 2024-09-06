@@ -44,6 +44,7 @@ Data.defaultDB = {
       hideCompletedObjectives = false,
       hideInCombat = false,
       hideInDungeons = true,
+      hideTable = false,
       hideTableHeader = false,
     },
   }
