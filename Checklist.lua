@@ -571,10 +571,12 @@ function Checklist:GetColumns(unfiltered)
                     if req.type == "item" then
                       local _, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(req.id)
                       local itemCount = C_Item.GetItemCount(req.id)
-                      text = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink)
-                      amount = format("%d / %d", itemCount, req.amount)
-                      if itemCount >= req.amount then
-                        completed = true
+                      text = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink or "Loading...")
+                      if itemCount then
+                        amount = format("%d / %d", itemCount, req.amount)
+                        if itemCount >= req.amount then
+                          completed = true
+                        end
                       end
                     end
                     if req.type == "currency" then
