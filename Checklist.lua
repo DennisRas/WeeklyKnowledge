@@ -563,8 +563,6 @@ function Checklist:GetColumns(unfiltered)
           if mapInfo then
             point = UiMapPoint.CreateFromCoordinates(loc.m, loc.x / 100, loc.y / 100)
           end
-          local canSetUserWaypointOnMap = (point and C_Map.CanSetUserWaypointOnMap(loc.m))
-
           return {
             text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20),
             onEnter = function(columnFrame)
@@ -626,7 +624,7 @@ function Checklist:GetColumns(unfiltered)
                   GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
                 end)
               end
-              if canSetUserWaypointOnMap then
+              if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
@@ -637,7 +635,7 @@ function Checklist:GetColumns(unfiltered)
               GameTooltip:Hide()
             end,
             onClick = function()
-              if canSetUserWaypointOnMap then
+              if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
                 if IsModifiedClick("CHATLINK") then
                   local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", loc.m, loc.x * 100, loc.y * 100, MAP_PIN_HYPERLINK)
                   if not ChatEdit_InsertLink(hyperlink) then
