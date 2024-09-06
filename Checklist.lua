@@ -211,14 +211,14 @@ function Checklist:Render()
             self:Render()
           end
         )
-        rootMenu:CreateCheckbox(
-          "Show the title bar",
-          function() return Data.db.global.checklist.windowTitlebar end,
-          function()
-            Data.db.global.checklist.windowTitlebar = not Data.db.global.checklist.windowTitlebar
-            self:Render()
-          end
-        )
+        -- rootMenu:CreateCheckbox(
+        --   "Show the title bar",
+        --   function() return Data.db.global.checklist.windowTitlebar end,
+        --   function()
+        --     Data.db.global.checklist.windowTitlebar = not Data.db.global.checklist.windowTitlebar
+        --     self:Render()
+        --   end
+        -- )
       end)
 
       self.window.titlebar.SettingsButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
