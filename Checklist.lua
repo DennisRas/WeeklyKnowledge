@@ -1,22 +1,31 @@
 ---@type string
 local addonName = select(1, ...)
-local WK = _G.WeeklyKnowledge
-local window = nil
+---@class WK_Addon
+local addon = select(2, ...)
 
-function WK:ToggleChecklistWindow()
-  if not window then return end
-  if window:IsVisible() then
-    window:Hide()
+---@class WK_Checklist
+local Checklist = {}
+addon.Checklist = Checklist
+
+local Constants = addon.Constants
+local Utils = addon.Utils
+local UI = addon.UI
+local Data = addon.Data
+
+function Checklist:ToggleWindow()
+  if not self.window then return end
+  if self.window:IsVisible() then
+    self.window:Hide()
   else
-    window:Show()
+    self.window:Show()
   end
-  self.db.global.checklist.open = window:IsVisible()
+  Data.db.global.checklist.open = self.window:IsVisible()
   self:Render()
 end
 
-function WK:RenderChecklist()
-  local character = self:GetCharacter()
-  local dataColumns = self:GetChecklistColumns()
+function Checklist:Render()
+  local character = Data:GetCharacter()
+  local dataColumns = self:GetColumns()
   local tableWidth = 0
   local tableHeight = 0
   local minWindowWidth = 200
@@ -26,117 +35,117 @@ function WK:RenderChecklist()
     rows = {}
   }
 
-  if not window then
+  if not self.window then
     local frameName = addonName .. "ChecklistWindow"
-    window = CreateFrame("Frame", frameName, UIParent)
-    window:SetSize(500, 500)
-    window:SetFrameStrata("HIGH")
-    window:SetFrameLevel(8100)
-    window:SetClampedToScreen(true)
-    window:SetMovable(true)
-    window:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 8, -8)
-    window:SetUserPlaced(true)
-    window:RegisterForDrag("LeftButton")
-    window:EnableMouse(true)
-    window:SetScript("OnDragStart", function() window:StartMoving() end)
-    window:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
-    window:SetShown(self.db.global.checklist.open)
-    self:SetBackgroundColor(window, self.db.global.checklist.windowBackgroundColor.r, self.db.global.checklist.windowBackgroundColor.g, self.db.global.checklist.windowBackgroundColor.b, self.db.global.checklist.windowBackgroundColor.a)
+    self.window = CreateFrame("Frame", frameName, UIParent)
+    self.window:SetSize(500, 500)
+    self.window:SetFrameStrata("HIGH")
+    self.window:SetFrameLevel(8100)
+    self.window:SetClampedToScreen(true)
+    self.window:SetMovable(true)
+    self.window:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 8, -8)
+    self.window:SetUserPlaced(true)
+    self.window:RegisterForDrag("LeftButton")
+    self.window:EnableMouse(true)
+    self.window:SetScript("OnDragStart", function() self.window:StartMoving() end)
+    self.window:SetScript("OnDragStop", function() self.window:StopMovingOrSizing() end)
+    self.window:SetShown(Data.db.global.checklist.open)
+    Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
 
-    window.border = CreateFrame("Frame", "$parentBorder", window, "BackdropTemplate")
-    window.border:SetPoint("TOPLEFT", window, "TOPLEFT", -3, 3)
-    window.border:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", 3, -3)
-    window.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    window.border:SetBackdropBorderColor(0, 0, 0, .5)
-    window.border:Show()
+    self.window.border = CreateFrame("Frame", "$parentBorder", self.window, "BackdropTemplate")
+    self.window.border:SetPoint("TOPLEFT", self.window, "TOPLEFT", -3, 3)
+    self.window.border:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 3, -3)
+    self.window.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
+    self.window.border:SetBackdropBorderColor(0, 0, 0, .5)
+    self.window.border:Show()
 
-    window.titlebar = CreateFrame("Frame", "$parentTitle", window)
-    window.titlebar:SetPoint("TOPLEFT", window, "TOPLEFT")
-    window.titlebar:SetPoint("TOPRIGHT", window, "TOPRIGHT")
-    window.titlebar:SetHeight(self.Constants.TITLEBAR_HEIGHT)
-    window.titlebar:RegisterForDrag("LeftButton")
-    window.titlebar:EnableMouse(true)
-    window.titlebar:SetScript("OnDragStart", function() window:StartMoving() end)
-    window.titlebar:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
-    self:SetBackgroundColor(window.titlebar, 0, 0, 0, 0.5)
+    self.window.titlebar = CreateFrame("Frame", "$parentTitle", self.window)
+    self.window.titlebar:SetPoint("TOPLEFT", self.window, "TOPLEFT")
+    self.window.titlebar:SetPoint("TOPRIGHT", self.window, "TOPRIGHT")
+    self.window.titlebar:SetHeight(Constants.TITLEBAR_HEIGHT)
+    self.window.titlebar:RegisterForDrag("LeftButton")
+    self.window.titlebar:EnableMouse(true)
+    self.window.titlebar:SetScript("OnDragStart", function() self.window:StartMoving() end)
+    self.window.titlebar:SetScript("OnDragStop", function() self.window:StopMovingOrSizing() end)
+    Utils:SetBackgroundColor(self.window.titlebar, 0, 0, 0, 0.5)
 
-    window.titlebar.icon = window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-    window.titlebar.icon:SetPoint("LEFT", window.titlebar, "LEFT", 6, 0)
-    window.titlebar.icon:SetSize(20, 20)
-    window.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
+    self.window.titlebar.icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+    self.window.titlebar.icon:SetPoint("LEFT", self.window.titlebar, "LEFT", 6, 0)
+    self.window.titlebar.icon:SetSize(20, 20)
+    self.window.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
 
-    window.titlebar.title = window.titlebar:CreateFontString("$parentText", "OVERLAY")
-    window.titlebar.title:SetFontObject("SystemFont_Med2")
-    window.titlebar.title:SetPoint("LEFT", window.titlebar, 28, 0)
-    window.titlebar.title:SetJustifyH("LEFT")
-    window.titlebar.title:SetJustifyV("MIDDLE")
-    window.titlebar.title:SetText("Checklist")
+    self.window.titlebar.title = self.window.titlebar:CreateFontString("$parentText", "OVERLAY")
+    self.window.titlebar.title:SetFontObject("SystemFont_Med2")
+    self.window.titlebar.title:SetPoint("LEFT", self.window.titlebar, 28, 0)
+    self.window.titlebar.title:SetJustifyH("LEFT")
+    self.window.titlebar.title:SetJustifyV("MIDDLE")
+    self.window.titlebar.title:SetText("Checklist")
 
     do -- Close Button
-      window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", window.titlebar)
-      window.titlebar.closeButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
-      window.titlebar.closeButton:SetPoint("RIGHT", window.titlebar, "RIGHT", 0, 0)
-      window.titlebar.closeButton:SetScript("OnClick", function() self:ToggleChecklistWindow() end)
-      window.titlebar.closeButton:SetScript("OnEnter", function()
-        window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
-        self:SetBackgroundColor(window.titlebar.closeButton, 1, 0, 0, 0.2)
-        GameTooltip:SetOwner(window.titlebar.closeButton, "ANCHOR_TOP")
+      self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
+      self.window.titlebar.closeButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.closeButton:SetPoint("RIGHT", self.window.titlebar, "RIGHT", 0, 0)
+      self.window.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
+      self.window.titlebar.closeButton:SetScript("OnEnter", function()
+        self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
+        GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
         GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
-      window.titlebar.closeButton:SetScript("OnLeave", function()
-        window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        self:SetBackgroundColor(window.titlebar.closeButton, 1, 1, 1, 0)
+      self.window.titlebar.closeButton:SetScript("OnLeave", function()
+        self.window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
 
-      window.titlebar.closeButton.Icon = window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-      window.titlebar.closeButton.Icon:SetPoint("CENTER", window.titlebar.closeButton, "CENTER")
-      window.titlebar.closeButton.Icon:SetSize(10, 10)
-      window.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
-      window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.window.titlebar.closeButton.Icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
+      self.window.titlebar.closeButton.Icon:SetPoint("CENTER", self.window.titlebar.closeButton, "CENTER")
+      self.window.titlebar.closeButton.Icon:SetSize(10, 10)
+      self.window.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
+      self.window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Settings Button
-      window.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", window.titlebar)
-      window.titlebar.SettingsButton:SetPoint("RIGHT", window.titlebar.closeButton, "LEFT", 0, 0)
-      window.titlebar.SettingsButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
-      window.titlebar.SettingsButton:SetScript("OnEnter", function()
-        window.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        self:SetBackgroundColor(window.titlebar.SettingsButton, 1, 1, 1, 0.05)
+      self.window.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.window.titlebar)
+      self.window.titlebar.SettingsButton:SetPoint("RIGHT", self.window.titlebar.closeButton, "LEFT", 0, 0)
+      self.window.titlebar.SettingsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.SettingsButton:SetScript("OnEnter", function()
+        self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(window.titlebar.SettingsButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      window.titlebar.SettingsButton:SetScript("OnLeave", function()
-        window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        self:SetBackgroundColor(window.titlebar.SettingsButton, 1, 1, 1, 0)
+      self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
+        self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+      self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         rootMenu:CreateCheckbox(
           "Hide in combat",
-          function() return self.db.global.checklist.hideInCombat end,
+          function() return Data.db.global.checklist.hideInCombat end,
           function()
-            self.db.global.checklist.hideInCombat = not self.db.global.checklist.hideInCombat
+            Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
             self:Render()
           end
         )
         rootMenu:CreateCheckbox(
           "Hide in dungeons",
-          function() return self.db.global.checklist.hideInDungeons end,
+          function() return Data.db.global.checklist.hideInDungeons end,
           function()
-            self.db.global.checklist.hideInDungeons = not self.db.global.checklist.hideInDungeons
+            Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
             self:Render()
           end
         )
         rootMenu:CreateCheckbox(
           "Hide completed objectives",
-          function() return self.db.global.checklist.hideCompletedObjectives end,
+          function() return Data.db.global.checklist.hideCompletedObjectives end,
           function()
-            self.db.global.checklist.hideCompletedObjectives = not self.db.global.checklist.hideCompletedObjectives
+            Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
             self:Render()
           end
         )
@@ -145,9 +154,9 @@ function WK:RenderChecklist()
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
-            function() return self.db.global.checklist.windowScale == i end,
+            function() return Data.db.global.checklist.windowScale == i end,
             function(data)
-              self.db.global.checklist.windowScale = data
+              Data.db.global.checklist.windowScale = data
               self:Render()
             end,
             i
@@ -155,33 +164,33 @@ function WK:RenderChecklist()
         end
 
         local colorInfo = {
-          r = self.db.global.checklist.windowBackgroundColor.r,
-          g = self.db.global.checklist.windowBackgroundColor.g,
-          b = self.db.global.checklist.windowBackgroundColor.b,
-          opacity = self.db.global.checklist.windowBackgroundColor.a,
+          r = Data.db.global.checklist.windowBackgroundColor.r,
+          g = Data.db.global.checklist.windowBackgroundColor.g,
+          b = Data.db.global.checklist.windowBackgroundColor.b,
+          opacity = Data.db.global.checklist.windowBackgroundColor.a,
           swatchFunc = function()
             local r, g, b = ColorPickerFrame:GetColorRGB();
             local a = ColorPickerFrame:GetColorAlpha();
             if r then
-              self.db.global.checklist.windowBackgroundColor.r = r
-              self.db.global.checklist.windowBackgroundColor.g = g
-              self.db.global.checklist.windowBackgroundColor.b = b
+              Data.db.global.checklist.windowBackgroundColor.r = r
+              Data.db.global.checklist.windowBackgroundColor.g = g
+              Data.db.global.checklist.windowBackgroundColor.b = b
               if a then
-                self.db.global.checklist.windowBackgroundColor.a = a
+                Data.db.global.checklist.windowBackgroundColor.a = a
               end
-              self:SetBackgroundColor(window, self.db.global.checklist.windowBackgroundColor.r, self.db.global.checklist.windowBackgroundColor.g, self.db.global.checklist.windowBackgroundColor.b, self.db.global.checklist.windowBackgroundColor.a)
+              Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
             end
           end,
           opacityFunc = function() end,
           cancelFunc = function(color)
             if color.r then
-              self.db.global.checklist.windowBackgroundColor.r = color.r
-              self.db.global.checklist.windowBackgroundColor.g = color.g
-              self.db.global.checklist.windowBackgroundColor.b = color.b
+              Data.db.global.checklist.windowBackgroundColor.r = color.r
+              Data.db.global.checklist.windowBackgroundColor.g = color.g
+              Data.db.global.checklist.windowBackgroundColor.b = color.b
               if color.a then
-                self.db.global.checklist.windowBackgroundColor.a = color.a
+                Data.db.global.checklist.windowBackgroundColor.a = color.a
               end
-              self:SetBackgroundColor(window, self.db.global.checklist.windowBackgroundColor.r, self.db.global.checklist.windowBackgroundColor.g, self.db.global.checklist.windowBackgroundColor.b, self.db.global.checklist.windowBackgroundColor.a)
+              Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
             end
           end,
           hasOpacity = 1,
@@ -196,50 +205,50 @@ function WK:RenderChecklist()
 
         rootMenu:CreateCheckbox(
           "Show the border",
-          function() return self.db.global.checklist.windowBorder end,
+          function() return Data.db.global.checklist.windowBorder end,
           function()
-            self.db.global.checklist.windowBorder = not self.db.global.checklist.windowBorder
+            Data.db.global.checklist.windowBorder = not Data.db.global.checklist.windowBorder
             self:Render()
           end
         )
         rootMenu:CreateCheckbox(
           "Show the title bar",
-          function() return self.db.global.checklist.windowTitlebar end,
+          function() return Data.db.global.checklist.windowTitlebar end,
           function()
-            self.db.global.checklist.windowTitlebar = not self.db.global.checklist.windowTitlebar
+            Data.db.global.checklist.windowTitlebar = not Data.db.global.checklist.windowTitlebar
             self:Render()
           end
         )
       end)
 
-      window.titlebar.SettingsButton.Icon = window.titlebar:CreateTexture(window.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
-      window.titlebar.SettingsButton.Icon:SetPoint("CENTER", window.titlebar.SettingsButton, "CENTER")
-      window.titlebar.SettingsButton.Icon:SetSize(12, 12)
-      window.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
-      window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.window.titlebar.SettingsButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
+      self.window.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.window.titlebar.SettingsButton, "CENTER")
+      self.window.titlebar.SettingsButton.Icon:SetSize(12, 12)
+      self.window.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
+      self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Columns Button
-      window.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", window.titlebar)
-      window.titlebar.ColumnsButton:SetPoint("RIGHT", window.titlebar.SettingsButton, "LEFT", 0, 0)
-      window.titlebar.ColumnsButton:SetSize(self.Constants.TITLEBAR_HEIGHT, self.Constants.TITLEBAR_HEIGHT)
-      window.titlebar.ColumnsButton:SetScript("OnEnter", function()
-        window.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        self:SetBackgroundColor(window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
+      self.window.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.window.titlebar)
+      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.SettingsButton, "LEFT", 0, 0)
+      self.window.titlebar.ColumnsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.ColumnsButton:SetScript("OnEnter", function()
+        self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(window.titlebar.ColumnsButton, "ANCHOR_TOP")
+        GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
         GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      window.titlebar.ColumnsButton:SetScript("OnLeave", function()
-        window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        self:SetBackgroundColor(window.titlebar.ColumnsButton, 1, 1, 1, 0)
+      self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
+        self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      window.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
-        local hidden = self.db.global.checklist.hiddenColumns
-        self:TableForEach(self:GetChecklistColumns(true), function(column)
+      self.window.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
+        local hidden = Data.db.global.checklist.hiddenColumns
+        Utils:TableForEach(self:GetColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.name,
@@ -253,41 +262,41 @@ function WK:RenderChecklist()
         end)
       end)
 
-      window.titlebar.ColumnsButton.Icon = window.titlebar:CreateTexture(window.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
-      window.titlebar.ColumnsButton.Icon:SetPoint("CENTER", window.titlebar.ColumnsButton, "CENTER")
-      window.titlebar.ColumnsButton.Icon:SetSize(12, 12)
-      window.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
-      window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.window.titlebar.ColumnsButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
+      self.window.titlebar.ColumnsButton.Icon:SetPoint("CENTER", self.window.titlebar.ColumnsButton, "CENTER")
+      self.window.titlebar.ColumnsButton.Icon:SetSize(12, 12)
+      self.window.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
+      self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    window.table = self:CreateTableFrame({
+    self.window.table = UI:CreateTableFrame({
       header = {
         enabled = true,
         sticky = true,
-        height = self.Constants.TABLE_HEADER_HEIGHT,
+        height = Constants.TABLE_HEADER_HEIGHT,
       },
       rows = {
-        height = self.Constants.TABLE_ROW_HEIGHT,
+        height = Constants.TABLE_ROW_HEIGHT,
         highlight = false,
         striped = true
       },
       cells = {
-        padding = self.Constants.TABLE_CELL_PADDING,
+        padding = Constants.TABLE_CELL_PADDING,
         highlight = true
       },
     })
-    window.table:SetParent(window)
-    window.table:SetPoint("TOPLEFT", window, "TOPLEFT", 0, -self.Constants.TITLEBAR_HEIGHT)
-    window.table:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", 0, 0)
+    self.window.table:SetParent(self.window)
+    self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
+    self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
   end
 
   if not character then
-    window:Hide()
+    self.window:Hide()
     return
   end
 
   do -- Table Column config
-    self:TableForEach(dataColumns, function(dataColumn)
+    Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn
       local column = {
         width = dataColumn.width,
@@ -301,7 +310,7 @@ function WK:RenderChecklist()
   do -- Table Header row
     ---@type WK_TableDataRow
     local row = {columns = {}}
-    self:TableForEach(dataColumns, function(dataColumn)
+    Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataCell
       local cell = {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.name),
@@ -311,17 +320,17 @@ function WK:RenderChecklist()
       table.insert(row.columns, cell)
     end)
     table.insert(tableData.rows, row)
-    tableHeight = tableHeight + window.table.config.header.height
+    tableHeight = tableHeight + self.window.table.config.header.height
   end
 
   do -- Table data
-    self:TableForEach(character.professions, function(characterProfession)
-      local dataProfession = self:TableFind(self.Professions, function(dataProfession)
+    Utils:TableForEach(character.professions, function(characterProfession)
+      local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
         return dataProfession.skillLineID == characterProfession.skillLineID
       end)
       if not dataProfession then return end
 
-      self:TableForEach(dataProfession.objectives, function(professionObjective)
+      Utils:TableForEach(dataProfession.objectives, function(professionObjective)
         local item = {
           id = professionObjective.itemID,
           name = "",
@@ -363,19 +372,19 @@ function WK:RenderChecklist()
           end
 
           if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
-            if not self.cache.isDarkmoonOpen then
+            if not Data.cache.isDarkmoonOpen then
               progress.total = 0
             end
           end
         end
 
-        if progress.total > 0 and progress.completed == progress.total and self.db.global.checklist.hideCompletedObjectives then
+        if progress.total > 0 and progress.completed == progress.total and Data.db.global.checklist.hideCompletedObjectives then
           return
         end
 
         ---@type WK_TableDataRow
         local row = {columns = {}}
-        self:TableForEach(dataColumns, function(dataColumn)
+        Utils:TableForEach(dataColumns, function(dataColumn)
           local cellData = {
             character = character,
             characterProfession = characterProfession,
@@ -393,22 +402,22 @@ function WK:RenderChecklist()
         end)
 
         table.insert(tableData.rows, row)
-        tableHeight = tableHeight + window.table.config.rows.height
+        tableHeight = tableHeight + self.window.table.config.rows.height
       end)
     end)
   end
 
-  window.titlebar.title:SetShown(tableWidth > minWindowWidth)
-  window.border:SetShown(self.db.global.checklist.windowBorder)
-  window.titlebar:SetShown(self.db.global.checklist.windowTitlebar)
-  window.table:SetData(tableData)
-  window:SetWidth(math.max(tableWidth, minWindowWidth))
-  window:SetHeight(math.min(tableHeight + self.Constants.TITLEBAR_HEIGHT, self.Constants.MAX_WINDOW_HEIGHT - 200))
-  window:SetScale(self.db.global.checklist.windowScale / 100)
+  self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
+  self.window.border:SetShown(Data.db.global.checklist.windowBorder)
+  self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
+  self.window.table:SetData(tableData)
+  self.window:SetWidth(math.max(tableWidth, minWindowWidth))
+  self.window:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))
+  self.window:SetScale(Data.db.global.checklist.windowScale / 100)
 end
 
-function WK:GetChecklistColumns(unfiltered)
-  local hidden = self.db.global.checklist.hiddenColumns
+function Checklist:GetColumns(unfiltered)
+  local hidden = Data.db.global.checklist.hiddenColumns
   local columns = {
     {
       name = "Objective",
@@ -464,7 +473,12 @@ function WK:GetChecklistColumns(unfiltered)
       width = 80,
       toggleHidden = true,
       cell = function(data)
-        local objective = self:GetObjective(data.professionObjective.objectiveID)
+        local objective = Data:GetObjective(data.professionObjective.objectiveID)
+        if not objective then
+          return {
+            text = "?"
+          }
+        end
         return {
           text = objective.name,
           onEnter = function(cellFrame)
@@ -484,7 +498,7 @@ function WK:GetChecklistColumns(unfiltered)
     --   width = 60,
     --   toggleHidden = true,
     --   cell = function(data)
-    --     local objective = self:GetObjective(data.professionObjective.objectiveID)
+    --     local objective = Data:GetObjective(data.professionObjective.objectiveID)
     --     return {
     --       text = objective.repeatable,
     --     }
@@ -547,10 +561,10 @@ function WK:GetChecklistColumns(unfiltered)
                 end
                 GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
-                if requires and self:TableCount(requires) > 0 then
+                if requires and Utils:TableCount(requires) > 0 then
                   GameTooltip:AddLine(" ")
                   GameTooltip:AddLine("Requirements:")
-                  self:TableForEach(requires, function(req)
+                  Utils:TableForEach(requires, function(req)
                     local text = " "
                     local amount = format("x%d", req.amount)
                     local completed = false
@@ -625,7 +639,7 @@ function WK:GetChecklistColumns(unfiltered)
     return columns
   end
 
-  local filteredColumns = self:TableFilter(columns, function(column)
+  local filteredColumns = Utils:TableFilter(columns, function(column)
     return not hidden[column.name]
   end)
 

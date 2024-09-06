@@ -1,16 +1,23 @@
 ---@type string
 local addonName = select(1, ...)
-local WK = _G.WeeklyKnowledge
+---@class WK_Addon
+local addon = select(2, ...)
+
+---@class WK_Data
+local Data = {}
+addon.Data = Data
+
+local Utils = addon.Utils
 local AceDB = LibStub("AceDB-3.0")
 
 ---@type WK_DataCache
-WK.cache = {
+Data.cache = {
   isDarkmoonOpen = false,
   items = {},
 }
 
-WK.DBVersion = 4
-WK.defaultDB = {
+Data.DBVersion = 4
+Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
     weeklyReset = 0,
@@ -43,7 +50,7 @@ WK.defaultDB = {
 }
 
 ---@type WK_Character
-WK.defaultCharacter = {
+Data.defaultCharacter = {
   enabled = true,
   lastUpdate = 0,
   GUID = "",
@@ -63,7 +70,7 @@ WK.defaultCharacter = {
 }
 
 ---@type WK_Objective[]
-WK.Objectives = {
+Data.Objectives = {
   {
     id = Enum.WK_Objectives.Unique,
     name = "Uniques",
@@ -116,7 +123,7 @@ WK.Objectives = {
 }
 
 ---@type WK_Profession[]
-WK.Professions = {
+Data.Professions = {
   {
     name = "Alchemy",
     skillLineID = 171,
@@ -407,7 +414,7 @@ WK.Professions = {
   }
 }
 
-function WK:InitDB()
+function Data:InitDB()
   ---@class AceDBObject-3.0
   ---@field global WK_DefaultGlobal
   self.db = AceDB:New(
@@ -417,7 +424,7 @@ function WK:InitDB()
   )
 end
 
-function WK:MigrateDB()
+function Data:MigrateDB()
   if type(self.db.global.DBVersion) ~= "number" then
     self.db.global.DBVersion = self.DBVersion
   end
@@ -457,8 +464,8 @@ function WK:MigrateDB()
     -- Move to new window settings
     if self.db.global.DBVersion == 3 then
       self.db.global.characters[""] = nil
-      if self.db.global.hiddenColumns and self:TableCount(self.db.global.hiddenColumns) > 0 then
-        self.db.global.main.hiddenColumns = WK:TableCopy(self.db.global.hiddenColumns)
+      if self.db.global.hiddenColumns and Utils:TableCount(self.db.global.hiddenColumns) > 0 then
+        self.db.global.main.hiddenColumns = Utils:TableCopy(self.db.global.hiddenColumns)
         ---@diagnostic disable-next-line: inject-field
         self.db.global.hiddenColumns = nil
       end
@@ -480,9 +487,10 @@ function WK:MigrateDB()
   end
 end
 
-function WK:TaskWeeklyReset()
+---Clear quest progress after a weekly reset
+---@return boolean
+function Data:TaskWeeklyReset()
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
-    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
     local questsToReset = {}
     for _, profession in ipairs(self.Professions) do
       for _, professionObjective in ipairs(profession.objectives) do
@@ -505,21 +513,23 @@ function WK:TaskWeeklyReset()
         end
       end
     end
+    return true
   end
   self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
+  return false
 end
 
 ---Get an objective by enum/id
 ---@param enum Enum.WK_Objectives
 ---@return WK_Objective|nil
-function WK:GetObjective(enum)
-  return self:TableFind(self.Objectives, function(objective)
+function Data:GetObjective(enum)
+  return Utils:TableFind(self.Objectives, function(objective)
     return objective.id == enum
   end)
 end
 
 ---Check to see if the Darkmoon Faire event is live
-function WK:ScanCalendar()
+function Data:ScanCalendar()
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
   if currentCalendarTime and currentCalendarTime.monthDay then
     local today = currentCalendarTime.monthDay
@@ -538,7 +548,7 @@ end
 ---Get stored character by GUID
 ---@param GUID WOWGUID?
 ---@return WK_Character|nil
-function WK:GetCharacter(GUID)
+function Data:GetCharacter(GUID)
   if GUID == nil then
     GUID = UnitGUID("player")
   end
@@ -548,7 +558,7 @@ function WK:GetCharacter(GUID)
   end
 
   if self.db.global.characters[GUID] == nil then
-    self.db.global.characters[GUID] = WK:TableCopy(self.defaultCharacter)
+    self.db.global.characters[GUID] = Utils:TableCopy(self.defaultCharacter)
   end
 
   self.db.global.characters[GUID].GUID = GUID
@@ -556,7 +566,7 @@ function WK:GetCharacter(GUID)
   return self.db.global.characters[GUID]
 end
 
-function WK:ScanCharacter()
+function Data:ScanCharacter()
   local character = self:GetCharacter()
   if not character then return end
 
@@ -583,11 +593,11 @@ function WK:ScanCharacter()
 
   -- Profession Tree tracking
   local prof1, prof2 = GetProfessions()
-  WK:TableForEach({prof1, prof2}, function(characterProfessionID)
+  Utils:TableForEach({prof1, prof2}, function(characterProfessionID)
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
     if not skillLineID then return end
 
-    local dataProfession = WK:TableFind(WK.Professions, function(dataProfession)
+    local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
       return dataProfession.skillLineID == skillLineID and dataProfession.spellID and IsPlayerSpell(dataProfession.spellID)
     end)
     if not dataProfession then return end
@@ -608,10 +618,10 @@ function WK:ScanCharacter()
       if configInfo then
         local treeIDs = configInfo.treeIDs
         if treeIDs then
-          WK:TableForEach(treeIDs, function(treeID)
+          Utils:TableForEach(treeIDs, function(treeID)
             local treeNodes = C_Traits.GetTreeNodes(treeID)
             if not treeNodes then return end
-            WK:TableForEach(treeNodes, function(treeNode)
+            Utils:TableForEach(treeNodes, function(treeNode)
               local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
               if not nodeInfo then return end
               characterProfession.knowledgeLevel = nodeInfo.ranksPurchased > 1 and characterProfession.knowledgeLevel + (nodeInfo.currentRank - 1) or characterProfession.knowledgeLevel
@@ -626,11 +636,11 @@ function WK:ScanCharacter()
   end)
 
   -- Quest tracking
-  WK:TableForEach(WK.Professions, function(dataProfession)
+  Utils:TableForEach(Data.Professions, function(dataProfession)
     if not dataProfession.objectives then return end
-    WK:TableForEach(dataProfession.objectives, function(objective)
+    Utils:TableForEach(dataProfession.objectives, function(objective)
       if not objective.quests then return end
-      WK:TableForEach(objective.quests, function(questID)
+      Utils:TableForEach(objective.quests, function(questID)
         if C_QuestLog.IsQuestFlaggedCompleted(questID) then
           character.completed[questID] = true
         end
@@ -639,7 +649,7 @@ function WK:ScanCharacter()
   end)
 
   -- Let's not track a character without a TWW profession
-  if WK:TableCount(character.professions) < 1 then
+  if Utils:TableCount(character.professions) < 1 then
     self.db.global.characters[character.GUID] = nil
   end
 end
@@ -647,8 +657,8 @@ end
 ---Get characters
 ---@param unfiltered boolean?
 ---@return WK_Character[]
-function WK:GetCharacters(unfiltered)
-  local characters = WK:TableFilter(self.db.global.characters, function(character)
+function Data:GetCharacters(unfiltered)
+  local characters = Utils:TableFilter(self.db.global.characters, function(character)
     local include = true
     if not unfiltered then
       if not character.enabled then

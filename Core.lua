@@ -1,28 +1,41 @@
 ---@type string
 local addonName = select(1, ...)
-local WK = _G.WeeklyKnowledge
+---@class WK_Addon
+local addon = select(2, ...)
+
+local Data = addon.Data
+local Main = addon.Main
+local Checklist = addon.Checklist
 local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibDBIcon = LibStub("LibDBIcon-1.0")
 
-function WK:Render()
-  self:RenderMain()
-  self:RenderChecklist()
+local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
+addon.Core = Core
+
+_G.WeeklyKnowledge = addon
+
+function Core:Render()
+  Main:Render()
+  Checklist:Render()
 end
 
-function WK:OnInitialize()
+function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
-  self:RegisterChatCommand("wk", self.ToggleMainWindow)
-  self:RegisterChatCommand("weeklyknowledge", self.ToggleMainWindow)
+  self:RegisterChatCommand("wk", Main.Render)
+  self:RegisterChatCommand("weeklyknowledge", Main.Render)
 
-  self:InitDB()
-  self:MigrateDB()
+  Data:InitDB()
+  Data:MigrateDB()
+  if Data:TaskWeeklyReset() then
+    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
+  end
 
   local WKLDB = LibDataBroker:NewDataObject(addonName, {
     label = addonName,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
-      self:ToggleMainWindow()
+      Main:Render()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
@@ -40,7 +53,7 @@ function WK:OnInitialize()
   self:Render()
 end
 
-function WK:OnEnable()
+function Core:OnEnable()
   self:RegisterBucketEvent(
     {
       "ACTIVE_TALENT_GROUP_CHANGED",
@@ -57,24 +70,24 @@ function WK:OnEnable()
     },
     3,
     function()
-      self:ScanCharacter()
+      Data:ScanCharacter()
       self:Render()
     end
   )
 
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
-    self:ScanCalendar()
+    Data:ScanCalendar()
     self:Render()
   end)
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
   C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
   C_Calendar.OpenCalendar()
 
-  self:ScanCharacter()
+  Data:ScanCharacter()
   self:Render()
 end
 
-function WK:OnDisable()
+function Core:OnDisable()
   self:UnregisterAllEvents()
   self:UnregisterAllBuckets()
 end

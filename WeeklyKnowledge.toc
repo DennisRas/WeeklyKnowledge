@@ -24,11 +24,11 @@ Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
 Types.lua
-Init.lua
 Constants.lua
 Utils.lua
-Data.lua
 Interface.lua
-Main.lua
+Data.lua
+
 Checklist.lua
+Main.lua
 Core.lua

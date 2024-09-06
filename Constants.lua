@@ -1,10 +1,11 @@
 ---@type string
 local addonName = select(1, ...)
-local WK = _G.WeeklyKnowledge
+---@class WK_Addon
+local addon = select(2, ...)
 
 ---@class WK_Constants
 local Constants = {}
-WK.Constants = Constants
+addon.Constants = Constants
 
 Constants.TITLEBAR_HEIGHT = 30
 Constants.TABLE_ROW_HEIGHT = 24

@@ -1,9 +1,18 @@
 ---@type string
 local addonName = select(1, ...)
-local WK = _G.WeeklyKnowledge
-local TableCollection = {}
+---@class WK_Addon
+local addon = select(2, ...)
 
-function WK:CreateScrollFrame(name, parent)
+---@class WK_Interface
+local UI = {}
+addon.UI = UI
+
+UI.TableCollection = {}
+
+local Utils = addon.Utils
+local Constants = addon.Constants
+
+function UI:CreateScrollFrame(name, parent)
   local frame = CreateFrame("ScrollFrame", name, parent)
   frame.content = CreateFrame("Frame", "$parentContent", frame)
   frame.scrollbarH = CreateFrame("Slider", "$parentScrollbarH", frame, "UISliderTemplate")
@@ -80,8 +89,8 @@ function WK:CreateScrollFrame(name, parent)
   return frame
 end
 
-function WK:CreateTableFrame(config)
-  local tableFrame = CreateFrame("Frame", "WeeklyKnowledgeTable" .. (self:TableCount(TableCollection) + 1))
+function UI:CreateTableFrame(config)
+  local tableFrame = CreateFrame("Frame", "WeeklyKnowledgeTable" .. (Utils:TableCount(self.TableCollection) + 1))
   tableFrame.scrollFrame = self:CreateScrollFrame("$parentScrollFrame", tableFrame)
 
   tableFrame.config = CreateFromMixins(
@@ -102,7 +111,7 @@ function WK:CreateTableFrame(config)
         striped = false
       },
       cells = {
-        padding = self.Constants.TABLE_CELL_PADDING,
+        padding = Constants.TABLE_CELL_PADDING,
         highlight = false
       },
       ---@type WK_TableData
@@ -131,8 +140,8 @@ function WK:CreateTableFrame(config)
     local offsetY = 0
     local offsetX = 0
 
-    WK:TableForEach(tableFrame.rows, function(rowFrame) rowFrame:Hide() end)
-    WK:TableForEach(tableFrame.data.rows, function(row, rowIndex)
+    Utils:TableForEach(tableFrame.rows, function(rowFrame) rowFrame:Hide() end)
+    Utils:TableForEach(tableFrame.data.rows, function(row, rowIndex)
       local rowFrame = tableFrame.rows[rowIndex]
       local rowHeight = tableFrame.config.rows.height
       local isStickyRow = false
@@ -158,19 +167,19 @@ function WK:CreateTableFrame(config)
         rowFrame:SetPoint("TOPLEFT", tableFrame, "TOPLEFT", 0, 0)
         rowFrame:SetPoint("TOPRIGHT", tableFrame, "TOPRIGHT", 0, 0)
         if not row.backgroundColor then
-          WK:SetBackgroundColor(rowFrame, 0, 0, 0, 0.3)
+          Utils:SetBackgroundColor(rowFrame, 0, 0, 0, 0.3)
         end
       else
         rowFrame:SetParent(tableFrame.scrollFrame.content)
         rowFrame:SetPoint("TOPLEFT", tableFrame.scrollFrame.content, "TOPLEFT", 0, -offsetY)
         rowFrame:SetPoint("TOPRIGHT", tableFrame.scrollFrame.content, "TOPRIGHT", 0, -offsetY)
         if tableFrame.config.rows.striped and rowIndex % 2 == 1 then
-          WK:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
+          Utils:SetBackgroundColor(rowFrame, 1, 1, 1, .02)
         end
       end
 
       if row.backgroundColor then
-        WK:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
+        Utils:SetBackgroundColor(rowFrame, row.backgroundColor.r, row.backgroundColor.g, row.backgroundColor.b, row.backgroundColor.a)
       end
 
       rowFrame.data = row
@@ -182,7 +191,7 @@ function WK:CreateTableFrame(config)
 
       function rowFrame:onEnterHandler(f)
         if rowIndex > 1 or not tableFrame.config.header.enabled then
-          WK:SetHighlightColor(rowFrame, 1, 1, 1, .03)
+          Utils:SetHighlightColor(rowFrame, 1, 1, 1, .03)
         end
         if row.onEnter then
           row:onEnter(f)
@@ -191,7 +200,7 @@ function WK:CreateTableFrame(config)
 
       function rowFrame:onLeaveHandler(f)
         if rowIndex > 1 or not tableFrame.config.header.enabled then
-          WK:SetHighlightColor(rowFrame, 1, 1, 1, 0)
+          Utils:SetHighlightColor(rowFrame, 1, 1, 1, 0)
         end
         if row.onLeave then
           row:onLeave(f)
@@ -205,8 +214,8 @@ function WK:CreateTableFrame(config)
       end
 
       offsetX = 0
-      WK:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
-      WK:TableForEach(row.columns, function(column, columnIndex)
+      Utils:TableForEach(rowFrame.columns, function(columnFrame) columnFrame:Hide() end)
+      Utils:TableForEach(row.columns, function(column, columnIndex)
         local columnFrame = rowFrame.columns[columnIndex]
         local columnConfig = tableFrame.data.columns[columnIndex]
         local columnWidth = columnConfig and columnConfig.width or tableFrame.config.columns.width
@@ -234,7 +243,7 @@ function WK:CreateTableFrame(config)
         columnFrame:Show()
 
         if column.backgroundColor then
-          WK:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
+          Utils:SetBackgroundColor(columnFrame, column.backgroundColor.r, column.backgroundColor.g, column.backgroundColor.b, column.backgroundColor.a)
         end
 
         function columnFrame:onEnterHandler(f)
@@ -273,6 +282,6 @@ function WK:CreateTableFrame(config)
 
   tableFrame.scrollFrame:HookScript("OnSizeChanged", function() tableFrame:RenderTable() end)
   tableFrame:RenderTable()
-  table.insert(TableCollection, tableFrame)
+  table.insert(self.TableCollection, tableFrame)
   return tableFrame;
 end

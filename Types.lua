@@ -84,6 +84,7 @@
 ---@field onEnter function?
 ---@field onLeave function?
 ---@field cell fun(character: WK_Character, characterProfession: WK_CharacterProfession, dataProfession: WK_Profession): WK_TableDataCell
+---@field toggleHidden boolean
 
 ---@class WK_TableData
 ---@field columns WK_TableDataColumn[]?
