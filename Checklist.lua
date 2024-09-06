@@ -566,70 +566,83 @@ function Checklist:GetColumns(unfiltered)
           return {
             text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20),
             onEnter = function(columnFrame)
-              GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
-              if loc and loc.hint then
-                GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
-              end
-              if mapInfo then
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
-              end
-              if loc and loc.x then
-                if not mapInfo then
-                  GameTooltip:AddLine(" ")
+              local showTooltip = function()
+                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+                if loc and loc.hint then
+                  GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
                 end
-                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
+                if mapInfo then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
+                end
+                if loc and loc.x then
+                  if not mapInfo then
+                    GameTooltip:AddLine(" ")
+                  end
+                  GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
+                end
+                if requires and Utils:TableCount(requires) > 0 then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddLine("Requirements:")
+                  Utils:TableForEach(requires, function(req)
+                    local leftText = " "
+                    local rightText = format("x%d", req.amount)
+                    local completed = false
+                    if req.type == "item" then
+                      local _, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(req.id)
+                      local itemCount = C_Item.GetItemCount(req.id)
+                      leftText = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink or "Loading...")
+                      if itemCount then
+                        rightText = format("%d / %d", itemCount, req.amount)
+                        if itemCount >= req.amount then
+                          completed = true
+                        end
+                      end
+                    end
+                    if req.type == "currency" then
+                      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(req.id)
+                      if currencyInfo then
+                        local _, _, _, hex = C_Item.GetItemQualityColor(currencyInfo.quality)
+                        leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(currencyInfo.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, currencyInfo.name)
+                        rightText = format("%d / %d", currencyInfo.quantity, req.amount)
+                        if currencyInfo.quantity >= req.amount then
+                          completed = true
+                        end
+                      end
+                    end
+                    if req.type == "renown" then
+                      local renownInfo = C_MajorFactions.GetMajorFactionData(req.id)
+                      local renownLevel = C_MajorFactions.GetCurrentRenownLevel(req.id) or 0
+                      if renownInfo and renownLevel > 0 then
+                        leftText = renownInfo.name
+                        rightText = format("%d / %d", renownLevel, req.amount)
+                        if renownLevel >= req.amount then
+                          completed = true
+                        end
+                      end
+                    end
+                    GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
+                  end)
+                end
+                if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
+                GameTooltip:Show()
               end
+
               if requires and Utils:TableCount(requires) > 0 then
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("Requirements:")
                 Utils:TableForEach(requires, function(req)
-                  local leftText = " "
-                  local rightText = format("x%d", req.amount)
-                  local completed = false
                   if req.type == "item" then
-                    local _, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(req.id)
-                    local itemCount = C_Item.GetItemCount(req.id)
-                    leftText = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink or "Loading...")
-                    if itemCount then
-                      rightText = format("%d / %d", itemCount, req.amount)
-                      if itemCount >= req.amount then
-                        completed = true
-                      end
-                    end
+                    Data.cache.items[req.id] = Item:CreateFromItemID(req.id)
+                    Data.cache.items[req.id]:ContinueOnItemLoad(showTooltip)
                   end
-                  if req.type == "currency" then
-                    local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(req.id)
-                    if currencyInfo then
-                      local _, _, _, hex = C_Item.GetItemQualityColor(currencyInfo.quality)
-                      leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(currencyInfo.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, currencyInfo.name)
-                      rightText = format("%d / %d", currencyInfo.quantity, req.amount)
-                      if currencyInfo.quantity >= req.amount then
-                        completed = true
-                      end
-                    end
-                  end
-                  if req.type == "renown" then
-                    local renownInfo = C_MajorFactions.GetMajorFactionData(req.id)
-                    local renownLevel = C_MajorFactions.GetCurrentRenownLevel(req.id) or 0
-                    if renownInfo and renownLevel > 0 then
-                      leftText = renownInfo.name
-                      rightText = format("%d / %d", renownLevel, req.amount)
-                      if renownLevel >= req.amount then
-                        completed = true
-                      end
-                    end
-                  end
-                  GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
                 end)
               end
-              if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-              end
-              GameTooltip:Show()
+
+              showTooltip()
             end,
             onLeave = function()
               GameTooltip:Hide()
