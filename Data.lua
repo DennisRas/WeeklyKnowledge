@@ -21,7 +21,6 @@ Data.DBVersion = 4
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
-    weeklyReset = 0,
     minimap = {
       minimapPos = 235,
       hide = false,
@@ -499,7 +498,7 @@ function Data:TaskWeeklyReset()
       for _, professionObjective in ipairs(profession.objectives) do
         local dataObjecteive = self:GetObjective(professionObjective.objectiveID)
         if dataObjecteive then
-          if dataObjecteive.repeatable ~= "Weekly" then
+          if dataObjecteive.repeatable == "Weekly" then
             for _, questID in ipairs(professionObjective.quests) do
               questsToReset[questID] = true
             end
@@ -508,15 +507,15 @@ function Data:TaskWeeklyReset()
       end
     end
     for _, character in pairs(self.db.global.characters) do
-      if type(character.lastUpdate) == "number" and character.lastUpdate < self.db.global.weeklyReset then
+      if type(character.lastUpdate) == "number" and character.lastUpdate <= self.db.global.weeklyReset then
         for questID in pairs(character.completed) do
           if questsToReset[questID] then
             character.completed[questID] = nil
+            hasReset = true
           end
         end
       end
     end
-    hasReset = true
   end
   self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
   return hasReset

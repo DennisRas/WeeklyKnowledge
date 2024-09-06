@@ -1,6 +1,6 @@
 ---@class WK_DefaultGlobal
 ---@field DBVersion integer?
----@field weeklyReset integer
+---@field weeklyReset integer?
 ---@field minimap {minimapPos: number, hide: boolean, lock: boolean }
 ---@field characters table<string, WK_Character>
 ---@field main WK_DefaultGlobalMain
