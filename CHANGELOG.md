@@ -5,11 +5,14 @@
 ### Added
 
 - Added a new Checklist window
+- Added map/location sources to objectives
+- Added hints on how to complete objectives
+- You can now see the items missing/needed in tooltips of the main window
+- New Setting: Show/hide window border
 
 ### Updated
 
-- You can now see the items missing/needed in tooltips
-- New Setting: Show/hide window border
+- Updated a couple of tooltip descriptions
 
 ### Fixed
 
@@ -17,6 +20,7 @@
 - Fixed a bug with ghost characters showing up on the list (scary!)
 - Scrollbars no longer overlap the column headers
 - Background color of column headers are no longer just grey if window color is different
+- Fixed a bug with transparent background colors not being transparent
 
 ## v1.0.4 - 2024-09-04
 
