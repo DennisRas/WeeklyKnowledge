@@ -21,8 +21,8 @@ end
 
 function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
-  self:RegisterChatCommand("wk", Main.Render)
-  self:RegisterChatCommand("weeklyknowledge", Main.Render)
+  self:RegisterChatCommand("wk", Main.ToggleWindow)
+  self:RegisterChatCommand("weeklyknowledge", Main.ToggleWindow)
 
   Data:InitDB()
   Data:MigrateDB()
@@ -35,7 +35,7 @@ function Core:OnInitialize()
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function()
-      Main:Render()
+      Main:ToggleWindow()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)

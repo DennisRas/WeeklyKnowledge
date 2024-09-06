@@ -14,7 +14,7 @@ local Data = addon.Data
 local Checklist = addon.Checklist
 local LibDBIcon = LibStub("LibDBIcon-1.0")
 
-function Main:ToggleMainWindow()
+function Main:ToggleWindow()
   if not self.window then return end
   if self.window:IsVisible() then
     self.window:Hide()
@@ -85,7 +85,7 @@ function Main:Render()
       self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
       self.window.titlebar.closeButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
       self.window.titlebar.closeButton:SetPoint("RIGHT", self.window.titlebar, "RIGHT", 0, 0)
-      self.window.titlebar.closeButton:SetScript("OnClick", function() self:ToggleMainWindow() end)
+      self.window.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
       self.window.titlebar.closeButton:SetScript("OnEnter", function()
         self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
         Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
