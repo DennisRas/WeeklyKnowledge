@@ -490,6 +490,7 @@ end
 ---Clear quest progress after a weekly reset
 ---@return boolean
 function Data:TaskWeeklyReset()
+  local hasReset = false
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
     local questsToReset = {}
     for _, profession in ipairs(self.Professions) do
@@ -513,10 +514,10 @@ function Data:TaskWeeklyReset()
         end
       end
     end
-    return true
+    hasReset = true
   end
   self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
-  return false
+  return hasReset
 end
 
 ---Get an objective by enum/id
