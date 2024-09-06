@@ -41,13 +41,13 @@ function Core:OnInitialize()
       tooltip:SetText(addonName, 1, 1, 1)
       tooltip:AddLine("Click to open WeeklyKnowledge", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
       local dragText = "Drag to move this icon"
-      if self.db.global.minimap.lock then
+      if Data.db.global.minimap.lock then
         dragText = dragText .. " |cffff0000(locked)|r"
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end
   })
-  LibDBIcon:Register(addonName, WKLDB, self.db.global.minimap)
+  LibDBIcon:Register(addonName, WKLDB, Data.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
 
   self:Render()
