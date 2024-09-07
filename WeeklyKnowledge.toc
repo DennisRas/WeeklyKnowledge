@@ -23,4 +23,12 @@ Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
+Types.lua
+Constants.lua
+Utils.lua
+Interface.lua
+Data.lua
+
+Checklist.lua
+Main.lua
 Core.lua

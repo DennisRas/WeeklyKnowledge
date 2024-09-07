@@ -157,6 +157,11 @@
         "GetProfessionInfo",
         "MenuUtil",
         "GameTooltip_SetTitle",
-        "GameTooltip_AddInstructionLine"
+        "ChatFrame_OpenChat",
+        "ChatEdit_InsertLink",
+        "HelpTip",
+        "MAP_PIN_HYPERLINK",
+        "UiMapPoint",
+        "CreateSimpleTextureMarkup"
     ]
 }

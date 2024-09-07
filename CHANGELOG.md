@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.1.0 - 2024-09-07
+
+A big shout-out to the WoWUIDev Discord community for all the guidance, help and testing. You rock!
+If you encounter a bug or incorrect data, please don't hesitate to reach out. Write a comment or visit the GitHub source :-)
+Thank you for your support.
+
+### Added
+
+- Added a new Checklist window
+- Added map/location sources to objectives
+- Added hints on how to complete objectives
+- Added waypoints for objectives
+- Added requirements for objectives
+- You can now see the items missing/needed in the main window tooltips
+- New Setting: Show/hide window border
+
+### Updated
+
+- Updated a couple of tooltip descriptions
+
+### Fixed
+
+- Fixed a bug with Darkmoon values not showing on login (Thansk @Lombra)
+- Fixed a bug with ghost characters showing up on the list (scary!)
+- Scrollbars no longer overlap the column headers
+- Background color of column headers are no longer just grey if window color is different
+- Fixed a bug with transparent background colors not being transparent
+
 ## v1.0.4 - 2024-09-04
 
 ### Fixed
