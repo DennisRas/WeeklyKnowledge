@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.2 - 2024-09-07
+
+###
+
+- Added descriptions and hints to some Uniques
+
+###
+
+- Fixed incorect location for Jewel-Etched Tailoring Notes (Thanks Shikimi)
+
 ## v1.1.1 - 2024-09-07
 
 ### Fixed
