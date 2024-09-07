@@ -13,6 +13,7 @@
 ### Fixed
 
 - Fixed an incorect location for Jewel-Etched Tailoring Notes (Thanks Shikimi)
+- Fixed a major issue of "ADDON_ACTION_BLOCKED" in certain situations while in combat (A massive thanks to Linaori, Numy and Meo 🦆 from the WoWUIDev Discord server)
 
 ## v1.1.1 - 2024-09-07
 

@@ -328,7 +328,7 @@ function Main:Render()
         GameTooltip:Hide()
       end)
       self.window.titlebar.ChecklistButton:SetScript("OnClick", function()
-        Data.db.global.main.checklistHelpTipClosed = true
+        -- Data.db.global.main.checklistHelpTipClosed = true
         Checklist:ToggleWindow()
         self:Render()
       end)
@@ -359,25 +359,25 @@ function Main:Render()
     table.insert(UISpecialFrames, frameName)
   end
 
-  do -- Show helptip for new checklist
-    local checklistHelpTipText = "Check out the new checklist!"
-    if Data.db.global.main.checklistHelpTipClosed then
-      HelpTip:Hide(self.window, checklistHelpTipText)
-    else
-      HelpTip:Show(
-        self.window,
-        {
-          text = checklistHelpTipText,
-          buttonStyle = HelpTip.ButtonStyle.Close,
-          targetPoint = HelpTip.Point.TopEdgeCenter,
-          onAcknowledgeCallback = function()
-            Data.db.global.main.checklistHelpTipClosed = true
-          end,
-        },
-        self.window.titlebar.ChecklistButton
-      )
-    end
-  end
+  -- do -- Show helptip for new checklist
+  --   local checklistHelpTipText = "Check out the new checklist!"
+  --   if Data.db.global.main.checklistHelpTipClosed then
+  --     HelpTip:Hide(self.window, checklistHelpTipText)
+  --   else
+  --     HelpTip:Show(
+  --       self.window,
+  --       {
+  --         text = checklistHelpTipText,
+  --         buttonStyle = HelpTip.ButtonStyle.Close,
+  --         targetPoint = HelpTip.Point.TopEdgeCenter,
+  --         onAcknowledgeCallback = function()
+  --           Data.db.global.main.checklistHelpTipClosed = true
+  --         end,
+  --       },
+  --       self.window.titlebar.ChecklistButton
+  --     )
+  --   end
+  -- end
 
   do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
