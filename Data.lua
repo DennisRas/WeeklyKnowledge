@@ -15,6 +15,7 @@ Data.cache = {
   isDarkmoonOpen = false,
   inCombat = false,
   items = {},
+  mapInfo = {},
 }
 
 Data.DBVersion = 4

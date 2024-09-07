@@ -4,6 +4,7 @@
 
 ###
 
+- Added a checklist column: Location
 - Added descriptions and hints to some Uniques
 
 ###

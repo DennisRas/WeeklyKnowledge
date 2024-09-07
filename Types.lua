@@ -78,6 +78,7 @@
 ---@field isDarkmoonOpen boolean
 ---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
+---@field mapInfo table<integer, UiMapDetails>
 
 ---@class WK_DataColumn
 ---@field name string

@@ -569,6 +569,31 @@ function Checklist:GetColumns(unfiltered)
         }
       end,
     },
+    {
+      name = "Location",
+      width = 100,
+      toggleHidden = true,
+      cell = function(data)
+        local text = " "
+        if data.professionObjective then
+          local loc = data.professionObjective.loc
+          if loc and loc.m then
+            if Data.cache.mapInfo[loc.m] then
+              text = Data.cache.mapInfo[loc.m].name
+            else
+              local mapInfo = C_Map.GetMapInfo(loc.m)
+              if mapInfo then
+                Data.cache.mapInfo[loc.m] = mapInfo
+                text = mapInfo.name
+              end
+            end
+          end
+        end
+        return {
+          text = text,
+        }
+      end,
+    },
     -- {
     --   name = "Repeat",
     --   width = 60,
