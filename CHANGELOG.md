@@ -1,15 +1,18 @@
 # Changelog
 
-## v1.1.2 - 2024-09-07
+## v1.1.2 - 2024-09-08
 
-###
+### Added
 
-- Added a checklist column: Location
-- Added descriptions and hints to some Uniques
+- Added a new checklist column: Location
 
-###
+### Updated
 
-- Fixed incorect location for Jewel-Etched Tailoring Notes (Thanks Shikimi)
+- Added detailed descriptions to most world uniques
+
+### Fixed
+
+- Fixed an incorect location for Jewel-Etched Tailoring Notes (Thanks Shikimi)
 
 ## v1.1.1 - 2024-09-07
 
