@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.1 - 2024-09-07
+
+### Fixed
+
+- Adjusted the requirements for the Darkmoon Faire quest "Eyes on the Prizes" (Thanks masterkain)
+
 ## v1.1.0 - 2024-09-07
 
 A big shout-out to the WoWUIDev Discord community for all the guidance, help and testing. You rock!

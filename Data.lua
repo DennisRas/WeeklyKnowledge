@@ -332,7 +332,7 @@ Data.Professions = {
       {objectiveID = Enum.WK_Objectives.ArtisanQuest,  quests = {84131}, itemID = 228778, points = 2,  loc = {m = 2339, x = 59.2, y = 55.6, hint = "Complete a quest from Kala Clayhoof in the Artisan's Consortium."}},
       {objectiveID = Enum.WK_Objectives.Treasure,      quests = {83267}, itemID = 225223, points = 1,  loc = {hint = "These are randomly looted from treasures and dirt around the world."}},
       {objectiveID = Enum.WK_Objectives.Treasure,      quests = {83268}, itemID = 225222, points = 1,  loc = {hint = "These are randomly looted from treasures and dirt around the world."}},
-      {objectiveID = Enum.WK_Objectives.DarkmoonQuest, quests = {29517}, itemID = 0,      points = 3,  loc = {m = 407, x = 49.6, y = 60.8, hint = "Talk to |cff00ff00Rinling|r at the Darkmoon Faire and complete the quest |cffffff00Eyes on the Prizes|r."}, requires = {{type = "item", id = 6529, amount = 10}, {type = "item", id = 2320, amount = 5}, {type = "item", id = 6260, amount = 1}}},
+      {objectiveID = Enum.WK_Objectives.DarkmoonQuest, quests = {29517}, itemID = 0,      points = 3,  loc = {m = 407, x = 49.6, y = 60.8, hint = "Talk to |cff00ff00Rinling|r at the Darkmoon Faire and complete the quest |cffffff00Eyes on the Prizes|r."}, requires = {{type = "item", id = 6529, amount = 10}, {type = "item", id = 2320, amount = 5}, {type = "item", id = 6260, amount = 5}}},
     }
   },
   {
