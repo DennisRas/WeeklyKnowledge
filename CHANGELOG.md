@@ -2,7 +2,9 @@
 
 ## v1.1.0 - 2024-09-07
 
-A big shout-out to the WoWUIDev Discord community for all the guidance, help and support. You rock!
+A big shout-out to the WoWUIDev Discord community for all the guidance, help and testing. You rock!
+If you encounter a bug or incorrect data, please don't hesitate to reach out. Write a comment or visit the GitHub source :-)
+Thank you for your support.
 
 ### Added
 
