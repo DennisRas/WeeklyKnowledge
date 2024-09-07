@@ -28,7 +28,6 @@ function Checklist:Render()
   local dataColumns = self:GetColumns()
   local tableWidth = 0
   local tableHeight = 0
-  local minWindowWidth = 200
   ---@type WK_TableData
   local tableData = {
     columns = {},
@@ -443,30 +442,34 @@ function Checklist:Render()
     end)
   end
 
-  local windowHeight = Constants.TITLEBAR_HEIGHT
-  local windowWidth = 400
-  if not Data.db.global.checklist.hideTable then
+  local windowWidth     = tableWidth
+  local windowHeight    = Constants.TITLEBAR_HEIGHT
+  local minWindowWidth  = 200
+  local maxWindowHeight = 300
+  if Data.db.global.checklist.hideTable then
+    self.window.table:Hide()
+    self.window.textbox:Hide()
+  else
     if rows == 0 then
       windowHeight = 100
       self.window.textbox:Show()
       self.window.table:Hide()
     else
-      windowWidth = math.max(tableWidth, minWindowWidth)
       windowHeight = windowHeight + tableHeight
       self.window.textbox:Hide()
       self.window.table:Show()
     end
-  else
-    self.window.table:Hide()
-    self.window.textbox:Hide()
   end
-  windowHeight = math.min(windowHeight, Constants.MAX_WINDOW_HEIGHT - 200)
+  if rows == 0 then
+    windowWidth = 500
+  end
+  windowHeight = math.min(windowHeight, maxWindowHeight)
+  windowWidth  = math.max(windowWidth, minWindowWidth)
 
   self.window:SetShown(Data.db.global.checklist.open)
-  self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
-
+  -- self.window.titlebar.title:SetShown(windowWidth > minWindowWidth)
   self.window.table:SetData(tableData)
   self.window:SetWidth(windowWidth)
   self.window:SetHeight(windowHeight)
