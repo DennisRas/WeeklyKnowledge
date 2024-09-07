@@ -85,7 +85,6 @@ function Checklist:Render()
     self.window.textbox:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", -20, 20)
     self.window.textbox:SetJustifyH("CENTER")
     self.window.textbox:SetJustifyV("MIDDLE")
-    self.window.textbox:SetText("Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
     self.window.textbox:Hide()
 
     do -- Close Button
@@ -360,6 +359,7 @@ function Checklist:Render()
   end
 
   local rows = 0
+  local profCount = 0
   do -- Table data
     Utils:TableForEach(character.professions, function(characterProfession)
       local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
@@ -439,6 +439,7 @@ function Checklist:Render()
         tableHeight = tableHeight + self.window.table.config.rows.height
         rows = rows + 1
       end)
+      profCount = profCount + 1
     end)
   end
 
@@ -466,6 +467,7 @@ function Checklist:Render()
   windowHeight = math.min(windowHeight, maxWindowHeight)
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
+  self.window.textbox:SetText(profCount == 0 and "It does not look like you have any TWW professions." or "Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
   self.window:SetShown(Data.db.global.checklist.open)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
