@@ -80,6 +80,15 @@ function Checklist:Render()
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText("Checklist")
 
+    self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
+    self.window.textbox:SetFontObject("SystemFont_Med1")
+    self.window.textbox:SetPoint("TOPLEFT", self.window, "TOPLEFT", 20, -Constants.TITLEBAR_HEIGHT - 20)
+    self.window.textbox:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", -20, 20)
+    self.window.textbox:SetJustifyH("CENTER")
+    self.window.textbox:SetJustifyV("MIDDLE")
+    self.window.textbox:SetText("Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
+    self.window.textbox:Hide()
+
     do -- Close Button
       self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
       self.window.titlebar.closeButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
@@ -351,6 +360,7 @@ function Checklist:Render()
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
+  local rows = 0
   do -- Table data
     Utils:TableForEach(character.professions, function(characterProfession)
       local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
@@ -428,18 +438,38 @@ function Checklist:Render()
 
         table.insert(tableData.rows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
+        rows = rows + 1
       end)
     end)
   end
 
+  local windowHeight = Constants.TITLEBAR_HEIGHT
+  local windowWidth = 400
+  if not Data.db.global.checklist.hideTable then
+    if rows == 0 then
+      windowHeight = 100
+      self.window.textbox:Show()
+      self.window.table:Hide()
+    else
+      windowWidth = math.max(tableWidth, minWindowWidth)
+      windowHeight = windowHeight + tableHeight
+      self.window.textbox:Hide()
+      self.window.table:Show()
+    end
+  else
+    self.window.table:Hide()
+    self.window.textbox:Hide()
+  end
+  windowHeight = math.min(windowHeight, Constants.MAX_WINDOW_HEIGHT - 200)
+
   self.window:SetShown(Data.db.global.checklist.open)
-  self.window.table:SetShown(not Data.db.global.checklist.hideTable)
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
+
   self.window.table:SetData(tableData)
-  self.window:SetWidth(math.max(tableWidth, minWindowWidth))
-  self.window:SetHeight(math.min(Data.db.global.checklist.hideTable and Constants.TITLEBAR_HEIGHT or tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT - 200))
+  self.window:SetWidth(windowWidth)
+  self.window:SetHeight(windowHeight)
   self.window:SetScale(Data.db.global.checklist.windowScale / 100)
   if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
     self.window:Hide()
