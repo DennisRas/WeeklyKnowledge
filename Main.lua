@@ -330,6 +330,7 @@ function Main:Render()
       self.window.titlebar.ChecklistButton:SetScript("OnClick", function()
         Data.db.global.main.checklistHelpTipClosed = true
         Checklist:ToggleWindow()
+        self:Render()
       end)
 
       self.window.titlebar.ChecklistButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ChecklistButton:GetName() .. "Icon", "ARTWORK")
