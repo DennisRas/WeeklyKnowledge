@@ -433,7 +433,7 @@ function Main:Render()
   self.window.border:SetShown(Data.db.global.main.windowBorder)
   self.window.table:SetData(tableData)
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
-  self.window:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT))
+  self.window:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT) + 2)
   self.window:SetScale(Data.db.global.main.windowScale / 100)
 end
 

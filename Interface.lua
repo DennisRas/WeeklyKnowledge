@@ -8,21 +8,30 @@ local UI = {}
 addon.UI = UI
 
 UI.TableCollection = {}
+UI.ScrollCollection = {}
 
 local Utils = addon.Utils
 local Constants = addon.Constants
 
-function UI:CreateScrollFrame(name, parent)
-  local frame = CreateFrame("ScrollFrame", name, parent)
+function UI:CreateScrollFrame(config)
+  local frame = CreateFrame("ScrollFrame", "WeeklyKnowledgeScrollFrame" .. (Utils:TableCount(self.TableCollection) + 1))
+  frame.config = CreateFromMixins(
+    {
+      scrollSpeedHorizontal = 20,
+      scrollSpeedVertical = 20,
+    },
+    config or {}
+  )
+
   frame.content = CreateFrame("Frame", "$parentContent", frame)
   frame.scrollbarH = CreateFrame("Slider", "$parentScrollbarH", frame, "UISliderTemplate")
   frame.scrollbarV = CreateFrame("Slider", "$parentScrollbarV", frame, "UISliderTemplate")
 
   frame:SetScript("OnMouseWheel", function(_, delta)
     if IsModifierKeyDown() or not frame.scrollbarV:IsVisible() then
-      frame.scrollbarH:SetValue(frame.scrollbarH:GetValue() - delta * ((frame.content:GetWidth() - frame:GetWidth()) * 0.2))
+      frame.scrollbarH:SetValue(frame.scrollbarH:GetValue() - delta * frame.config.scrollSpeedHorizontal)
     else
-      frame.scrollbarV:SetValue(frame.scrollbarV:GetValue() - delta * ((frame.content:GetHeight() - frame:GetHeight()) * 0.2))
+      frame.scrollbarV:SetValue(frame.scrollbarV:GetValue() - delta * frame.config.scrollSpeedVertical)
     end
   end)
   frame:SetScript("OnSizeChanged", function() frame:RenderScrollFrame() end)
@@ -65,18 +74,28 @@ function UI:CreateScrollFrame(name, parent)
   if frame.scrollbarV.NineSlice then frame.scrollbarV.NineSlice:Hide() end
 
   function frame:RenderScrollFrame()
-    if math.floor(frame.content:GetWidth()) > math.floor(frame:GetWidth()) then
-      frame.scrollbarH:SetMinMaxValues(0, frame.content:GetWidth() - frame:GetWidth())
-      frame.scrollbarH.thumb:SetWidth(frame.scrollbarH:GetWidth() / 5)
+    local viewportWidth = frame:GetWidth()
+    local viewportHeight = frame:GetHeight()
+    local contentWidth = frame.content:GetWidth()
+    local contentHeight = frame.content:GetHeight()
+    local ratioWidth = viewportWidth / contentWidth
+    local ratioHeight = viewportHeight / contentHeight
+    -- Horizontal
+    if ratioWidth < 1 then
+      frame.scrollbarH:SetValueStep(frame.config.scrollSpeedHorizontal)
+      frame.scrollbarH:SetMinMaxValues(0, contentWidth - viewportWidth)
+      frame.scrollbarH.thumb:SetWidth(viewportWidth * ratioWidth)
       frame.scrollbarH.thumb:SetHeight(frame.scrollbarH:GetHeight())
       frame.scrollbarH:Show()
     else
       frame:SetHorizontalScroll(0)
       frame.scrollbarH:Hide()
     end
-    if math.floor(frame.content:GetHeight()) > math.floor(frame:GetHeight()) then
-      frame.scrollbarV:SetMinMaxValues(0, frame.content:GetHeight() - frame:GetHeight())
-      frame.scrollbarV.thumb:SetHeight(frame.scrollbarV:GetHeight() / 5)
+    -- Vertical
+    if ratioHeight < 1 then
+      frame.scrollbarV:SetValueStep(frame.config.scrollSpeedVertical)
+      frame.scrollbarV:SetMinMaxValues(0, contentHeight - viewportHeight)
+      frame.scrollbarV.thumb:SetHeight(math.min(viewportHeight * ratioHeight, viewportHeight / 3))
       frame.scrollbarV.thumb:SetWidth(frame.scrollbarV:GetWidth())
       frame.scrollbarV:Show()
     else
@@ -91,8 +110,6 @@ end
 
 function UI:CreateTableFrame(config)
   local tableFrame = CreateFrame("Frame", "WeeklyKnowledgeTable" .. (Utils:TableCount(self.TableCollection) + 1))
-  tableFrame.scrollFrame = self:CreateScrollFrame("$parentScrollFrame", tableFrame)
-
   tableFrame.config = CreateFromMixins(
     {
       header = {
@@ -124,11 +141,15 @@ function UI:CreateTableFrame(config)
   )
   tableFrame.rows = {}
   tableFrame.data = tableFrame.config.data
+  tableFrame.scrollFrame = self:CreateScrollFrame({
+    name = "$parentScrollFrame",
+    scrollSpeedVertical = tableFrame.config.rows.height * 2
+  })
 
   ---Set the table data
   function tableFrame:SetData(data)
-    tableFrame.data = data
-    tableFrame:RenderTable()
+    self.data = data
+    self:RenderTable()
   end
 
   function tableFrame:SetRowHeight(height)
@@ -275,6 +296,7 @@ function UI:CreateTableFrame(config)
       end
     end)
 
+    tableFrame.scrollFrame:SetParent(tableFrame)
     tableFrame.scrollFrame:SetPoint("TOPLEFT", tableFrame, "TOPLEFT", 0, tableFrame.config.header.sticky and -tableFrame.config.header.height or 0)
     tableFrame.scrollFrame:SetPoint("BOTTOMRIGHT", tableFrame, "BOTTOMRIGHT")
     tableFrame.scrollFrame.content:SetSize(offsetX, offsetY)
