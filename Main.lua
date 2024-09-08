@@ -555,6 +555,12 @@ function Main:GetMainColumns(unfiltered)
   }
 
   Utils:TableForEach(Data.Objectives, function(dataObjective)
+    if dataObjective.id == Enum.WK_Objectives.DarkmoonQuest then
+      if not Data.cache.isDarkmoonOpen then
+        return
+      end
+    end
+
     ---@type WK_DataColumn
     local dataColumn = {
       name = dataObjective.name,

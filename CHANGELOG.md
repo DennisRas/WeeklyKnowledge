@@ -5,10 +5,11 @@
 ### Updated
 
 - Added detailed descriptions to more world uniques
+- Darkmoon Faire column is now automatically hidden if the event isn't active
 
 ### Fixed
 
-- Removed Darkmoon Faire from the checklist if the event isn't active
+- Darkmoon Faire objectives are now hidden from the checklist if the event isn't active
 
 ## v1.1.2 - 2024-09-08
 
