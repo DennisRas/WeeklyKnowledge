@@ -11,6 +11,7 @@
 ### Fixed
 
 - Darkmoon Faire objectives are now hidden from the checklist if the event isn't active
+- The scrollbars are now less buggy and easier to see and use (wider/taller)
 
 ## v1.1.2 - 2024-09-08
 
