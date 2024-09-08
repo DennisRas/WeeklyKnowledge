@@ -6,6 +6,10 @@
 
 - Added detailed descriptions to more world uniques
 
+### Fixed
+
+- Removed Darkmoon Faire from the checklist if the event isn't active
+
 ## v1.1.2 - 2024-09-08
 
 ### Added

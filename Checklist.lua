@@ -410,7 +410,7 @@ function Checklist:Render()
 
           if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
             if not Data.cache.isDarkmoonOpen then
-              progress.total = 0
+              return
             end
           end
         end
