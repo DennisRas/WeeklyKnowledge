@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.3 - 2024-09-08
+
+### Updated
+
+- Added detailed descriptions to more world uniques
+
 ## v1.1.2 - 2024-09-08
 
 ### Added
