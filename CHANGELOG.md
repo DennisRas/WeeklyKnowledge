@@ -18,6 +18,7 @@
 - Darkmoon Faire objectives are now hidden from the checklist if the event isn't active
 - The scrollbars are now less buggy and easier to see and use (wider/taller)
 - Fixed an old bug with character sorting
+- Fixed a bug with the checklist waypoint icons not showing properly for some players
 
 ## v1.1.2 - 2024-09-08
 

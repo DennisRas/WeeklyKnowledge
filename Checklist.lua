@@ -676,7 +676,8 @@ function Checklist:GetColumns(unfiltered)
     },
     {
       name = "",
-      width = 40,
+      width = 50,
+      align = "CENTER",
       cell = function(data)
         local loc = data.professionObjective.loc
         local requires = data.professionObjective.requires
@@ -690,7 +691,7 @@ function Checklist:GetColumns(unfiltered)
             point = UiMapPoint.CreateFromCoordinates(loc.m, loc.x / 100, loc.y / 100)
           end
           return {
-            text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20),
+            text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
             onEnter = function(columnFrame)
               local showTooltip = function()
                 GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
