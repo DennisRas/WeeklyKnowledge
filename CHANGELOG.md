@@ -7,6 +7,7 @@
 - Introduced a new Checklist setting: "Hide all uniques"
 - Added a Checklist setting for hiding vendor-specific uniques
 - Integrated support for TomTom waypoints within the Checklist window
+- Right clicking the minimap icon will now open the Checklist window
 
 ### Updated
 

@@ -34,13 +34,19 @@ function Core:OnInitialize()
     label = addonName,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
-    OnClick = function()
-      Main:ToggleWindow()
+    OnClick = function(...)
+      local _, b = ...
+      if b and b == "RightButton" then
+        Checklist:ToggleWindow()
+      else
+        Main:ToggleWindow()
+      end
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
-      tooltip:AddLine("Click to open WeeklyKnowledge", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      local dragText = "Drag to move this icon"
+      tooltip:AddLine("|cff00ff00Left click|r to open WeeklyKnowledge.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      local dragText = "|cff00ff00Drag|r to move this icon"
       if Data.db.global.minimap.lock then
         dragText = dragText .. " |cffff0000(locked)|r"
       end
