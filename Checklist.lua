@@ -682,6 +682,7 @@ function Checklist:GetColumns(unfiltered)
       cell = function(data)
         local loc = data.professionObjective.loc
         local requires = data.professionObjective.requires
+        local TomTom = _G["TomTom"]
         if data.professionObjective then
           local mapInfo = nil
           local point = nil
@@ -753,10 +754,17 @@ function Checklist:GetColumns(unfiltered)
                     GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
                   end)
                 end
-                if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
-                  GameTooltip:AddLine(" ")
-                  GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                  GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                if point then
+                  if C_Map.CanSetUserWaypointOnMap(loc.m) or TomTom then
+                    GameTooltip:AddLine(" ")
+                  end
+                  if C_Map.CanSetUserWaypointOnMap(loc.m) then
+                    GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                    GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  end
+                  if TomTom then
+                    GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  end
                 end
                 GameTooltip:Show()
               end
@@ -776,15 +784,32 @@ function Checklist:GetColumns(unfiltered)
               GameTooltip:Hide()
             end,
             onClick = function()
-              if point and C_Map.CanSetUserWaypointOnMap(loc.m) then
-                if IsModifiedClick("CHATLINK") then
-                  local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", loc.m, loc.x * 100, loc.y * 100, MAP_PIN_HYPERLINK)
-                  if not ChatEdit_InsertLink(hyperlink) then
-                    ChatFrame_OpenChat(hyperlink);
+              if point then
+                if IsAltKeyDown() and TomTom then
+                  local text = "Objective"
+                  if data.item.id and data.item.id > 0 and data.item.link then
+                    text = data.item.link
+                    if data.item.texture then
+                      text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
+                    end
+                  else
+                    text = "Quest"
+                    local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.professionObjective.quests[1] .. ":-1")
+                    if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
+                      text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
+                    end
                   end
-                else
-                  C_Map.SetUserWaypoint(point)
-                  C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+                  TomTom:AddWaypoint(loc.m, loc.x / 100, loc.y / 100, {title = text, from = addonName})
+                elseif C_Map.CanSetUserWaypointOnMap(loc.m) then
+                  if IsModifiedClick("CHATLINK") then
+                    local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", loc.m, loc.x * 100, loc.y * 100, MAP_PIN_HYPERLINK)
+                    if not ChatEdit_InsertLink(hyperlink) then
+                      ChatFrame_OpenChat(hyperlink);
+                    end
+                  else
+                    C_Map.SetUserWaypoint(point)
+                    C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+                  end
                 end
               end
             end,

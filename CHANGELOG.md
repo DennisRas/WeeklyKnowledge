@@ -6,6 +6,7 @@
 
 - Added a new Checklist setting: Hide all uniques
 - Added a new Checklist setting: Hide vendor uniques
+- Added support for TomTom waypoints in the Checklist window
 
 ### Updated
 
