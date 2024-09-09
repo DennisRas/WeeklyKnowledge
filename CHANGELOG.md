@@ -12,6 +12,7 @@
 - Added detailed descriptions to more world uniques
 - Darkmoon Faire column is now automatically hidden if the event isn't active
 - Scrolling will now jump 2 rows only, making it easier to follow
+- Checklist and Main windows will now stay behind other UI elements until focused on
 
 ### Fixed
 
