@@ -4,23 +4,23 @@
 
 ### Added
 
-- Added a new Checklist setting: Hide all uniques
-- Added a new Checklist setting: Hide vendor uniques
-- Added support for TomTom waypoints in the Checklist window
+- Introduced a new Checklist setting: "Hide all uniques"
+- Added a Checklist setting for hiding vendor-specific uniques
+- Integrated support for TomTom waypoints within the Checklist window
 
 ### Updated
 
-- Added detailed descriptions to more world uniques
-- Darkmoon Faire column is now automatically hidden if the event isn't active
-- Scrolling will now jump 2 rows only, making it easier to follow
-- Checklist and Main windows will now stay behind other UI elements until focused on
+- Expanded and improved detailed descriptions for many world uniques
+- The Darkmoon Faire column now automatically hides when the event is inactive
+- Adjusted scrolling behavior to move by 2 rows for smoother navigation
+- Redesigned scrollbars to be more visible, user-friendly, and less prone to bugs
+- Addon windows now remain behind other UI elements unless selected
 
 ### Fixed
 
-- Darkmoon Faire objectives are now hidden from the checklist if the event isn't active
-- The scrollbars are now less buggy and easier to see and use (wider/taller)
-- Fixed an old bug with character sorting
-- Fixed a bug with the checklist waypoint icons not showing properly for some players
+- Darkmoon Faire objectives will now correctly disappear from the checklist when the event is inactive
+- Resolved an old issue with character sorting
+- Fixed an issue where checklist waypoint icons weren't displaying properly for certain players
 
 ## v1.1.2 - 2024-09-08
 
