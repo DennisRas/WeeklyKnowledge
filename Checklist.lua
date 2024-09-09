@@ -155,6 +155,30 @@ function Checklist:Render()
             self:Render()
           end
         )
+        local hideAllUniques = rootMenu:CreateCheckbox(
+          "Hide all Uniques",
+          function() return Data.db.global.checklist.hideUniqueObjectives end,
+          function()
+            Data.db.global.checklist.hideUniqueObjectives = not Data.db.global.checklist.hideUniqueObjectives
+            self:Render()
+          end
+        )
+        hideAllUniques:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Hide all objectives from the Uniques category.");
+        end)
+        local hideVendorUniques = rootMenu:CreateCheckbox(
+          "Hide vendor Uniques",
+          function() return Data.db.global.checklist.hideUniqueVendorObjectives end,
+          function()
+            Data.db.global.checklist.hideUniqueVendorObjectives = not Data.db.global.checklist.hideUniqueVendorObjectives
+            self:Render()
+          end
+        )
+        hideVendorUniques:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Hide Uniques that are purchased from a vendor.");
+        end)
         rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
@@ -367,16 +391,32 @@ function Checklist:Render()
       end)
       if not dataProfession then return end
 
-      Utils:TableForEach(dataProfession.objectives, function(professionObjective)
+      Utils:TableForEach(dataProfession.objectives, function(dataProfessionObjective)
+        -- Hide Darkmoon objectives
+        if dataProfessionObjective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
+          if not Data.cache.isDarkmoonOpen then
+            return
+          end
+        end
+
+        -- Hide Uniques if enabled
+        if dataProfessionObjective.objectiveID == Enum.WK_Objectives.Unique then
+          if Data.db.global.checklist.hideUniqueObjectives then
+            return
+          elseif Data.db.global.checklist.hideUniqueVendorObjectives and dataProfessionObjective.requires and Utils:TableCount(dataProfessionObjective.requires) > 0 then
+            return
+          end
+        end
+
         local item = {
-          id = professionObjective.itemID,
+          id = dataProfessionObjective.itemID,
           name = "",
           link = "",
           texture = "",
         }
 
-        if professionObjective.itemID then
-          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(professionObjective.itemID)
+        if dataProfessionObjective.itemID then
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(dataProfessionObjective.itemID)
           if itemName then
             item.name = itemName
             item.link = itemLink
@@ -391,26 +431,19 @@ function Checklist:Render()
           pointsTotal = 0,
         }
 
-        local objective = professionObjective
-        if objective.quests then
+        if dataProfessionObjective.quests then
           local limit = 0
 
-          for _, questID in ipairs(objective.quests) do
+          for _, questID in ipairs(dataProfessionObjective.quests) do
             progress.total = progress.total + 1
-            progress.pointsTotal = progress.pointsTotal + objective.points
-            if objective.limit and progress.total > objective.limit then
-              progress.pointsTotal = objective.limit * objective.points
-              progress.total = objective.limit
+            progress.pointsTotal = progress.pointsTotal + dataProfessionObjective.points
+            if dataProfessionObjective.limit and progress.total > dataProfessionObjective.limit then
+              progress.pointsTotal = dataProfessionObjective.limit * dataProfessionObjective.points
+              progress.total = dataProfessionObjective.limit
             end
             if character.completed[questID] then
               progress.completed = progress.completed + 1
-              progress.points = progress.points + objective.points
-            end
-          end
-
-          if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
-            if not Data.cache.isDarkmoonOpen then
-              return
+              progress.points = progress.points + dataProfessionObjective.points
             end
           end
         end
@@ -426,7 +459,7 @@ function Checklist:Render()
             character = character,
             characterProfession = characterProfession,
             dataProfession = dataProfession,
-            professionObjective = professionObjective,
+            professionObjective = dataProfessionObjective,
             progress = progress,
             item = item
           }

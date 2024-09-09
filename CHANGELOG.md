@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.1.3 - 2024-09-08
+## v1.1.3 - 2024-09-09
+
+### Added
+
+- Added a new Checklist setting: Hide all uniques
+- Added a new Checklist setting: Hide vendor uniques
 
 ### Updated
 

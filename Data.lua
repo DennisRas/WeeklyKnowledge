@@ -18,7 +18,7 @@ Data.cache = {
   mapInfo = {},
 }
 
-Data.DBVersion = 4
+Data.DBVersion = 5
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -47,6 +47,8 @@ Data.defaultDB = {
       hideInDungeons = true,
       hideTable = false,
       hideTableHeader = false,
+      hideUniqueObjectives = false,
+      hideUniqueVendorObjectives = false,
     },
   }
 }

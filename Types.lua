@@ -27,6 +27,8 @@
 ---@field hideInDungeons boolean
 ---@field hideTable boolean
 ---@field hideTableHeader boolean
+---@field hideUniqueObjectives boolean
+---@field hideUniqueVendorObjectives boolean
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID
