@@ -675,7 +675,10 @@ function Data:GetCharacters(unfiltered)
   end)
 
   table.sort(characters, function(a, b)
-    return a.lastUpdate > b.lastUpdate
+    if type(a.lastUpdate) == "number" or type(b.lastUpdate) == "number" then
+      return a.lastUpdate > b.lastUpdate
+    end
+    return strcmputf8i(a.name, b.name) < 0
   end)
 
   return characters
