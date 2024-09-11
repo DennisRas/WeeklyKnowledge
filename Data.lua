@@ -18,7 +18,7 @@ Data.cache = {
   mapInfo = {},
 }
 
-Data.DBVersion = 5
+Data.DBVersion = 6
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -484,6 +484,26 @@ function Data:MigrateDB()
         self.db.global.checklist.windowBackgroundColor = self.db.global.windowBackgroundColor
         ---@diagnostic disable-next-line: inject-field
         self.db.global.windowBackgroundColor = nil
+      end
+    end
+    -- Remove unused attributes and old/broken characters
+    if self.db.global.DBVersion == 5 then
+      for characterGUID, character in pairs(self.db.global.characters) do
+        character.class = nil
+        character.color = nil
+        character.realm = nil
+        if type(character.enabled) ~= "boolean" then
+          character.enabled = true
+        end
+        if type(character.lastUpdate) ~= "number" then
+          self.db.global.characters[characterGUID] = nil
+        elseif type(character.classID) ~= "number" then
+          self.db.global.characters[characterGUID] = nil
+        elseif type(character.professions) ~= "table" then
+          self.db.global.characters[characterGUID] = nil
+        elseif #character.professions < 1 then
+          self.db.global.characters[characterGUID] = nil
+        end
       end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
