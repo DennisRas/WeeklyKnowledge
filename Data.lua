@@ -695,7 +695,7 @@ function Data:GetCharacters(unfiltered)
   end)
 
   table.sort(characters, function(a, b)
-    if type(a.lastUpdate) == "number" or type(b.lastUpdate) == "number" then
+    if type(a.lastUpdate) == "number" and type(b.lastUpdate) == "number" then
       return a.lastUpdate > b.lastUpdate
     end
     return strcmputf8i(a.name, b.name) < 0
