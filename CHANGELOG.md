@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4 - 2024-09-11
+
+### Fixed
+
+- Fixed a bug with unused/invalid characters causing errors
+- Fixed a bug with characters not showing up in the main window or dropdown
+
 ## v1.1.3 - 2024-09-09
 
 ### Added
