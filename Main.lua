@@ -248,17 +248,22 @@ function Main:Render()
       self.window.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.window.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
         Utils:TableForEach(Data:GetCharacters(true), function(character)
-          local text = format("%s - %s", character.name, character.realmName)
-          local _, classFile = GetClassInfo(character.classID)
-          if classFile then
-            local color = C_ClassColor.GetClassColor(classFile)
-            if color then
-              text = color:WrapTextInColorCode(text)
+          local name = character.name
+          if character.realmName then
+            name = format("%s - %s", character.name, character.realmName)
+          end
+          if character.classID then
+            local _, classFile = GetClassInfo(character.classID)
+            if classFile then
+              local color = C_ClassColor.GetClassColor(classFile)
+              if color then
+                name = color:WrapTextInColorCode(name)
+              end
             end
           end
 
           rootMenu:CreateCheckbox(
-            text,
+            name,
             function() return character.enabled or false end,
             function()
               character.enabled = not character.enabled
@@ -461,15 +466,17 @@ function Main:GetMainColumns(unfiltered)
       width = 90,
       toggleHidden = true,
       cell = function(character)
-        local characterName = character.name
-        local _, classFile = GetClassInfo(character.classID)
-        if classFile then
-          local color = C_ClassColor.GetClassColor(classFile)
-          if color then
-            characterName = color:WrapTextInColorCode(characterName)
+        local name = character.name
+        if character.classID then
+          local _, classFile = GetClassInfo(character.classID)
+          if classFile then
+            local color = C_ClassColor.GetClassColor(classFile)
+            if color then
+              name = color:WrapTextInColorCode(name)
+            end
           end
         end
-        return {text = characterName}
+        return {text = name}
       end,
     },
     {
