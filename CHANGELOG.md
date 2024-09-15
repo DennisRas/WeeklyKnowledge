@@ -4,7 +4,7 @@
 
 ### Added
 
-- You can now toggle each character profession individually
+- Added a new Character setting for hiding unused professions
 
 ## v1.1.4 - 2024-09-11
 
