@@ -18,7 +18,7 @@ Data.cache = {
   mapInfo = {},
 }
 
-Data.DBVersion = 6
+Data.DBVersion = 7
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -506,6 +506,13 @@ function Data:MigrateDB()
         end
       end
     end
+    if self.db.global.DBVersion == 6 then
+      for characterGUID, character in pairs(self.db.global.characters) do
+        for _, characterProfession in pairs(character.professions) do
+          characterProfession.enabled = true
+        end
+      end
+    end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
@@ -612,11 +619,9 @@ function Data:ScanCharacter()
   character.className = localizedClassName
   character.lastUpdate = GetServerTime()
 
-  -- Reset character data
-  character.professions = {}
-  character.completed = {}
 
   -- Profession Tree tracking
+  local professions = {}
   local prof1, prof2 = GetProfessions()
   Utils:TableForEach({prof1, prof2}, function(characterProfessionID)
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
@@ -627,14 +632,20 @@ function Data:ScanCharacter()
     end)
     if not dataProfession then return end
 
-    ---@type WK_CharacterProfession
-    local characterProfession = {
-      skillLineID = skillLineID,
-      level = skillLevel,
-      maxLevel = maxSkillLevel,
-      knowledgeLevel = 0,
-      knowledgeMaxLevel = 0,
-    }
+    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
+      return characterProfession.skillLineID == skillLineID
+    end)
+
+    if not characterProfession then
+      characterProfession = {
+        enabled = true,
+        skillLineID = skillLineID,
+        level = skillLevel,
+        maxLevel = maxSkillLevel,
+        knowledgeLevel = 0,
+        knowledgeMaxLevel = 0,
+      }
+    end
 
     -- Scan knowledge spent/max
     local configID = C_ProfSpecs.GetConfigIDForSkillLine(dataProfession.skillLineVariantID)
@@ -657,10 +668,12 @@ function Data:ScanCharacter()
       end
     end
 
-    table.insert(character.professions, characterProfession)
+    table.insert(professions, characterProfession)
   end)
+  character.professions = professions
 
   -- Quest tracking
+  character.completed = {}
   Utils:TableForEach(Data.Professions, function(dataProfession)
     if not dataProfession.objectives then return end
     Utils:TableForEach(dataProfession.objectives, function(objective)

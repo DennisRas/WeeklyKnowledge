@@ -49,6 +49,7 @@
 ---@field completed table<integer, boolean>
 
 ---@class WK_CharacterProfession
+---@field enabled boolean
 ---@field skillLineID integer
 ---@field level integer
 ---@field maxLevel integer

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.5 - 2024-09-15
+
+### Added
+
+- You can now toggle each character profession individually
+
 ## v1.1.4 - 2024-09-11
 
 ### Fixed

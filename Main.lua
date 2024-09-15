@@ -262,7 +262,7 @@ function Main:Render()
             end
           end
 
-          rootMenu:CreateCheckbox(
+          local characterButton = rootMenu:CreateCheckbox(
             name,
             function() return character.enabled or false end,
             function()
@@ -270,6 +270,26 @@ function Main:Render()
               self:Render()
             end
           )
+
+          if Utils:TableCount(character.professions) > 0 then
+            Utils:TableForEach(character.professions, function(characterProfession)
+              local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
+                return dataProfession.skillLineID == characterProfession.skillLineID
+              end)
+              local professionName = "?"
+              if dataProfession then
+                professionName = dataProfession.name
+              end
+              characterButton:CreateCheckbox(
+                professionName,
+                function() return characterProfession.enabled or false end,
+                function()
+                  characterProfession.enabled = not characterProfession.enabled
+                  self:Render()
+                end
+              )
+            end)
+          end
         end)
       end)
     end
@@ -416,6 +436,7 @@ function Main:Render()
   do -- Table data
     Utils:TableForEach(Data:GetCharacters(), function(character)
       Utils:TableForEach(character.professions, function(characterProfession)
+        if not characterProfession.enabled then return end
         local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
           return dataProfession.skillLineID == characterProfession.skillLineID
         end)
