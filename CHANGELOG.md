@@ -2,18 +2,19 @@
 
 ## v1.1.6 - 2024-09-16
 
-_Please note: To use the following changes, you'll need to log in to your characters again._
+_Please note: You will need to log in to your characters again to apply the following changes._
 
 ### Added
 
-- Added a column indicator to show unspent knowledge points
-- Introduced a new tooltip for the Knowledge column
-- The new Knowledge tooltip now provides an overview of spent, unspent, and maximum knowledge points
-- Added a profession specialization overview within the new Knowledge tooltip
+- Introduced a column indicator displaying unspent knowledge points
+- Added a new tooltip for the Knowledge column
+- The new Knowledge tooltip now shows an overview of spent, unspent, and maximum knowledge points
+- Added a profession specialization overview to the Knowledge tooltip
 
 ### Fixed
 
-- Resolved an issue where knowledge points would incorrectly increase after every reload
+- Resolved an issue where knowledge points would increase after every reload
+- Fixed a bug that prevented profession skill levels from updating during gameplay
 
 ## v1.1.5 - 2024-09-15
 

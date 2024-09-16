@@ -649,6 +649,9 @@ function Data:ScanCharacter()
       }
     end
 
+    characterProfession.skillLineID = skillLineID
+    characterProfession.level = skillLevel
+    characterProfession.maxLevel = maxSkillLevel
     characterProfession.specializations = {}
 
     local currencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(dataProfession.skillLineVariantID)
