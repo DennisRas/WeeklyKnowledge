@@ -644,10 +644,21 @@ function Data:ScanCharacter()
         maxLevel = maxSkillLevel,
         knowledgeLevel = 0,
         knowledgeMaxLevel = 0,
+        knowledgeUnspent = 0,
+        specializations = {}
       }
     end
 
+    characterProfession.specializations = {}
+
+    local currencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(dataProfession.skillLineVariantID)
+    if currencyInfo and currencyInfo.numAvailable then
+      characterProfession.knowledgeUnspent = currencyInfo.numAvailable
+    end
+
     -- Scan knowledge spent/max
+    local knowledgeLevel = 0
+    local knowledgeMaxLevel = 0
     local configID = C_ProfSpecs.GetConfigIDForSkillLine(dataProfession.skillLineVariantID)
     if configID and configID > 0 then
       local configInfo = C_Traits.GetConfigInfo(configID)
@@ -657,16 +668,38 @@ function Data:ScanCharacter()
           Utils:TableForEach(treeIDs, function(treeID)
             local treeNodes = C_Traits.GetTreeNodes(treeID)
             if not treeNodes then return end
+            local tabInfo = C_ProfSpecs.GetTabInfo(treeID)
+            local specialization
+            if tabInfo then
+              specialization = tabInfo
+              specialization.state = C_ProfSpecs.GetStateForTab(treeID, configID)
+              specialization.treeID = treeID
+              specialization.configID = configID
+              specialization.knowledgeLevel = 0
+              specialization.knowledgeMaxLevel = 0
+            end
             Utils:TableForEach(treeNodes, function(treeNode)
               local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
               if not nodeInfo then return end
-              characterProfession.knowledgeLevel = nodeInfo.ranksPurchased > 1 and characterProfession.knowledgeLevel + (nodeInfo.currentRank - 1) or characterProfession.knowledgeLevel
-              characterProfession.knowledgeMaxLevel = characterProfession.knowledgeMaxLevel + (nodeInfo.maxRanks - 1)
+              if nodeInfo.ranksPurchased > 1 then
+                knowledgeLevel = knowledgeLevel + (nodeInfo.currentRank - 1)
+                if tabInfo and specialization then
+                  specialization.knowledgeLevel = specialization.knowledgeLevel + (nodeInfo.currentRank - 1)
+                end
+              end
+              knowledgeMaxLevel = knowledgeMaxLevel + (nodeInfo.maxRanks - 1)
+              if tabInfo and specialization then
+                specialization.knowledgeMaxLevel = specialization.knowledgeMaxLevel + (nodeInfo.maxRanks - 1)
+              end
             end)
+            table.insert(characterProfession.specializations, specialization)
           end)
         end
       end
     end
+
+    characterProfession.knowledgeLevel = knowledgeLevel
+    characterProfession.knowledgeMaxLevel = knowledgeMaxLevel
 
     table.insert(professions, characterProfession)
   end)

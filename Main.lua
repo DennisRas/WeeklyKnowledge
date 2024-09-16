@@ -562,7 +562,7 @@ function Main:GetMainColumns(unfiltered)
       name = "Knowledge",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Knowledge", 1, 1, 1);
+        GameTooltip:SetText("Knowledge Points", 1, 1, 1);
         GameTooltip:AddLine("Current knowledge gained.")
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
@@ -571,14 +571,87 @@ function Main:GetMainColumns(unfiltered)
       onLeave = function()
         GameTooltip:Hide()
       end,
-      width = 80,
+      width = 100,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(_, characterProfession)
-        if characterProfession.knowledgeMaxLevel > 0 then
-          return {text = characterProfession.knowledgeLevel > 0 and characterProfession.knowledgeLevel == characterProfession.knowledgeMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel) or characterProfession.knowledgeLevel .. " / " .. characterProfession.knowledgeMaxLevel}
+      cell = function(_, characterProfession, dataProfession)
+        local text = ""
+
+        if characterProfession.knowledgeLevel then
+          text = format("%d", characterProfession.knowledgeLevel)
+          if characterProfession.knowledgeUnspent and characterProfession.knowledgeUnspent > 0 then
+            text = format("%d %s", characterProfession.knowledgeLevel, LIGHTBLUE_FONT_COLOR:WrapTextInColorCode("(" .. characterProfession.knowledgeUnspent .. ")"))
+          end
         end
-        return {text = ""}
+        if characterProfession.knowledgeMaxLevel then
+          text = format("%s / %d", text, characterProfession.knowledgeMaxLevel)
+        end
+        if characterProfession.knowledgeMaxLevel > 0 and characterProfession.knowledgeLevel == characterProfession.knowledgeMaxLevel then
+          text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
+        end
+
+        return {
+          text = text,
+          onEnter = function(cellFrame)
+            local pointsSpentColor = LIGHTGRAY_FONT_COLOR
+            local pointsSpentValue = "?"
+            local pointsUnspentColor = LIGHTGRAY_FONT_COLOR
+            local pointsUnspentValue = "?"
+            local pointsMaxColor = LIGHTGRAY_FONT_COLOR
+            local pointsMaxValue = "?"
+
+            if characterProfession.knowledgeLevel then
+              pointsSpentColor = WHITE_FONT_COLOR
+              pointsSpentValue = tostring(characterProfession.knowledgeLevel)
+            end
+
+            if characterProfession.knowledgeUnspent then
+              pointsUnspentColor = WHITE_FONT_COLOR
+              if characterProfession.knowledgeUnspent > 0 then
+                pointsUnspentColor = LIGHTBLUE_FONT_COLOR
+              end
+              pointsUnspentValue = tostring(characterProfession.knowledgeUnspent)
+            end
+
+            if characterProfession.knowledgeMaxLevel then
+              pointsMaxColor = WHITE_FONT_COLOR
+              pointsMaxValue = tostring(characterProfession.knowledgeMaxLevel)
+            end
+
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(dataProfession.name, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Points Spent:", pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
+            GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
+            GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
+
+            if characterProfession.specializations and Utils:TableCount(characterProfession.specializations) > 0 then
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("Specializations:")
+              Utils:TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
+                local name = characterProfessionSpecialization.name
+                if strlenutf8(name) > 20 then
+                  name = strsub(name, 1, 20) .. "..."
+                end
+                local value = format("%d / %d", characterProfessionSpecialization.knowledgeLevel or 0, characterProfessionSpecialization.knowledgeMaxLevel or 0)
+                if characterProfessionSpecialization.rootIconID then
+                  name = "|T" .. characterProfessionSpecialization.rootIconID .. ":12|t " .. name
+                end
+                if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Locked then
+                  value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode("Locked")
+                end
+                if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Unlockable then
+                  value = DIM_GREEN_FONT_COLOR:WrapTextInColorCode("Can Unlock")
+                end
+                GameTooltip:AddDoubleLine(name, value, 1, 1, 1, 1, 1, 1)
+              end)
+            end
+
+            GameTooltip:Show()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+        }
       end,
     },
   }

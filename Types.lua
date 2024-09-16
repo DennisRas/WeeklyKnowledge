@@ -55,6 +55,8 @@
 ---@field maxLevel integer
 ---@field knowledgeLevel integer
 ---@field knowledgeMaxLevel integer
+---@field knowledgeUnspent integer
+---@field specializations table
 
 ---@class WK_Objective
 ---@field id Enum.WK_Objectives
