@@ -387,37 +387,39 @@ function Checklist:Render()
   local profCount = 0
   do -- Table data
     Utils:TableForEach(character.professions, function(characterProfession)
-      local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
-        return dataProfession.skillLineID == characterProfession.skillLineID
-      end)
-      if not dataProfession then return end
+      local profession = Utils:TableGet(Data.Professions, "skillLineID", characterProfession.skillLineID)
+      if not profession then return end
 
-      Utils:TableForEach(dataProfession.objectives, function(dataProfessionObjective)
+      local objectives = Utils:TableFilter(Data.Objectives, function(objective)
+        return objective.professionID == profession.id
+      end)
+
+      Utils:TableForEach(objectives, function(objective)
         -- Hide Darkmoon objectives
-        if dataProfessionObjective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
+        if objective.typeID == Enum.WK_Objectives.DarkmoonQuest then
           if not Data.cache.isDarkmoonOpen then
             return
           end
         end
 
         -- Hide Uniques if enabled
-        if dataProfessionObjective.objectiveID == Enum.WK_Objectives.Unique then
+        if objective.typeID == Enum.WK_Objectives.Unique then
           if Data.db.global.checklist.hideUniqueObjectives then
             return
-          elseif Data.db.global.checklist.hideUniqueVendorObjectives and dataProfessionObjective.requires and Utils:TableCount(dataProfessionObjective.requires) > 0 then
+          elseif Data.db.global.checklist.hideUniqueVendorObjectives and objective.requires and Utils:TableCount(objective.requires) > 0 then
             return
           end
         end
 
         local item = {
-          id = dataProfessionObjective.itemID,
+          id = objective.itemID,
           name = "",
           link = "",
           texture = "",
         }
 
-        if dataProfessionObjective.itemID then
-          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(dataProfessionObjective.itemID)
+        if objective.itemID then
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(objective.itemID)
           if itemName then
             item.name = itemName
             item.link = itemLink
@@ -432,19 +434,19 @@ function Checklist:Render()
           pointsTotal = 0,
         }
 
-        if dataProfessionObjective.quests then
+        if objective.quests then
           local limit = 0
 
-          for _, questID in ipairs(dataProfessionObjective.quests) do
+          for _, questID in ipairs(objective.quests) do
             progress.total = progress.total + 1
-            progress.pointsTotal = progress.pointsTotal + dataProfessionObjective.points
-            if dataProfessionObjective.limit and progress.total > dataProfessionObjective.limit then
-              progress.pointsTotal = dataProfessionObjective.limit * dataProfessionObjective.points
-              progress.total = dataProfessionObjective.limit
+            progress.pointsTotal = progress.pointsTotal + objective.points
+            if objective.limit and progress.total > objective.limit then
+              progress.pointsTotal = objective.limit * objective.points
+              progress.total = objective.limit
             end
             if character.completed[questID] then
               progress.completed = progress.completed + 1
-              progress.points = progress.points + dataProfessionObjective.points
+              progress.points = progress.points + objective.points
             end
           end
         end
@@ -459,8 +461,8 @@ function Checklist:Render()
           local cellData = {
             character = character,
             characterProfession = characterProfession,
-            dataProfession = dataProfession,
-            professionObjective = dataProfessionObjective,
+            dataProfession = profession,
+            professionObjective = objective,
             progress = progress,
             item = item
           }

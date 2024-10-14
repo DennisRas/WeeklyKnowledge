@@ -57,8 +57,9 @@
 ---@field knowledgeMaxLevel integer
 ---@field knowledgeUnspent integer
 ---@field specializations table
+---@field catchUpCurrencyInfo CurrencyInfo?
 
----@class WK_Objective
+---@class WK_ObjectiveType
 ---@field id Enum.WK_Objectives
 ---@field name string
 ---@field description string
@@ -70,10 +71,14 @@
 ---@field skillLineID integer Profession ID
 ---@field skillLineVariantID integer Profession Expansion Variant ID
 ---@field spellID integer Learned Profession Spell ID
----@field objectives WK_ProfessionObjective[]
+---@field catchUpCurrencyID integer
+---@field catchUpWeeklyCap integer
+---@field catchUpItemID integer
+--- ---@field objectives WK_ProfessionObjective[]
 
----@class WK_ProfessionObjective
----@field objectiveID Enum.WK_Objectives
+---@class WK_Objective
+---@field professionID integer
+---@field typeID Enum.WK_Objectives
 ---@field quests integer[]
 ---@field itemID integer?
 ---@field points integer

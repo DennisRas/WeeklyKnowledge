@@ -84,12 +84,14 @@ function Core:OnEnable()
     },
     3,
     function()
+      Data.cache.weeklyProgress = {}
       Data:ScanCharacter()
       self:Render()
     end
   )
 
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
+    Data.cache.weeklyProgress = {}
     Data:ScanCalendar()
     self:Render()
   end)
