@@ -727,8 +727,11 @@ function Main:GetMainColumns(unfiltered)
                 GameTooltip:AddLine(" ")
                 for itemID, itemLooted in pairs(items) do
                   local item = Data.cache.items[itemID]
+                  local itemCached = item and item:IsItemDataCached()
+                  local icon = itemCached and item:GetItemIcon() or 134400
+                  local name = itemCached and item:GetItemLink() or "Loading..."
                   GameTooltip:AddDoubleLine(
-                    item and item:GetItemLink() or "Loading...",
+                    format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name),
                     CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
                   )
                 end
@@ -757,7 +760,7 @@ function Main:GetMainColumns(unfiltered)
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText("Catch-Up", 1, 1, 1);
-      GameTooltip:AddLine("This is your total Knowledge Points progress.", nil, nil, nil, true)
+      GameTooltip:AddLine("Keep track of your Knowledge Points progress and catch up on points from previous weeks.\n\nDo note that Treatise points are not included in calculations for this week.", nil, nil, nil, true)
       -- GameTooltip:AddLine(" ")
       -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
       GameTooltip:Show()
@@ -803,12 +806,18 @@ function Main:GetMainColumns(unfiltered)
           or progress.objective.typeID == Enum.WK_Objectives.TrainerQuest
         )
       end)
+      local hasGathering = Utils:TableFind(progress, function(prog)
+        return prog.objective.typeID == Enum.WK_Objectives.Gathering
+      end)
       Utils:TableForEach(progress, function(prog)
         local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", prog.objective.typeID)
         if not objectiveType then return end
         if prog.questsTotal == 0 then return end
         sumPointsEarned = sumPointsEarned + prog.pointsEarned
         sumPointsTotal = sumPointsTotal + prog.pointsTotal
+
+        -- Only gathering professions require completed gathering before catch-up unlocks
+        if not hasGathering then return end
         if not requirements[objectiveType.name] then
           requirements[objectiveType.name] = {0, 0}
         end
@@ -819,24 +828,46 @@ function Main:GetMainColumns(unfiltered)
       return {
         text = format(textColor:WrapTextInColorCode("%d / %d"), catchUpCurrent, catchUpTotal),
         onEnter = function(cellFrame)
-          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-          GameTooltip:SetText("Catch-Up", 1, 1, 1)
-          local color = WHITE_FONT_COLOR
-          color = sumPointsEarned == sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-          GameTooltip:AddDoubleLine("Weekly Points:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
-          color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-          GameTooltip:AddDoubleLine("Catch-Up Points:", format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
-          color = catchUpCurrent == catchUpTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-          GameTooltip:AddDoubleLine("Total:", format("%d / %d", catchUpCurrent, catchUpTotal), nil, nil, nil, color.r, color.g, color.b)
-          if Utils:TableCount(requirements) > 0 then
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine("Weekly Objectives to unlock Catch-Up points (Treatise does not count):", nil, nil, nil, true)
-            Utils:TableForEach(requirements, function(value, name)
-              color = value[1] == value[2] and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-              GameTooltip:AddDoubleLine(format("%s Points", name), format("%d / %d", value[1], value[2]), 1, 1, 1, color.r, color.g, color.b)
-            end)
+          local showTooltip = function()
+            local color = WHITE_FONT_COLOR
+
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText("Catch-Up", 1, 1, 1)
+            color = sumPointsEarned == sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
+            GameTooltip:AddDoubleLine("Weekly Points:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
+            color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
+            GameTooltip:AddDoubleLine("Catch-Up Points:", format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
+            color = catchUpCurrent == catchUpTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
+            GameTooltip:AddDoubleLine("Total:", format("%d / %d", catchUpCurrent, catchUpTotal), nil, nil, nil, color.r, color.g, color.b)
+
+            if Utils:TableCount(requirements) > 0 then
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("Unlock Catch-Up this week:", nil, nil, nil, true)
+              Utils:TableForEach(requirements, function(value, name)
+                color = value[1] == value[2] and GREEN_FONT_COLOR or WHITE_FONT_COLOR
+                GameTooltip:AddDoubleLine(format("%s Points", name), format("%d / %d", value[1], value[2]), 1, 1, 1, color.r, color.g, color.b)
+              end)
+            end
+
+            if profession.catchUpItemID and profession.catchUpItemID > 0 then
+              local item = Data.cache.items[profession.catchUpItemID]
+              local itemCached = item and item:IsItemDataCached()
+              local icon = itemCached and item:GetItemIcon() or 134400
+              local name = itemCached and item:GetItemLink() or "Loading..."
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("Catch-Up " .. (hasGathering and "Gathering" or "Patron Orders") .. ":")
+              GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name))
+            end
+
+            GameTooltip:Show()
           end
-          GameTooltip:Show()
+
+          if profession.catchUpItemID and profession.catchUpItemID > 0 then
+            Data.cache.items[profession.catchUpItemID] = Item:CreateFromItemID(profession.catchUpItemID)
+            Data.cache.items[profession.catchUpItemID]:ContinueOnItemLoad(showTooltip)
+          end
+
+          showTooltip()
         end,
         onLeave = function()
           GameTooltip:Hide()

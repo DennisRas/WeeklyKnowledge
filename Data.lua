@@ -340,7 +340,7 @@ Data.Professions = {
     spellID = 423321,
     catchUpCurrencyID = 3057,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228724,
   },
   {
     name = "Blacksmithing",
@@ -349,7 +349,7 @@ Data.Professions = {
     spellID = 423332,
     catchUpCurrencyID = 3058,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228726,
   },
   {
     name = "Enchanting",
@@ -358,7 +358,7 @@ Data.Professions = {
     spellID = 423334,
     catchUpCurrencyID = 3059,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 227662,
   },
   {
     name = "Engineering",
@@ -367,7 +367,7 @@ Data.Professions = {
     spellID = 423335,
     catchUpCurrencyID = 3060,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228730,
   },
   {
     name = "Herbalism",
@@ -376,7 +376,7 @@ Data.Professions = {
     spellID = 441327,
     catchUpCurrencyID = 3061,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 224835,
   },
   {
     name = "Inscription",
@@ -385,7 +385,7 @@ Data.Professions = {
     spellID = 423338,
     catchUpCurrencyID = 3062,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228732,
   },
   {
     name = "Jewelcrafting",
@@ -394,7 +394,7 @@ Data.Professions = {
     spellID = 423339,
     catchUpCurrencyID = 3063,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228734,
   },
   {
     name = "Leatherworking",
@@ -403,7 +403,7 @@ Data.Professions = {
     spellID = 423340,
     catchUpCurrencyID = 3064,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228736,
   },
   {
     name = "Mining",
@@ -412,7 +412,7 @@ Data.Professions = {
     spellID = 423341,
     catchUpCurrencyID = 3065,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 224838,
   },
   {
     name = "Skinning",
@@ -421,7 +421,7 @@ Data.Professions = {
     spellID = 423342,
     catchUpCurrencyID = 3066,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 224782,
   },
   {
     name = "Tailoring",
@@ -430,7 +430,7 @@ Data.Professions = {
     spellID = 423343,
     catchUpCurrencyID = 3067,
     catchUpWeeklyCap = 0,
-    catchUpItemID = 0,
+    catchUpItemID = 228738,
   }
 }
 
