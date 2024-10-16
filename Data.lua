@@ -750,6 +750,12 @@ end
 function Data:GetCharacters(unfiltered)
   local characters = Utils:TableFilter(self.db.global.characters, function(character)
     local include = true
+
+    -- Ignore ghost characters (Bug: https://github.com/DennisRas/WeeklyKnowledge/issues/47)
+    if not character.name or character.name == "" then
+      include = false
+    end
+
     if not unfiltered then
       if not character.enabled then
         include = false

@@ -6,6 +6,10 @@
 
 - Added a new Catch-Up column. Feedback is much appreciated.
 
+### Fixed
+
+- Fixed an issue with ghost characters showing up on the character list.
+
 ## v1.1.6 - 2024-09-16
 
 _Please note: You will need to log in to your characters again to apply the following changes._
