@@ -540,18 +540,13 @@ function Data:TaskWeeklyReset()
   local hasReset = false
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
     local questsToReset = {}
-    for _, profession in ipairs(self.Professions) do
-      for _, professionObjective in ipairs(profession.objectives) do
-        local dataObjecteive = self:GetObjective(professionObjective.objectiveID)
-        if dataObjecteive then
-          if dataObjecteive.repeatable == "Weekly" then
-            for _, questID in ipairs(professionObjective.quests) do
-              questsToReset[questID] = true
-            end
-          end
-        end
-      end
-    end
+    Utils:TableForEach(self.Objectives, function(objective)
+      local objectiveType = Utils:TableGet(self.ObjectiveTypes, "id", objective.typeID)
+      if not objectiveType or objectiveType.repeatable ~= "Weekly" then return end
+      Utils:TableForEach(objective.quests, function(questID)
+        questsToReset[questID] = true
+      end)
+    end)
     for _, character in pairs(self.db.global.characters) do
       if type(character.lastUpdate) == "number" and character.lastUpdate <= self.db.global.weeklyReset then
         for questID in pairs(character.completed) do
@@ -572,7 +567,7 @@ end
 ---@return WK_ObjectiveType|nil
 function Data:GetObjective(enum)
   return Utils:TableFind(self.ObjectiveTypes, function(objective)
-    return objective.id == enum
+    return objective.typeID == enum
   end)
 end
 
