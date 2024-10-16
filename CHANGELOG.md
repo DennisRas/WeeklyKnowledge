@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.7 - 2024-10-16
+
+### Added
+
+- Added a new Catch-Up column. Feedback is much appreciated.
+
 ## v1.1.6 - 2024-09-16
 
 _Please note: You will need to log in to your characters again to apply the following changes._
