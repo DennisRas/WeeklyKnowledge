@@ -4,15 +4,15 @@
 
 ### Added
 
-- Added a new Catch-Up column. Feedback is much appreciated.
+- Introduced a new Catch-Up column. Feedback is greatly appreciated!
 
 ### Updated
 
-- Window frames can now be dragged partly off-screen to the side and bottom.
+- Window frames can now be partially dragged off-screen to the sides and bottom.
 
 ### Fixed
 
-- Fixed an issue with ghost characters showing up on the character list.
+- Resolved an issue where ghost characters were appearing on the character list.
 
 ## v1.1.6 - 2024-09-16
 
