@@ -74,7 +74,6 @@
 ---@field catchUpCurrencyID integer
 ---@field catchUpWeeklyCap integer
 ---@field catchUpItemID integer
---- ---@field objectives WK_ProfessionObjective[]
 
 ---@class WK_Objective
 ---@field professionID integer

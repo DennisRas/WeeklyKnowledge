@@ -383,6 +383,8 @@ function Checklist:Render()
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
+  local weeklyProgress = Data:GetWeeklyProgress()
+
   local rows = 0
   local profCount = 0
   do -- Table data
@@ -391,7 +393,7 @@ function Checklist:Render()
       if not profession then return end
 
       local objectives = Utils:TableFilter(Data.Objectives, function(objective)
-        return objective.professionID == profession.id
+        return objective.professionID == profession.skillLineID
       end)
 
       Utils:TableForEach(objectives, function(objective)
@@ -427,31 +429,36 @@ function Checklist:Render()
           end
         end
 
-        local progress = {
-          completed = 0,
-          total = 0,
-          points = 0,
-          pointsTotal = 0,
-        }
+        local progress = Utils:TableFind(weeklyProgress, function(progress)
+          return progress.objective == objective and progress.character == character
+        end)
+        if not progress then return end
 
-        if objective.quests then
-          local limit = 0
+        -- local progress = {
+        --   completed = 0,
+        --   total = 0,
+        --   points = 0,
+        --   pointsTotal = 0,
+        -- }
 
-          for _, questID in ipairs(objective.quests) do
-            progress.total = progress.total + 1
-            progress.pointsTotal = progress.pointsTotal + objective.points
-            if objective.limit and progress.total > objective.limit then
-              progress.pointsTotal = objective.limit * objective.points
-              progress.total = objective.limit
-            end
-            if character.completed[questID] then
-              progress.completed = progress.completed + 1
-              progress.points = progress.points + objective.points
-            end
-          end
-        end
+        -- if objective.quests then
+        --   local limit = 0
 
-        if progress.total > 0 and progress.completed == progress.total and Data.db.global.checklist.hideCompletedObjectives then
+        --   for _, questID in ipairs(objective.quests) do
+        --     progress.questsTotal = progress.questsTotal + 1
+        --     progress.pointsEarnedTotal = progress.pointsTotal + objective.points
+        --     if objective.limit and progress.questsTotal > objective.limit then
+        --       progress.pointsTotal = objective.limit * objective.points
+        --       progress.questsTotal = objective.limit
+        --     end
+        --     if character.completed[questID] then
+        --       progress.questsCompleted = progress.questsCompleted + 1
+        --       progress.pointsEarned = progress.points + objective.points
+        --     end
+        --   end
+        -- end
+
+        if progress.questsTotal > 0 and progress.questsCompleted == progress.questsTotal and Data.db.global.checklist.hideCompletedObjectives then
           return
         end
 
@@ -462,7 +469,7 @@ function Checklist:Render()
             character = character,
             characterProfession = characterProfession,
             dataProfession = profession,
-            professionObjective = objective,
+            objective = objective,
             progress = progress,
             item = item
           }
@@ -535,10 +542,10 @@ function Checklist:GetColumns(unfiltered)
           end
         else
           text = "Quest"
-          local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.professionObjective.quests[1] .. ":-1")
+          local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
           if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
-            -- link = format("|cffffff00|Hquest:%d:70|h[%s]|h|r", data.professionObjective.quests[1], questTooltipData.lines[1].leftText) -- Isn't working
-            link = "quest:" .. data.professionObjective.quests[1] .. ":-1"
+            -- link = format("|cffffff00|Hquest:%d:70|h[%s]|h|r", data.objective.quests[1], questTooltipData.lines[1].leftText) -- Isn't working
+            link = "quest:" .. data.objective.quests[1] .. ":-1"
             text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
           end
         end
@@ -585,18 +592,18 @@ function Checklist:GetColumns(unfiltered)
       width = 80,
       toggleHidden = true,
       cell = function(data)
-        local objective = Data:GetObjective(data.professionObjective.objectiveID)
-        if not objective then
+        local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", data.objective.typeID)
+        if not objectiveType then
           return {
             text = "?"
           }
         end
         return {
-          text = objective.name,
+          text = objectiveType.name,
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText(objective.name, 1, 1, 1);
-            GameTooltip:AddLine(objective.description, nil, nil, nil, true)
+            GameTooltip:SetText(objectiveType.name, 1, 1, 1);
+            GameTooltip:AddLine(objectiveType.description, nil, nil, nil, true)
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -611,8 +618,8 @@ function Checklist:GetColumns(unfiltered)
       toggleHidden = true,
       cell = function(data)
         local text = " "
-        if data.professionObjective then
-          local loc = data.professionObjective.loc
+        if data.objective then
+          local loc = data.objective.loc
           if loc and loc.m then
             if Data.cache.mapInfo[loc.m] then
               text = Data.cache.mapInfo[loc.m].name
@@ -635,7 +642,7 @@ function Checklist:GetColumns(unfiltered)
     --   width = 60,
     --   toggleHidden = true,
     --   cell = function(data)
-    --     local objective = Data:GetObjective(data.professionObjective.objectiveID)
+    --     local objective = Data:GetObjective(data.objective.objectiveID)
     --     return {
     --       text = objective.repeatable,
     --     }
@@ -647,10 +654,10 @@ function Checklist:GetColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
-        local result = format("%d / %d", data.progress.completed, data.progress.total)
-        if data.progress.total == 0 then
+        local result = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
+        if data.progress.questsTotal == 0 then
           result = ""
-        elseif data.progress.completed == data.progress.total then
+        elseif data.progress.questsCompleted == data.progress.questsTotal then
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
@@ -665,10 +672,10 @@ function Checklist:GetColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
-        local result = format("%d / %d", data.progress.points, data.progress.pointsTotal)
-        if data.progress.total == 0 then
+        local result = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
+        if data.progress.questsTotal == 0 then
           result = ""
-        elseif data.progress.points == data.progress.pointsTotal then
+        elseif data.progress.pointsEarned == data.progress.pointsTotal then
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
@@ -682,10 +689,10 @@ function Checklist:GetColumns(unfiltered)
       width = 50,
       align = "CENTER",
       cell = function(data)
-        local loc = data.professionObjective.loc
-        local requires = data.professionObjective.requires
+        local loc = data.objective.loc
+        local requires = data.objective.requires
         local TomTom = _G["TomTom"]
-        if data.professionObjective then
+        if data.objective then
           local mapInfo = nil
           local point = nil
           if loc and loc.m then
@@ -796,7 +803,7 @@ function Checklist:GetColumns(unfiltered)
                     end
                   else
                     text = "Quest"
-                    local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.professionObjective.quests[1] .. ":-1")
+                    local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
                     if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
                       text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
                     end
