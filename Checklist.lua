@@ -518,6 +518,7 @@ function Checklist:Render()
   self.window.table:SetData(tableData)
   self.window:SetWidth(windowWidth)
   self.window:SetHeight(windowHeight + 2)
+  self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
   self.window:SetScale(Data.db.global.checklist.windowScale / 100)
   if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
     self.window:Hide()
