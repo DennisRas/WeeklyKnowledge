@@ -11,6 +11,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0")
 
 local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 _G.WeeklyKnowledge = addon
 
@@ -27,7 +28,7 @@ function Core:OnInitialize()
   Data:InitDB()
   Data:MigrateDB()
   if Data:TaskWeeklyReset() then
-    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
+    self:Print(L["WeeklyReset"])
   end
 
   local WKLDB = LibDataBroker:NewDataObject(addonName, {
@@ -44,11 +45,11 @@ function Core:OnInitialize()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
-      tooltip:AddLine("|cff00ff00Left click|r to open WeeklyKnowledge.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      local dragText = "|cff00ff00Drag|r to move this icon"
+      tooltip:AddLine(L["TooltipLine1"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      tooltip:AddLine(L["TooltipLine2"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      local dragText = L["TooltipLine3"]
       if Data.db.global.minimap.lock then
-        dragText = dragText .. " |cffff0000(locked)|r"
+        dragText = dragText .. L["TooltipLocked"]
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end
