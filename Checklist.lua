@@ -7,6 +7,8 @@ local addon = select(2, ...)
 local Checklist = {}
 addon.Checklist = Checklist
 
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
@@ -78,7 +80,7 @@ function Checklist:Render()
     self.window.titlebar.title:SetPoint("LEFT", self.window.titlebar, 28, 0)
     self.window.titlebar.title:SetJustifyH("LEFT")
     self.window.titlebar.title:SetJustifyV("MIDDLE")
-    self.window.titlebar.title:SetText("Checklist")
+    self.window.titlebar.title:SetText(L["Checklist"])
 
     self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
     self.window.textbox:SetFontObject("SystemFont_Med1")
@@ -97,7 +99,7 @@ function Checklist:Render()
         self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
         Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
         GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+        GameTooltip:SetText(L["CloseTheWindow"], 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
       self.window.titlebar.closeButton:SetScript("OnLeave", function()
@@ -122,8 +124,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Settings"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["SettingsDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
@@ -133,7 +135,7 @@ function Checklist:Render()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         rootMenu:CreateCheckbox(
-          "Hide in combat",
+          L["HideInCombat"],
           function() return Data.db.global.checklist.hideInCombat end,
           function()
             Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
@@ -141,7 +143,7 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide in dungeons",
+          L["HideInDungeons"],
           function() return Data.db.global.checklist.hideInDungeons end,
           function()
             Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
@@ -149,7 +151,7 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide completed objectives",
+          L["HideCompletedObjectives"],
           function() return Data.db.global.checklist.hideCompletedObjectives end,
           function()
             Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
@@ -157,7 +159,7 @@ function Checklist:Render()
           end
         )
         local hideAllUniques = rootMenu:CreateCheckbox(
-          "Hide all Uniques",
+          L["HideAllUniques"],
           function() return Data.db.global.checklist.hideUniqueObjectives end,
           function()
             Data.db.global.checklist.hideUniqueObjectives = not Data.db.global.checklist.hideUniqueObjectives
@@ -166,10 +168,10 @@ function Checklist:Render()
         )
         hideAllUniques:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide all objectives from the Uniques category.");
+          GameTooltip_AddNormalLine(tooltip, L["HideAllUniquesDesc"]);
         end)
         local hideVendorUniques = rootMenu:CreateCheckbox(
-          "Hide vendor Uniques",
+          L["HideVendorUniques"],
           function() return Data.db.global.checklist.hideUniqueVendorObjectives end,
           function()
             Data.db.global.checklist.hideUniqueVendorObjectives = not Data.db.global.checklist.hideUniqueVendorObjectives
@@ -178,10 +180,10 @@ function Checklist:Render()
         )
         hideVendorUniques:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide Uniques that are purchased from a vendor.");
+          GameTooltip_AddNormalLine(tooltip, L["HideVendorUniquesDesc"]);
         end)
-        rootMenu:CreateTitle("Window")
-        local windowScale = rootMenu:CreateButton("Scaling")
+        rootMenu:CreateTitle(L["Window"])
+        local windowScale = rootMenu:CreateButton(L["Scaling"])
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
@@ -227,7 +229,7 @@ function Checklist:Render()
           hasOpacity = 1,
         }
         rootMenu:CreateColorSwatch(
-          "Background color",
+          L["BackgroundColor"],
           function()
             ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
           end,
@@ -235,7 +237,7 @@ function Checklist:Render()
         )
 
         rootMenu:CreateCheckbox(
-          "Show the border",
+          L["ShowTheBorder"],
           function() return Data.db.global.checklist.windowBorder end,
           function()
             Data.db.global.checklist.windowBorder = not Data.db.global.checklist.windowBorder
@@ -268,8 +270,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Columns"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["ColumnsDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
@@ -312,8 +314,8 @@ function Checklist:Render()
         self.window.titlebar.toggleButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0.05)
         GameTooltip:SetOwner(self.window.titlebar.toggleButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Toggle objectives", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Expand/Collapse the list.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["ToggleObjectives"], 1, 1, 1, 1, true)
+        GameTooltip:AddLine(L["ToggleObjectivesDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.toggleButton:SetScript("OnLeave", function()
@@ -510,7 +512,7 @@ function Checklist:Render()
   windowHeight = math.min(windowHeight, maxWindowHeight)
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
-  self.window.textbox:SetText(profCount == 0 and "It does not look like you have any TWW professions." or "Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
+  self.window.textbox:SetText(profCount == 0 and L["ZeroProfCount"] or L["LookPatronOrders"])
   self.window:SetShown(Data.db.global.checklist.open)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
@@ -529,7 +531,7 @@ function Checklist:GetColumns(unfiltered)
   local hidden = Data.db.global.checklist.hiddenColumns
   local columns = {
     {
-      name = "Objective",
+      name = L["Objective"],
       width = 260,
       cell = function(data)
         local text = ""
@@ -542,7 +544,7 @@ function Checklist:GetColumns(unfiltered)
             text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
           end
         else
-          text = "Quest"
+          text = L["Quest"]
           local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
           if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
             -- link = format("|cffffff00|Hquest:%d:70|h[%s]|h|r", data.objective.quests[1], questTooltipData.lines[1].leftText) -- Isn't working
@@ -558,7 +560,7 @@ function Checklist:GetColumns(unfiltered)
               GameTooltip:SetHyperlink(link)
               if canShare then
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine(L["ShiftClickToLinkToChat"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
               end
             end
             GameTooltip:Show()
@@ -579,7 +581,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Profession",
+      name = L["Profession"],
       width = 100,
       toggleHidden = true,
       cell = function(data)
@@ -589,7 +591,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Category",
+      name = L["Category"],
       width = 80,
       toggleHidden = true,
       cell = function(data)
@@ -614,7 +616,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Location",
+      name = L["Location"],
       width = 100,
       toggleHidden = true,
       cell = function(data)
@@ -650,7 +652,7 @@ function Checklist:GetColumns(unfiltered)
     --   end,
     -- },
     {
-      name = "Progress",
+      name = L["Progress"],
       width = 70,
       align = "CENTER",
       toggleHidden = true,
@@ -668,7 +670,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Points",
+      name = L["Points"],
       width = 70,
       align = "CENTER",
       toggleHidden = true,
@@ -707,23 +709,23 @@ function Checklist:GetColumns(unfiltered)
             onEnter = function(columnFrame)
               local showTooltip = function()
                 GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-                GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+                GameTooltip:SetText(L["DoYouKnowTheWay"], 1, 1, 1)
                 if loc and loc.hint then
                   GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
                 end
                 if mapInfo then
                   GameTooltip:AddLine(" ")
-                  GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
+                  GameTooltip:AddDoubleLine(L["LocationAt"], mapInfo.name, nil, nil, nil, 1, 1, 1)
                 end
                 if loc and loc.x then
                   if not mapInfo then
                     GameTooltip:AddLine(" ")
                   end
-                  GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
+                  GameTooltip:AddDoubleLine(L["CoordinatesAt"], format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
                 end
                 if requires and Utils:TableCount(requires) > 0 then
                   GameTooltip:AddLine(" ")
-                  GameTooltip:AddLine("Requirements:")
+                  GameTooltip:AddLine(L["RequirementsA"])
                   Utils:TableForEach(requires, function(req)
                     local leftText = " "
                     local rightText = format("x%d", req.amount)
@@ -769,11 +771,11 @@ function Checklist:GetColumns(unfiltered)
                     GameTooltip:AddLine(" ")
                   end
                   if C_Map.CanSetUserWaypointOnMap(loc.m) then
-                    GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                    GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                    GameTooltip:AddLine(L["ClickToPlaceAPinOnTheMap"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                    GameTooltip:AddLine(L["ShiftClickToShareAPinInChat"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                   end
                   if TomTom then
-                    GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                    GameTooltip:AddLine(L["AltClickToPlaceAWaypoint"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                   end
                 end
                 GameTooltip:Show()
@@ -796,14 +798,14 @@ function Checklist:GetColumns(unfiltered)
             onClick = function()
               if point then
                 if IsAltKeyDown() and TomTom then
-                  local text = "Objective"
+                  local text = L["Objective"]
                   if data.item.id and data.item.id > 0 and data.item.link then
                     text = data.item.link
                     if data.item.texture then
                       text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
                     end
                   else
-                    text = "Quest"
+                    text = L["Quest"]
                     local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
                     if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
                       text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")

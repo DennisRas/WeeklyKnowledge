@@ -7,6 +7,8 @@ local addon = select(2, ...)
 local Main = {}
 addon.Main = Main
 
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
@@ -91,7 +93,7 @@ function Main:Render()
         self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
         Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
         GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+        GameTooltip:SetText(L["CloseTheWindow"], 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
       self.window.titlebar.closeButton:SetScript("OnLeave", function()
@@ -116,8 +118,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Settings"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["SettingsDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
@@ -127,7 +129,7 @@ function Main:Render()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         local showMinimapIcon = rootMenu:CreateCheckbox(
-          "Show the minimap button",
+          L["ShowTheMinimapButton"],
           function() return not Data.db.global.minimap.hide end,
           function()
             Data.db.global.minimap.hide = not Data.db.global.minimap.hide
@@ -136,11 +138,11 @@ function Main:Render()
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.");
+          GameTooltip_AddNormalLine(tooltip, L["ShowMinimapIconDesc"]);
         end)
 
         local lockMinimapIcon = rootMenu:CreateCheckbox(
-          "Lock the minimap button",
+          L["LockMinimapIcon"],
           function() return Data.db.global.minimap.lock end,
           function()
             Data.db.global.minimap.lock = not Data.db.global.minimap.lock
@@ -149,11 +151,11 @@ function Main:Render()
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
+          GameTooltip_AddNormalLine(tooltip, L["LockMinimapIconDesc"]);
         end)
 
-        rootMenu:CreateTitle("Window")
-        local windowScale = rootMenu:CreateButton("Scaling")
+        rootMenu:CreateTitle(L["Window"])
+        local windowScale = rootMenu:CreateButton(L["Scaling"])
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
@@ -199,7 +201,7 @@ function Main:Render()
           hasOpacity = 1,
         }
         rootMenu:CreateColorSwatch(
-          "Background color",
+          L["BackgroundColor"],
           function()
             ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
           end,
@@ -207,7 +209,7 @@ function Main:Render()
         )
 
         rootMenu:CreateCheckbox(
-          "Show the border",
+          L["ShowTheBorder"],
           function() return Data.db.global.main.windowBorder end,
           function()
             Data.db.global.main.windowBorder = not Data.db.global.main.windowBorder
@@ -232,8 +234,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.CharactersButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.CharactersButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable your characters.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Characters"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["CharactersDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.CharactersButton:SetScript("OnLeave", function()
@@ -301,8 +303,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Columns"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["ColumnsDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
@@ -342,8 +344,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ChecklistButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ChecklistButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Checklist", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle the Checklist window", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["Checklist"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["ChecklistDesc"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ChecklistButton:SetScript("OnLeave", function()
@@ -469,11 +471,11 @@ function Main:GetMainColumns(unfiltered)
   ---@type WK_DataColumn[]
   local columns = {
     {
-      name = "Name",
+      name = L["Name"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Name", 1, 1, 1);
-        GameTooltip:AddLine("Your characters.")
+        GameTooltip:SetText(L["Name"], 1, 1, 1);
+        GameTooltip:AddLine(L["NameDesc"])
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
@@ -498,11 +500,11 @@ function Main:GetMainColumns(unfiltered)
       end,
     },
     {
-      name = "Realm",
+      name = L["Realm"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Realm", 1, 1, 1);
-        GameTooltip:AddLine("Realm names.")
+        GameTooltip:SetText(L["Realm"], 1, 1, 1);
+        GameTooltip:AddLine(L["RealmDesc"])
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
@@ -517,11 +519,11 @@ function Main:GetMainColumns(unfiltered)
       end,
     },
     {
-      name = "Profession",
+      name = L["Profession"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Profession", 1, 1, 1);
-        GameTooltip:AddLine("Your professions.")
+        GameTooltip:SetText(L["Profession"], 1, 1, 1);
+        GameTooltip:AddLine(L["ProfessionDesc"])
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
@@ -536,11 +538,11 @@ function Main:GetMainColumns(unfiltered)
       end,
     },
     {
-      name = "Skill",
+      name = L["Skill"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Skill", 1, 1, 1);
-        GameTooltip:AddLine("Current skill levels.")
+        GameTooltip:SetText(L["Skill"], 1, 1, 1);
+        GameTooltip:AddLine(L["SkillDesc"])
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
@@ -556,11 +558,11 @@ function Main:GetMainColumns(unfiltered)
       end,
     },
     {
-      name = "Knowledge",
+      name = L["Knowledge"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Knowledge Points", 1, 1, 1);
-        GameTooltip:AddLine("Current knowledge gained.")
+        GameTooltip:SetText(L["KnowledgePoints"], 1, 1, 1);
+        GameTooltip:AddLine(L["KnowledgePointsDesc"])
         -- GameTooltip:AddLine(" ")
         -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
@@ -617,27 +619,27 @@ function Main:GetMainColumns(unfiltered)
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText(dataProfession.name, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Points Spent:", pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
-            GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
-            GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
+            GameTooltip:AddDoubleLine(L["PointsSpentAt"], pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
+            GameTooltip:AddDoubleLine(L["PointsUnspentAt"], pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
+            GameTooltip:AddDoubleLine(L["MaxAt"], pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
 
             if characterProfession.specializations and Utils:TableCount(characterProfession.specializations) > 0 then
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Specializations:")
+              GameTooltip:AddLine(L["SpecializationsAt"])
               Utils:TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
                 local name = characterProfessionSpecialization.name
-                if strlenutf8(name) > 20 then
-                  name = strsub(name, 1, 20) .. "..."
+                if strlenutf8(name) > 30 then
+                  name = strsub(name, 1, 30) .. "..."
                 end
                 local value = format("%d / %d", characterProfessionSpecialization.knowledgeLevel or 0, characterProfessionSpecialization.knowledgeMaxLevel or 0)
                 if characterProfessionSpecialization.rootIconID then
                   name = "|T" .. characterProfessionSpecialization.rootIconID .. ":12|t " .. name
                 end
                 if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Locked then
-                  value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode("Locked")
+                  value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode(L["Locked"])
                 end
                 if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Unlockable then
-                  value = DIM_GREEN_FONT_COLOR:WrapTextInColorCode("Can Unlock")
+                  value = DIM_GREEN_FONT_COLOR:WrapTextInColorCode(L["CanUnlock"])
                 end
                 GameTooltip:AddDoubleLine(name, value, 1, 1, 1, 1, 1, 1)
               end)
@@ -714,23 +716,23 @@ function Main:GetMainColumns(unfiltered)
         return {
           text = text,
           onEnter = function(cellFrame)
-            local label = "Items:"
+            local label = L["Items"]
             if objectiveType.type == "quest" then
-              label = "Quests:"
+              label = L["Quests"]
             end
 
             local showTooltip = function()
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText(objectiveType.name, 1, 1, 1);
               GameTooltip:AddDoubleLine(label, format("%d / %d", questsCompleted, questsTotal), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", pointsEarned, pointsTotal), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine(L["KnowledgePointsAt"], format("%d / %d", pointsEarned, pointsTotal), nil, nil, nil, 1, 1, 1)
               if Utils:TableCount(items) > 0 then
                 GameTooltip:AddLine(" ")
                 for itemID, itemLooted in pairs(items) do
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
-                  local name = itemCached and item:GetItemLink() or "Loading..."
+                  local name = itemCached and item:GetItemLink() or L["ItemLinkLoading"]
                   GameTooltip:AddDoubleLine(
                     format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name),
                     CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
@@ -760,8 +762,8 @@ function Main:GetMainColumns(unfiltered)
     name = "Catch-Up",
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText("Catch-Up", 1, 1, 1);
-      GameTooltip:AddLine("Keep track of your Knowledge Points progress and catch up on points from previous weeks.\n\nDo note that Treatise points are not included in calculations for this week.", nil, nil, nil, true)
+      GameTooltip:SetText(L["Catch-Up"], 1, 1, 1);
+      GameTooltip:AddLine(L["Catch-UpDesc"], nil, nil, nil, true)
       -- GameTooltip:AddLine(" ")
       -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
       GameTooltip:Show()
@@ -778,8 +780,8 @@ function Main:GetMainColumns(unfiltered)
           text = "-",
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText("No data", 1, 1, 1);
-            GameTooltip:AddLine("Log in to fetch the data for this character.", nil, nil, nil, true);
+            GameTooltip:SetText(L["NoData"], 1, 1, 1);
+            GameTooltip:AddLine(L["NoDataDesc"], nil, nil, nil, true);
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -833,20 +835,20 @@ function Main:GetMainColumns(unfiltered)
             local color = WHITE_FONT_COLOR
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText("Catch-Up", 1, 1, 1)
+            GameTooltip:SetText(L["Catch-Up"], 1, 1, 1)
             color = sumPointsEarned == sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-            GameTooltip:AddDoubleLine("Weekly Points:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
+            GameTooltip:AddDoubleLine(L["WeeklyPointsAt"], format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-            GameTooltip:AddDoubleLine("Catch-Up Points:", format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
+            GameTooltip:AddDoubleLine(L["Catch-UpPointsAt"], format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent == catchUpTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-            GameTooltip:AddDoubleLine("Total:", format("%d / %d", catchUpCurrent, catchUpTotal), nil, nil, nil, color.r, color.g, color.b)
+            GameTooltip:AddDoubleLine(L["TotalAt"], format("%d / %d", catchUpCurrent, catchUpTotal), nil, nil, nil, color.r, color.g, color.b)
 
             if Utils:TableCount(requirements) > 0 then
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Unlock Catch-Up this week:", nil, nil, nil, true)
+              GameTooltip:AddLine(L["UnlockCatch-UpDesc"], nil, nil, nil, true)
               Utils:TableForEach(requirements, function(value, name)
                 color = value[1] == value[2] and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-                GameTooltip:AddDoubleLine(format("%s Points", name), format("%d / %d", value[1], value[2]), 1, 1, 1, color.r, color.g, color.b)
+                GameTooltip:AddDoubleLine(format(L["fmtPoints"], name), format("%d / %d", value[1], value[2]), 1, 1, 1, color.r, color.g, color.b)
               end)
             end
 
@@ -856,7 +858,7 @@ function Main:GetMainColumns(unfiltered)
               local icon = itemCached and item:GetItemIcon() or 134400
               local name = itemCached and item:GetItemLink() or "Loading..."
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Catch-Up " .. (hasGathering and "Gathering" or "Patron Orders") .. ":")
+              GameTooltip:AddLine(L["Catch-UpSpc"] .. (hasGathering and L["Gathering"] or L["PatronOrders"]) .. ":")
               GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name))
             end
 
