@@ -854,15 +854,17 @@ function Data:GetWeeklyProgress()
         end
 
         if objective.typeID == Enum.WK_Objectives.CatchUp and profession.catchUpCurrencyID then
-          progress.questsTotal = 1
           local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
           local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
 
+          progress.pointsEarned = catchUpCurrent
+          progress.pointsTotal = catchUpTotal
+
           if catchUpCurrent < catchUpTotal then
-            progress.pointsEarned = catchUpCurrent
-            progress.pointsTotal = catchUpTotal
+            progress.questsTotal = catchUpTotal - catchUpCurrent
           else
-            progress.questsCompleted = 1
+            progress.questsTotal = catchUpTotal
+            progress.questsCompleted = catchUpTotal
           end
         end
 
