@@ -660,6 +660,9 @@ function Main:GetMainColumns(unfiltered)
       if not Data.cache.isDarkmoonOpen then
         return
       end
+    elseif objectiveType.id == Enum.WK_Objectives.CatchUp then
+      -- There's a hard-coded column with more info
+      return
     end
 
     ---@type WK_DataColumn

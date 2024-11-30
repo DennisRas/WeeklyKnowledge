@@ -29,6 +29,7 @@
 ---@field hideTableHeader boolean
 ---@field hideUniqueObjectives boolean
 ---@field hideUniqueVendorObjectives boolean
+---@field hideCatchUpObjectives boolean
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID
@@ -129,4 +130,5 @@ Enum.WK_Objectives = {
   Gathering = "Gathering",
   TrainerQuest = "TrainerQuest",
   DarkmoonQuest = "DarkmoonQuest",
+  CatchUp = "CatchUp",
 }
