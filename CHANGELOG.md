@@ -6,6 +6,10 @@
 
 - Added Catch-Up objectives to the Checklist (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))
 
+### Updated
+
+- Improved the performance of the addon when not shown on screen
+
 ### Fixed
 
 - Fixed a bug related to the Darkmoon Faire (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))

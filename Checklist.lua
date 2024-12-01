@@ -367,6 +367,12 @@ function Checklist:Render()
     return
   end
 
+  -- Quick hotfix to avoid excessive rendering
+  if (not self.window:IsVisible() and not Data.db.global.checklist.open) or (Data.cache.inCombat and Data.db.global.checklist.hideInCombat) then
+    self.window:Hide()
+    return
+  end
+
   do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn

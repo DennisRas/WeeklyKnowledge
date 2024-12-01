@@ -383,6 +383,11 @@ function Main:Render()
     table.insert(UISpecialFrames, frameName)
   end
 
+  -- Quick hotfix to avoid excessive rendering
+  if not self.window:IsVisible() then
+    return
+  end
+
   -- do -- Show helptip for new checklist
   --   local checklistHelpTipText = "Check out the new checklist!"
   --   if Data.db.global.main.checklistHelpTipClosed then
