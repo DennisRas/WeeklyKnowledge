@@ -764,7 +764,10 @@ function Main:GetMainColumns(unfiltered)
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText("Catch-Up", 1, 1, 1);
-      GameTooltip:AddLine("Keep track of your Knowledge Points progress and catch up on points from previous weeks.\n\nDo note that Treatise points are not included in calculations for this week.", nil, nil, nil, true)
+      local objective = Utils:TableGet(Data.ObjectiveTypes, "id", Enum.WK_Objectives.CatchUp)
+      if objective then
+        GameTooltip:AddLine(objective.description, nil, nil, nil, true)
+      end
       -- GameTooltip:AddLine(" ")
       -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
       GameTooltip:Show()
