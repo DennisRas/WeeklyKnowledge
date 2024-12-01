@@ -190,7 +190,7 @@ function Checklist:Render()
         )
         hideCatchUp:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide catch-up points objectives.");
+          GameTooltip_AddNormalLine(tooltip, "Hide all objectives from the Catch-Up category.");
         end)
         rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
