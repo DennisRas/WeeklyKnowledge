@@ -181,7 +181,7 @@ function Checklist:Render()
           GameTooltip_AddNormalLine(tooltip, "Hide Uniques that are purchased from a vendor.");
         end)
         local hideCatchUp = rootMenu:CreateCheckbox(
-          "Hide catch-up objectives",
+          "Hide Catch-Up objectives",
           function() return Data.db.global.checklist.hideCatchUpObjectives end,
           function()
             Data.db.global.checklist.hideCatchUpObjectives = not Data.db.global.checklist.hideCatchUpObjectives
