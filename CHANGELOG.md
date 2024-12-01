@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.8 - 2024-12-01
+
+### Added
+
+- Added Catch-Up objectives to the Checklist (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))
+
+### Fixed
+
+- Fixed a bug related to the Darkmoon Faire (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))
+
 ## v1.1.7 - 2024-10-16
 
 ### Added
