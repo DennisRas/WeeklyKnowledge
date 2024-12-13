@@ -182,6 +182,18 @@ function Checklist:Render()
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
           GameTooltip_AddNormalLine(tooltip, L["HideVendorUniquesDesc"]);
         end)
+        local hideCatchUp = rootMenu:CreateCheckbox(
+          L["HideCatch-UpObjectives"],
+          function() return Data.db.global.checklist.hideCatchUpObjectives end,
+          function()
+            Data.db.global.checklist.hideCatchUpObjectives = not Data.db.global.checklist.hideCatchUpObjectives
+            self:Render()
+          end
+        )
+        hideCatchUp:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, L["HideCatch-UpObjectivesDesc"]);
+        end)
         rootMenu:CreateTitle(L["Window"])
         local windowScale = rootMenu:CreateButton(L["Scaling"])
         for i = 80, 200, 10 do
@@ -357,6 +369,12 @@ function Checklist:Render()
     return
   end
 
+  -- Quick hotfix to avoid excessive rendering
+  if (not self.window:IsVisible() and not Data.db.global.checklist.open) or (Data.cache.inCombat and Data.db.global.checklist.hideInCombat) then
+    self.window:Hide()
+    return
+  end
+
   do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableDataColumn
@@ -411,6 +429,13 @@ function Checklist:Render()
           if Data.db.global.checklist.hideUniqueObjectives then
             return
           elseif Data.db.global.checklist.hideUniqueVendorObjectives and objective.requires and Utils:TableCount(objective.requires) > 0 then
+            return
+          end
+        end
+
+        -- Hide Catch-Up if enabled
+        if objective.typeID == Enum.WK_Objectives.CatchUp then
+          if Data.db.global.checklist.hideCatchUpObjectives then
             return
           end
         end
@@ -750,6 +775,32 @@ function Checklist:GetColumns(unfiltered)
                         if currencyInfo.quantity >= req.amount then
                           completed = true
                         end
+                      end
+                    end
+                    if req.type == "quest" then
+                      leftText = req.name
+
+                      if not req.match or req.match == "all" then
+                        local numCompleted = 0
+
+                        completed = true
+                        for _, questID in ipairs(req.quests) do
+                          if not C_QuestLog.IsQuestFlaggedCompleted(questID) then
+                            completed = false
+                          else
+                            numCompleted = numCompleted + 1
+                          end
+                        end
+
+                        rightText = format("%d / %d", numCompleted, #req.quests)
+                      else
+                        for _, questID in ipairs(req.quests) do
+                          if C_QuestLog.IsQuestFlaggedCompleted(questID) then
+                            completed = true
+                          end
+                        end
+
+                        rightText = format("%d / %d", completed and 1 or 0, 1)
                       end
                     end
                     if req.type == "renown" then

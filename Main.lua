@@ -385,6 +385,11 @@ function Main:Render()
     table.insert(UISpecialFrames, frameName)
   end
 
+  -- Quick hotfix to avoid excessive rendering
+  if not self.window:IsVisible() then
+    return
+  end
+
   -- do -- Show helptip for new checklist
   --   local checklistHelpTipText = "Check out the new checklist!"
   --   if Data.db.global.main.checklistHelpTipClosed then
@@ -557,6 +562,7 @@ function Main:GetMainColumns(unfiltered)
         return {text = characterProfession.level > 0 and characterProfession.level == characterProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.level .. " / " .. characterProfession.maxLevel) or characterProfession.level .. " / " .. characterProfession.maxLevel}
       end,
     },
+
     {
       name = L["Knowledge"],
       onEnter = function(cellFrame)
@@ -662,6 +668,9 @@ function Main:GetMainColumns(unfiltered)
       if not Data.cache.isDarkmoonOpen then
         return
       end
+    elseif objectiveType.id == Enum.WK_Objectives.CatchUp then
+      -- There's a hard-coded column with more info
+      return
     end
 
     ---@type WK_DataColumn
@@ -759,7 +768,7 @@ function Main:GetMainColumns(unfiltered)
   end)
 
   table.insert(columns, {
-    name = "Catch-Up",
+    name = L["Catch-Up"],
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText(L["Catch-Up"], 1, 1, 1);

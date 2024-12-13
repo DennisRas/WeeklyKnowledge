@@ -21,7 +21,7 @@ function Core:Render()
 end
 
 function Core:OnInitialize()
-  _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = "Show/Hide the window"
+  _G["BINDING_NAME_WEEKLYKNOWLEDGE"] = L["ShowHideTheWindow"]
   self:RegisterChatCommand("wk", function() Main:ToggleWindow() end)
   self:RegisterChatCommand("weeklyknowledge", function() Main:ToggleWindow() end)
 

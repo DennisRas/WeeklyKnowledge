@@ -5,108 +5,115 @@ if not L then return end
 -- Spanish translation by Ghordjan
 
 -- Core strings
-L["WeeklyReset"] = "Reinicio semanal: ¡Buen trabajo! El progreso de tus personajes se ha reiniciado para una nueva semana.";
+L["ShowHideTheWindow"] = "Mostrar/Ocultar la ventana"
 
-L["TooltipLine1"] = "|cff00ff00Clic Izquierdo|r para abrir WeeklyKnowledge.";
-L["TooltipLine2"] = "|cff00ff00Clic Derecho|r para abrir la Lista de Verificación.";
-L["TooltipLine3"] = "|cff00ff00Arrastrar|r para mover este icono";
-L["TooltipLocked"] = " |cffff0000(bloqueado)|r";
+L["WeeklyReset"] = "Reinicio semanal: ¡Buen trabajo! El progreso de tus personajes se ha reiniciado para una nueva semana."
+
+L["TooltipLine1"] = "|cff00ff00Clic Izquierdo|r para abrir WeeklyKnowledge."
+L["TooltipLine2"] = "|cff00ff00Clic Derecho|r para abrir la Lista de Verificación."
+L["TooltipLine3"] = "|cff00ff00Arrastrar|r para mover este icono"
+L["TooltipLocked"] = " |cffff0000(bloqueado)|r"
 
 -- Main strings
-L["CloseTheWindow"] = "Cerrar la ventana";
+L["CloseTheWindow"] = "Cerrar la ventana"
 
 L["Settings"] = "Opciones";
-L["SettingsDesc"] = "Vamos a personalizar esto un poco";
-L["ShowTheMinimapButton"] = "Mostrar el botón del minimap";
-L["ShowMinimapIconDesc"] = "A veces esto está muy concurrido.";
-L["LockMinimapIcon"] = "Bloquear el botón del minimap";
-L["LockMinimapIconDesc"] = "Ya no volveremos a mover el botón accidentalmente!";
+L["SettingsDesc"] = "Vamos a personalizar esto un poco"
+L["ShowTheMinimapButton"] = "Mostrar el botón del minimap"
+L["ShowMinimapIconDesc"] = "A veces esto está muy concurrido."
+L["LockMinimapIcon"] = "Bloquear el botón del minimap"
+L["LockMinimapIconDesc"] = "Ya no volveremos a mover el botón accidentalmente!"
 
-L["BackgroundColor"] = "Color de fondo";
-L["ShowTheBorder"] = "Mostrar el borde";
-L["Window"] = "Ventana";
-L["Scaling"] = "Escalado";
+L["BackgroundColor"] = "Color de fondo"
+L["ShowTheBorder"] = "Mostrar el borde"
+L["Window"] = "Ventana"
+L["Scaling"] = "Escalado"
 
-L["Characters"] = "Personajes";
-L["CharactersDesc"] = "Habilitar/Deshabilitar tus personajes.";
+L["Characters"] = "Personajes"
+L["CharactersDesc"] = "Habilitar/Deshabilitar tus personajes."
 
-L["Columns"] = "Columnas";
-L["ColumnsDesc"] = "Habilitar/Deshabilitar columnas de la tabla.";
+L["Columns"] = "Columnas"
+L["ColumnsDesc"] = "Habilitar/Deshabilitar columnas de la tabla."
 
-L["Checklist"] = "Lista de Verificación";
-L["ChecklistDesc"] = "Alternar la ventana de Verificación";
+L["Checklist"] = "Lista de Verificación"
+L["ChecklistDesc"] = "Alternar la ventana de Verificación"
 
-L["Name"] = "Nombre";
-L["NameDesc"] = "Tus Personajes";
+L["Name"] = "Nombre"
+L["NameDesc"] = "Tus Personajes"
 
-L["Realm"] = "Reinos";
-L["RealmDesc"] = "Nombre de los Reinos.";
+L["Realm"] = "Reinos"
+L["RealmDesc"] = "Nombre de los Reinos."
 
-L["Profession"] = "Profesión";
-L["ProfessionDesc"] = "Tus Profesiones";
+L["Profession"] = "Profesión"
+L["ProfessionDesc"] = "Tus Profesiones"
 
-L["Skill"] = "Habilidad";
-L["SkillDesc"] = "Nivel Actual de Habilidad.";
+L["Skill"] = "Habilidad"
+L["SkillDesc"] = "Nivel Actual de Habilidad."
 
-L["Knowledge"] = "Conocimiento";
-L["KnowledgePoints"] = "Puntos de Conocimiento";
-L["KnowledgePointsDesc"] = "Conocimiento ganada actualmente";
+L["Equipment"] = "Equipación"
+L["EquipmentDesc"] = "Equipo de profesión"
 
-L["PointsSpentAt"] = "Puntos Gastados:";
-L["PointsUnspentAt"] = "Puntos Por Gastar:";
-L["CanUnlock"] = "Puede desbloquear";
-L["Locked"] = "Bloqueado";
-L["CanUnlock"] = "Se puede desbloquear";
-L["MaxAt"] = "Máx:";
-L["SpecializationsAt"] = "Especializaciones:";
+L["Knowledge"] = "Conocimiento"
+L["KnowledgePoints"] = "Puntos de Conocimiento"
+L["KnowledgePointsDesc"] = "Conocimiento ganada actualmente"
 
-L["Items"] = "Items:";
-L["Quests"] = "Misiones:";
-L["KnowledgePointsAt"] = "Puntos de Conocimiento:";
+L["PointsSpentAt"] = "Puntos Gastados:"
+L["PointsUnspentAt"] = "Puntos Por Gastar:"
+L["CanUnlock"] = "Puede desbloquear"
+L["Locked"] = "Bloqueado"
+L["CanUnlock"] = "Se puede desbloquear"
+L["MaxAt"] = "Máx:"
+L["SpecializationsAt"] = "Especializaciones:"
 
-L["ItemLinkLoading"] = "Cargando...";
+L["Items"] = "Items:"
+L["Quests"] = "Misiones:"
+L["KnowledgePointsAt"] = "Puntos de Conocimiento:"
 
-L["Catch-Up"] = "Ponerse al día";
-L["Catch-UpDesc"] = "lleva un registro de tu progreso en Puntos de conocimiento y ponte al día con los puntos de las semanas anteriores.\n\nTen en cuenta que los puntos del Tratado no están incluidos en los cálculos de esta semana.";
+L["ItemLinkLoading"] = "Cargando..."
 
-L["NoData"] = "Sin datos";
-L["NoDataDesc"] = "Inicia sesión para obtener los datos de este personaje.";
+L["Catch-Up"] = "Ponerse al día"
+L["Catch-UpDesc"] = "lleva un registro de tu progreso en Puntos de conocimiento y ponte al día con los puntos de las semanas anteriores.\n\nTen en cuenta que los puntos del Tratado no están incluidos en los cálculos de esta semana."
 
-L["WeeklyPointsAt"] = "Puntos Semanales:";
-L["Catch-UpPointsAt"] = "Puntos de puesta al día:";
+L["NoData"] = "Sin datos"
+L["NoDataDesc"] = "Inicia sesión para obtener los datos de este personaje."
+
+L["WeeklyPointsAt"] = "Puntos Semanales:"
+L["Catch-UpPointsAt"] = "Puntos de puesta al día:"
 L["TotalAt"] = "Total:";
 
-L["UnlockCatch-UpDesc"] = "Desbloquea la función de puesta al día esta semana:";
-L["fmtPoints"] = "%s Puntos";
-L["Catch-UpSpc"] = "Puesta al día ";
-L["Gathering"] = "Recogiendo";
-L["PatronOrders"] = "Pedidos de Clientes";
+L["UnlockCatch-UpDesc"] = "Desbloquea la función de puesta al día esta semana:"
+L["fmtPoints"] = "%s Puntos"
+L["Catch-UpSpc"] = "Puesta al día "
+L["Gathering"] = "Recogiendo"
+L["PatronOrders"] = "Pedidos de Clientes"
 
 -- Data strings
-L["Uniques"] = "Únicos";
-L["Uniques_Desc"] = "Estos son elementos de puntos de conocimiento de un solo uso que se encuentran en tesoros de todo el mundo y que venden los vendedores Artesanos, de Renombre y Kej.\n\nRepetible: ";
+L["Uniques"] = "Únicos"
+L["Uniques_Desc"] = "Estos son elementos de puntos de conocimiento de un solo uso que se encuentran en tesoros de todo el mundo y que venden los vendedores Artesanos, de Renombre y Kej.\n\nRepetible: "
 
-L["Weekly"] = "Semanal";
-L["NonRepeatable"] = "No";
+L["Weekly"] = "Semanal"
+L["NonRepeatable"] = "No"
 
-L["Treatise"] = "Tratado";
-L["Treatise_Desc"] = "Los escribas pueden fabricarlos. Envía una orden de fabricación si no tienes la profesión de inscripción.\n\nRepetible: ";
+L["Treatise"] = "Tratado"
+L["Treatise_Desc"] = "Los escribas pueden fabricarlos. Envía una orden de fabricación si no tienes la profesión de inscripción.\n\nRepetible: "
 
-L["Artisan"] = "Artesano";
-L["ArtisanQuest_Desc"] = "Misión: Kala Clayhoof del Consorcio de Artesanos quiere que cumplas pedidos de fabricación.\n\nRepetible: ";
+L["Artisan"] = "Artesano"
+L["ArtisanQuest_Desc"] = "Misión: Kala Clayhoof del Consorcio de Artesanos quiere que cumplas pedidos de fabricación.\n\nRepetible: "
 
-L["Treasure"] = "Tesoro";
-L["Treasure_Desc"] = "Estos se obtienen al azar de tesoros y tierra alrededor del mundo.\n\nRepetible:";
+L["Treasure"] = "Tesoro"
+L["Treasure_Desc"] = "Estos se obtienen al azar de tesoros y tierra alrededor del mundo.\n\nRepetible:"
 
-L["Gathering"] = "Recolección";
-L["Gathering_Desc"] = "Estos se obtienen al azar de los nodos de recolección en todo el mundo. Es posible que (no confirmado) encuentres aleatoriamente elementos adicionales más allá del límite semanal.\n\nEstos también se obtienen al desencantar.\n\nRepetible: ";
+L["Gathering"] = "Recolección"
+L["Gathering_Desc"] = "Estos se obtienen al azar de los nodos de recolección en todo el mundo. Es posible que (no confirmado) encuentres aleatoriamente elementos adicionales más allá del límite semanal.\n\nEstos también se obtienen al desencantar.\n\nRepetible: "
 
-L["Trainer"] = "Entrenador";
-L["TrainerQuest_Desc"] = "Misión: Completa una misión en tu entrenador de profesión.\n\nRepetible: ";
+L["Trainer"] = "Entrenador"
+L["TrainerQuest_Desc"] = "Misión: Completa una misión en tu entrenador de profesión.\n\nRepetible: "
 
-L["Darkmoon"] = "Feria de la Luna Negra";
-L["DarkmoonQuest_Desc"] = "Misión: Completa una misión en la Feria de la Luna Negra.\n\nRepetible: ";
-L["Monthly"] = "Mensual";
+L["Darkmoon"] = "Feria de la Luna Negra"
+L["DarkmoonQuest_Desc"] = "Misión: Completa una misión en la Feria de la Luna Negra.\n\nRepetible: "
+L["Monthly"] = "Mensual"
+
+L["Catchup_Desc"] = "Keep track of your Knowledge Points progress and catch up on points from previous weeks.\n\nRepeatable: "
 
 -- Data.Professions
 L["Alchemy"] = "Alquímia"
@@ -118,7 +125,7 @@ L["Inscription"] = "Inscripción"
 L["Jewelcrafting"] = "Joyería"
 L["Leatherworking"] = "Peletería"
 L["Mining"] = "Minería"
-L["Skinning"] = "Desueyo"
+L["Skinning"] = "Desuello"
 L["Tailoring"] = "Sastrería"
 
 -- Data.Objectives hints
@@ -146,7 +153,7 @@ L["Quest_Kala_Clayhoof_Hint"] = "Completa una misión de Kala Pezuñarcilla en e
 L["Randomly_Looted_Disenchanting_Hint"] = "Estos se obtienen aleatoriamente al desencantar objetos."
 L["Randomly_Looted_Herbs_Hint"] = "Estos se extraen aleatoriamente de hierbas de todo el mundo."
 L["Randomly_Looted_Mining_Hint"] = "Estos se obtienen aleatoriamente de los nodos de minería de todo el mundo."
-L["Randomly_Looted_Skinning_Hint"] = "Estos se obtienen aleatoriamente de los nodos de desueyo en todo el mundo."
+L["Randomly_Looted_Skinning_Hint"] = "Estos se obtienen aleatoriamente de los nodos de desuello en todo el mundo."
 
 L["Talk_Sylannia_Darkmoon_Quest_29506_Hint"] = "Habla con |cff00ff00Sylannia|r en la Feria de la Luna Negra y completa la misión |cffffff00A Burbujas moradas|r."
 L["Talk_Yebb_Neblegear_Darkmoon_Quest_29508_Hint"] = "Habla con |cff00ff00Yebb Neblegear|r en la Feria de la Luna Negra y completa la misión |cffffff00 Peque necesita un par zapatos|r.\n\nPista: hay un yunque detrás de la tienda de reliquias."
@@ -163,7 +170,7 @@ L["Talk_Selina_Dourman_Darkmoon_Quest_29520_Hint"] = "Habla con |cff00ff00Selina
 L["Talk_Enchanting_Trainer_Hint"] = "Habla con tu instructor de encantamiento |cff00ff00Nagad|r y completa la misión."
 L["Talk_Herbalism_Trainer_Hint"] = "Habla con tu instructor de herbolistería |cff00ff00Akdan|r y completa la misión."
 L["Talk_Mining_Trainer_Hint"] = "Habla con tu instructor de minería |cff00ff00Tarib|r y completa la misión."
-L["Talk_Skinning_Trainer_Hint"] = "Habla con tu instructor de desueyo |cff00ff00Ginnad|r y completa la misión."
+L["Talk_Skinning_Trainer_Hint"] = "Habla con tu instructor de desuello |cff00ff00Ginnad|r y completa la misión."
 
 L["Item_226265_Hint"] = "Este objeto es un barril que se encuentra detrás de los pilares, junto a la puerta."
 L["Item_226266_Hint"] = "Este objeto es un marco de metal que se encuentra encima de un gran cofre."
@@ -238,6 +245,20 @@ L["Item_226353_Hint"] = "Este objeto es un transportador que se encuentra en una
 L["Item_226354_Hint"] = "Este objeto es una colcha que se encuentra dentro del edificio a la izquierda."
 L["Item_226355_Hint"] = "Este objeto es un alfiletero que se encuentra en el escritorio."
 
+local Patron_Orders_Awarded_Hint = "Otorgado mediante órdenes de clientes en su estación de trabajo."
+L["Item_228724_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228726_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228730_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228732_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228734_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228736_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228738_Hint"] = Patron_Orders_Awarded_Hint
+
+L["Item_227662_Hint"] = "These are randomly looted from disenchanting items once the weekly objectives below are completed."
+L["Item_224835_Hint"] = "These are randomly looted from herbs around the world once the weekly objectives below are completed."
+L["Item_224838_Hint"] = "These are randomly looted from mining nodes around the world. once the weekly objectives below are completed."
+L["Item_224782_Hint"] = "These are randomly looted from skinning around the world once the weekly objectives below are completed."
+
 -- Interface strings
 
 -- Checklist strings
@@ -249,30 +270,34 @@ L["Location"] = "Ubicación"
 L["Progress"] = "Progreso"
 L["Points"] = "Puntos"
 L["Objective"] = "Objetivo"
+L["Quest"] = "Misión"
 
-L["HideInCombat"] = "Ocultar en combate";
-L["HideInDungeons"] = "Ocultar en mazmorras";
-L["HideCompletedObjectives"] = "Ocultar objetivos completados";
-L["HideAllUniques"] = "Ocultar todos los únicos";
-L["HideAllUniquesDesc"] = "Ocultar todos los únicos por categoría";
-L["HideVendorUniques"] = "Ocultar los únicos de vendedor";
-L["HideVendorUniquesDesc"] = "Ocultar los únicos comprados a un vendedor.";
+L["HideInCombat"] = "Ocultar en combate"
+L["HideInDungeons"] = "Ocultar en mazmorras"
+L["HideCompletedObjectives"] = "Ocultar objetivos completados"
+L["HideAllUniques"] = "Ocultar todos los únicos"
+L["HideAllUniquesDesc"] = "Ocultar todos los únicos por categoría"
+L["HideVendorUniques"] = "Ocultar los únicos de vendedor"
+L["HideVendorUniquesDesc"] = "Ocultar los únicos comprados a un vendedor."
 
-L["ToggleObjectives"] = "Alternar objetivos";
-L["ToggleObjectivesDesc"] = "Expandir/Colapsar la lista.";
+L["HideCatch-UpObjectives"] = "Ocultar objetivos de ponerse al día"
+L["HideCatch-UpObjectivesDesc"] = "Ocultar todos los objetivos de la categoría Ponerse al día."
 
-L["ZeroProfCount"] = "No parece que tengas ninguna profesión de TWW.";
-L["LookPatronOrders"] = "Buen trabajo! Lo conseguiste :-)\nAsegúrate de echar un vistazo a tus pedidos de clientes!";
+L["ToggleObjectives"] = "Alternar objetivos"
+L["ToggleObjectivesDesc"] = "Expandir/Colapsar la lista."
 
-L["ShiftClickToLinkToChat"] = "<Mayúsculas Clic para Enlazar en el Chat>";
+L["ZeroProfCount"] = "No parece que tengas ninguna profesión de TWW."
+L["LookPatronOrders"] = "Buen trabajo! Lo conseguiste :-)\nAsegúrate de echar un vistazo a tus pedidos de clientes!"
 
-L["DoYouKnowTheWay"] = "¿Conoces el camino?";
-L["LocationAt"] = "Ubicación:";
-L["CoordinatesAt"] = "Coordenadas:";
-L["RequirementsA"] = "Requisitos:";
+L["ShiftClickToLinkToChat"] = "<Mayúsculas Clic para Enlazar en el Chat>"
 
-L["ClickToPlaceAPinOnTheMap"] = "<Clic para colocar una marca en el mapa>";
-L["ShiftClickToShareAPinInChat"] = "<Mayúsculas Clic para compartir la marca en el chat>";
-L["AltClickToPlaceAWaypoint"] = "<Alt Clic para colocar un punto de ruta de TomTom>";
+L["DoYouKnowTheWay"] = "¿Conoces el camino?"
+L["LocationAt"] = "Ubicación:"
+L["CoordinatesAt"] = "Coordenadas:"
+L["RequirementsA"] = "Requisitos:"
+
+L["ClickToPlaceAPinOnTheMap"] = "<Clic para colocar una marca en el mapa>"
+L["ShiftClickToShareAPinInChat"] = "<Mayúsculas Clic para compartir la marca en el chat>"
+L["AltClickToPlaceAWaypoint"] = "<Alt Clic para colocar un punto de ruta de TomTom>"
 
 -- Types strings

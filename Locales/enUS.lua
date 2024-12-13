@@ -2,7 +2,11 @@ local addonName, addon = ...
 local L = LibStub("AceLocale-3.0"):NewLocale(addonName, "enUS", true)
 if not L then return end
 
+-- English translation (orignal)
+
 -- Core strings
+L["ShowHideTheWindow"] = "Show/Hide the window"
+
 L["WeeklyReset"] = "Weekly Reset: Good job! Progress of your characters have been reset for a new week.";
 
 L["TooltipLine1"] = "|cff00ff00Left click|r to open WeeklyKnowledge.";
@@ -45,6 +49,9 @@ L["ProfessionDesc"] = "Your professions";
 
 L["Skill"] = true
 L["SkillDesc"] = "Current skill levels.";
+
+L["Equipment"] = "Equipment"
+L["EquipmentDesc"] = "Profession equipment"
 
 L["Knowledge"] = true;
 L["KnowledgePoints"] = "Knowledge Points"
@@ -104,6 +111,8 @@ L["TrainerQuest_Desc"] = "Quest: Complete a quest at your profession trainer.\n\
 L["Darkmoon"] = true;
 L["DarkmoonQuest_Desc"] = "Quest: Complete a quest at the Darkmoon Faire.\n\nRepeatable: ";
 L["Monthly"] = true;
+
+L["Catchup_Desc"] = "Keep track of your Knowledge Points progress and catch up on points from previous weeks.\n\nRepeatable: "
 
 -- Data.Professions
 L["Alchemy"] = true
@@ -234,6 +243,20 @@ L["Item_226353_Hint"] = "This item is a protractor found on a crate inside the b
 L["Item_226354_Hint"] = "This item is a quilt found inside the building to the left."
 L["Item_226355_Hint"] = "This item is a pincushian found on the desk."
 
+local Patron_Orders_Awarded_Hint = "Awarded from Patron Orders at your crafting station."
+L["Item_228724_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228726_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228730_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228732_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228734_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228736_Hint"] = Patron_Orders_Awarded_Hint
+L["Item_228738_Hint"] = Patron_Orders_Awarded_Hint
+
+L["Item_227662_Hint"] = "These are randomly looted from disenchanting items once the weekly objectives below are completed."
+L["Item_224835_Hint"] = "These are randomly looted from herbs around the world once the weekly objectives below are completed."
+L["Item_224838_Hint"] = "These are randomly looted from mining nodes around the world. once the weekly objectives below are completed."
+L["Item_224782_Hint"] = "These are randomly looted from skinning around the world once the weekly objectives below are completed."
+
 -- Interface strings
 
 -- Checklist strings
@@ -245,6 +268,7 @@ L["Location"] = true
 L["Progress"] = true
 L["Points"] = true
 L["Objective"] = true
+L["Quest"] = true
 
 L["HideInCombat"] = "Hide in combat";
 L["HideInDungeons"] = "Hide in dungeons";
@@ -253,6 +277,9 @@ L["HideAllUniques"] = "Hide all Uniques";
 L["HideAllUniquesDesc"] = "Hide all objectives from the Uniques category.";
 L["HideVendorUniques"] = "Hide vendor Uniques";
 L["HideVendorUniquesDesc"] = "Hide Uniques that are purchased from a vendor.";
+
+L["HideCatch-UpObjectives"] = "Hide Catch-Up objectives"
+L["HideCatch-UpObjectivesDesc"] = "Hide all objectives from the Catch-Up category."
 
 L["ToggleObjectives"] = "Toggle objectives";
 L["ToggleObjectivesDesc"] = "Expand/Collapse the list.";

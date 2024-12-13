@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.1.8+ - 2024-12-10
+
+### Added
+
+- Introduced a new Profession Equipment column!
+
+# Changelog
+
+## v1.1.8 - 2024-12-01
+
+### Added
+
+- Added Catch-Up objectives to the Checklist (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))
+
+### Updated
+
+- Improved the performance of the addon when not shown on screen
+
+### Fixed
+
+- Fixed a bug related to the Darkmoon Faire (Thanks to [Belazor](https://github.com/DennisRas/WeeklyKnowledge/pull/66))
+
 ## v1.1.7 - 2024-10-16
 
 ### Added

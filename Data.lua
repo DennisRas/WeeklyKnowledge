@@ -21,7 +21,7 @@ Data.cache = {
   weeklyProgress = {},
 }
 
-Data.DBVersion = 8
+Data.DBVersion = 8+1
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -52,6 +52,7 @@ Data.defaultDB = {
       hideTableHeader = false,
       hideUniqueObjectives = false,
       hideUniqueVendorObjectives = false,
+      hideCatchUpObjectives = false,
     },
   }
 }
@@ -74,6 +75,7 @@ Data.defaultCharacter = {
   className = "",
   professions = {},
   completed = {},
+  equipment = {}, -- mfm
 }
 
 ---@type WK_ObjectiveType[]
@@ -127,6 +129,13 @@ Data.ObjectiveTypes = {
     type = "quest",
     repeatable = L["Monthly"],
   },
+  {
+    id = Enum.WK_Objectives.CatchUp,
+    name = L["Catch-Up"],
+    description = L["Catchup_Desc"] .. WHITE_FONT_COLOR:WrapTextInColorCode("No"),
+    type = "item",
+    repeatable = "No",
+  },
 }
 
 ---@type WK_Objective[]
@@ -149,6 +158,7 @@ Data.Objectives = {
   {professionID = 171, typeID = Enum.WK_Objectives.Treasure,      quests = {83253},                             itemID = 225234, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 171, typeID = Enum.WK_Objectives.Treasure,      quests = {83255},                             itemID = 225235, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 171, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29506},                             itemID = 0,      points = 3,  loc = {m = 407, x = 50.2, y = 69.6, hint = L["Talk_Sylannia_Darkmoon_Quest_29506_Hint"]},             requires = {{type = "item", id = 1645, amount = 5}}},
+  {professionID = 171, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228724, points = 0,  loc = {hint = L["Item_228724_Hint"]}},
   {professionID = 164, typeID = Enum.WK_Objectives.Unique,        quests = {82631},                             itemID = 224038, points = 10, loc = {m = 2213, x = 46.6, y = 21.6, hint = L["Vendor_Rakka_Hint"]},                      requires = {{type = "currency", id = 3056, amount = 565}}},
   {professionID = 164, typeID = Enum.WK_Objectives.Unique,        quests = {83059},                             itemID = 224647, points = 10, loc = {m = 2339, x = 39.2, y = 24.2, hint = L["Vendor_Auditor_Balwurz_Hint"]},            requires = {{type = "renown", id = 2590, amount = 12}, {type = "item", id = 210814, amount = 50}}}, -- Jewel-Etched Blacksmithing Notes
   {professionID = 164, typeID = Enum.WK_Objectives.Unique,        quests = {83848},                             itemID = 226276, points = 3,  loc = {m = 2248, x = 59.8, y = 61.9, hint = L["Item_226276_Hint"]}},                      -- Ancient Earthen Anvil
@@ -167,6 +177,7 @@ Data.Objectives = {
   {professionID = 164, typeID = Enum.WK_Objectives.Treasure,      quests = {83256},                             itemID = 225233, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 164, typeID = Enum.WK_Objectives.Treasure,      quests = {83257},                             itemID = 225232, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 164, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29508},                             itemID = 0,      points = 3,  loc = {m = 407, x = 51.0, y = 81.8, hint = L["Talk_Yebb_Neblegear_Darkmoon_Quest_29508_Hint"]}},
+  {professionID = 164, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228726, points = 0,  loc = {hint = L["Item_228726_Hint"]}},
   {professionID = 333, typeID = Enum.WK_Objectives.Unique,        quests = {81076},                             itemID = 227411, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 333, typeID = Enum.WK_Objectives.Unique,        quests = {81077},                             itemID = 227422, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 333, typeID = Enum.WK_Objectives.Unique,        quests = {81078},                             itemID = 227433, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -187,6 +198,7 @@ Data.Objectives = {
   {professionID = 333, typeID = Enum.WK_Objectives.Gathering,     quests = {84295},                             itemID = 227661, points = 4,  loc = {hint = L["Randomly_Looted_Disenchanting_Hint"]}},
   {professionID = 333, typeID = Enum.WK_Objectives.TrainerQuest,  quests = {84084, 84085, 84086},               itemID = 227667, points = 3,  limit = 1,                                                                                loc = {m = 2339, x = 52.8, y = 71.2, hint = L["Talk_Enchanting_Trainer_Hint"]}},
   {professionID = 333, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29510},                             itemID = 0,      points = 3,  loc = {m = 407, x = 53.2, y = 76.6, hint = L["Talk_Sayge_Darkmoon_Quest_29510_Hint"]}},
+  {professionID = 333, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 227662, points = 0,  loc = {hint = L["Item_227662_Hint"]},                                                     requires = {{type = "quest", name = "Treasure", quests = {83258, 83259}, match = "all"}, {type = "quest", name = "Disenchanting", quests = {84290, 84291, 84292, 84293, 84294, 84295}, match = "all"}, {type = "quest", name = "Trainer Quest", quests = {84084, 84085, 84086}, match = "any"}}},
   {professionID = 202, typeID = Enum.WK_Objectives.Unique,        quests = {82632},                             itemID = 224052, points = 10, loc = {m = 2213, x = 58.2, y = 31.6, hint = L["Vendor_Rukku_Hint"]},                      requires = {{type = "currency", id = 3056, amount = 565}}},
   {professionID = 202, typeID = Enum.WK_Objectives.Unique,        quests = {83063},                             itemID = 224653, points = 10, loc = {m = 2214, x = 47.2, y = 32.8, hint = L["Vendor_Waxmonger_Squick_Hint"]},           requires = {{type = "renown", id = 2594, amount = 12}, {type = "item", id = 210814, amount = 50}}},
   {professionID = 202, typeID = Enum.WK_Objectives.Unique,        quests = {83866},                             itemID = 226292, points = 3,  loc = {m = 2248, x = 61.3, y = 69.6, hint = L["Item_226292_Hint"]}},                      -- Rock Engineer's Wrench
@@ -205,6 +217,7 @@ Data.Objectives = {
   {professionID = 202, typeID = Enum.WK_Objectives.Treasure,      quests = {83260},                             itemID = 225228, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 202, typeID = Enum.WK_Objectives.Treasure,      quests = {83261},                             itemID = 225229, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 202, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29511},                             itemID = 0,      points = 3,  loc = {m = 407, x = 49.6, y = 60.8, hint = L["Talk_Rinling_Darkmoon_Quest_29511_Hint"]}},
+  {professionID = 202, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228730, points = 0,  loc = {hint = L["Item_228730_Hint"]}},
   {professionID = 182, typeID = Enum.WK_Objectives.Unique,        quests = {81422},                             itemID = 227415, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 182, typeID = Enum.WK_Objectives.Unique,        quests = {81423},                             itemID = 227426, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 182, typeID = Enum.WK_Objectives.Unique,        quests = {81424},                             itemID = 227437, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -223,6 +236,7 @@ Data.Objectives = {
   {professionID = 182, typeID = Enum.WK_Objectives.Gathering,     quests = {81421},                             itemID = 224265, points = 4,  loc = {hint = L["Randomly_Looted_Herbs_Hint"]}},
   {professionID = 182, typeID = Enum.WK_Objectives.TrainerQuest,  quests = {82970, 82958, 82965, 82916, 82962}, itemID = 224817, points = 3,  limit = 1,                                                                                loc = {m = 2339, x = 44.8, y = 69.4, hint = L["Talk_Herbalism_Trainer_Hint"]}},
   {professionID = 182, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29514},                             itemID = 0,      points = 3,  loc = {m = 407, x = 55.0, y = 70.6, hint = L["Talk_Chronos_Darkmoon_Quest_29514_Hint"]}},
+  {professionID = 182, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 224835, points = 0,  loc = {hint = L["Item_224835_Hint"]},                                                     requires = {{type = "quest", name = "Trainer Quest", quests = {82970, 82958, 82965, 82916, 82962}, match = "any"}, {type = "quest", name = "Gathering", quests = {81416, 81417, 81418, 81419, 81420, 81421}, match = "all"}}},
   {professionID = 773, typeID = Enum.WK_Objectives.Unique,        quests = {80749},                             itemID = 227408, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 773, typeID = Enum.WK_Objectives.Unique,        quests = {80750},                             itemID = 227419, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 773, typeID = Enum.WK_Objectives.Unique,        quests = {80751},                             itemID = 227430, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -241,6 +255,7 @@ Data.Objectives = {
   {professionID = 773, typeID = Enum.WK_Objectives.Treasure,      quests = {83262},                             itemID = 225227, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 773, typeID = Enum.WK_Objectives.Treasure,      quests = {83264},                             itemID = 225226, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 773, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29515},                             itemID = 0,      points = 3,  loc = {m = 407, x = 53.2, y = 76.6, hint = L["Talk_Sayge_Darkmoon_Quest_29515_Hint"]},    requires = {{type = "item", id = 39354, amount = 5}}},
+  {professionID = 773, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228732, points = 0,  loc = {hint = L["Item_228732_Hint"]}},
   {professionID = 755, typeID = Enum.WK_Objectives.Unique,        quests = {81259},                             itemID = 227413, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 755, typeID = Enum.WK_Objectives.Unique,        quests = {81260},                             itemID = 227424, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 755, typeID = Enum.WK_Objectives.Unique,        quests = {81261},                             itemID = 227435, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -259,6 +274,7 @@ Data.Objectives = {
   {professionID = 755, typeID = Enum.WK_Objectives.Treasure,      quests = {83265},                             itemID = 225224, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 755, typeID = Enum.WK_Objectives.Treasure,      quests = {83266},                             itemID = 225225, points = 2,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},                                             -- Deepstone Fragment
   {professionID = 755, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29516},                             itemID = 0,      points = 3,  loc = {m = 407, x = 55.0, y = 70.6, hint = L["Talk_Chronos_Darkmoon_Quest_29516_Hint"]}},
+  {professionID = 755, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228734, points = 0,  loc = {hint = L["Item_228734_Hint"]}},
   {professionID = 165, typeID = Enum.WK_Objectives.Unique,        quests = {80978},                             itemID = 227414, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 165, typeID = Enum.WK_Objectives.Unique,        quests = {80979},                             itemID = 227425, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 165, typeID = Enum.WK_Objectives.Unique,        quests = {80980},                             itemID = 227436, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -277,6 +293,7 @@ Data.Objectives = {
   {professionID = 165, typeID = Enum.WK_Objectives.Treasure,      quests = {83267},                             itemID = 225223, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 165, typeID = Enum.WK_Objectives.Treasure,      quests = {83268},                             itemID = 225222, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 165, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29517},                             itemID = 0,      points = 3,  loc = {m = 407, x = 49.6, y = 60.8, hint = L["Talk_Rinling_Darkmoon_Quest_29517_Hint"]},  requires = {{type = "item", id = 6529, amount = 10}, {type = "item", id = 2320, amount = 5}, {type = "item", id = 6260, amount = 5}}},
+  {professionID = 165, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228736, points = 0,  loc = {hint = L["Item_228736_Hint"]}},
   {professionID = 186, typeID = Enum.WK_Objectives.Unique,        quests = {81390},                             itemID = 227416, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 186, typeID = Enum.WK_Objectives.Unique,        quests = {81391},                             itemID = 227427, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 186, typeID = Enum.WK_Objectives.Unique,        quests = {81392},                             itemID = 227438, points = 15, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -295,6 +312,7 @@ Data.Objectives = {
   {professionID = 186, typeID = Enum.WK_Objectives.Gathering,     quests = {83049},                             itemID = 224584, points = 3,  loc = {hint = L["Randomly_Looted_Mining_Hint"]}},
   {professionID = 186, typeID = Enum.WK_Objectives.TrainerQuest,  quests = {83104, 83105, 83103, 83106, 83102}, itemID = 224818, points = 3,  limit = 1,                                                                                loc = {m = 2339, x = 52.6, y = 52.6, hint = L["Talk_Mining_Trainer_Hint"]}},
   {professionID = 186, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29518},                             itemID = 0,      points = 3,  loc = {m = 407, x = 49.6, y = 60.8, hint = L["Talk_Rinling_Darkmoon_Quest_29518_Hint"]}},
+  {professionID = 186, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 224838, points = 0,  loc = {hint = L["Item_224838_Hint"]},                                                     requires = {{type = "quest", name = "Trainer Quest", quests = {83104, 83105, 83103, 83106, 83102}, match = "any"}, {type = "quest", name = "Gathering", quests = {83050, 83051, 83052, 83053, 83054, 83049}, match = "all"}}},
   {professionID = 393, typeID = Enum.WK_Objectives.Unique,        quests = {82596},                             itemID = 224007, points = 10, loc = {m = 2213, x = 43.5, y = 19.7, hint = L["Vendor_Kama_Hint"]},                       requires = {{type = "currency", id = 3056, amount = 565}}},
   {professionID = 393, typeID = Enum.WK_Objectives.Unique,        quests = {83067},                             itemID = 224657, points = 10, loc = {m = 2215, x = 42.4, y = 55.0, hint = L["Vendor_Auralia_Steelstrike_Hint"]},        requires = {{type = "renown", id = 2570, amount = 14}, {type = "item", id = 210814, amount = 50}}},
   {professionID = 393, typeID = Enum.WK_Objectives.Unique,        quests = {83914},                             itemID = 226340, points = 3,  loc = {m = 2339, x = 28.7, y = 51.8, hint = L["Object_Location_Hint"]}},
@@ -313,6 +331,7 @@ Data.Objectives = {
   {professionID = 393, typeID = Enum.WK_Objectives.Gathering,     quests = {81464},                             itemID = 224781, points = 2,  loc = {hint = L["Randomly_Looted_Skinning_Hint"]}},
   {professionID = 393, typeID = Enum.WK_Objectives.TrainerQuest,  quests = {83097, 83098, 83100, 82992, 82993}, itemID = 224807, points = 3,  limit = 1,                                                                                loc = {m = 2339, x = 54.4, y = 57.6, hint = L["Talk_Skinning_Trainer_Hint"]}},
   {professionID = 393, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29519},                             itemID = 0,      points = 3,  loc = {m = 407, x = 55.0, y = 70.6, hint = L["Talk_Chronos_Darkmoon_Quest_29519_Hint"]}},
+  {professionID = 393, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 224782, points = 0,  loc = {hint = L["Item_224782_Hint"]},                                                     requires = {{type = "quest", name = "Trainer Quest", quests = {83097, 83098, 83100, 82992, 82993}, match = "any"}, {type = "quest", name = "Gathering", quests = {81459, 81460, 81461, 81462, 81463, 81464}, match = "all"}}},
   {professionID = 197, typeID = Enum.WK_Objectives.Unique,        quests = {80871},                             itemID = 227410, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 200}}},
   {professionID = 197, typeID = Enum.WK_Objectives.Unique,        quests = {80872},                             itemID = 227421, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 300}}},
   {professionID = 197, typeID = Enum.WK_Objectives.Unique,        quests = {80873},                             itemID = 227432, points = 10, loc = {m = 2339, x = 59.6, y = 56.2, hint = L["Vendor_Lyrendal_Hint"]},                   requires = {{type = "item", id = 210814, amount = 400}}},
@@ -331,6 +350,7 @@ Data.Objectives = {
   {professionID = 197, typeID = Enum.WK_Objectives.Treasure,      quests = {83269},                             itemID = 225221, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 197, typeID = Enum.WK_Objectives.Treasure,      quests = {83270},                             itemID = 225220, points = 1,  loc = {hint = L["Treasures_And_Dirt_Hint"]}},
   {professionID = 197, typeID = Enum.WK_Objectives.DarkmoonQuest, quests = {29520},                             itemID = 0,      points = 3,  loc = {m = 407, x = 55.6, y = 55.8, hint = L["Talk_Selina_Dourman_Darkmoon_Quest_29520_Hint"]},       requires = {{type = "item", id = 2320, amount = 1}, {type = "item", id = 2604, amount = 1}, {type = "item", id = 6260, amount = 1}}},
+  {professionID = 197, typeID = Enum.WK_Objectives.CatchUp,       quests = {},                                  itemID = 228738, points = 0,  loc = {hint = L["Item_228738_Hint"]}},
 }
 
 ---@type WK_Profession[]
@@ -529,6 +549,12 @@ function Data:MigrateDB()
         for _, characterProfession in pairs(character.professions) do
           characterProfession.enabled = true
         end
+      end
+    end
+    -- profession equipment -- mfm
+    if self.db.global.DBVersion == 9 then
+      for characterGUID, character in pairs(self.db.global.characters) do
+        character.equipment = {}
       end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
@@ -830,9 +856,24 @@ function Data:GetWeeklyProgress()
           end
         end)
 
-        if objective.objectiveID == Enum.WK_Objectives.DarkmoonQuest then
+        if objective.typeID == Enum.WK_Objectives.DarkmoonQuest then
           if not self.cache.isDarkmoonOpen then
             progress.questsTotal = 0
+          end
+        end
+
+        if objective.typeID == Enum.WK_Objectives.CatchUp and profession.catchUpCurrencyID then
+          local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
+          local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
+
+          progress.pointsEarned = catchUpCurrent
+          progress.pointsTotal = catchUpTotal
+
+          if catchUpCurrent < catchUpTotal then
+            progress.questsTotal = catchUpTotal - catchUpCurrent
+          else
+            progress.questsTotal = catchUpTotal
+            progress.questsCompleted = catchUpTotal
           end
         end
 
