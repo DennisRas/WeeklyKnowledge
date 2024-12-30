@@ -780,7 +780,7 @@ function Main:GetMainColumns(unfiltered)
     onLeave = function()
       GameTooltip:Hide()
     end,
-    width = 80,
+    width = 120,
     align = "CENTER",
     toggleHidden = true,
     cell = function(character, characterProfession, profession)
@@ -801,6 +801,7 @@ function Main:GetMainColumns(unfiltered)
 
       local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
       local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
+      local missing = catchUpTotal - catchUpCurrent
       local textColor = WHITE_FONT_COLOR
       if catchUpCurrent == catchUpTotal then
         textColor = GREEN_FONT_COLOR
@@ -838,7 +839,7 @@ function Main:GetMainColumns(unfiltered)
       end)
 
       return {
-        text = format(textColor:WrapTextInColorCode("%d / %d"), catchUpCurrent, catchUpTotal),
+        text = format(textColor:WrapTextInColorCode("%d / %d (%d)"), catchUpCurrent, catchUpTotal, missing),
         onEnter = function(cellFrame)
           local showTooltip = function()
             local color = WHITE_FONT_COLOR
@@ -850,6 +851,7 @@ function Main:GetMainColumns(unfiltered)
             color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
             GameTooltip:AddDoubleLine("Catch-Up Points:", format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent == catchUpTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
+            GameTooltip:AddDoubleLine("Missing:", format("%d", missing), nil, nil, nil, color.r, color.g, color.b)
             GameTooltip:AddDoubleLine("Total:", format("%d / %d", catchUpCurrent, catchUpTotal), nil, nil, nil, color.r, color.g, color.b)
 
             if Utils:TableCount(requirements) > 0 then
