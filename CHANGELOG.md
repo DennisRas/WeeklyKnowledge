@@ -5,10 +5,12 @@
 ### Added
 
 - Added Catch-Up objectives to the Checklist (Thanks to [Belazor](https://github.com/belazor-wow/))
+- Added addon category for the new AddOn List. Credit: Warcraft Wiki
 
 ### Updated
 
 - Improved the performance of the addon when not shown on screen
+- Updated the TOC number to support patch 11.1
 
 ### Fixed
 

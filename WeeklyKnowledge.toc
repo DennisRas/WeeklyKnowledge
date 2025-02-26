@@ -1,4 +1,4 @@
-## Interface: 110002
+## Interface: 110100
 ## Title: WeeklyKnowledge
 ## Notes: Track your profession knowledge across your characters
 ## Version: @project-version@
@@ -8,6 +8,17 @@
 ## X-Curse-Project-ID: 1092009
 ## X-Wago-ID: qKQx0o6x
 ## X-WoWI-ID: 26821
+## Category-enUS: Professions
+## Category-deDE: Berufe
+## Category-esES: Profesiones
+## Category-esMX: Profesiones
+## Category-frFR: Métiers
+## Category-itIT: Professioni
+## Category-koKR: 전문 기술
+## Category-ptBR: Profissões
+## Category-ruRU: Профессии
+## Category-zhCN: 专业
+## Category-zhTW: 專業技能
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
