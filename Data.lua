@@ -858,11 +858,11 @@ function Data:GetWeeklyProgress()
         end
 
         if (
-          objective.typeID == Enum.WK_Objectives.ArtisanQuest
-          or objective.typeID == Enum.WK_Objectives.Treasure
-          or objective.typeID == Enum.WK_Objectives.Gathering
-          or objective.typeID == Enum.WK_Objectives.TrainerQuest
-        ) then
+            objective.typeID == Enum.WK_Objectives.ArtisanQuest
+            or objective.typeID == Enum.WK_Objectives.Treasure
+            or objective.typeID == Enum.WK_Objectives.Gathering
+            or objective.typeID == Enum.WK_Objectives.TrainerQuest
+          ) then
           local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", objective.typeID)
           if objectiveType and progress.questsTotal > 0 then
             sumPointsEarned = sumPointsEarned + progress.pointsEarned
@@ -877,6 +877,7 @@ function Data:GetWeeklyProgress()
         if not objective.quests then return end
         if objective.typeID ~= Enum.WK_Objectives.CatchUp then return end
         if not profession.catchUpCurrencyID then return end
+        if not characterProfession.catchUpCurrencyInfo then return end
 
         local limit = 0
         local progress = {
