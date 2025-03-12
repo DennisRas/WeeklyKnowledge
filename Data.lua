@@ -812,8 +812,12 @@ function Data:GetWeeklyProgress()
         return objective.professionID == profession.skillLineID
       end)
 
+      local sumPointsEarned = 0
+      local sumPointsTotal = 0
+
       Utils:TableForEach(objectives, function(objective)
         if not objective.quests then return end
+        if objective.typeID == Enum.WK_Objectives.CatchUp then return end
         local limit = 0
         local progress = {
           character = character,
@@ -853,19 +857,55 @@ function Data:GetWeeklyProgress()
           end
         end
 
-        if objective.typeID == Enum.WK_Objectives.CatchUp and profession.catchUpCurrencyID then
-          local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
-          local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
-
-          progress.pointsEarned = catchUpCurrent
-          progress.pointsTotal = catchUpTotal
-
-          if catchUpCurrent < catchUpTotal then
-            progress.questsTotal = catchUpTotal - catchUpCurrent
-          else
-            progress.questsTotal = catchUpTotal
-            progress.questsCompleted = catchUpTotal
+        if (
+          objective.typeID == Enum.WK_Objectives.ArtisanQuest
+          or objective.typeID == Enum.WK_Objectives.Treasure
+          or objective.typeID == Enum.WK_Objectives.Gathering
+          or objective.typeID == Enum.WK_Objectives.TrainerQuest
+        ) then
+          local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", objective.typeID)
+          if objectiveType and progress.questsTotal > 0 then
+            sumPointsEarned = sumPointsEarned + progress.pointsEarned
+            sumPointsTotal = sumPointsTotal + progress.pointsTotal
           end
+        end
+
+        table.insert(self.cache.weeklyProgress, progress)
+      end)
+
+      Utils:TableForEach(objectives, function(objective)
+        if not objective.quests then return end
+        if objective.typeID ~= Enum.WK_Objectives.CatchUp then return end
+        if not profession.catchUpCurrencyID then return end
+
+        local limit = 0
+        local progress = {
+          character = character,
+          characterProfession = characterProfession,
+          profession = profession,
+          objective = objective,
+          questsCompleted = 0,
+          questsTotal = 0,
+          pointsEarned = 0,
+          pointsTotal = 0,
+          items = {},
+        }
+
+        if objective.itemID and objective.itemID > 0 then
+          progress.items[objective.itemID] = false
+        end
+
+        local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
+        local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
+
+        progress.pointsEarned = catchUpCurrent - sumPointsEarned
+        progress.pointsTotal = catchUpTotal - sumPointsTotal
+
+        if progress.pointsEarned < progress.pointsTotal then
+          progress.questsTotal = progress.pointsTotal - progress.pointsEarned
+        else
+          progress.questsTotal = progress.pointsTotal
+          progress.questsCompleted = progress.pointsTotal
         end
 
         table.insert(self.cache.weeklyProgress, progress)
