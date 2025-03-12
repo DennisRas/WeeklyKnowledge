@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.9 - 2025-03-13
+
+### Updated
+
+- Catch-Up objectives in the Checklist no longer include knowledge points available for the current week (Thanks to [Belazor](https://github.com/belazor-wow/))
+
+### Fixed
+
+- Resolved an issue where old characters without Catch-Up currency info were causing errors
+
 ## v1.1.8 - 2025-02-26
 
 ### Added
