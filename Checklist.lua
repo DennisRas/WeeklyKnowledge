@@ -410,6 +410,11 @@ function Checklist:Render()
       local profession = Utils:TableGet(Data.Professions, "skillLineID", characterProfession.skillLineID)
       if not profession then return end
 
+      if not characterProfession.enabled or not character.enabled then
+        profCount = profCount + 1
+        return
+      end
+
       local objectives = Utils:TableFilter(Data.Objectives, function(objective)
         return objective.professionID == profession.skillLineID
       end)
