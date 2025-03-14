@@ -411,19 +411,19 @@ function Checklist:Render()
       if not profession then return end
 
       local objectives = Utils:TableFilter(Data.Objectives, function(objective)
-        return objective.professionID == profession.skillLineID
+        return objective.skillLineID == profession.skillLineID
       end)
 
       Utils:TableForEach(objectives, function(objective)
         -- Hide Darkmoon objectives
-        if objective.typeID == Enum.WK_Objectives.DarkmoonQuest then
+        if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
           if not Data.cache.isDarkmoonOpen then
             return
           end
         end
 
         -- Hide Uniques if enabled
-        if objective.typeID == Enum.WK_Objectives.Unique then
+        if objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
           if Data.db.global.checklist.hideUniqueObjectives then
             return
           elseif Data.db.global.checklist.hideUniqueVendorObjectives and objective.requires and Utils:TableCount(objective.requires) > 0 then
@@ -432,7 +432,7 @@ function Checklist:Render()
         end
 
         -- Hide Catch-Up if enabled
-        if objective.typeID == Enum.WK_Objectives.CatchUp then
+        if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
           if Data.db.global.checklist.hideCatchUpObjectives then
             return
           end
@@ -618,7 +618,7 @@ function Checklist:GetColumns(unfiltered)
       width = 80,
       toggleHidden = true,
       cell = function(data)
-        local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", data.objective.typeID)
+        local objectiveType = Utils:TableGet(Data.ObjectiveCategories, "id", data.objective.typeID)
         if not objectiveType then
           return {
             text = "?"

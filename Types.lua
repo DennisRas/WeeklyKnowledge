@@ -60,8 +60,8 @@
 ---@field specializations table
 ---@field catchUpCurrencyInfo CurrencyInfo?
 
----@class WK_ObjectiveType
----@field id Enum.WK_Objectives
+---@class WK_ObjectiveCategory
+---@field id Enum.WK_ObjectiveCategory
 ---@field name string
 ---@field description string
 ---@field type "item" | "quest"
@@ -77,8 +77,8 @@
 ---@field catchUpItemID integer
 
 ---@class WK_Objective
----@field professionID integer
----@field typeID Enum.WK_Objectives
+---@field skillLineID integer
+---@field categoryID Enum.WK_ObjectiveCategory
 ---@field quests integer[]
 ---@field itemID integer?
 ---@field points integer
@@ -121,8 +121,8 @@
 ---@field onLeave function?
 ---@field onClick function?
 
----@enum Enum.WK_Objectives
-Enum.WK_Objectives = {
+---@enum Enum.WK_ObjectiveCategory
+Enum.WK_ObjectiveCategory = {
   Unique = "Unique",
   Treatise = "Treatise",
   ArtisanQuest = "ArtisanQuest",

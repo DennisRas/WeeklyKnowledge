@@ -660,12 +660,12 @@ function Main:GetMainColumns(unfiltered)
 
   local weeklyProgress = Data:GetWeeklyProgress()
 
-  Utils:TableForEach(Data.ObjectiveTypes, function(objectiveType)
-    if objectiveType.id == Enum.WK_Objectives.DarkmoonQuest then
+  Utils:TableForEach(Data.ObjectiveCategories, function(objectiveType)
+    if objectiveType.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
       if not Data.cache.isDarkmoonOpen then
         return
       end
-    elseif objectiveType.id == Enum.WK_Objectives.CatchUp then
+    elseif objectiveType.id == Enum.WK_ObjectiveCategory.CatchUp then
       -- There's a hard-coded column with more info
       return
     end
@@ -769,7 +769,7 @@ function Main:GetMainColumns(unfiltered)
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText("Catch-Up", 1, 1, 1);
-      local objective = Utils:TableGet(Data.ObjectiveTypes, "id", Enum.WK_Objectives.CatchUp)
+      local objective = Utils:TableGet(Data.ObjectiveCategories, "id", Enum.WK_ObjectiveCategory.CatchUp)
       if objective then
         GameTooltip:AddLine(objective.description, nil, nil, nil, true)
       end
@@ -812,17 +812,17 @@ function Main:GetMainColumns(unfiltered)
 
       local progress = Utils:TableFilter(weeklyProgress, function(progress)
         return progress.character == character and progress.profession == profession and (
-          progress.objective.typeID == Enum.WK_Objectives.ArtisanQuest
-          or progress.objective.typeID == Enum.WK_Objectives.Treasure
-          or progress.objective.typeID == Enum.WK_Objectives.Gathering
-          or progress.objective.typeID == Enum.WK_Objectives.TrainerQuest
+          progress.objective.typeID == Enum.WK_ObjectiveCategory.ArtisanQuest
+          or progress.objective.typeID == Enum.WK_ObjectiveCategory.Treasure
+          or progress.objective.typeID == Enum.WK_ObjectiveCategory.Gathering
+          or progress.objective.typeID == Enum.WK_ObjectiveCategory.TrainerQuest
         )
       end)
       local hasGathering = Utils:TableFind(progress, function(prog)
-        return prog.objective.typeID == Enum.WK_Objectives.Gathering
+        return prog.objective.typeID == Enum.WK_ObjectiveCategory.Gathering
       end)
       Utils:TableForEach(progress, function(prog)
-        local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", prog.objective.typeID)
+        local objectiveType = Utils:TableGet(Data.ObjectiveCategories, "id", prog.objective.typeID)
         if not objectiveType then return end
         if prog.questsTotal == 0 then return end
         sumPointsEarned = sumPointsEarned + prog.pointsEarned
