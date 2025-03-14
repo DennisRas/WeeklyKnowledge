@@ -657,50 +657,45 @@ function Data:ScanCharacter()
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLineID, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(characterProfessionID)
     if not skillLineID then return end
 
-    local dataProfession = Utils:TableFind(Data.Professions, function(dataProfession)
-      return dataProfession.skillLineID == skillLineID and dataProfession.spellID and IsPlayerSpell(dataProfession.spellID)
+    local profession = Utils:TableFind(self.Professions, function(profession)
+      return profession.skillLineID == skillLineID and profession.spellID and IsPlayerSpell(profession.spellID)
     end)
-    if not dataProfession then return end
+    if not profession then return end
 
-    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
-      return characterProfession.skillLineID == skillLineID
+    local enabled = Utils:TableFind(character.professions, function(characterProfession)
+      return characterProfession.skillLineID == profession.skillLineID and characterProfession.enabled
     end)
 
-    if not characterProfession then
-      ---@type WK_CharacterProfession
-      characterProfession = {
-        enabled = true,
-        skillLineID = skillLineID,
-        level = skillLevel,
-        maxLevel = maxSkillLevel,
-        knowledgeLevel = 0,
-        knowledgeMaxLevel = 0,
-        knowledgeUnspent = 0,
-        specializations = {}
-      }
+    ---@type WK_CharacterProfession
+    local characterProfession = {
+      enabled = enabled and true or false,
+      skillLineID = profession.skillLineID,
+      skillLineVariantID = profession.skillLineVariantID,
+      level = skillLevel,
+      maxLevel = maxSkillLevel,
+      knowledgeLevel = 0,
+      knowledgeMaxLevel = 0,
+      knowledgeUnspent = 0,
+      specializations = {},
+      catchUpCurrencyInfo = nil,
+    }
+
+    local specializationCurrencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(profession.skillLineVariantID)
+    if specializationCurrencyInfo and specializationCurrencyInfo.numAvailable then
+      characterProfession.knowledgeUnspent = specializationCurrencyInfo.numAvailable
     end
 
-    characterProfession.skillLineID = skillLineID
-    characterProfession.level = skillLevel
-    characterProfession.maxLevel = maxSkillLevel
-    characterProfession.specializations = {}
-
-    local currencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(dataProfession.skillLineVariantID)
-    if currencyInfo and currencyInfo.numAvailable then
-      characterProfession.knowledgeUnspent = currencyInfo.numAvailable
-    end
-
-    if dataProfession.catchUpCurrencyID then
-      local catchUpCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo(dataProfession.catchUpCurrencyID)
-      if catchUpCurrencyInfo and catchUpCurrencyInfo.quantity then
-        characterProfession.catchUpCurrencyInfo = catchUpCurrencyInfo
+    if profession.catchUpCurrencyID then
+      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(profession.catchUpCurrencyID)
+      if currencyInfo and currencyInfo.quantity then
+        characterProfession.catchUpCurrencyInfo = currencyInfo
       end
     end
 
     -- Scan knowledge spent/max
     local knowledgeLevel = 0
     local knowledgeMaxLevel = 0
-    local configID = C_ProfSpecs.GetConfigIDForSkillLine(dataProfession.skillLineVariantID)
+    local configID = C_ProfSpecs.GetConfigIDForSkillLine(profession.skillLineVariantID)
     if configID and configID > 0 then
       local configInfo = C_Traits.GetConfigInfo(configID)
       if configInfo then
@@ -801,7 +796,7 @@ function Data:GetWeeklyProgress()
     return self.cache.weeklyProgress
   end
 
-  self.cache.weeklyProgress = {}
+  self.cache.weeklyProgress = wipe(self.cache.weeklyProgress or {})
 
   Utils:TableForEach(self:GetCharacters(), function(character)
     Utils:TableForEach(character.professions, function(characterProfession)
@@ -809,16 +804,15 @@ function Data:GetWeeklyProgress()
       if not profession then return end
 
       local objectives = Utils:TableFilter(self.Objectives, function(objective)
-        return objective.skillLineID == profession.skillLineID
+        return objective.skillLineID == profession.skillLineID and objective.quests ~= nil
       end)
 
       local sumPointsEarned = 0
       local sumPointsTotal = 0
+      local objectivesThisWeek = Utils:TableFilter(objectives, function(objective) return objective.categoryID ~= Enum.WK_ObjectiveCategory.CatchUp end)
+      local objectivesCatchUp = Utils:TableFilter(objectives, function(objective) return objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp end)
 
-      Utils:TableForEach(objectives, function(objective)
-        if not objective.quests then return end
-        if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then return end
-        local limit = 0
+      Utils:TableForEach(objectivesThisWeek, function(objective)
         local progress = {
           character = character,
           characterProfession = characterProfession,
@@ -863,8 +857,7 @@ function Data:GetWeeklyProgress()
             or objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
             or objective.categoryID == Enum.WK_ObjectiveCategory.TrainerQuest
           ) then
-          local objectiveCategory = Utils:TableGet(Data.ObjectiveCategories, "id", objective.categoryID)
-          if objectiveCategory and progress.questsTotal > 0 then
+          if progress.questsTotal > 0 then
             sumPointsEarned = sumPointsEarned + progress.pointsEarned
             sumPointsTotal = sumPointsTotal + progress.pointsTotal
           end
@@ -873,44 +866,40 @@ function Data:GetWeeklyProgress()
         table.insert(self.cache.weeklyProgress, progress)
       end)
 
-      Utils:TableForEach(objectives, function(objective)
-        if not objective.quests then return end
-        if objective.categoryID ~= Enum.WK_ObjectiveCategory.CatchUp then return end
-        if not profession.catchUpCurrencyID then return end
-        if not characterProfession.catchUpCurrencyInfo then return end
+      if profession.catchUpCurrencyID and characterProfession.catchUpCurrencyInfo then
+        Utils:TableForEach(objectivesCatchUp, function(objective)
+          local progress = {
+            character = character,
+            characterProfession = characterProfession,
+            profession = profession,
+            objective = objective,
+            questsCompleted = 0,
+            questsTotal = 0,
+            pointsEarned = 0,
+            pointsTotal = 0,
+            items = {},
+          }
 
-        local limit = 0
-        local progress = {
-          character = character,
-          characterProfession = characterProfession,
-          profession = profession,
-          objective = objective,
-          questsCompleted = 0,
-          questsTotal = 0,
-          pointsEarned = 0,
-          pointsTotal = 0,
-          items = {},
-        }
+          if objective.itemID and objective.itemID > 0 then
+            progress.items[objective.itemID] = false
+          end
 
-        if objective.itemID and objective.itemID > 0 then
-          progress.items[objective.itemID] = false
-        end
+          local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
+          local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
 
-        local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
-        local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
+          progress.pointsEarned = catchUpCurrent - sumPointsEarned
+          progress.pointsTotal = catchUpTotal - sumPointsTotal
 
-        progress.pointsEarned = catchUpCurrent - sumPointsEarned
-        progress.pointsTotal = catchUpTotal - sumPointsTotal
+          if progress.pointsEarned < progress.pointsTotal then
+            progress.questsTotal = progress.pointsTotal - progress.pointsEarned
+          else
+            progress.questsTotal = progress.pointsTotal
+            progress.questsCompleted = progress.pointsTotal
+          end
 
-        if progress.pointsEarned < progress.pointsTotal then
-          progress.questsTotal = progress.pointsTotal - progress.pointsEarned
-        else
-          progress.questsTotal = progress.pointsTotal
-          progress.questsCompleted = progress.pointsTotal
-        end
-
-        table.insert(self.cache.weeklyProgress, progress)
-      end)
+          table.insert(self.cache.weeklyProgress, progress)
+        end)
+      end
     end)
   end)
 

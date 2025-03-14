@@ -52,6 +52,7 @@
 ---@class WK_CharacterProfession
 ---@field enabled boolean
 ---@field skillLineID integer
+---@field skillLineVariantID integer
 ---@field level integer
 ---@field maxLevel integer
 ---@field knowledgeLevel integer
@@ -60,21 +61,21 @@
 ---@field specializations table
 ---@field catchUpCurrencyInfo CurrencyInfo?
 
+---@class WK_Profession
+---@field name string
+---@field skillLineID integer Profession Base ID
+---@field skillLineVariantID integer Profession Variant ID (Expansion)
+---@field spellID integer Profession Spell ID
+---@field catchUpCurrencyID integer
+---@field catchUpWeeklyCap integer
+---@field catchUpItemID integer
+
 ---@class WK_ObjectiveCategory
 ---@field id Enum.WK_ObjectiveCategory
 ---@field name string
 ---@field description string
 ---@field type "item" | "quest"
 ---@field repeatable "No" | "Weekly" | "Monthly"
-
----@class WK_Profession
----@field name string
----@field skillLineID integer Profession ID
----@field skillLineVariantID integer Profession Expansion Variant ID
----@field spellID integer Learned Profession Spell ID
----@field catchUpCurrencyID integer
----@field catchUpWeeklyCap integer
----@field catchUpItemID integer
 
 ---@class WK_Objective
 ---@field skillLineID integer
