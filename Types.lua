@@ -85,11 +85,22 @@
 ---@field points integer
 ---@field limit integer?
 
+---@class WK_Progress
+---@field objective WK_Objective
+---@field character WK_Character
+---@field characterProfession WK_CharacterProfession
+---@field questsCompleted number
+---@field questsTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field items table<number, boolean>
+
 ---@class WK_DataCache
 ---@field isDarkmoonOpen boolean
 ---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
 ---@field mapInfo table<integer, UiMapDetails>
+---@field weeklyProgress WK_Progress[]
 
 ---@class WK_DataColumn
 ---@field name string

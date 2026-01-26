@@ -550,8 +550,19 @@ function Checklist:Render()
   end
 end
 
+---@class WK_ChecklistData
+
+---@class WK_ChecklistColumn
+---@field name string
+---@field width number
+---@field cell fun(data: WK_ChecklistData): WK_TableDataCell
+
+---Get column data
+---@param unfiltered boolean?
+---@return table
 function Checklist:GetColumns(unfiltered)
   local hidden = Data.db.global.checklist.hiddenColumns
+  ---@type WK_ChecklistColumn[]
   local columns = {
     {
       name = "Objective",
@@ -618,7 +629,7 @@ function Checklist:GetColumns(unfiltered)
       width = 80,
       toggleHidden = true,
       cell = function(data)
-        local objectiveType = Utils:TableGet(Data.ObjectiveCategories, "id", data.objective.typeID)
+        local objectiveType = Utils:TableGet(Data.ObjectiveCategories, "id", data.objective.categoryID)
         if not objectiveType then
           return {
             text = "?"

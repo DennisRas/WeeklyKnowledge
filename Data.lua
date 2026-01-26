@@ -790,7 +790,7 @@ function Data:GetCharacters(unfiltered)
 end
 
 ---Analyze all objectives and their progress
----@return table
+---@return WK_Progress[]
 function Data:GetWeeklyProgress()
   if type(self.cache.weeklyProgress) == "table" and Utils:TableCount(self.cache.weeklyProgress) > 0 then
     return self.cache.weeklyProgress
@@ -813,6 +813,7 @@ function Data:GetWeeklyProgress()
       local objectivesCatchUp = Utils:TableFilter(objectives, function(objective) return objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp end)
 
       Utils:TableForEach(objectivesThisWeek, function(objective)
+        ---@type WK_Progress
         local progress = {
           character = character,
           characterProfession = characterProfession,
@@ -868,6 +869,7 @@ function Data:GetWeeklyProgress()
 
       if profession.catchUpCurrencyID and characterProfession.catchUpCurrencyInfo then
         Utils:TableForEach(objectivesCatchUp, function(objective)
+          ---@type WK_Progress
           local progress = {
             character = character,
             characterProfession = characterProfession,
