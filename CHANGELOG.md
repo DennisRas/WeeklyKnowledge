@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.11 - ?
+
+### Fixed
+
+- Fix error in GetWeeklyProgress when catch-up currency quantity or maxQuantity is nil (e.g. stale or missing currency data). Fixes #80.
+
 ## v1.1.10 - 2026-01-26
 
 ### Updated

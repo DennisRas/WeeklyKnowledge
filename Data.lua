@@ -867,7 +867,8 @@ function Data:GetWeeklyProgress()
         table.insert(self.cache.weeklyProgress, progress)
       end)
 
-      if profession.catchUpCurrencyID and characterProfession.catchUpCurrencyInfo then
+      local catchUpInfo = characterProfession.catchUpCurrencyInfo
+      if profession.catchUpCurrencyID and catchUpInfo and catchUpInfo.quantity ~= nil and catchUpInfo.maxQuantity ~= nil then
         Utils:TableForEach(objectivesCatchUp, function(objective)
           ---@type WK_Progress
           local progress = {
@@ -886,11 +887,8 @@ function Data:GetWeeklyProgress()
             progress.items[objective.itemID] = false
           end
 
-          local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
-          local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
-
-          progress.pointsEarned = catchUpCurrent - sumPointsEarned
-          progress.pointsTotal = catchUpTotal - sumPointsTotal
+          progress.pointsEarned = catchUpInfo.quantity - sumPointsEarned
+          progress.pointsTotal = catchUpInfo.maxQuantity - sumPointsTotal
 
           if progress.pointsEarned < progress.pointsTotal then
             progress.questsTotal = progress.pointsTotal - progress.pointsEarned
