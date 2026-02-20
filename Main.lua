@@ -660,12 +660,12 @@ function Main:GetMainColumns(unfiltered)
 
   local weeklyProgress = Data:GetWeeklyProgress()
 
-  Utils:TableForEach(Data.ObjectiveTypes, function(objectiveType)
-    if objectiveType.id == Enum.WK_Objectives.DarkmoonQuest then
+  Utils:TableForEach(Data.ObjectiveCategories, function(objectiveType)
+    if objectiveType.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
       if not Data.cache.isDarkmoonOpen then
         return
       end
-    elseif objectiveType.id == Enum.WK_Objectives.CatchUp then
+    elseif objectiveType.id == Enum.WK_ObjectiveCategory.CatchUp then
       -- There's a hard-coded column with more info
       return
     end
@@ -697,7 +697,7 @@ function Main:GetMainColumns(unfiltered)
         local items = {}
 
         local progress = Utils:TableFilter(weeklyProgress, function(progress)
-          return progress.character == character and progress.profession == profession and progress.objective.typeID == objectiveType.id
+          return progress.character == character and progress.profession == profession and progress.objective.categoryID == objectiveType.id
         end)
 
         Utils:TableForEach(progress, function(prog)
@@ -764,12 +764,13 @@ function Main:GetMainColumns(unfiltered)
     table.insert(columns, dataColumn)
   end)
 
-  table.insert(columns, {
-    name = "Catch-Up",
+  ---@type WK_DataColumn
+  local dataColumn = {
+    name = "Progress",
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText("Catch-Up", 1, 1, 1);
-      local objective = Utils:TableGet(Data.ObjectiveTypes, "id", Enum.WK_Objectives.CatchUp)
+      GameTooltip:SetText("Progress", 1, 1, 1);
+      local objective = Utils:TableGet(Data.ObjectiveCategories, "id", Enum.WK_ObjectiveCategory.CatchUp)
       if objective then
         GameTooltip:AddLine(objective.description, nil, nil, nil, true)
       end
@@ -812,29 +813,29 @@ function Main:GetMainColumns(unfiltered)
 
       local progress = Utils:TableFilter(weeklyProgress, function(progress)
         return progress.character == character and progress.profession == profession and (
-          progress.objective.typeID == Enum.WK_Objectives.ArtisanQuest
-          or progress.objective.typeID == Enum.WK_Objectives.Treasure
-          or progress.objective.typeID == Enum.WK_Objectives.Gathering
-          or progress.objective.typeID == Enum.WK_Objectives.TrainerQuest
+          progress.objective.categoryID == Enum.WK_ObjectiveCategory.ArtisanQuest
+          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.Treasure
+          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
+          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.TrainerQuest
         )
       end)
       local hasGathering = Utils:TableFind(progress, function(prog)
-        return prog.objective.typeID == Enum.WK_Objectives.Gathering
+        return prog.objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
       end)
       Utils:TableForEach(progress, function(prog)
-        local objectiveType = Utils:TableGet(Data.ObjectiveTypes, "id", prog.objective.typeID)
-        if not objectiveType then return end
+        local objectiveCategory = Utils:TableGet(Data.ObjectiveCategories, "id", prog.objective.categoryID)
+        if not objectiveCategory then return end
         if prog.questsTotal == 0 then return end
         sumPointsEarned = sumPointsEarned + prog.pointsEarned
         sumPointsTotal = sumPointsTotal + prog.pointsTotal
 
         -- Only gathering professions require completed gathering before catch-up unlocks
         if not hasGathering then return end
-        if not requirements[objectiveType.name] then
-          requirements[objectiveType.name] = {0, 0}
+        if not requirements[objectiveCategory.name] then
+          requirements[objectiveCategory.name] = {0, 0}
         end
-        requirements[objectiveType.name][1] = requirements[objectiveType.name][1] + prog.pointsEarned
-        requirements[objectiveType.name][2] = requirements[objectiveType.name][2] + prog.pointsTotal
+        requirements[objectiveCategory.name][1] = requirements[objectiveCategory.name][1] + prog.pointsEarned
+        requirements[objectiveCategory.name][2] = requirements[objectiveCategory.name][2] + prog.pointsTotal
       end)
 
       return {
@@ -844,9 +845,9 @@ function Main:GetMainColumns(unfiltered)
             local color = WHITE_FONT_COLOR
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText("Catch-Up", 1, 1, 1)
+            GameTooltip:SetText("Your Progress", 1, 1, 1)
             color = sumPointsEarned == sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
-            GameTooltip:AddDoubleLine("Weekly Points:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
+            GameTooltip:AddDoubleLine("Points This Week:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
             GameTooltip:AddDoubleLine("Catch-Up Points:", format("%d / %d", catchUpCurrent - sumPointsEarned, catchUpTotal - sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent == catchUpTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
@@ -886,7 +887,8 @@ function Main:GetMainColumns(unfiltered)
         end,
       }
     end,
-  })
+  }
+  table.insert(columns, dataColumn)
 
   if unfiltered then
     return columns

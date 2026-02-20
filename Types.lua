@@ -52,6 +52,7 @@
 ---@class WK_CharacterProfession
 ---@field enabled boolean
 ---@field skillLineID integer
+---@field skillLineVariantID integer
 ---@field level integer
 ---@field maxLevel integer
 ---@field knowledgeLevel integer
@@ -60,35 +61,46 @@
 ---@field specializations table
 ---@field catchUpCurrencyInfo CurrencyInfo?
 
----@class WK_ObjectiveType
----@field id Enum.WK_Objectives
+---@class WK_Profession
+---@field name string
+---@field skillLineID integer Profession Base ID
+---@field skillLineVariantID integer Profession Variant ID (Expansion)
+---@field spellID integer Profession Spell ID
+---@field catchUpCurrencyID integer
+---@field catchUpWeeklyCap integer
+---@field catchUpItemID integer
+
+---@class WK_ObjectiveCategory
+---@field id Enum.WK_ObjectiveCategory
 ---@field name string
 ---@field description string
 ---@field type "item" | "quest"
 ---@field repeatable "No" | "Weekly" | "Monthly"
 
----@class WK_Profession
----@field name string
----@field skillLineID integer Profession ID
----@field skillLineVariantID integer Profession Expansion Variant ID
----@field spellID integer Learned Profession Spell ID
----@field catchUpCurrencyID integer
----@field catchUpWeeklyCap integer
----@field catchUpItemID integer
-
 ---@class WK_Objective
----@field professionID integer
----@field typeID Enum.WK_Objectives
+---@field skillLineID integer
+---@field categoryID Enum.WK_ObjectiveCategory
 ---@field quests integer[]
 ---@field itemID integer?
 ---@field points integer
 ---@field limit integer?
+
+---@class WK_Progress
+---@field objective WK_Objective
+---@field character WK_Character
+---@field characterProfession WK_CharacterProfession
+---@field questsCompleted number
+---@field questsTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field items table<number, boolean>
 
 ---@class WK_DataCache
 ---@field isDarkmoonOpen boolean
 ---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
 ---@field mapInfo table<integer, UiMapDetails>
+---@field weeklyProgress WK_Progress[]
 
 ---@class WK_DataColumn
 ---@field name string
@@ -121,8 +133,8 @@
 ---@field onLeave function?
 ---@field onClick function?
 
----@enum Enum.WK_Objectives
-Enum.WK_Objectives = {
+---@enum Enum.WK_ObjectiveCategory
+Enum.WK_ObjectiveCategory = {
   Unique = "Unique",
   Treatise = "Treatise",
   ArtisanQuest = "ArtisanQuest",
