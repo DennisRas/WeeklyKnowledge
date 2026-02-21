@@ -1,0 +1,8 @@
+<Bindings>
+  <Binding name="WEEKLYKNOWLEDGE_MAIN" category="WeeklyKnowledge">
+    WEEKLYKNOWLEDGE_TOGGLE_MAIN()
+  </Binding>
+  <Binding name="WEEKLYKNOWLEDGE_CHECKLIST" category="WeeklyKnowledge">
+    WEEKLYKNOWLEDGE_TOGGLE_CHECKLIST()
+  </Binding>
+</Bindings>
