@@ -7,6 +7,15 @@ local addon = select(2, ...)
 local Utils = {}
 addon.Utils = Utils
 
+---True if the value is a secret (WoW API); use before comparing/using API return values that may be secret.
+---@param value any
+---@return boolean
+function Utils:IsSecretValue(value)
+  if issecretvalue == nil then return false end
+  ---@diagnostic disable-next-line: param-type-mismatch
+  return issecretvalue(value)
+end
+
 ---Set the background color for a parent frame
 ---@param parent any
 ---@param r number?

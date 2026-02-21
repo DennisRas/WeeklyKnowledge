@@ -10,8 +10,14 @@ addon.Data = Data
 local Utils = addon.Utils
 local AceDB = LibStub("AceDB-3.0")
 
+---True when chat messaging lockdown is active (C_ChatInfo.InChatMessagingLockdown). Calendar/ChatInfo APIs may return secrets; skip scan/update.
+function Data:IsInChatMessagingLockdown()
+  return C_ChatInfo and C_ChatInfo.InChatMessagingLockdown and C_ChatInfo.InChatMessagingLockdown()
+end
+
 ---@type WK_DataCache
 Data.cache = {
+  addonReady = false,
   isDarkmoonOpen = false,
   inCombat = false,
   items = {},
@@ -590,19 +596,25 @@ function Data:GetObjective(categoryID)
   end)
 end
 
----Check to see if the Darkmoon Faire event is live
+---Check to see if the Darkmoon Faire event is live.
+---Bails early when calendar may return secret values (SecretInChatMessagingLockdown; taint-safe).
 function Data:ScanCalendar()
+  if self:IsInChatMessagingLockdown() then
+    return
+  end
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
-  if currentCalendarTime and currentCalendarTime.monthDay then
-    local today = currentCalendarTime.monthDay
-    local numEvents = C_Calendar.GetNumDayEvents(0, today)
-    if numEvents then
-      for i = 1, numEvents do
-        local event = C_Calendar.GetDayEvent(0, today, i)
-        if event and event.eventID == 479 then
-          self.cache.isDarkmoonOpen = true
-        end
-      end
+  if not currentCalendarTime or not currentCalendarTime.monthDay then
+    return
+  end
+  local today = currentCalendarTime.monthDay
+  local numEvents = C_Calendar.GetNumDayEvents(0, today)
+  if not numEvents then
+    return
+  end
+  for i = 1, numEvents do
+    local event = C_Calendar.GetDayEvent(0, today, i)
+    if event and not Utils:IsSecretValue(event.eventID) and event.eventID == 479 then
+      self.cache.isDarkmoonOpen = true
     end
   end
 end
@@ -629,6 +641,9 @@ function Data:GetCharacter(GUID)
 end
 
 function Data:ScanCharacter()
+  if self:IsInChatMessagingLockdown() then
+    return
+  end
   local character = self:GetCharacter()
   if not character then return end
 

@@ -17,6 +17,8 @@ function Checklist:ToggleWindow()
   if self.window:IsVisible() then
     self.window:Hide()
   else
+    if not Data.cache.addonReady then return end
+    if Data.cache.inCombat then return end
     self.window:Show()
   end
   Data.db.global.checklist.open = self.window:IsVisible()

@@ -4,7 +4,12 @@
 
 ### Fixed
 
-- Fix error in GetWeeklyProgress when catch-up currency quantity or maxQuantity is nil (e.g. stale or missing currency data). Fixes #80.
+- Fix error when catch-up currency data is missing or outdated. Fixes #80.
+- Fix error when opening the addon during combat or in instances. Fixes #84.
+
+### Updated
+
+- The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
 
 ## v1.1.10 - 2026-01-26
 

@@ -96,6 +96,7 @@
 ---@field items table<number, boolean>
 
 ---@class WK_DataCache
+---@field addonReady boolean
 ---@field isDarkmoonOpen boolean
 ---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
