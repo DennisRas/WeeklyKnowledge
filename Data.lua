@@ -668,6 +668,17 @@ function Data:GetCharacter(GUID)
   return self.db.global.characters[GUID]
 end
 
+---Remove a character from the addon. No undo; log in on that character again to reintroduce.
+---@param characterOrGUID WK_Character|string
+function Data:DeleteCharacter(characterOrGUID)
+  local GUID = type(characterOrGUID) == "table" and characterOrGUID.GUID or characterOrGUID
+  if not GUID or self.db.global.characters[GUID] == nil then return end
+  self.db.global.characters[GUID] = nil
+  if type(self.cache.weeklyProgress) == "table" then
+    self.cache.weeklyProgress = {}
+  end
+end
+
 function Data:ScanCharacter()
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end

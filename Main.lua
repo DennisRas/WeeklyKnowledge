@@ -14,6 +14,24 @@ local Data = addon.Data
 local Checklist = addon.Checklist
 local LibDBIcon = LibStub("LibDBIcon-1.0")
 
+do
+  local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
+  StaticPopupDialogs[dialogName] = {
+    text = "Remove %s from " .. addonName .. "? This cannot be undone. To add this character again, log in on them.",
+    button1 = YES,
+    button2 = CANCEL,
+    OnAccept = function(_, character)
+      if character then
+        Data:DeleteCharacter(character)
+        Main:Render()
+      end
+    end,
+    timeout = 0,
+    whileDead = 1,
+    hideOnEscape = 1,
+  }
+end
+
 function Main:ToggleWindow()
   if not self.window then return end
   if self.window:IsVisible() then
@@ -287,6 +305,15 @@ function Main:Render()
                   self:Render()
                 end
               )
+            end)
+          end
+          if character.GUID ~= UnitGUID("player") then
+            characterButton:CreateButton("Remove character", function()
+              local characterName = character.name
+              if character.realmName then
+                characterName = format("%s - %s", character.name, character.realmName)
+              end
+              StaticPopup_Show("WEEKLYKNOWLEDGE_DELETE_CHARACTER", characterName, nil, character)
             end)
           end
         end)
