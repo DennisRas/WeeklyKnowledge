@@ -19,6 +19,7 @@
 
 ### Updated
 
+- Character list is now controlled only by profession toggles; the per-character checkbox has been removed. If you had previously hidden a character, all its professions are now hidden instead.
 - The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
 
 ## v1.1.10 - 2026-01-26

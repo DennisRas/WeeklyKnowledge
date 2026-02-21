@@ -33,7 +33,6 @@
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID
----@field enabled boolean
 ---@field name string
 ---@field realmName string
 ---@field level integer

@@ -281,14 +281,7 @@ function Main:Render()
             end
           end
 
-          local characterButton = rootMenu:CreateCheckbox(
-            name,
-            function() return character.enabled or false end,
-            function()
-              character.enabled = not character.enabled
-              self:Render()
-            end
-          )
+          local characterButton = rootMenu:CreateButton(name)
 
           if Utils:TableCount(character.professions) > 0 then
             Utils:TableForEach(character.professions, function(characterProfession)
