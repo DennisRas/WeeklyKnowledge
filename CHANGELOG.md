@@ -4,8 +4,8 @@
 
 ### Added
 
-- Added Unique objectives for the Undermine renown quartermaster (Smaks Topskimmer).
-- Added Unique objectives for the Khaz Algar renown quartermaster in Karesh (Om'sirik).
+- Added Unique objectives for the Undermine renown quartermaster (Smaks Topskimmer). Credit to pepedressingroom for the data.
+- Added Unique objectives for the Khaz Algar renown quartermaster in Karesh (Om'sirik). Credit to jcdny for the data.
 - Requirements tooltip now shows profession skill (name and level) when an objective has a skill requirement.
 
 ### Fixed
