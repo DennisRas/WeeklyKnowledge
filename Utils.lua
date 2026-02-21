@@ -30,7 +30,7 @@ function Utils:SetBackgroundColor(parent, r, g, b, a)
   end
 
   if type(r) == "table" then
-    r, g, b, a = r.a, r.g, r.b, r.a
+    r, g, b, a = r.r, r.g, r.b, r.a
   end
 
   if type(r) == nil then
@@ -54,7 +54,7 @@ function Utils:SetHighlightColor(parent, r, g, b, a)
   end
 
   if type(r) == "table" then
-    r, g, b, a = r.a, r.g, r.b, r.a
+    r, g, b, a = r.r, r.g, r.b, r.a
   end
 
   if type(r) == nil then
