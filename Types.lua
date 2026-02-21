@@ -53,6 +53,7 @@
 ---@field enabled boolean
 ---@field skillLineID integer
 ---@field skillLineVariantID integer
+---@field name string? Localized expansion-specific name from GetProfessionInfo
 ---@field level integer
 ---@field maxLevel integer
 ---@field knowledgeLevel integer

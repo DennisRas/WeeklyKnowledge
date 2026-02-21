@@ -825,6 +825,14 @@ function Checklist:GetColumns(unfiltered)
                         end
                       end
                     end
+                    if req.type == "skill" then
+                      leftText = (data.dataProfession and data.dataProfession.name) or "Profession skill"
+                      local skillLevel = data.characterProfession and data.characterProfession.level or 0
+                      rightText = format("%d / %d", skillLevel, req.amount)
+                      if skillLevel >= req.amount then
+                        completed = true
+                      end
+                    end
                     GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
                   end)
                 end
