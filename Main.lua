@@ -19,7 +19,6 @@ function Main:ToggleWindow()
   if self.window:IsVisible() then
     self.window:Hide()
   else
-    if not Data.cache.addonReady then return end
     if Data.cache.inCombat then return end
     self.window:Show()
   end
@@ -382,7 +381,7 @@ function Main:Render()
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
 
-    table.insert(UISpecialFrames, frameName)
+    table.insert(UISpecialFrames, self.window:GetName() or (addonName .. "MainWindow"))
   end
 
   -- Quick hotfix to avoid excessive rendering

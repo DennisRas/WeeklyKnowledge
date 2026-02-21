@@ -55,6 +55,8 @@ function Core:OnInitialize()
   })
   LibDBIcon:Register(addonName, WKLDB, Data.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
+
+  self:Render()
 end
 
 function Core:OnEnable()
@@ -88,37 +90,14 @@ function Core:OnEnable()
     end
   )
 
-  self.calendarInitDone = false
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
     Data.cache.weeklyProgress = {}
-    if not Data:IsInChatMessagingLockdown() then
-      if not self.calendarInitDone then
-        local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
-        C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
-        C_Calendar.OpenCalendar()
-        self.calendarInitDone = true
-      end
-      Data:ScanCalendar()
-    end
+    Data:ScanCalendar()
     self:Render()
   end)
 
-  local initTimer
-  local function tryInit()
-    if Data.cache.addonReady then return end
-    if InCombatLockdown and InCombatLockdown() then return end
-    Data.cache.addonReady = true
-    self:CancelTimer(initTimer)
-    if not Data:IsInChatMessagingLockdown() then
-      local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
-      C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
-      C_Calendar.OpenCalendar()
-      self.calendarInitDone = true
-    end
-    Data:ScanCharacter()
-    self:Render()
-  end
-  initTimer = self:ScheduleRepeatingTimer(tryInit, 1)
+  Data:ScanCharacter()
+  self:Render()
 end
 
 function Core:OnDisable()

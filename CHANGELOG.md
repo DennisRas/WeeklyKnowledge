@@ -10,9 +10,10 @@
 
 ### Fixed
 
-- Fix error when catch-up currency data is missing or outdated. Fixes #80.
-- Fix error when opening the addon during combat or in instances. Fixes #84.
+- Fixed error when catch-up currency data is missing or outdated. Fixes #80.
+- Fixed error when opening the addon during combat or in instances. Fixes #84.
 - Corrected waypoints for four profession knowledge items in The Ringing Deeps (zone map changed in 11.1). Fixes #81.
+- Fixed an issue with windows not staying in position after reloading/loading.
 
 ### Updated
 

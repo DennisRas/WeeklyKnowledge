@@ -17,7 +17,7 @@ end
 
 ---@type WK_DataCache
 Data.cache = {
-  addonReady = false,
+  calendarOpened = false,
   isDarkmoonOpen = false,
   inCombat = false,
   items = {},
@@ -621,8 +621,14 @@ end
 ---Check to see if the Darkmoon Faire event is live.
 ---Bails early when calendar may return secret values (SecretInChatMessagingLockdown; taint-safe).
 function Data:ScanCalendar()
-  if self:IsInChatMessagingLockdown() then
-    return
+  if self:IsInChatMessagingLockdown() then return end
+  if not self.cache.calendarOpened then
+    local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
+    if currentCalendarTime and currentCalendarTime.month then
+      C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
+      C_Calendar.OpenCalendar()
+      self.cache.calendarOpened = true
+    end
   end
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
   if not currentCalendarTime or not currentCalendarTime.monthDay then
@@ -663,9 +669,8 @@ function Data:GetCharacter(GUID)
 end
 
 function Data:ScanCharacter()
-  if self:IsInChatMessagingLockdown() then
-    return
-  end
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
 
