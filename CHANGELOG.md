@@ -9,6 +9,14 @@
 - Added Unique objectives for the Undermine renown quartermaster (Smaks Topskimmer). Credit to pepedressingroom for the data.
 - Added Unique objectives for the Khaz Algar renown quartermaster in Karesh (Om'sirik). Credit to jcdny for the data.
 - Requirements tooltip now shows profession skill (name and level) when an objective has a skill requirement.
+- Added a new column to the Checklist: Repeatable
+- Added caching for checking completed quests/objectives in order to improve performance.
+
+### Updated
+
+- Character list is now controlled only by profession toggles; the per-character checkbox has been removed. If you had previously hidden a character, all its professions are now hidden instead.
+- The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
+- Updated the Repeatable status to Catch-Up
 
 ### Fixed
 
@@ -16,11 +24,6 @@
 - Fixed error when opening the addon during combat or in instances. Fixes #84.
 - Corrected waypoints for four profession knowledge items in The Ringing Deeps (zone map changed in 11.1). Fixes #81.
 - Fixed an issue with windows not staying in position after reloading/loading.
-
-### Updated
-
-- Character list is now controlled only by profession toggles; the per-character checkbox has been removed. If you had previously hidden a character, all its professions are now hidden instead.
-- The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
 
 ## v1.1.10 - 2026-01-26
 

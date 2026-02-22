@@ -17,7 +17,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0")
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
   StaticPopupDialogs[dialogName] = {
-    text = "Remove %s from " .. addonName .. "? This cannot be undone. To add this character again, log in on them.",
+    text = "Remove %s?\nThis cannot be undone.\nTo add this character again, log in on them.",
     button1 = YES,
     button2 = CANCEL,
     OnAccept = function(_, character)
@@ -44,7 +44,12 @@ function Main:ToggleWindow()
 end
 
 function Main:Render()
-  local dataColumns = self:GetMainColumns()
+  local selectedExpansion = Data.db.global.main.selectedExpansion
+  local skillLineVariants = Data:GetSkillLineVariants()
+  local expansions = Data:GetExpansions()
+  local characters = Data:GetCharacters()
+  local columns = self:GetTableColumns()
+  local objectiveCategories = Data:GetObjectiveCategories()
   local tableWidth = 0
   local tableHeight = 0
   local minWindowWidth = 300
@@ -100,6 +105,13 @@ function Main:Render()
     self.window.titlebar.title:SetJustifyH("LEFT")
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText(addonName)
+
+    self.window.titlebar.selectedExpansion = self.window.titlebar:CreateFontString("$parentSelectedExpansion", "OVERLAY")
+    self.window.titlebar.selectedExpansion:SetFontObject("SystemFont_Med2")
+    self.window.titlebar.selectedExpansion:SetPoint("CENTER", self.window.titlebar, "CENTER", 0, 0)
+    self.window.titlebar.selectedExpansion:SetJustifyH("CENTER")
+    self.window.titlebar.selectedExpansion:SetJustifyV("MIDDLE")
+    self.window.titlebar.selectedExpansion:SetTextColor(1, 1, 1, 1)
 
     do -- Close Button
       self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
@@ -266,7 +278,7 @@ function Main:Render()
       self.window.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Characters.blp")
       self.window.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.window.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
-        Utils:TableForEach(Data:GetCharacters(true), function(character)
+        Utils:TableForEach(characters, function(character)
           local name = character.name
           if character.realmName then
             name = format("%s - %s", character.name, character.realmName)
@@ -285,11 +297,8 @@ function Main:Render()
 
           if Utils:TableCount(character.professions) > 0 then
             Utils:TableForEach(character.professions, function(characterProfession)
-              local profession = Utils:TableGet(Data.Professions, "skillLineID", characterProfession.skillLineID)
-              local professionName = "?"
-              if profession then
-                professionName = profession.name
-              end
+              local variant = skillLineVariants[characterProfession.skillLineVariantID]
+              local professionName = (variant and variant.name) or "?"
               characterButton:CreateCheckbox(
                 professionName,
                 function() return characterProfession.enabled or false end,
@@ -313,9 +322,56 @@ function Main:Render()
       end)
     end
 
+    do -- Expansion Button
+      self.window.titlebar.ExpansionButton = CreateFrame("DropdownButton", "$parentExpansionButton", self.window.titlebar)
+      self.window.titlebar.ExpansionButton:SetPoint("RIGHT", self.window.titlebar.CharactersButton, "LEFT", 0, 0)
+      self.window.titlebar.ExpansionButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.ExpansionButton:SetScript("OnEnter", function()
+        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
+        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:Show()
+      end)
+      self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
+        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      self.window.titlebar.ExpansionButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ExpansionButton:GetName() .. "Icon", "ARTWORK")
+      self.window.titlebar.ExpansionButton.Icon:SetPoint("CENTER", self.window.titlebar.ExpansionButton, "CENTER")
+      self.window.titlebar.ExpansionButton.Icon:SetSize(12, 12)
+      self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
+      self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
+        rootMenu:CreateRadio(
+          "All expansions",
+          function() return Data.db.global.main.selectedExpansion == nil end,
+          function()
+            Data.db.global.main.selectedExpansion = nil
+            self:Render()
+          end,
+          nil
+        )
+        Utils:TableForEach(expansions, function(expansion)
+          rootMenu:CreateRadio(
+            expansion.name,
+            function() return Data.db.global.main.selectedExpansion == expansion.id end,
+            function()
+              Data.db.global.main.selectedExpansion = expansion.id
+              self:Render()
+            end,
+            expansion.id
+          )
+        end)
+      end)
+    end
+
     do -- Columns Button
       self.window.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.window.titlebar)
-      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.CharactersButton, "LEFT", 0, 0)
+      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.ExpansionButton, "LEFT", 0, 0)
       self.window.titlebar.ColumnsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
       self.window.titlebar.ColumnsButton:SetScript("OnEnter", function()
         self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
@@ -333,7 +389,7 @@ function Main:Render()
       end)
       self.window.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
         local hidden = Data.db.global.main.hiddenColumns
-        Utils:TableForEach(self:GetMainColumns(true), function(column)
+        Utils:TableForEach(columns, function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.name,
@@ -429,27 +485,27 @@ function Main:Render()
   --   end
   -- end
 
-  do -- Table Column config
-    Utils:TableForEach(dataColumns, function(dataColumn)
+  do -- Table columns config
+    Utils:TableForEach(columns, function(column)
       ---@type WK_TableDataColumn
-      local column = {
-        width = dataColumn.width,
-        align = dataColumn.align or "LEFT",
+      local columnConfig = {
+        width = column.width,
+        align = column.align or "LEFT",
       }
-      table.insert(tableData.columns, column)
-      tableWidth = tableWidth + dataColumn.width
+      table.insert(tableData.columns, columnConfig)
+      tableWidth = tableWidth + columnConfig.width
     end)
   end
 
   do -- Table Header row
     ---@type WK_TableDataRow
     local row = {columns = {}}
-    Utils:TableForEach(dataColumns, function(dataColumn)
+    Utils:TableForEach(columns, function(column)
       ---@type WK_TableDataCell
       local cell = {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.name),
-        onEnter = dataColumn.onEnter,
-        onLeave = dataColumn.onLeave,
+        text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.name),
+        onEnter = column.onEnter,
+        onLeave = column.onLeave,
       }
       table.insert(row.columns, cell)
     end)
@@ -457,21 +513,24 @@ function Main:Render()
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
-  do -- Table data
-    Utils:TableForEach(Data:GetCharacters(), function(character)
-      Utils:TableForEach(character.professions, function(characterProfession)
-        if not characterProfession.enabled then return end
-        local profession = Utils:TableGet(Data.Professions, "skillLineID", characterProfession.skillLineID)
-        if not profession then return end
+  do -- Table data rows
+    Utils:TableForEach(characters, function(character)
+      local professions = Utils:TableFilter(character.professions or {}, function(characterProfession)
+        local skillLineVariant = skillLineVariants[characterProfession.skillLineVariantID]
+        if not skillLineVariant then return false end
+        if selectedExpansion and skillLineVariant.expansionID ~= selectedExpansion then return false end
+        if not characterProfession.enabled then return false end
+        return true
+      end)
 
+      Utils:TableForEach(professions, function(characterProfession)
         ---@type WK_TableDataRow
         local row = {columns = {}}
-        Utils:TableForEach(dataColumns, function(dataColumn)
+        Utils:TableForEach(columns, function(column)
           ---@type WK_TableDataCell
-          local cell = dataColumn.cell(character, characterProfession, profession)
+          local cell = column.cell(character, characterProfession, characterProfession.skillLineVariantID)
           table.insert(row.columns, cell)
         end)
-
         table.insert(tableData.rows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
       end)
@@ -479,6 +538,7 @@ function Main:Render()
   end
 
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
+  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", Data.db.global.main.selectedExpansion and expansions[Data.db.global.main.selectedExpansion].name or "All Expansions"))
   self.window.border:SetShown(Data.db.global.main.windowBorder)
   self.window.table:SetData(tableData)
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
@@ -488,10 +548,16 @@ function Main:Render()
 end
 
 ---Get columns for the table
----@param unfiltered boolean?
+---@param unfiltered boolean? Show all columns, even if they are hidden
 ---@return WK_DataColumn[]
-function Main:GetMainColumns(unfiltered)
+function Main:GetTableColumns(unfiltered)
   local hidden = Data.db.global.main.hiddenColumns
+  local weeklyProgress = Data:GetWeeklyProgress()
+  local objectives = Data:GetObjectives()
+  local skillLineVariants = Data:GetSkillLineVariants()
+  local expansions = Data:GetExpansions()
+  local objectiveCategories = Data:GetObjectiveCategories()
+
   ---@type WK_DataColumn[]
   local columns = {
     {
@@ -500,8 +566,6 @@ function Main:GetMainColumns(unfiltered)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Name", 1, 1, 1);
         GameTooltip:AddLine("Your characters.")
-        -- GameTooltip:AddLine(" ")
-        -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -529,8 +593,6 @@ function Main:GetMainColumns(unfiltered)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Realm", 1, 1, 1);
         GameTooltip:AddLine("Realm names.")
-        -- GameTooltip:AddLine(" ")
-        -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -548,17 +610,35 @@ function Main:GetMainColumns(unfiltered)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Profession", 1, 1, 1);
         GameTooltip:AddLine("Your professions.")
-        -- GameTooltip:AddLine(" ")
-        -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
       end,
       onLeave = function()
         GameTooltip:Hide()
       end,
-      width = 80,
+      width = 120,
       toggleHidden = true,
-      cell = function(_, _, dataProfession)
-        return {text = dataProfession.name}
+      cell = function(_, _, skillLineVariantID)
+        local variant = skillLineVariants[skillLineVariantID]
+        return {text = variant and variant.name or ""}
+      end,
+    },
+    {
+      name = "Expansion",
+      onEnter = function(cellFrame)
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Expansion", 1, 1, 1);
+        GameTooltip:AddLine("Expansion for this profession row.")
+        GameTooltip:Show()
+      end,
+      onLeave = function()
+        GameTooltip:Hide()
+      end,
+      width = 120,
+      toggleHidden = true,
+      cell = function(_, _, skillLineVariantID)
+        local variant = skillLineVariants[skillLineVariantID]
+        local expansion = variant and expansions[variant.expansionID]
+        return {text = expansion and expansion.name or ""}
       end,
     },
     {
@@ -567,8 +647,6 @@ function Main:GetMainColumns(unfiltered)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Skill", 1, 1, 1);
         GameTooltip:AddLine("Current skill levels.")
-        -- GameTooltip:AddLine(" ")
-        -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -578,7 +656,7 @@ function Main:GetMainColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(_, characterProfession)
-        return {text = characterProfession.level > 0 and characterProfession.level == characterProfession.maxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.level .. " / " .. characterProfession.maxLevel) or characterProfession.level .. " / " .. characterProfession.maxLevel}
+        return {text = characterProfession.skillLevel > 0 and characterProfession.skillLevel == characterProfession.skillMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel) or characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel}
       end,
     },
     {
@@ -587,8 +665,6 @@ function Main:GetMainColumns(unfiltered)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Knowledge Points", 1, 1, 1);
         GameTooltip:AddLine("Current knowledge gained.")
-        -- GameTooltip:AddLine(" ")
-        -- GameTooltip:AddLine("<Click to Sort Column>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -597,7 +673,8 @@ function Main:GetMainColumns(unfiltered)
       width = 100,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(_, characterProfession, dataProfession)
+      cell = function(_, characterProfession, skillLineVariantID)
+        local skillLineVariant = skillLineVariants[skillLineVariantID]
         local text = ""
 
         if characterProfession.knowledgeLevel then
@@ -642,7 +719,7 @@ function Main:GetMainColumns(unfiltered)
             end
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText(dataProfession.name, 1, 1, 1)
+            GameTooltip:SetText(skillLineVariant and skillLineVariant.name or "", 1, 1, 1)
             GameTooltip:AddDoubleLine("Points Spent:", pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
             GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
             GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
@@ -679,25 +756,23 @@ function Main:GetMainColumns(unfiltered)
     },
   }
 
-  local weeklyProgress = Data:GetWeeklyProgress()
-
-  Utils:TableForEach(Data.ObjectiveCategories, function(objectiveType)
-    if objectiveType.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+  Utils:TableForEach(objectiveCategories, function(objectiveCategory)
+    if objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
       if not Data.cache.isDarkmoonOpen then
         return
       end
-    elseif objectiveType.id == Enum.WK_ObjectiveCategory.CatchUp then
+    elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
       -- There's a hard-coded column with more info
       return
     end
 
     ---@type WK_DataColumn
     local dataColumn = {
-      name = objectiveType.name,
+      name = objectiveCategory.name,
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText(objectiveType.name, 1, 1, 1);
-        GameTooltip:AddLine(objectiveType.description, nil, nil, nil, true)
+        GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
+        GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -706,7 +781,7 @@ function Main:GetMainColumns(unfiltered)
       width = 90,
       toggleHidden = true,
       align = "CENTER",
-      cell = function(character, characterProfession, profession)
+      cell = function(character, characterProfession, skillLineVariantID)
         if not characterProfession.knowledgeMaxLevel or characterProfession.knowledgeMaxLevel == 0 then
           return {text = ""}
         end
@@ -718,7 +793,8 @@ function Main:GetMainColumns(unfiltered)
         local items = {}
 
         local progress = Utils:TableFilter(weeklyProgress, function(progress)
-          return progress.character == character and progress.profession == profession and progress.objective.categoryID == objectiveType.id
+          local pObj = objectives[progress.objectiveId]
+          return progress.characterGUID == character.GUID and pObj and pObj.skillLineVariantID == skillLineVariantID and pObj.categoryID == objectiveCategory.id
         end)
 
         Utils:TableForEach(progress, function(prog)
@@ -744,13 +820,13 @@ function Main:GetMainColumns(unfiltered)
           text = text,
           onEnter = function(cellFrame)
             local label = "Items:"
-            if objectiveType.type == "quest" then
+            if objectiveCategory.type == "quest" then
               label = "Quests:"
             end
 
             local showTooltip = function()
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText(objectiveType.name, 1, 1, 1);
+              GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
               GameTooltip:AddDoubleLine(label, format("%d / %d", questsCompleted, questsTotal), nil, nil, nil, 1, 1, 1)
               GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", pointsEarned, pointsTotal), nil, nil, nil, 1, 1, 1)
               if Utils:TableCount(items) > 0 then
@@ -791,7 +867,7 @@ function Main:GetMainColumns(unfiltered)
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText("Progress", 1, 1, 1);
-      local objective = Utils:TableGet(Data.ObjectiveCategories, "id", Enum.WK_ObjectiveCategory.CatchUp)
+      local objective = objectiveCategories[Enum.WK_ObjectiveCategory.CatchUp]
       if objective then
         GameTooltip:AddLine(objective.description, nil, nil, nil, true)
       end
@@ -805,7 +881,7 @@ function Main:GetMainColumns(unfiltered)
     width = 80,
     align = "CENTER",
     toggleHidden = true,
-    cell = function(character, characterProfession, profession)
+    cell = function(character, characterProfession, skillLineVariantID)
       if not characterProfession.catchUpCurrencyInfo then
         return {
           text = "-",
@@ -821,6 +897,7 @@ function Main:GetMainColumns(unfiltered)
         }
       end
 
+      local variant = skillLineVariants[skillLineVariantID]
       local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
       local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
       local textColor = WHITE_FONT_COLOR
@@ -833,18 +910,21 @@ function Main:GetMainColumns(unfiltered)
       local requirements = {}
 
       local progress = Utils:TableFilter(weeklyProgress, function(progress)
-        return progress.character == character and progress.profession == profession and (
-          progress.objective.categoryID == Enum.WK_ObjectiveCategory.ArtisanQuest
-          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.Treasure
-          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
-          or progress.objective.categoryID == Enum.WK_ObjectiveCategory.TrainerQuest
+        local pObj = objectives[progress.objectiveId]
+        return progress.characterGUID == character.GUID and pObj and pObj.skillLineVariantID == skillLineVariantID and (
+          pObj.categoryID == Enum.WK_ObjectiveCategory.ArtisanQuest
+          or pObj.categoryID == Enum.WK_ObjectiveCategory.Treasure
+          or pObj.categoryID == Enum.WK_ObjectiveCategory.Gathering
+          or pObj.categoryID == Enum.WK_ObjectiveCategory.TrainerQuest
         )
       end)
       local hasGathering = Utils:TableFind(progress, function(prog)
-        return prog.objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
+        local obj = objectives[prog.objectiveId]
+        return obj and obj.categoryID == Enum.WK_ObjectiveCategory.Gathering
       end)
       Utils:TableForEach(progress, function(prog)
-        local objectiveCategory = Utils:TableGet(Data.ObjectiveCategories, "id", prog.objective.categoryID)
+        local obj = objectives[prog.objectiveId]
+        local objectiveCategory = obj and objectiveCategories[obj.categoryID]
         if not objectiveCategory then return end
         if prog.questsTotal == 0 then return end
         sumPointsEarned = sumPointsEarned + prog.pointsEarned
@@ -883,8 +963,8 @@ function Main:GetMainColumns(unfiltered)
               end)
             end
 
-            if profession.catchUpItemID and profession.catchUpItemID > 0 then
-              local item = Data.cache.items[profession.catchUpItemID]
+            if variant and variant.catchUpItemID and variant.catchUpItemID > 0 then
+              local item = Data.cache.items[variant.catchUpItemID]
               local itemCached = item and item:IsItemDataCached()
               local icon = itemCached and item:GetItemIcon() or 134400
               local name = itemCached and item:GetItemLink() or "Loading..."
@@ -896,9 +976,9 @@ function Main:GetMainColumns(unfiltered)
             GameTooltip:Show()
           end
 
-          if profession.catchUpItemID and profession.catchUpItemID > 0 then
-            Data.cache.items[profession.catchUpItemID] = Item:CreateFromItemID(profession.catchUpItemID)
-            Data.cache.items[profession.catchUpItemID]:ContinueOnItemLoad(showTooltip)
+          if variant and variant.catchUpItemID and variant.catchUpItemID > 0 then
+            Data.cache.items[variant.catchUpItemID] = Item:CreateFromItemID(variant.catchUpItemID)
+            Data.cache.items[variant.catchUpItemID]:ContinueOnItemLoad(showTooltip)
           end
 
           showTooltip()

@@ -92,6 +92,7 @@ function Core:OnEnable()
     3,
     function()
       Data.cache.weeklyProgress = {}
+      Data.cache.weeklyProgressExpansionID = nil
       Data:ScanCharacter()
       self:Render()
     end
@@ -99,6 +100,7 @@ function Core:OnEnable()
 
   self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
     Data.cache.weeklyProgress = {}
+    Data.cache.weeklyProgressExpansionID = nil
     Data:ScanCalendar()
     self:Render()
   end)

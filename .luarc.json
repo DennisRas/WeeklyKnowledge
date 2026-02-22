@@ -162,6 +162,9 @@
         "HelpTip",
         "MAP_PIN_HYPERLINK",
         "UiMapPoint",
-        "CreateSimpleTextureMarkup"
+        "CreateSimpleTextureMarkup",
+        "StaticPopupDialogs",
+        "YES",
+        "StaticPopup_Show"
     ]
 }
