@@ -180,7 +180,7 @@ Enum.WK_ObjectiveCategory = {
 }
 
 ---@enum Enum.WK_Factions
-Enum.WK_Factions = {
+Enum.WK_Faction = {
   AmaniTribe = 2696,
   TheSingularity = 2699,
   Harati = 2704,
@@ -188,7 +188,7 @@ Enum.WK_Factions = {
 }
 
 ---@enum Enum.WK_Currencies
-Enum.WK_Currencies = {
+Enum.WK_Currency = {
   VoidlightMarl = 3316,
   ArtisanAlchemistMoxie = 3256,
   ArtisanBlacksmithMoxie = 3257,
@@ -202,4 +202,23 @@ Enum.WK_Currencies = {
   ArtisanSkinnerMoxie = 3265,
   ArtisanTailorMoxie = 3266,
   UnalloyedAbundance = 3377,
+}
+
+---@enum Enum.WK_Maps
+Enum.WK_Map = {
+  DarkmoonIsland = 407,
+  Dornogal = 2339,
+  CityOfThreads = 2213,
+  Hallowfall = 2215,
+  AzjKahet = 2255,
+  TheRingingDeeps = 2214,
+  IsleOfDorn = 2248,
+  Undermine = 2346,
+  Tazavesh = 2472,
+  Voidstorm = 2405,
+  ZulAman = 2437,
+  AtalAman = 2536,
+  Harandar = 2413,
+  EversongWoods = 2395,
+  SlayersRise = 2444,
 }
