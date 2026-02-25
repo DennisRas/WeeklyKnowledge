@@ -11,6 +11,16 @@
 ---@field abbr string Abbreviation key, e.g. "DF", "TWW", "Midnight"
 ---@field name string Full name
 
+---@class WK_Faction
+---@field id integer MajorFactionData.factionID
+---@field expansionID Enum.ExpansionLevel MajorFactionData.expansionID
+---@field name string MajorFactionData.name
+
+---@class WK_Currency
+---@field id integer
+---@field expansionID Enum.ExpansionLevel
+---@field name string
+
 ---@class WK_DefaultGlobalMain
 ---@field selectedExpansion Enum.ExpansionLevel? or nil for all
 ---@field hiddenColumns table<string, boolean>
@@ -166,4 +176,30 @@ Enum.WK_ObjectiveCategory = {
   TrainerQuest = "TrainerQuest",
   DarkmoonQuest = "DarkmoonQuest",
   CatchUp = "CatchUp",
+  WeeklyQuest = "WeeklyQuest",
+}
+
+---@enum Enum.WK_Factions
+Enum.WK_Factions = {
+  AmaniTribe = 2696,
+  TheSingularity = 2699,
+  Harati = 2704,
+  SilvermoonCity = 2710
+}
+
+---@enum Enum.WK_Currencies
+Enum.WK_Currencies = {
+  VoidlightMarl = 3316,
+  ArtisanAlchemistMoxie = 3256,
+  ArtisanBlacksmithMoxie = 3257,
+  ArtisanEnchanterMoxie = 3258,
+  ArtisanEngineerMoxie = 3259,
+  ArtisanHerbalistMoxie = 3260,
+  ArtisanScribeMoxie = 3261,
+  ArtisanJewelcrafterMoxie = 3262,
+  ArtisanLeatherworkerMoxie = 3263,
+  ArtisanMinerMoxie = 3264,
+  ArtisanSkinnerMoxie = 3265,
+  ArtisanTailorMoxie = 3266,
+  UnalloyedAbundance = 3377,
 }

@@ -11,12 +11,14 @@
 - Requirements tooltip now shows profession skill (name and level) when an objective has a skill requirement.
 - Added a new column to the Checklist: Repeatable
 - Added caching for checking completed quests/objectives in order to improve performance.
+- Added a new category/column named Quest; This is the old Artisan/Trainer columns merged.
 
 ### Updated
 
 - Character list is now controlled only by profession toggles; the per-character checkbox has been removed. If you had previously hidden a character, all its professions are now hidden instead.
 - The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
 - Updated the Repeatable status to Catch-Up
+- Updated a shit ton of location hints - Yeah this took a lot of time :-P
 
 ### Fixed
 
