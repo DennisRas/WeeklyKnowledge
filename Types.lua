@@ -107,19 +107,38 @@
 ---@field description string
 ---@field type "item" | "quest"
 ---@field repeatable "No" | "Yes" | "Weekly" | "Monthly"
+---@field hint boolean?
+
+---@alias WK_ObjectiveRequirementType "item" | "currency" | "renown" | "skill" | "quest"
+---@alias WK_ObjectiveRequirementMatch "all" | "any"
+
+---@class WK_ObjectiveLocation
+---@field m number? UiMapID (e.g. Enum.WK_Map)
+---@field x number?
+---@field y number?
+---@field hint string?
+
+---@class WK_ObjectiveRequirement
+---@field type WK_ObjectiveRequirementType
+---@field id integer? item/currency/renown ID
+---@field amount integer?
+---@field name string? quest requirement label
+---@field quests integer[]? quest IDs for type "quest"
+---@field match WK_ObjectiveRequirementMatch? for type "quest": all or any
 
 ---@class WK_Objective
----@field id integer
 ---@field skillLineVariantID integer Profession variant (unique per expansion); expansion from Data:GetSkillLineVariant
 ---@field categoryID Enum.WK_ObjectiveCategory
 ---@field quests integer[]
 ---@field itemID integer?
 ---@field points integer
 ---@field limit integer?
+---@field loc WK_ObjectiveLocation?
+---@field requires WK_ObjectiveRequirement[]?
 
 ---@class WK_Progress
 ---@field characterGUID string
----@field objectiveId integer WK_Objective.id
+---@field objective WK_Objective
 ---@field questsCompleted number
 ---@field questsTotal number
 ---@field pointsEarned number

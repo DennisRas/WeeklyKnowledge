@@ -45,7 +45,6 @@ end
 
 function Main:Render()
   local selectedExpansion = Data.db.global.main.selectedExpansion
-  local skillLineVariants = Data:GetSkillLineVariants()
   local expansions = Data:GetExpansions()
   local characters = Data:GetCharacters()
   local columns = self:GetTableColumns()
@@ -297,7 +296,7 @@ function Main:Render()
 
           if Utils:TableCount(character.professions) > 0 then
             Utils:TableForEach(character.professions, function(characterProfession)
-              local variant = skillLineVariants[characterProfession.skillLineVariantID]
+              local variant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
               local professionName = (variant and variant.name) or "?"
               characterButton:CreateCheckbox(
                 professionName,
@@ -516,7 +515,7 @@ function Main:Render()
   do -- Table data rows
     Utils:TableForEach(characters, function(character)
       local professions = Utils:TableFilter(character.professions or {}, function(characterProfession)
-        local skillLineVariant = skillLineVariants[characterProfession.skillLineVariantID]
+        local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return false end
         if selectedExpansion and skillLineVariant.expansionID ~= selectedExpansion then return false end
         if not characterProfession.enabled then return false end
@@ -538,7 +537,7 @@ function Main:Render()
   end
 
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
-  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", Data.db.global.main.selectedExpansion and expansions[Data.db.global.main.selectedExpansion].name or "All Expansions"))
+  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.main.selectedExpansion and Data:GetExpansionByID(Data.db.global.main.selectedExpansion) or {}).name or "All Expansions"))
   self.window.border:SetShown(Data.db.global.main.windowBorder)
   self.window.table:SetData(tableData)
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
@@ -554,7 +553,6 @@ function Main:GetTableColumns(unfiltered)
   local hidden = Data.db.global.main.hiddenColumns
   local weeklyProgress = Data:GetWeeklyProgress()
   local objectives = Data:GetObjectives()
-  local skillLineVariants = Data:GetSkillLineVariants()
   local expansions = Data:GetExpansions()
   local objectiveCategories = Data:GetObjectiveCategories()
 
@@ -618,7 +616,7 @@ function Main:GetTableColumns(unfiltered)
       width = 120,
       toggleHidden = true,
       cell = function(_, _, skillLineVariantID)
-        local variant = skillLineVariants[skillLineVariantID]
+        local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         return {text = variant and variant.name or ""}
       end,
     },
@@ -636,8 +634,8 @@ function Main:GetTableColumns(unfiltered)
       width = 120,
       toggleHidden = true,
       cell = function(_, _, skillLineVariantID)
-        local variant = skillLineVariants[skillLineVariantID]
-        local expansion = variant and expansions[variant.expansionID]
+        local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
+        local expansion = variant and Data:GetExpansionByID(variant.expansionID)
         return {text = expansion and expansion.name or ""}
       end,
     },
@@ -674,7 +672,7 @@ function Main:GetTableColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(_, characterProfession, skillLineVariantID)
-        local skillLineVariant = skillLineVariants[skillLineVariantID]
+        local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local text = ""
 
         if characterProfession.knowledgeLevel then
@@ -793,7 +791,7 @@ function Main:GetTableColumns(unfiltered)
         local items = {}
 
         local progress = Utils:TableFilter(weeklyProgress, function(progress)
-          local pObj = objectives[progress.objectiveId]
+          local pObj = progress.objective
           return progress.characterGUID == character.GUID and pObj and pObj.skillLineVariantID == skillLineVariantID and pObj.categoryID == objectiveCategory.id
         end)
 
@@ -867,7 +865,7 @@ function Main:GetTableColumns(unfiltered)
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
       GameTooltip:SetText("Progress", 1, 1, 1);
-      local objective = objectiveCategories[Enum.WK_ObjectiveCategory.CatchUp]
+      local objective = Data:GetObjectiveCategoryByID(Enum.WK_ObjectiveCategory.CatchUp)
       if objective then
         GameTooltip:AddLine(objective.description, nil, nil, nil, true)
       end
@@ -897,7 +895,7 @@ function Main:GetTableColumns(unfiltered)
         }
       end
 
-      local variant = skillLineVariants[skillLineVariantID]
+      local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
       local catchUpCurrent = characterProfession.catchUpCurrencyInfo.quantity
       local catchUpTotal = characterProfession.catchUpCurrencyInfo.maxQuantity
       local textColor = WHITE_FONT_COLOR
@@ -910,7 +908,7 @@ function Main:GetTableColumns(unfiltered)
       local requirements = {}
 
       local progress = Utils:TableFilter(weeklyProgress, function(progress)
-        local pObj = objectives[progress.objectiveId]
+        local pObj = progress.objective
         return progress.characterGUID == character.GUID and pObj and pObj.skillLineVariantID == skillLineVariantID and (
           pObj.categoryID == Enum.WK_ObjectiveCategory.ArtisanQuest
           or pObj.categoryID == Enum.WK_ObjectiveCategory.Treasure
@@ -919,12 +917,12 @@ function Main:GetTableColumns(unfiltered)
         )
       end)
       local hasGathering = Utils:TableFind(progress, function(prog)
-        local obj = objectives[prog.objectiveId]
+        local obj = prog.objective
         return obj and obj.categoryID == Enum.WK_ObjectiveCategory.Gathering
       end)
       Utils:TableForEach(progress, function(prog)
-        local obj = objectives[prog.objectiveId]
-        local objectiveCategory = obj and objectiveCategories[obj.categoryID]
+        local obj = prog.objective
+        local objectiveCategory = obj and Data:GetObjectiveCategoryByID(obj.categoryID)
         if not objectiveCategory then return end
         if prog.questsTotal == 0 then return end
         sumPointsEarned = sumPointsEarned + prog.pointsEarned

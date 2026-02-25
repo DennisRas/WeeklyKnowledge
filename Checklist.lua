@@ -27,7 +27,6 @@ end
 function Checklist:Render()
   local character = Data:GetCharacter()
   local dataColumns = self:GetColumns()
-  local skillLineVariants = Data:GetSkillLineVariants()
   local expansions = Data:GetExpansions()
 
   local tableWidth = 0
@@ -415,7 +414,7 @@ function Checklist:Render()
         highlight = true
       },
     })
-    self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", Data.db.global.checklist.selectedExpansion and expansions[Data.db.global.checklist.selectedExpansion].name or "All Expansions"))
+    self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.checklist.selectedExpansion and Data:GetExpansionByID(Data.db.global.checklist.selectedExpansion) or {}).name or "All Expansions"))
     self.window.table:SetParent(self.window)
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
@@ -469,7 +468,7 @@ function Checklist:Render()
   do -- Table data
     Utils:TableForEach(character.professions, function(characterProfession)
       local skillLineVariantID = characterProfession.skillLineVariantID
-      if not skillLineVariants[skillLineVariantID] then return end
+      if not Data:GetSkillLineVariantByID(skillLineVariantID) then return end
 
       Utils:TableForEach(Utils:TableFilter(objectives, function(o)
                            return o.skillLineVariantID == skillLineVariantID
@@ -514,7 +513,7 @@ function Checklist:Render()
                            end
 
                            local progress = Utils:TableFind(weeklyProgress, function(progress)
-                             return progress.characterGUID == character.GUID and progress.objectiveId == objective.id
+                             return progress.characterGUID == character.GUID and progress.objective == objective
                            end)
                            if not progress then return end
 
@@ -620,10 +619,8 @@ end
 ---@param unfiltered boolean?
 ---@return table
 function Checklist:GetColumns(unfiltered)
-  local skillLineVariants = Data:GetSkillLineVariants()
   local expansions = Data:GetExpansions()
   local hidden = Data.db.global.checklist.hiddenColumns
-  local objectiveCategories = Data:GetObjectiveCategories()
   local objectives = Data:GetObjectives()
   ---@type WK_ChecklistColumn[]
   local columns = {
@@ -682,7 +679,7 @@ function Checklist:GetColumns(unfiltered)
       width = 120,
       toggleHidden = true,
       cell = function(data)
-        local skillLineVariant = skillLineVariants[data.skillLineVariantID]
+        local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
         return {
           text = skillLineVariant and skillLineVariant.name or "",
         }
@@ -693,8 +690,8 @@ function Checklist:GetColumns(unfiltered)
       width = 120,
       toggleHidden = true,
       cell = function(data)
-        local skillLineVariant = skillLineVariants[data.skillLineVariantID]
-        local expansion = skillLineVariant and expansions[skillLineVariant.expansionID]
+        local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+        local expansion = skillLineVariant and Data:GetExpansionByID(skillLineVariant.expansionID)
         return {
           text = expansion and expansion.name or "",
         }
@@ -705,7 +702,7 @@ function Checklist:GetColumns(unfiltered)
       width = 80,
       toggleHidden = true,
       cell = function(data)
-        local objectiveCategory = objectiveCategories[data.objective.categoryID]
+        local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
         if not objectiveCategory then
           return {
             text = "?"
@@ -753,13 +750,13 @@ function Checklist:GetColumns(unfiltered)
       width = 60,
       toggleHidden = true,
       cell = function(data)
-        local objective = objectives[data.objective.id]
+        local objective = data.objective
         if not objective then
           return {
             text = " "
           }
         end
-        local objectiveCategory = objectiveCategories[objective.categoryID]
+        local objectiveCategory = Data:GetObjectiveCategoryByID(objective.categoryID)
         if not objectiveCategory then
           return {
             text = " "
@@ -909,7 +906,7 @@ function Checklist:GetColumns(unfiltered)
                       end
                     end
                     if req.type == "skill" then
-                      local skillLineVariant = skillLineVariants[data.skillLineVariantID]
+                      local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
                       leftText = (skillLineVariant and skillLineVariant.name) or "Profession skill"
                       local skillLevel = data.characterProfession and data.characterProfession.skillLevel or 0
                       rightText = format("%d / %d", skillLevel, req.amount)
