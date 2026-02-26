@@ -29,6 +29,7 @@
 ---@field windowBorder boolean Show the border?
 ---@field fontSize integer?
 ---@field checklistHelpTipClosed boolean?
+---@field hideLowLevelProfessions boolean?
 
 ---@class WK_DefaultGlobalhecklist
 ---@field selectedExpansion Enum.ExpansionLevel? or nil for all

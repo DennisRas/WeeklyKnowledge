@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 12
+Data.DBVersion = 13
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -44,6 +44,7 @@ Data.defaultDB = {
       windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
       windowBorder = true,
       checklistHelpTipClosed = false,
+      hideLowLevelProfessions = false,
     },
     checklist = {
       selectedExpansion = nil,
@@ -1065,7 +1066,10 @@ end
 function Data:GetCharacters()
   local characters = Utils:TableFilter(self.db.global.characters, function(character)
     -- Ignore ghost characters (Bug: https://github.com/DennisRas/WeeklyKnowledge/issues/47)
-    return (character.name and character.name ~= "")
+    if not character.name or character.name == "" then
+      return false
+    end
+    return true
   end)
 
   table.sort(characters, function(a, b)

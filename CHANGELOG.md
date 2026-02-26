@@ -13,6 +13,7 @@
 - Added caching for checking completed quests/objectives in order to improve performance.
 - Added a new category/column named Weekly Quest; This is the old Artisan/Trainer columns merged.
 - Added a new column: First Craft; This will show you the amount of first craft points available from your profession recipes.
+- Added a new setting: You can now hide characters/professions with a skill level below 25.
 
 ### Updated
 

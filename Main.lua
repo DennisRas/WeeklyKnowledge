@@ -156,6 +156,19 @@ function Main:Render()
         GameTooltip:Hide()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        local hideLowLevelProfessions = rootMenu:CreateCheckbox(
+          "Hide low level professions",
+          function() return Data.db.global.main.hideLowLevelProfessions end,
+          function()
+            Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
+            self:Render()
+          end
+        )
+        hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.");
+        end)
+
         local showMinimapIcon = rootMenu:CreateCheckbox(
           "Show the minimap button",
           function() return not Data.db.global.minimap.hide end,
@@ -519,6 +532,7 @@ function Main:Render()
         if not skillLineVariant then return false end
         if selectedExpansion and skillLineVariant.expansionID ~= selectedExpansion then return false end
         if not characterProfession.enabled then return false end
+        if Data.db.global.main.hideLowLevelProfessions and (characterProfession.skillLevel and characterProfession.skillLevel > 0 and characterProfession.skillLevel < 25) then return false end
         return true
       end)
 
