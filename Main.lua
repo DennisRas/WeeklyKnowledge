@@ -644,7 +644,7 @@ function Main:GetTableColumns(unfiltered)
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Skill", 1, 1, 1);
-        GameTooltip:AddLine("Current skill levels.")
+        GameTooltip:AddLine("Current skill levels.\n\nNote: This is only updated when you open the profession window or craft a recipe.", nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -654,6 +654,20 @@ function Main:GetTableColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(_, characterProfession)
+        if not characterProfession.skillLevel or characterProfession.skillLevel == 0 then
+          return {
+            text = "-",
+            onEnter = function(cellFrame)
+              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText("No data", 1, 1, 1);
+              GameTooltip:AddLine("Log in on this character and open the profession window one time to fetch skill level data.", nil, nil, nil, true);
+              GameTooltip:Show()
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+          }
+        end
         return {text = characterProfession.skillLevel > 0 and characterProfession.skillLevel == characterProfession.skillMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel) or characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel}
       end,
     },
@@ -757,7 +771,7 @@ function Main:GetTableColumns(unfiltered)
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("First Craft", 1, 1, 1);
-        GameTooltip:AddLine("Recipes with First Craft rewards.", nil, nil, nil, true)
+        GameTooltip:AddLine("Recipes with First Craft rewards.\n\nNote: This is only updated when you open the profession window or craft a recipe.", nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -774,7 +788,7 @@ function Main:GetTableColumns(unfiltered)
             onEnter = function(cellFrame)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText("No data", 1, 1, 1);
-              GameTooltip:AddLine("Log in on this character and open the profession to fetch recipe data.", nil, nil, nil, true);
+              GameTooltip:AddLine("Log in on this character and open the profession window one time to fetch recipe data.", nil, nil, nil, true);
               GameTooltip:Show()
             end,
             onLeave = function()
@@ -816,11 +830,16 @@ function Main:GetTableColumns(unfiltered)
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText("First Craft", 1, 1, 1);
-            GameTooltip:AddDoubleLine("Recipes:", tostring(totalRecipes))
-            GameTooltip:AddDoubleLine("Learned:", tostring(learnedRecipes))
-            GameTooltip:AddDoubleLine("Unlearned:", tostring(unlearnedRecipes))
+            GameTooltip:AddDoubleLine("Completed:", tostring(totalRecipes - firstCraftRemaining), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Remaining:", tostring(firstCraftRemaining), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Total:", tostring(totalRecipes), nil, nil, nil, 1, 1, 1)
             GameTooltip:AddLine(" ")
-            GameTooltip:AddDoubleLine("First Crafts left:", tostring(firstCraftRemaining))
+            GameTooltip:AddLine("Recipes", 1, 1, 1, true)
+            GameTooltip:AddDoubleLine("Learned:", tostring(learnedRecipes), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Unlearned:", tostring(unlearnedRecipes), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Total:", tostring(totalRecipes), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine("Note: This is only updated when you open the profession window or craft a recipe.", nil, nil, nil, true)
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -957,13 +976,18 @@ function Main:GetTableColumns(unfiltered)
     align = "CENTER",
     toggleHidden = true,
     cell = function(character, characterProfession, skillLineVariantID)
+      local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
       if not characterProfession.catchUpCurrencyInfo then
         return {
           text = "-",
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText("No data", 1, 1, 1);
-            GameTooltip:AddLine("Log in to fetch the data for this character.", nil, nil, nil, true);
+            if skillLineVariant and skillLineVariant.expansionID == Enum.ExpansionLevel.Dragonflight then
+              GameTooltip:AddLine("Data has not been added to the Dragonflight expansion yet.\nYou can still track your skill/knowledge level meanwhile.\nIt is not guaranteed that Dragonflight can be added if the system is too different from recent expansions.", nil, nil, nil, true);
+            else
+              GameTooltip:AddLine("Log in to fetch the data for this character.", nil, nil, nil, true);
+            end
             GameTooltip:Show()
           end,
           onLeave = function()

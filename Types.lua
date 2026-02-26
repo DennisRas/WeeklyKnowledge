@@ -97,11 +97,8 @@
 ---@field expansionID Enum.ExpansionLevel
 ---@field skillLineID integer References WK_SkillLine.id
 ---@field name string Expansion-specific name (e.g. "Khaz Algar Alchemy")
----@field spellID integer
 ---@field catchUpCurrencyID integer
----@field catchUpWeeklyCap integer
 ---@field catchUpItemID integer
----@field recipeIDs integer[]? Recipe IDs
 
 ---@class WK_ObjectiveCategory
 ---@field id Enum.WK_ObjectiveCategory

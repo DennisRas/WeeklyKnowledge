@@ -109,7 +109,7 @@ function Core:OnEnable()
       "TRADE_SKILL_SHOW",
       "TRAIT_CONFIG_UPDATED",
     },
-    3,
+    1,
     function()
       Data:ClearWeeklyProgress()
       Data:ScanProfession()
@@ -128,6 +128,9 @@ function Core:OnEnable()
     end)
 
   Data:ScanCharacter()
+  Data:ScanProfession()
+  Data:ScanQuests()
+  Data:ScanCalendar()
   self:Render()
 end
 
