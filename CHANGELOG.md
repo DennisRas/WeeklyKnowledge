@@ -11,7 +11,7 @@
 - Requirements tooltip now shows profession skill (name and level) when an objective has a skill requirement.
 - Added a new column to the Checklist: Repeatable
 - Added caching for checking completed quests/objectives in order to improve performance.
-- Added a new category/column named Quest; This is the old Artisan/Trainer columns merged.
+- Added a new category/column named Weekly Quest; This is the old Artisan/Trainer columns merged.
 
 ### Updated
 
