@@ -77,33 +77,55 @@ function Core:OnEnable()
   end)
   self:RegisterBucketEvent(
     {
-      "ACTIVE_TALENT_GROUP_CHANGED",
-      "BAG_UPDATE_DELAYED",
-      "CHAT_MSG_LOOT",
-      "ITEM_COUNT_CHANGED",
-      "PLAYER_SPECIALIZATION_CHANGED",
-      "PLAYER_TALENT_UPDATE",
-      "QUEST_COMPLETE",
-      "QUEST_TURNED_IN",
-      "SKILL_LINES_CHANGED",
-      "TRAIT_CONFIG_UPDATED",
-      "UNIT_INVENTORY_CHANGED",
+      "PLAYER_LEVEL_CHANGED"
     },
     3,
     function()
-      Data.cache.weeklyProgress = {}
-      Data.cache.weeklyProgressExpansionID = nil
+      Data:ClearWeeklyProgress()
       Data:ScanCharacter()
       self:Render()
     end
   )
-
-  self:RegisterBucketEvent({"CALENDAR_UPDATE_EVENT_LIST",}, 1, function()
-    Data.cache.weeklyProgress = {}
-    Data.cache.weeklyProgressExpansionID = nil
-    Data:ScanCalendar()
-    self:Render()
-  end)
+  self:RegisterBucketEvent(
+    {
+      "QUEST_COMPLETE",
+      "QUEST_LOG_UPDATE",
+      "QUEST_TURNED_IN",
+    },
+    3,
+    function()
+      Data:ClearWeeklyProgress()
+      Data:ScanQuests()
+      self:Render()
+    end
+  )
+  self:RegisterBucketEvent(
+    {
+      "NEW_RECIPE_LEARNED",
+      "SKILL_LINES_CHANGED",
+      "TRADE_SKILL_DATA_SOURCE_CHANGED",
+      "TRADE_SKILL_DETAILS_UPDATE",
+      "TRADE_SKILL_LIST_UPDATE",
+      "TRADE_SKILL_SHOW",
+      "TRAIT_CONFIG_UPDATED",
+    },
+    3,
+    function()
+      Data:ClearWeeklyProgress()
+      Data:ScanProfession()
+      self:Render()
+    end
+  )
+  self:RegisterBucketEvent(
+    {
+      "CALENDAR_UPDATE_EVENT_LIST",
+    },
+    1,
+    function()
+      Data:ClearWeeklyProgress()
+      Data:ScanCalendar()
+      self:Render()
+    end)
 
   Data:ScanCharacter()
   self:Render()

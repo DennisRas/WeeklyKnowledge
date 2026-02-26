@@ -49,21 +49,21 @@
 ---@field hideCatchUpObjectives boolean
 
 ---@class WK_Character
----@field GUID string|WOWGUID
----@field name string
----@field realmName string
----@field level integer
----@field factionEnglish string
----@field factionName string
----@field raceID integer
----@field raceEnglish string
----@field raceName string
----@field classID integer
----@field classFile ClassFile?
----@field className string
----@field lastUpdate number
----@field professions WK_CharacterProfession[]
----@field completed table<integer, boolean> questID -> true
+---@field GUID string|WOWGUID Character GUID
+---@field name string Character name
+---@field realmName string Realm name
+---@field level integer Character level
+---@field factionEnglish string Faction English name
+---@field factionName string Faction name
+---@field raceID integer Race ID
+---@field raceEnglish string Race English name
+---@field raceName string Race name
+---@field classID integer Class ID
+---@field classFile ClassFile? Class file
+---@field className string Class name
+---@field lastUpdate number Last update time
+---@field professions WK_CharacterProfession[] Profession information for the character
+---@field completed table<integer, boolean> questID -> true Completed quests for the character
 
 ---@class WK_CharacterProfession
 ---@field enabled boolean
@@ -75,6 +75,7 @@
 ---@field knowledgeUnspent integer
 ---@field specializations WK_CharacterProfessionSpecialization[]
 ---@field catchUpCurrencyInfo CurrencyInfo?
+---@field tradeSkillRecipes TradeSkillRecipeInfo[] Recipes for the profession
 
 ---@class WK_CharacterProfessionSpecialization
 ---@field rootNodeID integer
@@ -100,6 +101,7 @@
 ---@field catchUpCurrencyID integer
 ---@field catchUpWeeklyCap integer
 ---@field catchUpItemID integer
+---@field recipeIDs integer[]? Recipe IDs
 
 ---@class WK_ObjectiveCategory
 ---@field id Enum.WK_ObjectiveCategory
@@ -153,6 +155,7 @@
 ---@field mapInfo table<integer, UiMapDetails>
 ---@field weeklyProgress WK_Progress[]
 ---@field completedQuests table<integer, boolean> questID -> true
+---@field tradeSkillRecipes TradeSkillRecipeInfo[] Trade skill recipes
 
 ---@class WK_DataColumn
 ---@field name string

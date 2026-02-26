@@ -752,6 +752,83 @@ function Main:GetTableColumns(unfiltered)
         }
       end,
     },
+    {
+      name = "First Craft",
+      onEnter = function(cellFrame)
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetText("First Craft", 1, 1, 1);
+        GameTooltip:AddLine("Recipes with First Craft rewards.", nil, nil, nil, true)
+        GameTooltip:Show()
+      end,
+      onLeave = function()
+        GameTooltip:Hide()
+      end,
+      width = 100,
+      align = "CENTER",
+      toggleHidden = true,
+      cell = function(_, characterProfession)
+        local recipes = characterProfession.tradeSkillRecipes
+        if not recipes or Utils:TableCount(recipes) == 0 then
+          return {
+            text = "-",
+            onEnter = function(cellFrame)
+              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText("No data", 1, 1, 1);
+              GameTooltip:AddLine("Log in on this character and open the profession to fetch recipe data.", nil, nil, nil, true);
+              GameTooltip:Show()
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+          }
+        end
+
+        local totalRecipes = 0
+        local learnedRecipes = 0
+        local unlearnedRecipes = 0
+        local firstCraftRemaining = 0
+
+        Utils:TableForEach(recipes, function(recipeInfo)
+          if not recipeInfo then
+            return
+          end
+          totalRecipes = totalRecipes + 1
+          if recipeInfo.learned then
+            learnedRecipes = learnedRecipes + 1
+          else
+            unlearnedRecipes = unlearnedRecipes + 1
+          end
+          if recipeInfo.firstCraft then
+            firstCraftRemaining = firstCraftRemaining + 1
+          end
+        end)
+
+        local text = "-"
+        if totalRecipes > 0 then
+          text = format("%d / %d", totalRecipes - firstCraftRemaining, totalRecipes)
+          if firstCraftRemaining == 0 then
+            text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
+          end
+        end
+
+        return {
+          text = text,
+          onEnter = function(cellFrame)
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText("First Craft", 1, 1, 1);
+            GameTooltip:AddDoubleLine("Recipes:", tostring(totalRecipes))
+            GameTooltip:AddDoubleLine("Learned:", tostring(learnedRecipes))
+            GameTooltip:AddDoubleLine("Unlearned:", tostring(unlearnedRecipes))
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine("First Crafts left:", tostring(firstCraftRemaining))
+            GameTooltip:Show()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+        }
+      end,
+    },
   }
 
   Utils:TableForEach(objectiveCategories, function(objectiveCategory)

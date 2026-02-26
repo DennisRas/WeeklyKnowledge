@@ -24,6 +24,7 @@ Data.cache = {
   mapInfo = {},
   weeklyProgress = {},
   completedQuests = {},
+  tradeSkillRecipes = {},
 }
 
 Data.DBVersion = 11
@@ -64,7 +65,7 @@ Data.defaultDB = {
   }
 }
 
-local MISSING_INFO = 99999999999
+local MISSING_INFO = 999999999
 Data.MISSING_INFO = MISSING_INFO
 
 ---@type WK_Character
@@ -84,6 +85,7 @@ Data.defaultCharacter = {
   className = "",
   professions = {},
   completed = {},
+  recipes = {},
 }
 
 ---@type WK_Expansion[]
@@ -543,41 +545,41 @@ Data.SkillLines = {
 ---@type WK_SkillLineVariant[]
 Data.SkillLineVariants = {
   -- Dragonflight (Dragon Isles)
-  {id = 2823, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 171, name = "Dragon Isles Alchemy",        spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2822, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 164, name = "Dragon Isles Blacksmithing",  spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2825, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 333, name = "Dragon Isles Enchanting",     spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2827, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 202, name = "Dragon Isles Engineering",    spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2832, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 182, name = "Dragon Isles Herbalism",      spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2828, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 773, name = "Dragon Isles Inscription",    spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2829, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 755, name = "Dragon Isles Jewelcrafting",  spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2830, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 165, name = "Dragon Isles Leatherworking", spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2833, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 186, name = "Dragon Isles Mining",         spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2834, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 393, name = "Dragon Isles Skinning",       spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2831, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 197, name = "Dragon Isles Tailoring",      spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0},
+  {id = 2823, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 171, name = "Dragon Isles Alchemy",        spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {370677, 405879, 406106, 370676, 370747, 370745, 1261882, 1261885, 370746, 370743, 370543, 370672, 370668, 370457, 370456, 370723, 370536, 415628, 370551, 370460, 370504, 370462, 370463, 370453, 370438, 370525, 370524, 415810, 370528, 370533, 405832, 370673, 400270, 370725, 370728, 370738, 370724, 405847, 370472, 370483, 370735, 370473, 370521, 370476, 370558, 370561, 370556, 370731, 370465, 370478, 370730, 370717, 370729, 370714, 370715, 381270, 370732, 370722, 370733, 370711, 370710, 370707, 370708, 370547, 370539, 377978}},
+  {id = 2822, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 164, name = "Dragon Isles Blacksmithing",  spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {367615, 367614, 371372, 426332, 367619, 367617, 367616, 393853, 367590, 367591, 367589, 367588, 367587, 367592, 367594, 367593, 367608, 367622, 367606, 365734, 367602, 367605, 367604, 367585, 367586, 367603, 367607, 365730, 365731, 367601, 365729, 409224, 408326, 408283, 367623, 367618, 371412, 371374, 371369, 371371, 371368, 371366, 371365, 371367, 1261892, 1261896, 367598, 395883, 367713, 371403, 400808, 430082, 430083, 430084, 430085, 430086, 430087, 430088, 430089, 367597, 395880, 367712, 367714, 403158, 403159, 403160, 403161, 403162, 403163, 403164, 403165, 365735, 377281, 377280, 419031, 419032, 419033, 419034, 419035, 419036, 419037, 419038, 408299, 408282, 408288, 393416, 395879, 371682, 388279, 376700, 376617, 376618, 376619, 376620, 376621, 376622, 376623, 376624, 395881, 371650, 367595, 371302, 367599, 367611, 371674, 371349, 367600, 371360, 393404, 367596, 371338, 371364, 371304, 371395, 371343, 395886, 377981, 371309, 367610, 371394, 371344, 367609}},
+  {id = 2825, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 333, name = "Dragon Isles Enchanting",     spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {422338, 405803, 391179, 429947, 414989, 406418, 391813, 391814, 391815, 391816, 390839, 390825, 389547, 1261933, 416047, 389549, 1261919, 389551, 405076, 389550, 404859, 389558, 429945, 414988, 406413, 389479, 389480, 389484, 389508, 389513, 389519, 389525, 389530, 389416, 389417, 389419, 429948, 414985, 406108, 389403, 389405, 389404, 389537, 389540, 389543, 389542, 405937, 389546, 389301, 389303, 389304, 391185, 390855, 390831, 391812, 400809, 391810, 414946, 391811, 390951, 391809, 405650, 391202, 389292, 389293, 389294, 389295, 391808, 389410, 389397, 389398, 389400, 391806, 391197, 390823, 389297, 389298, 389300, 377982, 388930, 389135, 389136, 391176, 391807, 391196, 389151, 394189}},
+  {id = 2827, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 202, name = "Dragon Isles Engineering",    spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {382391, 382319, 382320, 407170, 382388, 382318, 382321, 382390, 382317, 382389, 382358, 382354, 382400, 382341, 382399, 382329, 382342, 382340, 1259404, 1263237, 382408, 382350, 382368, 382349, 382371, 382369, 382370, 382353, 382351, 408230, 416149, 382328, 384491, 382334, 393796, 386667, 408052, 382359, 387246, 407006, 382348, 407005, 430093, 430094, 430095, 430096, 400810, 382326, 409351, 409353, 409355, 409356, 382325, 419042, 419043, 419044, 419045, 382355, 382356, 386670, 382357, 382336, 382332, 382324, 382344, 382367, 382379, 382387, 382380, 396777, 382381, 382339, 382393, 382398, 382392, 382397, 382394, 382395, 382396, 382345, 384313, 382403, 382327, 382331, 382335, 382402, 382404, 382365, 382366, 382343, 382323, 382346, 382338, 382337, 382333, 382363, 382364, 382362, 382361, 382401, 382322, 382385, 382377, 382378, 382384, 382407, 382383, 382386, 382376, 384314, 382330, 377983, 382375}},
+  {id = 2832, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 182, name = "Dragon Isles Herbalism",      spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2828, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 773, name = "Dragon Isles Inscription",    spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {383540, 383770, 383325, 383767, 383772, 383541, 383542, 422337, 383545, 383550, 383552, 383548, 1259422, 1259433, 1259429, 1259461, 1259441, 1259451, 1272572, 391836, 391846, 408272, 425954, 383546, 408277, 408273, 429149, 416137, 427956, 383554, 383555, 383556, 383560, 383561, 383562, 383535, 391834, 391845, 383538, 383586, 383587, 383534, 391832, 391848, 383533, 383536, 400811, 383592, 383593, 425263, 383588, 408278, 383591, 383590, 430092, 430091, 430090, 403168, 403167, 403166, 419041, 419040, 419039, 383790, 390850, 390853, 390851, 390847, 390849, 390852, 390848, 383512, 391781, 400028, 400027, 400026, 383574, 383575, 383522, 383517, 383523, 383844, 383515, 383759, 383524, 383519, 383516, 392944, 383520, 425961, 425959, 408218, 408222, 425958, 408223, 408221, 408220, 383549, 383527, 383551, 383525, 408271, 383529, 383547, 383791, 383576, 383577, 383578, 383579, 383581, 383580, 383582, 383583, 383584, 383585, 383539, 383543, 383544, 383563, 384948, 383530, 384949, 383567, 383570, 383571, 384869, 383565, 383573, 383572, 383569, 385197, 377985, 383786, 383531, 383787, 383788}},
+  {id = 2829, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 755, name = "Dragon Isles Jewelcrafting",  spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {374501, 374499, 374490, 374493, 374486, 374488, 407161, 374551, 374498, 374497, 394621, 374542, 374467, 374538, 374465, 374540, 374543, 374470, 374468, 1259384, 1259386, 1259369, 374442, 374450, 374445, 374447, 374454, 374461, 374459, 374460, 374516, 374511, 374514, 374510, 374512, 374457, 374453, 374462, 374455, 374444, 374446, 374443, 374456, 374463, 374449, 374448, 374458, 408231, 374525, 374509, 374553, 408398, 374522, 408397, 374547, 374549, 374548, 374546, 374550, 420740, 400812, 430055, 430056, 374502, 403131, 403132, 374472, 419004, 419005, 374483, 374484, 375063, 377804, 374518, 377960, 391782, 374495, 374496, 392697, 374508, 374506, 374530, 374537, 374531, 374532, 376233, 374477, 374478, 374494, 374437, 374439, 374440, 374438, 374441, 377915, 374480, 374475, 403483}},
+  {id = 2830, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 165, name = "Dragon Isles Leatherworking", spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {375151, 406267, 375144, 375157, 375153, 375125, 422330, 375123, 375117, 375124, 375119, 375120, 375121, 375122, 375118, 375197, 375155, 375156, 375149, 375148, 375115, 375116, 375110, 375112, 375109, 375111, 375114, 375113, 375145, 375154, 375142, 375146, 406266, 375147, 375143, 375150, 375152, 375199, 375196, 375191, 375195, 375189, 375194, 375190, 375192, 375193, 1259195, 1259233, 375159, 406275, 375160, 418579, 381547, 375162, 381849, 381848, 375161, 375171, 406214, 375172, 395864, 395839, 375135, 375134, 375140, 375137, 375138, 375141, 375136, 375139, 375133, 375131, 375127, 375130, 375126, 375129, 375128, 375132, 430066, 430065, 430071, 430068, 430069, 430072, 430067, 430070, 430064, 430062, 430058, 430061, 430057, 430060, 430059, 430063, 403142, 403141, 403147, 403144, 403145, 403148, 403143, 403146, 403140, 403138, 403134, 403137, 403133, 403136, 403135, 403139, 395867, 400814, 395847, 419015, 419014, 419020, 419017, 419018, 419021, 419016, 419019, 419013, 419011, 419007, 419010, 419006, 419009, 419008, 419012, 395868, 395851, 375166, 375188, 375102, 409557, 409555, 375187, 375184, 375185, 375178, 375179, 375176, 375180, 375174, 395865, 375173, 395845, 395863, 395844, 375182, 375168, 375181, 375105, 375164, 375108, 377989, 375103, 375183, 375106, 375104, 375186, 375107}},
+  {id = 2833, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 186, name = "Dragon Isles Mining",         spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2834, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 393, name = "Dragon Isles Skinning",       spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2831, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 197, name = "Dragon Isles Tailoring",      spellID = 0,      catchUpCurrencyID = 0,    catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {376497, 376493, 376502, 376500, 376501, 376496, 376503, 376504, 376505, 376546, 376492, 376494, 376495, 408318, 376517, 376513, 376514, 376510, 376516, 376515, 376512, 376511, 376518, 376544, 376548, 376550, 376552, 376554, 1259247, 1261940, 376539, 376540, 376529, 376541, 376542, 376561, 409839, 408304, 426434, 376532, 376531, 395807, 376538, 376556, 376557, 376533, 430081, 430073, 430076, 430077, 430078, 430080, 430079, 430075, 430074, 376565, 376566, 403157, 403149, 403152, 403153, 403154, 403156, 403155, 403151, 403150, 395814, 400815, 419030, 419022, 419025, 419026, 419027, 419029, 419028, 419024, 419023, 405974, 395815, 376528, 376699, 376527, 376519, 376522, 376523, 376524, 376526, 376525, 376521, 376520, 376570, 376563, 376564, 395813, 376534, 376558, 376549, 376536, 376537, 395809, 376543, 376535, 376568, 376567, 376559, 376569, 376551, 376506, 376547, 376507, 376555, 376553, 376560, 376508, 377986, 376509, 376545, 376530}},
   -- The War Within (Khaz Algar)
-  {id = 2871, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 171, name = "Khaz Algar Alchemy",          spellID = 423321, catchUpCurrencyID = 3057, catchUpWeeklyCap = 0, catchUpItemID = 228724},
-  {id = 2872, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 164, name = "Khaz Algar Blacksmithing",    spellID = 423332, catchUpCurrencyID = 3058, catchUpWeeklyCap = 0, catchUpItemID = 228726},
-  {id = 2874, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 333, name = "Khaz Algar Enchanting",       spellID = 423334, catchUpCurrencyID = 3059, catchUpWeeklyCap = 0, catchUpItemID = 227662},
-  {id = 2875, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 202, name = "Khaz Algar Engineering",      spellID = 423335, catchUpCurrencyID = 3060, catchUpWeeklyCap = 0, catchUpItemID = 228730},
-  {id = 2877, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 182, name = "Khaz Algar Herbalism",        spellID = 441327, catchUpCurrencyID = 3061, catchUpWeeklyCap = 0, catchUpItemID = 224835},
-  {id = 2878, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 773, name = "Khaz Algar Inscription",      spellID = 423338, catchUpCurrencyID = 3062, catchUpWeeklyCap = 0, catchUpItemID = 228732},
-  {id = 2879, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 755, name = "Khaz Algar Jewelcrafting",    spellID = 423339, catchUpCurrencyID = 3063, catchUpWeeklyCap = 0, catchUpItemID = 228734},
-  {id = 2880, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 165, name = "Khaz Algar Leatherworking",   spellID = 423340, catchUpCurrencyID = 3064, catchUpWeeklyCap = 0, catchUpItemID = 228736},
-  {id = 2881, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 186, name = "Khaz Algar Mining",           spellID = 423341, catchUpCurrencyID = 3065, catchUpWeeklyCap = 0, catchUpItemID = 224838},
-  {id = 2882, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 393, name = "Khaz Algar Skinning",         spellID = 423342, catchUpCurrencyID = 3066, catchUpWeeklyCap = 0, catchUpItemID = 224782},
-  {id = 2883, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 197, name = "Khaz Algar Tailoring",        spellID = 423343, catchUpCurrencyID = 3067, catchUpWeeklyCap = 0, catchUpItemID = 228738},
+  {id = 2871, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 171, name = "Khaz Algar Alchemy",          spellID = 423321, catchUpCurrencyID = 3057, catchUpWeeklyCap = 0, catchUpItemID = 228724,  recipeIDs = {449938, 430624, 432962, 432963, 430605, 430612, 430601, 430604, 430602, 430603, 1259673, 1261878, 430598, 430596, 430618, 449573, 449571, 430619, 430622, 449574, 430623, 449572, 430600, 430597, 430599, 1246966, 449575, 430621, 430620, 430345, 430617, 430614, 430616, 430615, 430607, 430608, 430611, 433087, 1238010, 432204, 430595, 430594, 430593, 462122, 430591, 427174, 427185, 430590, 430592, 427214, 462121}},
+  {id = 2872, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 164, name = "Khaz Algar Blacksmithing",    spellID = 423332, catchUpCurrencyID = 3058, catchUpWeeklyCap = 0, catchUpItemID = 228726,  recipeIDs = {450246, 450238, 450240, 450237, 450239, 450235, 450241, 450236, 450242, 450221, 450230, 450223, 450228, 450234, 450222, 450224, 450225, 450231, 450233, 450227, 450220, 450229, 450226, 450232, 450245, 450250, 450281, 450282, 450279, 450280, 450278, 450276, 450275, 450277, 453727, 1259675, 1259681, 450218, 455001, 454998, 455003, 454997, 438921, 438914, 438916, 438918, 438917, 438919, 438915, 438920, 454999, 455000, 455002, 455004, 450284, 450286, 450288, 450255, 450254, 450289, 450263, 450265, 450266, 450262, 450261, 450256, 450253, 450274, 450272, 450270, 450260, 450264, 450252, 450257, 450251, 450273, 450271, 450217, 450219, 450259, 450268, 450267, 450269, 450291, 450258, 450216, 450292, 450287, 450285, 450283}},
+  {id = 2874, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 333, name = "Khaz Algar Enchanting",       spellID = 423334, catchUpCurrencyID = 3059, catchUpWeeklyCap = 0, catchUpItemID = 227662,  recipeIDs = {445323, 445331, 445403, 445339, 445336, 445341, 445354, 445355, 445372, 445334, 445325, 445330, 445389, 445393, 445386, 445347, 445322, 445321, 1259690, 445353, 445379, 445333, 445351, 445387, 445320, 445375, 445349, 445385, 445317, 1259715, 445335, 445394, 445388, 445359, 445383, 445396, 445368, 445364, 445328, 445378, 445380, 445398, 445399, 445318, 445346, 445395, 445374, 445373, 445340, 445324, 445348, 445367, 445400, 445391, 445402, 445382, 1249469, 445362, 445332, 445377, 445352, 445342, 445343, 445370, 445357, 445363, 445390, 445319, 445365, 445366, 445326, 445350, 445356, 445329, 445397, 445345, 445376, 445381, 445327, 445401, 445360, 445337, 445338, 445361, 445344, 445371, 445392, 445358, 445384}},
+  {id = 2875, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 202, name = "Khaz Algar Engineering",      spellID = 423335, catchUpCurrencyID = 3060, catchUpWeeklyCap = 0, catchUpItemID = 228730,  recipeIDs = {447374, 447373, 447312, 447318, 447321, 447317, 447315, 447352, 447314, 447316, 447319, 447320, 447325, 447327, 447333, 447331, 447369, 447370, 447371, 447329, 447335, 447323, 443570, 447372, 1259778, 1259724, 1213620, 447367, 447366, 447364, 447365, 447368, 447344, 447343, 447342, 447358, 447360, 447362, 447363, 447361, 447357, 447356, 438926, 438922, 438927, 438923, 438928, 438924, 438929, 438925, 455005, 447355, 447354, 447353, 447324, 447326, 447330, 447332, 447328, 447334, 447350, 447351, 447322, 447340, 447341, 447339, 447379, 447375, 447378, 447376, 447377, 459299, 447338, 447336, 447337}},
+  {id = 2877, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 182, name = "Khaz Algar Herbalism",        spellID = 441327, catchUpCurrencyID = 3061, catchUpWeeklyCap = 0, catchUpItemID = 224835,  recipeIDs = {}},
+  {id = 2878, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 773, name = "Khaz Algar Inscription",      spellID = 423338, catchUpCurrencyID = 3062, catchUpWeeklyCap = 0, catchUpItemID = 228732,  recipeIDs = {444199, 444198, 444197, 444207, 444205, 1260005, 1260044, 1259796, 1259784, 1259818, 1259805, 444187, 444184, 444188, 444223, 444182, 447868, 444189, 444185, 444183, 444236, 444186, 444217, 444220, 444218, 471132, 1236170, 444219, 444192, 444193, 444194, 444195, 1249466, 1249468, 1249463, 444209, 1243994, 472951, 1236908, 444203, 1213515, 1213517, 1213514, 1234336, 1213512, 444338, 444337, 455006, 444336, 455007, 455008, 444214, 444215, 444212, 444213, 444232, 444235, 444233, 444229, 444231, 444234, 444230, 444210, 444211, 444208, 444190, 444206, 444204, 444224, 444227, 444226, 444225, 444191, 444201, 444200, 444196, 444221, 444222}},
+  {id = 2879, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 755, name = "Khaz Algar Jewelcrafting",    spellID = 423339, catchUpCurrencyID = 3063, catchUpWeeklyCap = 0, catchUpItemID = 228734,  recipeIDs = {435318, 435319, 435230, 435334, 435385, 435382, 435383, 435384, 435338, 435369, 435339, 435370, 435374, 435372, 435376, 435378, 1260172, 1260096, 435321, 435322, 435320, 435337, 435392, 434541, 434545, 434553, 434543, 434551, 434555, 434546, 434550, 434554, 434544, 434548, 434552, 435387, 435386, 435333, 435331, 435373, 435332, 435371, 435375, 435377, 435391, 434549, 435327, 434547, 434542, 435389, 434563, 435379, 435380, 435330, 435325, 435323, 435329, 1226650, 434537, 434539, 434538, 434536, 434540, 434020, 435324, 435326}},
+  {id = 2880, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 165, name = "Khaz Algar Leatherworking",   spellID = 423340, catchUpCurrencyID = 3064, catchUpWeeklyCap = 0, catchUpItemID = 228736,  recipeIDs = {444070, 443958, 441065, 441059, 441063, 441064, 441061, 441062, 441060, 441066, 443960, 443950, 443949, 441058, 441053, 441054, 441052, 441055, 441056, 441051, 441057, 444073, 443961, 444068, 444071, 443951, 444117, 444111, 444121, 444119, 444108, 444115, 444106, 444113, 1270836, 1260328, 441460, 1216520, 444103, 444102, 441461, 443698, 443706, 438907, 438908, 438913, 438909, 438912, 438910, 438911, 438906, 438902, 438898, 438899, 438904, 438900, 438901, 438903, 438905, 444122, 443699, 443707, 443700, 444105, 444107, 443708, 444114, 444110, 444075, 444086, 444076, 444116, 444079, 443697, 444078, 444087, 443705, 444077, 443701, 443709, 444118, 444104, 444112, 443695, 443703, 444120, 443696, 443704, 443702, 443710}},
+  {id = 2881, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 186, name = "Khaz Algar Mining",           spellID = 423341, catchUpCurrencyID = 3065, catchUpWeeklyCap = 0, catchUpItemID = 224838,  recipeIDs = {}},
+  {id = 2882, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 393, name = "Khaz Algar Skinning",         spellID = 423342, catchUpCurrencyID = 3066, catchUpWeeklyCap = 0, catchUpItemID = 224782,  recipeIDs = {}},
+  {id = 2883, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 197, name = "Khaz Algar Tailoring",        spellID = 423343, catchUpCurrencyID = 3067, catchUpWeeklyCap = 0, catchUpItemID = 228738,  recipeIDs = {446940, 446939, 446938, 446945, 446941, 446943, 446944, 446942, 446937, 446935, 446932, 446930, 1228344, 1228343, 1228338, 1228342, 446933, 446931, 446934, 446973, 446974, 446972, 446971, 446970, 446975, 1260215, 1260326, 446982, 446987, 446991, 446977, 447001, 446992, 446979, 446989, 446988, 447888, 446984, 446983, 446990, 446985, 446986, 447000, 454431, 438892, 438897, 438894, 438893, 438889, 438896, 438890, 438891, 438895, 456706, 446995, 446997, 446996, 446998, 446999, 446963, 446962, 446978, 446959, 454397, 446958, 446961, 446968, 446976, 446969, 446966, 446965, 446964, 446967, 446957, 446928, 446927, 446960, 446955, 446956, 447002, 446929}},
   -- Midnight
-  {id = 2906, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 171, name = "Midnight Alchemy",            spellID = 471003, catchUpCurrencyID = 3189, catchUpWeeklyCap = 0, catchUpItemID = 246320},
-  {id = 2907, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 164, name = "Midnight Blacksmithing",      spellID = 471004, catchUpCurrencyID = 3199, catchUpWeeklyCap = 0, catchUpItemID = 246322},
-  {id = 2909, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 333, name = "Midnight Enchanting",         spellID = 471006, catchUpCurrencyID = 3198, catchUpWeeklyCap = 0, catchUpItemID = 267653},
-  {id = 2910, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 202, name = "Midnight Engineering",        spellID = 471007, catchUpCurrencyID = 3197, catchUpWeeklyCap = 0, catchUpItemID = 246326},
-  {id = 2912, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 182, name = "Midnight Herbalism",          spellID = 471022, catchUpCurrencyID = 3196, catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2913, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 773, name = "Midnight Inscription",        spellID = 471025, catchUpCurrencyID = 3195, catchUpWeeklyCap = 0, catchUpItemID = 246328},
-  {id = 2914, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 755, name = "Midnight Jewelcrafting",      spellID = 471026, catchUpCurrencyID = 3194, catchUpWeeklyCap = 0, catchUpItemID = 246330},
-  {id = 2915, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 165, name = "Midnight Leatherworking",     spellID = 471027, catchUpCurrencyID = 3193, catchUpWeeklyCap = 0, catchUpItemID = 2463320},
-  {id = 2916, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 186, name = "Midnight Mining",             spellID = 471028, catchUpCurrencyID = 3192, catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2917, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 393, name = "Midnight Skinning",           spellID = 471014, catchUpCurrencyID = 3191, catchUpWeeklyCap = 0, catchUpItemID = 0},
-  {id = 2918, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 197, name = "Midnight Tailoring",          spellID = 471015, catchUpCurrencyID = 3190, catchUpWeeklyCap = 0, catchUpItemID = 0},
+  {id = 2906, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 171, name = "Midnight Alchemy",            spellID = 471003, catchUpCurrencyID = 3189, catchUpWeeklyCap = 0, catchUpItemID = 246320,  recipeIDs = {1230874, 1230857, 1230877, 1230876, 1230878, 1230856, 1233138, 1230892, 1230891, 1230869, 1230862, 1230859, 1230863, 1230893, 1230885, 1233132, 1233137, 1233136, 1233133, 1233135, 1230870, 1230872, 1230873, 1230883, 1230855, 1230886, 1230854, 1230875, 1230864, 1230860, 1230858, 1230865, 1230861, 1230868, 1230866, 1230867, 1230890, 1230889, 1230888, 1230887, 1233130, 1233129}},
+  {id = 2907, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 164, name = "Midnight Blacksmithing",      spellID = 471004, catchUpCurrencyID = 3199, catchUpWeeklyCap = 0, catchUpItemID = 246322,  recipeIDs = {1229653, 1229652, 1229648, 1229649, 1229655, 1229646, 1229659, 1230767, 1229654, 1229651, 1229650, 1229647, 1230768, 1230766, 1229658, 1229662, 1229664, 1229666, 1229663, 1229661, 1229668, 1229665, 1229660, 1229667, 1229656, 1229657, 1264644, 1262899, 1264645, 1264646, 1262919, 1264651, 1262905, 1229598, 1229603, 1229599, 1229604, 1229605, 1229601, 1229602, 1229600, 1229606, 1276108, 1276110, 1276112, 1276109, 1276111, 1229634, 1229631, 1229636, 1229635, 1229637, 1229638, 1229645, 1229642, 1229644, 1229641, 1229640, 1229643, 1229639, 1229632, 1229633, 1229630, 1230763, 1229616, 1229617, 1229629, 1229624, 1229622, 1229625, 1229621, 1229626, 1229618, 1229615, 1229623, 1229627, 1229619, 1229620, 1229614, 1230759, 1230769, 1230762, 1229628, 1229611, 1229607, 1229612, 1229613, 1229609, 1229610, 1229608, 1230764, 1230761, 1230760, 1230758, 1265906}},
+  {id = 2909, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 333, name = "Midnight Enchanting",         spellID = 471006, catchUpCurrencyID = 3198, catchUpWeeklyCap = 0, catchUpItemID = 267653,  recipeIDs = {1236095, 1236094, 1236065, 1236080, 1236079, 1236490, 1236488, 1236071, 1236056, 1236084, 1236062, 1236076, 1236091, 1236487, 1236054, 1236082, 1236068, 1236069, 1236059, 1236074, 1236088, 1236089, 1236060, 1236097, 1236067, 1236066, 1236081, 1236085, 1236057, 1236072, 1246906, 1246902, 1236063, 1236064, 1236077, 1236078, 1236093, 1236092, 1281342, 1281348, 1281349, 1246904, 1246905, 1236492, 1246903, 1246908, 1246909, 1236493, 1246907, 1236070, 1236090, 1236058, 1236489, 1236055, 1236061, 1236073, 1236098, 1236099, 1236100, 1236491, 1236083, 1236075, 1236087, 1236461, 1236463, 1236465, 1236466, 1236594, 1236467, 1236468, 1236464, 1236469, 1236470, 1236471, 1236472, 1236473, 1236474, 1236475, 1236476, 1236477, 1236478, 1236479, 1236480, 1236481, 1236482, 1236483, 1236484, 1236485, 1236086, 1236486}},
+  {id = 2910, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 202, name = "Midnight Engineering",        spellID = 471007, catchUpCurrencyID = 3197, catchUpWeeklyCap = 0, catchUpItemID = 246326,  recipeIDs = {1282456, 1282457, 1264528, 1264523, 1264525, 1264524, 1264526, 1264527, 1264529, 1229875, 1229876, 1229880, 1229870, 1229877, 1229871, 1229879, 1229874, 1229878, 1229881, 1229873, 1229872, 1248612, 1248615, 1248611, 1248613, 1248610, 1248616, 1248614, 1229906, 1229902, 1229897, 1229894, 1229907, 1229903, 1261945, 1229922, 1229927, 1229923, 1261866, 1229921, 1229919, 1261895, 1229916, 1229924, 1229917, 1229887, 1229888, 1229892, 1229882, 1229889, 1229883, 1229884, 1229891, 1229886, 1229890, 1229893, 1229885, 1261893, 1229926, 1261913, 1229928, 1229858, 1229859, 1229857, 1229856, 1229912, 1229908, 1261490, 1229913, 1229909, 1261491, 1261492, 1229914, 1229910, 1229915, 1261493, 1229911, 1229898, 1229900, 1229904, 1229895, 1229899, 1229901, 1229896, 1229905, 1282455, 1229853, 1229867, 1229868, 1229869, 1229938, 1229864, 1229863, 1229936, 1229935, 1229937, 1229865, 1229866, 1229862, 1229755}},
+  {id = 2912, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 182, name = "Midnight Herbalism",          spellID = 471022, catchUpCurrencyID = 3196, catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2913, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 773, name = "Midnight Inscription",        spellID = 471025, catchUpCurrencyID = 3195, catchUpWeeklyCap = 0, catchUpItemID = 246328,  recipeIDs = {1230060, 1230061, 1230059, 1230062, 1264550, 1264552, 1264551, 1230024, 1230025, 1230023, 1248621, 1248625, 1248630, 1248622, 1248627, 1248623, 1248631, 1248624, 1248620, 1248626, 1248619, 1248628, 1230052, 1230053, 1230051, 1230054, 1230034, 1230026, 1230030, 1230036, 1230028, 1230032, 1230029, 1230031, 1230027, 1230035, 1230033, 1230050, 1260760, 1230067, 1230068, 1230064, 1230069, 1230066, 1230065, 1230038, 1230037, 1230040, 1230039, 1230046, 1230043, 1230045, 1230049, 1230047, 1230044, 1230048, 1230018, 1230021, 1230020, 1230022, 1230042, 1230041, 1230084, 1230082, 1230080, 1230078, 1230055, 1230058, 1230056, 1230057, 1230019, 1230070, 1230072, 1230071, 1230073, 1230074, 1230076, 1230075, 1230077, 1230016, 1230017}},
+  {id = 2914, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 755, name = "Midnight Jewelcrafting",      spellID = 471026, catchUpCurrencyID = 3194, catchUpWeeklyCap = 0, catchUpItemID = 246330,  recipeIDs = {1242464, 1242463, 1230479, 1242461, 1230486, 1230485, 1230487, 1230488, 1242462, 1251983, 1230497, 1230495, 1230496, 1230498, 1230473, 1230470, 1230477, 1230478, 1230472, 1230471, 1246891, 1246895, 1230501, 1230500, 1230502, 1246893, 1246892, 1246894, 1246889, 1230482, 1230459, 1230467, 1230451, 1230443, 1230460, 1230468, 1230452, 1230444, 1230458, 1230466, 1230450, 1230442, 1230461, 1230469, 1230453, 1230445, 1230481, 1230484, 1230483, 1230504, 1230503, 1230494, 1230474, 1230499, 1230493, 1230490, 1230457, 1230465, 1230464, 1230454, 1230446, 1230491, 1230441, 1230455, 1230489, 1230448, 1230440, 1230462, 1230447, 1230439, 1230492, 1230463, 1230456, 1230437, 1230449, 1230475, 1230476, 1231132}},
+  {id = 2915, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 165, name = "Midnight Leatherworking",     spellID = 471027, catchUpCurrencyID = 3193, catchUpWeeklyCap = 0, catchUpItemID = 2463320, recipeIDs = {1237516, 1237541, 1237543, 1237537, 1237540, 1237536, 1237538, 1237542, 1237539, 1237489, 1237515, 1237486, 1237487, 1237488, 1237507, 1237510, 1237514, 1237509, 1237511, 1237512, 1237508, 1237513, 1237550, 1237562, 1237559, 1237565, 1237553, 1237556, 1237571, 1237568, 1237519, 1237518, 1237517, 1237498, 1237570, 1237549, 1237555, 1237552, 1237558, 1237567, 1237561, 1237564, 1237577, 1237545, 1237579, 1237544, 1237578, 1246937, 1246939, 1246938, 1246943, 1246940, 1246941, 1246942, 1237531, 1237502, 1237523, 1237527, 1237525, 1237526, 1237522, 1237524, 1237521, 1237520, 1237496, 1237490, 1237491, 1237492, 1237493, 1237495, 1237494, 1237497, 1237547, 1237532, 1237503, 1237533, 1237504, 1237551, 1237548, 1237560, 1237554, 1237573, 1237563, 1237572, 1237530, 1237575, 1237574, 1237501, 1237534, 1237505, 1237566, 1237557, 1237528, 1237499, 1237546, 1237529, 1237569, 1237500, 1237535, 1237506}},
+  {id = 2916, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 186, name = "Midnight Mining",             spellID = 471028, catchUpCurrencyID = 3192, catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2917, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 393, name = "Midnight Skinning",           spellID = 471014, catchUpCurrencyID = 3191, catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {}},
+  {id = 2918, expansionID = Enum.ExpansionLevel.Midnight,     skillLineID = 197, name = "Midnight Tailoring",          spellID = 471015, catchUpCurrencyID = 3190, catchUpWeeklyCap = 0, catchUpItemID = 0,       recipeIDs = {1228950, 1228984, 1228985, 1228988, 1228986, 1228945, 1228942, 1228943, 1228947, 1228949, 1228948, 1228946, 1228944, 1228981, 1228982, 1228987, 1228983, 1228962, 1228963, 1228964, 1228965, 1228966, 1228967, 1279123, 1279124, 1279125, 1279128, 1279129, 1229003, 1227926, 1228961, 1228975, 1228060, 1228960, 1228974, 1246919, 1229001, 1229002, 1229000, 1246929, 1228979, 1280545, 1280544, 1280543, 1280542, 1280541, 1280546, 1228980, 1228989, 1228990, 1228991, 1228992, 1228993, 1228994, 1228995, 1228996, 1228997, 1228976, 1228959, 1228955, 1228977, 1228968, 1228970, 1228971, 1228972, 1228973, 1228969, 1228940, 1228978, 1228951, 1228956, 1228958, 1228952, 1228953, 1228957, 1228939, 1228954, 1228941}},
 }
 
 function Data:InitDB()
@@ -738,6 +740,13 @@ function Data:TaskWeeklyReset()
   return hasReset
 end
 
+---Clear the weekly progress cache.
+function Data:ClearWeeklyProgress()
+  if type(self.cache.weeklyProgress) == "table" then
+    self.cache.weeklyProgress = {}
+  end
+end
+
 ---Get stored character by GUID
 ---@param GUID WOWGUID?
 ---@return WK_Character|nil
@@ -799,44 +808,33 @@ function Data:ScanCalendar()
   end
 end
 
-function Data:ScanCharacter()
+function Data:ScanProfession()
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
-  local objectives = self:GetObjectives()
   local character = self:GetCharacter()
   if not character then return end
 
-  -- Update character info
-  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
-  local localizedClassName, classFile, classID = UnitClass("player")
-  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
-  character.name = UnitName("player")
-  character.realmName = GetRealmName()
-  character.level = UnitLevel("player")
-  character.factionEnglish = englishFactionName
-  character.factionName = localizedFactionName
-  character.raceID = raceID
-  character.raceEnglish = englishRaceName
-  character.raceName = localizedRaceName
-  character.classID = classID
-  character.classFile = classFile
-  character.className = localizedClassName
-  character.lastUpdate = GetServerTime()
+  local tradeSkillLines = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
+  if not tradeSkillLines then
+    return
+  end
 
   -- Profession Tree tracking
   local professions = {}
-
-  local tradeSkillLines = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
-  if not tradeSkillLines then return end
-
   Utils:TableForEach(tradeSkillLines, function(tradeSkillLineID)
     -- skip professions we don't care about
     local skillLineVariant = self:GetSkillLineVariantByID(tradeSkillLineID)
-    if not skillLineVariant then return end
+    if not skillLineVariant then
+      -- print("No skill line variant found for trade skill line ID: " .. tradeSkillLineID)
+      return
+    end
 
     -- Is the profession learned?
     local info = C_TradeSkillUI.GetProfessionInfoBySkillLineID(tradeSkillLineID)
-    if not info or not info.skillLevel or info.skillLevel <= 0 then return end
+    if not info or not info.skillLevel or info.skillLevel <= 0 then
+      -- print("No profession info found for trade skill line ID: " .. tradeSkillLineID)
+      return
+    end
 
     -- Preserve enabled state
     local enabled = Utils:TableFind(character.professions, function(characterProfession)
@@ -856,6 +854,7 @@ function Data:ScanCharacter()
       knowledgeUnspent = 0,
       specializations = {},
       catchUpCurrencyInfo = nil,
+      tradeSkillRecipes = {},
     }
 
     -- Get specialization currency info
@@ -870,6 +869,17 @@ function Data:ScanCharacter()
       if currencyInfo and currencyInfo.quantity then
         profession.catchUpCurrencyInfo = currencyInfo
       end
+    end
+
+    -- Get recipes
+    ---@type TradeSkillRecipeInfo[]
+    if skillLineVariant.recipeIDs then
+      Utils:TableForEach(skillLineVariant.recipeIDs, function(recipeID)
+        local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID)
+        if recipeInfo then
+          table.insert(profession.tradeSkillRecipes, recipeInfo)
+        end
+      end)
     end
 
     -- Scan knowledge spent/max for the profession
@@ -930,15 +940,22 @@ function Data:ScanCharacter()
 
     profession.knowledgeLevel = totalKnowledgeLevel
     profession.knowledgeMaxLevel = totalKnowledgeMaxLevel
-
     table.insert(professions, profession)
   end)
 
   character.professions = professions
+  character.lastUpdate = GetServerTime()
+end
+
+function Data:ScanQuests()
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
 
   -- Track completed quests
   local completedQuests = {}
-  Utils:TableForEach(objectives, function(objective)
+  Utils:TableForEach(self:GetObjectives(), function(objective)
     if not objective.quests then return end
     Utils:TableForEach(objective.quests, function(questID)
       if completedQuests[questID] or self.cache.completedQuests[questID] then return end
@@ -949,11 +966,36 @@ function Data:ScanCharacter()
     end)
   end)
   character.completed = completedQuests
+  character.lastUpdate = GetServerTime()
+end
 
-  -- Don't track a character without any professions
-  if Utils:TableCount(character.professions) < 1 then
-    self.db.global.characters[character.GUID] = nil
-  end
+function Data:ScanCharacter()
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
+
+  -- Update character info
+  local localizedRaceName, englishRaceName, raceID = UnitRace("player")
+  local localizedClassName, classFile, classID = UnitClass("player")
+  local englishFactionName, localizedFactionName = UnitFactionGroup("player")
+  character.name = UnitName("player")
+  character.realmName = GetRealmName()
+  character.level = UnitLevel("player")
+  character.factionEnglish = englishFactionName
+  character.factionName = localizedFactionName
+  character.raceID = raceID
+  character.raceEnglish = englishRaceName
+  character.raceName = localizedRaceName
+  character.classID = classID
+  character.classFile = classFile
+  character.className = localizedClassName
+  character.lastUpdate = GetServerTime()
+
+  -- -- Don't track a character without any professions
+  -- if Utils:TableCount(character.professions) < 1 then
+  --   self.db.global.characters[character.GUID] = nil
+  -- end
 end
 
 ---@return table<WOWGUID, WK_Character>

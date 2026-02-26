@@ -12,6 +12,7 @@
 - Added a new column to the Checklist: Repeatable
 - Added caching for checking completed quests/objectives in order to improve performance.
 - Added a new category/column named Weekly Quest; This is the old Artisan/Trainer columns merged.
+- Added a new column: First Craft; This will show you the amount of first craft points available from your profession recipes.
 
 ### Updated
 
