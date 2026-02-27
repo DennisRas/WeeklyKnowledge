@@ -166,42 +166,6 @@ function Checklist:Render()
             self:Render()
           end
         )
-        local hideAllUniques = rootMenu:CreateCheckbox(
-          "Hide all Uniques",
-          function() return Data.db.global.checklist.hideUniqueObjectives end,
-          function()
-            Data.db.global.checklist.hideUniqueObjectives = not Data.db.global.checklist.hideUniqueObjectives
-            self:Render()
-          end
-        )
-        hideAllUniques:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide all objectives from the Uniques category.");
-        end)
-        local hideVendorUniques = rootMenu:CreateCheckbox(
-          "Hide vendor Uniques",
-          function() return Data.db.global.checklist.hideUniqueVendorObjectives end,
-          function()
-            Data.db.global.checklist.hideUniqueVendorObjectives = not Data.db.global.checklist.hideUniqueVendorObjectives
-            self:Render()
-          end
-        )
-        hideVendorUniques:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide Uniques that are purchased from a vendor.");
-        end)
-        local hideCatchUp = rootMenu:CreateCheckbox(
-          "Hide Catch-Up objectives",
-          function() return Data.db.global.checklist.hideCatchUpObjectives end,
-          function()
-            Data.db.global.checklist.hideCatchUpObjectives = not Data.db.global.checklist.hideCatchUpObjectives
-            self:Render()
-          end
-        )
-        hideCatchUp:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide all objectives from the Catch-Up category.");
-        end)
         rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
@@ -281,9 +245,56 @@ function Checklist:Render()
       self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
+    do -- Expansion Button
+      self.window.titlebar.ExpansionButton = CreateFrame("DropdownButton", "$parentExpansionButton", self.window.titlebar)
+      self.window.titlebar.ExpansionButton:SetPoint("RIGHT", self.window.titlebar.SettingsButton, "LEFT", 0, 0)
+      self.window.titlebar.ExpansionButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.ExpansionButton:SetScript("OnEnter", function()
+        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
+        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:Show()
+      end)
+      self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
+        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0)
+        GameTooltip:Hide()
+      end)
+      self.window.titlebar.ExpansionButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ExpansionButton:GetName() .. "Icon", "ARTWORK")
+      self.window.titlebar.ExpansionButton.Icon:SetPoint("CENTER", self.window.titlebar.ExpansionButton, "CENTER")
+      self.window.titlebar.ExpansionButton.Icon:SetSize(14, 14)
+      self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_House.blp")
+      self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+      self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
+        rootMenu:CreateRadio(
+          "All expansions",
+          function() return Data.db.global.checklist.selectedExpansion == nil end,
+          function()
+            Data.db.global.checklist.selectedExpansion = nil
+            self:Render()
+          end,
+          nil
+        )
+        Utils:TableForEach(expansions, function(expansion)
+          rootMenu:CreateRadio(
+            expansion.name,
+            function() return Data.db.global.checklist.selectedExpansion == expansion.id end,
+            function()
+              Data.db.global.checklist.selectedExpansion = expansion.id
+              self:Render()
+            end,
+            expansion.id
+          )
+        end)
+      end)
+    end
+
     do -- Columns Button
       self.window.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.window.titlebar)
-      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.SettingsButton, "LEFT", 0, 0)
+      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.ExpansionButton, "LEFT", 0, 0)
       self.window.titlebar.ColumnsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
       self.window.titlebar.ColumnsButton:SetScript("OnEnter", function()
         self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
@@ -291,7 +302,7 @@ function Checklist:Render()
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
         GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:AddLine("Toggle columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
@@ -322,56 +333,49 @@ function Checklist:Render()
       self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    do -- Expansion Button
-      self.window.titlebar.ExpansionButton = CreateFrame("DropdownButton", "$parentExpansionButton", self.window.titlebar)
-      self.window.titlebar.ExpansionButton:SetPoint("RIGHT", self.window.titlebar.ColumnsButton, "LEFT", 0, 0)
-      self.window.titlebar.ExpansionButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.ExpansionButton:SetScript("OnEnter", function()
-        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
+    do -- Categories Button
+      self.window.titlebar.CategoriesButton = CreateFrame("DropdownButton", "$parentCategoriesButton", self.window.titlebar)
+      self.window.titlebar.CategoriesButton:SetPoint("RIGHT", self.window.titlebar.ColumnsButton, "LEFT", 0, 0)
+      self.window.titlebar.CategoriesButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
+      self.window.titlebar.CategoriesButton:SetScript("OnEnter", function()
+        self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.CategoriesButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:SetOwner(self.window.titlebar.CategoriesButton, "ANCHOR_TOP")
+        GameTooltip:SetText("Categories", 1, 1, 1, 1, true);
+        GameTooltip:AddLine("Toggle categories.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
-      self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
-        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0)
+      self.window.titlebar.CategoriesButton:SetScript("OnLeave", function()
+        self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
+        Utils:SetBackgroundColor(self.window.titlebar.CategoriesButton, 1, 1, 1, 0)
         GameTooltip:Hide()
       end)
-      self.window.titlebar.ExpansionButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ExpansionButton:GetName() .. "Icon", "ARTWORK")
-      self.window.titlebar.ExpansionButton.Icon:SetPoint("CENTER", self.window.titlebar.ExpansionButton, "CENTER")
-      self.window.titlebar.ExpansionButton.Icon:SetSize(12, 12)
-      self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
-      self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-      self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
-        rootMenu:CreateRadio(
-          "All expansions",
-          function() return Data.db.global.checklist.selectedExpansion == nil end,
-          function()
-            Data.db.global.checklist.selectedExpansion = nil
-            self:Render()
-          end,
-          nil
-        )
-        Utils:TableForEach(expansions, function(expansion)
-          rootMenu:CreateRadio(
-            expansion.name,
-            function() return Data.db.global.checklist.selectedExpansion == expansion.id end,
-            function()
-              Data.db.global.checklist.selectedExpansion = expansion.id
+      self.window.titlebar.CategoriesButton:SetupMenu(function(_, rootMenu)
+        local hidden = Data.db.global.checklist.hiddenCategories
+        Utils:TableForEach(Data.ObjectiveCategories, function(category)
+          rootMenu:CreateCheckbox(
+            category.name,
+            function() return not hidden[category.id] end,
+            function(categoryID)
+              hidden[categoryID] = not hidden[categoryID]
               self:Render()
             end,
-            expansion.id
+            category.id
           )
         end)
       end)
+
+      self.window.titlebar.CategoriesButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.CategoriesButton:GetName() .. "Icon", "ARTWORK")
+      self.window.titlebar.CategoriesButton.Icon:SetPoint("CENTER", self.window.titlebar.CategoriesButton, "CENTER")
+      self.window.titlebar.CategoriesButton.Icon:SetSize(11, 11)
+      self.window.titlebar.CategoriesButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Category.blp")
+      self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
     do -- Toggle Button
       self.window.titlebar.toggleButton = CreateFrame("Button", "$parentToggleButton", self.window.titlebar)
-      self.window.titlebar.toggleButton:SetPoint("RIGHT", self.window.titlebar.ExpansionButton, "LEFT", 0, 0)
+      self.window.titlebar.toggleButton:SetPoint("RIGHT", self.window.titlebar.CategoriesButton, "LEFT", 0, 0)
       self.window.titlebar.toggleButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
       self.window.titlebar.toggleButton:SetScript("OnClick", function()
         Data.db.global.checklist.hideTable = not Data.db.global.checklist.hideTable
@@ -414,7 +418,6 @@ function Checklist:Render()
         highlight = true
       },
     })
-    self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.checklist.selectedExpansion and Data:GetExpansionByID(Data.db.global.checklist.selectedExpansion) or {}).name or "All Expansions"))
     self.window.table:SetParent(self.window)
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
@@ -461,111 +464,132 @@ function Checklist:Render()
   end
 
   local weeklyProgress = Data:GetWeeklyProgress()
+  local characterProfessions = character.professions
 
   local rows = 0
-  local profCount = 0
+  local professionCount = 0
   local objectives = Data:GetObjectives()
   do -- Table data
-    Utils:TableForEach(character.professions, function(characterProfession)
+    Utils:TableForEach(characterProfessions, function(characterProfession)
       local skillLineVariantID = characterProfession.skillLineVariantID
-      if not Data:GetSkillLineVariantByID(skillLineVariantID) then return end
+      local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
+      if not skillLineVariant then return end
 
-      Utils:TableForEach(Utils:TableFilter(objectives, function(o)
-                           return o.skillLineVariantID == skillLineVariantID
-                         end), function(objective)
-                           -- Hide Darkmoon objectives
-                           if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-                             if not Data.cache.isDarkmoonOpen then
-                               return
-                             end
-                           end
+      -- Skip if the skill line variant is not the selected expansion
+      if Data.db.global.checklist.selectedExpansion and skillLineVariant.expansionID ~= Data.db.global.checklist.selectedExpansion then
+        -- print("Checklist: Skipping skill line variant", skillLineVariant.name, Data.db.global.checklist.selectedExpansion, skillLineVariant.expansionID)
+        return
+      end
+      local filteredObjectives = Utils:TableFilter(objectives, function(objective)
+        -- Hide Darkmoon objectives
+        if not Data.cache.isDarkmoonOpen and objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+          -- print("Checklist: Skipping Darkmoon objective", objective.name)
+          return false
+        end
 
-                           -- Hide Uniques if enabled
-                           if objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
-                             if Data.db.global.checklist.hideUniqueObjectives then
-                               return
-                             elseif Data.db.global.checklist.hideUniqueVendorObjectives and objective.requires and Utils:TableCount(objective.requires) > 0 then
-                               return
-                             end
-                           end
+        -- Hide if category is hidden
+        local hiddenCategories = Data.db.global.checklist.hiddenCategories
+        if hiddenCategories and hiddenCategories[objective.categoryID] then
+          -- print("Checklist: Skipping hidden category objective", objective.name)
+          return false
+        end
 
-                           -- Hide Catch-Up if enabled
-                           if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-                             if Data.db.global.checklist.hideCatchUpObjectives then
-                               return
-                             end
-                           end
+        -- Hide Uniques if enabled
+        if Data.db.global.checklist.hideUniqueObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
+          -- print("Checklist: Skipping Unique objective", objective.name)
+          return false
+        end
 
-                           local item = {
-                             id = objective.itemID,
-                             name = "",
-                             link = "",
-                             texture = "",
-                           }
+        -- Hide Vendor Uniques if enabled
+        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and Utils:TableCount(objective.requires) > 0 then
+          -- print("Checklist: Skipping Unique Vendor objective", objective.name)
+          return false
+        end
 
-                           if objective.itemID then
-                             local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(objective.itemID)
-                             if itemName then
-                               item.name = itemName
-                               item.link = itemLink
-                               item.texture = itemTexture
-                             end
-                           end
+        -- Hide Catch-Up if enabled
+        if Data.db.global.checklist.hideCatchUpObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+          -- print("Checklist: Skipping Catch-Up objective", objective.name)
+          return false
+        end
 
-                           local progress = Utils:TableFind(weeklyProgress, function(progress)
-                             return progress.characterGUID == character.GUID and progress.objective == objective
-                           end)
-                           if not progress then return end
+        return true
+      end)
+      Utils:TableForEach(filteredObjectives, function(objective)
+        local item = {
+          id = objective.itemID,
+          name = "",
+          link = "",
+          texture = "",
+        }
 
-                           -- local progress = {
-                           --   completed = 0,
-                           --   total = 0,
-                           --   points = 0,
-                           --   pointsTotal = 0,
-                           -- }
+        if objective.itemID then
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(objective.itemID)
+          if itemName then
+            item.name = itemName
+            item.link = itemLink
+            item.texture = itemTexture
+          end
+        end
 
-                           -- if objective.quests then
-                           --   local limit = 0
+        local progress = Utils:TableFind(weeklyProgress, function(progress)
+          return progress.characterGUID == character.GUID and progress.objective == objective
+        end)
+        if not progress then
+          -- print("Checklist: Skipping objective", objective.name, "no progress found")
+          return
+        end
 
-                           --   for _, questID in ipairs(objective.quests) do
-                           --     progress.questsTotal = progress.questsTotal + 1
-                           --     progress.pointsEarnedTotal = progress.pointsTotal + objective.points
-                           --     if objective.limit and progress.questsTotal > objective.limit then
-                           --       progress.pointsTotal = objective.limit * objective.points
-                           --       progress.questsTotal = objective.limit
-                           --     end
-                           --     if character.completed[questID] then
-                           --       progress.questsCompleted = progress.questsCompleted + 1
-                           --       progress.pointsEarned = progress.points + objective.points
-                           --     end
-                           --   end
-                           -- end
+        -- local progress = {
+        --   completed = 0,
+        --   total = 0,
+        --   points = 0,
+        --   pointsTotal = 0,
+        -- }
 
-                           if progress.questsTotal > 0 and progress.questsCompleted == progress.questsTotal and Data.db.global.checklist.hideCompletedObjectives then
-                             return
-                           end
+        -- if objective.quests then
+        --   local limit = 0
 
-                           ---@type WK_TableDataRow
-                           local row = {columns = {}}
-                           Utils:TableForEach(dataColumns, function(dataColumn)
-                             local cellData = {
-                               character = character,
-                               characterProfession = characterProfession,
-                               skillLineVariantID = skillLineVariantID,
-                               objective = objective,
-                               progress = progress,
-                               item = item
-                             }
-                             ---@type WK_TableDataCell
-                             local cell = dataColumn.cell(cellData)
-                             table.insert(row.columns, cell)
-                           end)
+        --   for _, questID in ipairs(objective.quests) do
+        --     progress.questsTotal = progress.questsTotal + 1
+        --     progress.pointsEarnedTotal = progress.pointsTotal + objective.points
+        --     if objective.limit and progress.questsTotal > objective.limit then
+        --       progress.pointsTotal = objective.limit * objective.points
+        --       progress.questsTotal = objective.limit
+        --     end
+        --     if character.completed[questID] then
+        --       progress.questsCompleted = progress.questsCompleted + 1
+        --       progress.pointsEarned = progress.points + objective.points
+        --     end
+        --   end
+        -- end
 
-                           table.insert(tableData.rows, row)
-                           tableHeight = tableHeight + self.window.table.config.rows.height
-                           rows = rows + 1
-                         end)
-      profCount = profCount + 1
+        -- Skip if the objective is completed and hide completed objectives is enabled
+        if progress.questsTotal > 0 and progress.questsCompleted == progress.questsTotal and Data.db.global.checklist.hideCompletedObjectives then
+          -- print("Checklist: Skipping completed objective", objective.name)
+          return
+        end
+
+        ---@type WK_TableDataRow
+        local row = {columns = {}}
+        Utils:TableForEach(dataColumns, function(dataColumn)
+          local cellData = {
+            character = character,
+            characterProfession = characterProfession,
+            skillLineVariantID = skillLineVariantID,
+            objective = objective,
+            progress = progress,
+            item = item
+          }
+          ---@type WK_TableDataCell
+          local cell = dataColumn.cell(cellData)
+          table.insert(row.columns, cell)
+        end)
+
+        table.insert(tableData.rows, row)
+        tableHeight = tableHeight + self.window.table.config.rows.height
+        rows = rows + 1
+      end)
+      professionCount = professionCount + 1
     end)
   end
 
@@ -587,17 +611,23 @@ function Checklist:Render()
       self.window.table:Show()
     end
   end
-  if rows == 0 then
-    windowWidth = 500
-  end
   windowHeight = math.min(windowHeight, maxWindowHeight)
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
-  self.window.textbox:SetText(profCount == 0 and "It does not look like you have any TWW professions." or "Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
+  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.checklist.selectedExpansion and Data:GetExpansionByID(Data.db.global.checklist.selectedExpansion) or {}).name or "All Expansions"))
+  self.window.titlebar.selectedExpansion:SetShown(windowWidth >= 600)
+  if professionCount == 0 then
+    self.window.textbox:SetText("It does not look like you have any active professions.\nDid you check the wrong expansion?")
+  else
+    if rows == 0 then
+      self.window.textbox:SetText("It does not look like you have any objectives.\nMake sure to check the settings top right.")
+    else
+      self.window.textbox:SetText("Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
+    end
+  end
   self.window:SetShown(Data.db.global.checklist.open)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
-  -- self.window.titlebar.title:SetShown(windowWidth > minWindowWidth)
   self.window.table:SetData(tableData)
   self.window:SetWidth(windowWidth)
   self.window:SetHeight(windowHeight + 2)
@@ -746,7 +776,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Repeatable",
+      name = "Repeat?",
       width = 60,
       toggleHidden = true,
       cell = function(data)

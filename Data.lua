@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 13
+Data.DBVersion = 14
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -50,6 +50,7 @@ Data.defaultDB = {
       selectedExpansion = nil,
       open = false,
       hiddenColumns = {},
+      hiddenCategories = {},
       windowScale = 100,
       windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
       windowBorder = true,
@@ -59,9 +60,6 @@ Data.defaultDB = {
       hideInDungeons = true,
       hideTable = false,
       hideTableHeader = false,
-      hideUniqueObjectives = false,
-      hideUniqueVendorObjectives = false,
-      hideCatchUpObjectives = false,
     },
   }
 }
@@ -735,6 +733,23 @@ function Data:MigrateDB()
           end
           character.professions = professions
         end
+      end
+    end
+    -- Migrate hidden categories
+    if self.db.global.DBVersion == 13 then
+      if not self.db.global.checklist.hiddenCategories then
+        self.db.global.checklist.hiddenCategories = {}
+      end
+      if self.db.global.checklist.hideUniqueObjectives then
+        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.Unique] = true
+        self.db.global.checklist.hideUniqueObjectives = nil
+      end
+      if self.db.global.checklist.hideUniqueVendorObjectives then
+        self.db.global.checklist.hideUniqueVendorObjectives = nil
+      end
+      if self.db.global.checklist.hideCatchUpObjectives then
+        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.CatchUp] = true
+        self.db.global.checklist.hideCatchUpObjectives = nil
       end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1

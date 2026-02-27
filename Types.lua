@@ -34,6 +34,7 @@
 ---@class WK_DefaultGlobalhecklist
 ---@field selectedExpansion Enum.ExpansionLevel? or nil for all
 ---@field hiddenColumns table<string, boolean>
+---@field hiddenCategories table<Enum.WK_ObjectiveCategory, boolean>
 ---@field windowScale integer
 ---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
 ---@field windowBorder boolean Show the border?
@@ -45,9 +46,6 @@
 ---@field hideInDungeons boolean
 ---@field hideTable boolean
 ---@field hideTableHeader boolean
----@field hideUniqueObjectives boolean
----@field hideUniqueVendorObjectives boolean
----@field hideCatchUpObjectives boolean
 
 ---@class WK_Character
 ---@field GUID string|WOWGUID Character GUID

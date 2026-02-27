@@ -5,22 +5,24 @@
 ### Added
 
 - Added a new option to remove a character from the addon via the Characters dropdown.
-- Keybindings for the main window and the checklist window (Options -> Keybindings -> WeeklyKnowledge). Credit to narcolic for the feature (PR #85).
+- Added keybindings to toggle the windows (Options -> Keybindings -> WeeklyKnowledge). Credit to narcolic for the feature (PR #85).
 - Added Unique objectives for the Undermine renown quartermaster (Smaks Topskimmer). Credit to pepedressingroom for the data.
 - Added Unique objectives for the Khaz Algar renown quartermaster in Karesh (Om'sirik). Credit to jcdny for the data.
 - Requirements tooltip now shows profession skill (name and level) when an objective has a skill requirement.
-- Added a new column to the Checklist: Repeatable
 - Added caching for checking completed quests/objectives in order to improve performance.
-- Added a new category/column named Weekly Quest; This is the old Artisan/Trainer columns merged.
-- Added a new column: First Craft; This will show you the amount of first craft points available from your profession recipes.
-- Added a new setting: You can now hide characters/professions with a skill level below 25.
+- Added a new category named Weekly Quest; This is the old Artisan/Trainer columns merged.
+- Added a new column in the Main window: First Craft; This will show you the amount of first craft points available from your profession recipes.
+- Added a new setting in the Main window: You can now hide characters/professions with a skill level below 25.
+- Added a new column in the Checklist window: Repeatable
+- Added a new category filter in the Checklist window.
 
 ### Updated
 
-- Character list is now controlled only by profession toggles; the per-character checkbox has been removed. If you had previously hidden a character, all its professions are now hidden instead.
-- The addon now waits until you leave combat before loading. You can open the main or checklist window after that; you can always close them, even in combat.
+- Removed the per-character checkbox in the Character dropdown. The character list is now based on the toggled professions.
+- The addon now only loads/updates while out of combat. You can open the windows after combat. You can always close them, even in combat.
 - Updated the Repeatable status to Catch-Up
 - Updated a shit ton of location hints - Yeah this took a lot of time :-P
+- Checklist window no longer changes window size when no professions or objectives are active.
 
 ### Fixed
 
