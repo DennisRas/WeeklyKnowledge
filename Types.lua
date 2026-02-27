@@ -239,4 +239,5 @@ Enum.WK_Map = {
   Harandar = 2413,
   EversongWoods = 2395,
   SlayersRise = 2444,
+  SilvermoonCity = 2393,
 }
