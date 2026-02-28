@@ -948,6 +948,8 @@ function Main:GetTableColumns(unfiltered)
             local label = "Items:"
             if objectiveCategory.type == "quest" then
               label = "Quests:"
+            elseif objectiveCategory.type == "recipe" then
+              label = "Crafting Recipes:"
             end
 
             local showTooltip = function()
