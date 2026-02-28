@@ -32,6 +32,7 @@
 - Fixed error when opening the addon during combat or in instances. Fixes #84.
 - Corrected waypoints for four profession knowledge items in The Ringing Deeps (zone map changed in 11.1). Fixes #81.
 - Fixed an issue with windows not staying in position after reloading/loading.
+- Fixed a bug with hidden columns completely vanishing
 
 ## v1.1.10 - 2026-01-26
 

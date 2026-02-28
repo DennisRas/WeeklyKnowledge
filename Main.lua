@@ -401,7 +401,7 @@ function Main:Render()
       end)
       self.window.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
         local hidden = Data.db.global.main.hiddenColumns
-        Utils:TableForEach(columns, function(column)
+        Utils:TableForEach(self:GetTableColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.name,
