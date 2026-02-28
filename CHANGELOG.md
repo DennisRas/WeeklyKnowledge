@@ -15,6 +15,7 @@
 - Added a new setting in the Main window: You can now hide characters/professions with a skill level below 25.
 - Added a new column in the Checklist window: Repeatable
 - Added a new category filter in the Checklist window.
+- Added a new section to the addon description giving credit to the awesome people! You rock <3
 
 ### Updated
 
@@ -23,6 +24,7 @@
 - Updated the Repeatable status to Catch-Up
 - Updated a shit ton of location hints - Yeah this took a lot of time :-P
 - Checklist window no longer changes window size when no professions or objectives are active.
+- Updated the addon description.
 
 ### Fixed
 
