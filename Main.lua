@@ -156,6 +156,22 @@ function Main:Render()
         GameTooltip:Hide()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        local showFullProfessionName = rootMenu:CreateCheckbox(
+          "Show full profession name",
+          function() return Data.db.global.showFullProfessionName end,
+          function()
+            Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
+            self:Render()
+            if addon.Checklist and addon.Checklist.Render then
+              addon.Checklist:Render()
+            end
+          end
+        )
+        showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
+        end)
+
         local hideLowLevelProfessions = rootMenu:CreateCheckbox(
           "Hide low level professions",
           function() return Data.db.global.main.hideLowLevelProfessions end,
@@ -627,11 +643,19 @@ function Main:GetTableColumns(unfiltered)
       onLeave = function()
         GameTooltip:Hide()
       end,
-      width = 120,
+      width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
       cell = function(_, _, skillLineVariantID)
+        local text = ""
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
-        return {text = variant and variant.name or ""}
+        if not variant then return {text = ""} end
+        local skillLine = Data:GetSkillLineByID(variant and variant.skillLineID or 0)
+        if not skillLine then return {text = ""} end
+        text = skillLine.name
+        if Data.db.global.showFullProfessionName then
+          text = variant.name
+        end
+        return {text = text}
       end,
     },
     {
@@ -649,8 +673,10 @@ function Main:GetTableColumns(unfiltered)
       toggleHidden = true,
       cell = function(_, _, skillLineVariantID)
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
+        if not variant then return {text = ""} end
         local expansion = variant and Data:GetExpansionByID(variant.expansionID)
-        return {text = expansion and expansion.name or ""}
+        if not expansion then return {text = ""} end
+        return {text = expansion.name}
       end,
     },
     {

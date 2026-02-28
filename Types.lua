@@ -2,6 +2,7 @@
 ---@field DBVersion integer?
 ---@field weeklyReset integer?
 ---@field minimap {minimapPos: number, hide: boolean, lock: boolean }
+---@field showFullProfessionName boolean? Show the full profession name with the expansion variant
 ---@field characters table<string, WK_Character>
 ---@field main WK_DefaultGlobalMain
 ---@field checklist WK_DefaultGlobalhecklist
@@ -29,7 +30,7 @@
 ---@field windowBorder boolean Show the border?
 ---@field fontSize integer?
 ---@field checklistHelpTipClosed boolean?
----@field hideLowLevelProfessions boolean?
+---@field hideLowLevelProfessions boolean? Hide professions with a skill level below 25
 
 ---@class WK_DefaultGlobalhecklist
 ---@field selectedExpansion Enum.ExpansionLevel? or nil for all

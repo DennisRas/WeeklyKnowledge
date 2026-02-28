@@ -142,6 +142,22 @@ function Checklist:Render()
         GameTooltip:Hide()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+        local showFullProfessionName = rootMenu:CreateCheckbox(
+          "Show full profession name",
+          function() return Data.db.global.showFullProfessionName end,
+          function()
+            Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
+            self:Render()
+            if addon.Main and addon.Main.Render then
+              addon.Main:Render()
+            end
+          end
+        )
+        showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
+        end)
+
         rootMenu:CreateCheckbox(
           "Hide in combat",
           function() return Data.db.global.checklist.hideInCombat end,
@@ -713,13 +729,19 @@ function Checklist:GetColumns(unfiltered)
     },
     {
       name = "Profession",
-      width = 120,
+      width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
       cell = function(data)
-        local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
-        return {
-          text = skillLineVariant and skillLineVariant.name or "",
-        }
+        local text = ""
+        local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+        if not variant then return {text = ""} end
+        local skillLine = Data:GetSkillLineByID(variant and variant.skillLineID or 0)
+        if not skillLine then return {text = ""} end
+        text = skillLine.name
+        if Data.db.global.showFullProfessionName then
+          text = variant.name
+        end
+        return {text = text}
       end,
     },
     {

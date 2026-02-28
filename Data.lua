@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 14
+Data.DBVersion = 15
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -37,6 +37,7 @@ Data.defaultDB = {
       lock = false
     },
     characters = {},
+    showFullProfessionName = true,
     main = {
       selectedExpansion = nil,
       hiddenColumns = {},
