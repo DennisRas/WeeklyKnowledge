@@ -19,6 +19,30 @@ function Core:Render()
   Checklist:Render()
 end
 
+function Core:HandleCommand(message)
+  local cmd = self:GetArgs(message, 1)
+  if not cmd then
+    Main:ToggleWindow()
+    return
+  end
+  if cmd:lower() == "checklist" then
+    Checklist:ToggleWindow()
+    return
+  end
+  if cmd:lower() == "minimap" then
+    Data.db.global.minimap.hide = not Data.db.global.minimap.hide
+    LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+    self:Print("Minimap button " .. (Data.db.global.minimap.hide and "hidden" or "shown") .. ".")
+    self:Render()
+    return
+  end
+  if cmd:lower() == "toggle" then
+    Main:ToggleWindow()
+    return
+  end
+  self:Print("Usage: /wk [checklist | minimap]")
+end
+
 function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_MAIN"] = "Toggle WeeklyKnowledge window"
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_CHECKLIST"] = "Toggle Checklist window"
@@ -28,8 +52,8 @@ function Core:OnInitialize()
   _G["WEEKLYKNOWLEDGE_TOGGLE_CHECKLIST"] = function()
     if addon and addon.Checklist then addon.Checklist:ToggleWindow() end
   end
-  self:RegisterChatCommand("wk", function() Main:ToggleWindow() end)
-  self:RegisterChatCommand("weeklyknowledge", function() Main:ToggleWindow() end)
+  self:RegisterChatCommand("wk", "HandleCommand")
+  self:RegisterChatCommand("weeklyknowledge", "HandleCommand")
 
   Data:InitDB()
   Data:MigrateDB()

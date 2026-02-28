@@ -17,6 +17,7 @@
 - Added a new category filter in the Checklist window.
 - Added a new section to the addon description giving credit to the awesome people! You rock <3
 - Added a new setting to show the profession names with or without the expansion variant
+- Added new chat commands: /wk checklist and /wk minimap
 
 ### Updated
 
