@@ -765,7 +765,21 @@ function Checklist:GetColumns(unfiltered)
         if Data.db.global.showFullProfessionName then
           text = variant.name
         end
-        return {text = text}
+        return {
+          text = text,
+          onEnter = function(cellFrame)
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(text, 1, 1, 1);
+            GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            GameTooltip:Show()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+          onClick = function()
+            C_TradeSkillUI.OpenTradeSkill(skillLine.id)
+          end,
+        }
       end,
     },
     {

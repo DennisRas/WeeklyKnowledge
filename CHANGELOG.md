@@ -14,11 +14,12 @@
 - Added a new column in the Main window: First Craft; This will show you the amount of first craft points available from your profession recipes.
 - ADded a new column in the Main window: Concentration; This will keep track of your concentration with an estimate of when it's maxed out.
 - Added a new setting in the Main window: You can now hide characters/professions with a skill level below 25.
-- Added a new column in the Checklist window: Repeatable
+- Added a new column in the Checklist window: Repeatable.
 - Added a new category filter in the Checklist window.
 - Added a new section to the addon description giving credit to the awesome people! You rock <3
-- Added a new setting to show the profession names with or without the expansion variant
+- Added a new setting to show the profession names with or without the expansion variant.
 - Added new chat commands: /wk checklist and /wk minimap
+- You can now click the profession in the columns and Checklist to open your profession.
 
 ### Updated
 

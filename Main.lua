@@ -585,6 +585,7 @@ function Main:GetTableColumns(unfiltered)
   local objectives = Data:GetObjectives()
   local expansions = Data:GetExpansions()
   local objectiveCategories = Data:GetObjectiveCategories()
+  local currentCharacter = Data:GetCharacter()
 
   ---@type WK_DataColumn[]
   local columns = {
@@ -645,7 +646,7 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
-      cell = function(_, _, skillLineVariantID)
+      cell = function(character, characterProfession, skillLineVariantID)
         local text = ""
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
@@ -655,7 +656,25 @@ function Main:GetTableColumns(unfiltered)
         if Data.db.global.showFullProfessionName then
           text = variant.name
         end
-        return {text = text}
+        return {
+          text = text,
+          onEnter = function(cellFrame)
+            if character == currentCharacter then
+              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText(text, 1, 1, 1);
+              GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+              GameTooltip:Show()
+            end
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+          onClick = function()
+            if character == currentCharacter then
+              C_TradeSkillUI.OpenTradeSkill(skillLine.id)
+            end
+          end,
+        }
       end,
     },
     {
