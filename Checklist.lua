@@ -690,6 +690,23 @@ function Checklist:GetColumns(unfiltered)
           if data.item.texture then
             text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
           end
+        elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+          text = format("Crafting Recipe: ID = %d", data.objective.spellID or "Unknown")
+          local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[data.objective.spellID]
+          if not recipeInfo then
+            recipeInfo = C_TradeSkillUI.GetRecipeInfo(data.objective.spellID)
+            if recipeInfo then
+              if not Data.cache.tradeSkillRecipes then
+                Data.cache.tradeSkillRecipes = {}
+              end
+              Data.cache.tradeSkillRecipes[data.objective.spellID] = recipeInfo
+            end
+          end
+          if recipeInfo then
+            canShare = true
+            link = C_Spell.GetSpellLink(recipeInfo.recipeID or data.objective.spellID)
+            text = "|T" .. recipeInfo.icon .. ":0|t " .. (recipeInfo.hyperlink or recipeInfo.name)
+          end
         else
           text = "Quest"
           local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")

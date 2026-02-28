@@ -75,7 +75,6 @@
 ---@field knowledgeUnspent integer
 ---@field specializations WK_CharacterProfessionSpecialization[]
 ---@field catchUpCurrencyInfo CurrencyInfo?
----@field tradeSkillRecipes TradeSkillRecipeInfo[] Recipes for the profession
 ---@field concentration WK_CharacterProfessionConcentration?
 
 ---@class WK_CharacterProfessionConcentration
@@ -116,7 +115,7 @@
 ---@field id Enum.WK_ObjectiveCategory
 ---@field name string
 ---@field description string
----@field type "item" | "quest"
+---@field type "item" | "quest" | "recipe"
 ---@field repeatable "No" | "Yes" | "Weekly" | "Monthly"
 ---@field hint boolean?
 
@@ -141,6 +140,7 @@
 ---@field skillLineVariantID integer Profession variant (unique per expansion); expansion from Data:GetSkillLineVariant
 ---@field categoryID Enum.WK_ObjectiveCategory
 ---@field quests integer[]
+---@field spellID integer?
 ---@field itemID integer?
 ---@field points integer
 ---@field limit integer?
@@ -200,6 +200,7 @@
 ---@enum Enum.WK_ObjectiveCategory
 Enum.WK_ObjectiveCategory = {
   Unique = "Unique",
+  FirstCraft = "FirstCraft",
   Treatise = "Treatise",
   ArtisanQuest = "ArtisanQuest",
   Treasure = "Treasure",

@@ -38,7 +38,20 @@ Types.lua
 Constants.lua
 Utils.lua
 Interface.lua
+
 Data.lua
+Data\Expansions.lua
+Data\ObjectiveCategories.lua
+Data\SkillLines.lua
+Data\SkillLineVariants.lua
+Data\Objectives\CatchUp.lua
+Data\Objectives\DarkmoonQuest.lua
+Data\Objectives\FirstCraft.lua
+Data\Objectives\Gathering.lua
+Data\Objectives\Treasure.lua
+Data\Objectives\Treatise.lua
+Data\Objectives\Unique.lua
+Data\Objectives\WeeklyQuest.lua
 
 Checklist.lua
 Main.lua

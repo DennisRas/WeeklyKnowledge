@@ -161,3 +161,15 @@ function Utils:TableForEach(tbl, callback)
   end
   return tbl
 end
+
+---Merge two table arrays
+---@generic T
+---@param tbl1 T[]
+---@param tbl2 T[]
+---@return T[]
+function Utils:TableMerge(tbl1, tbl2)
+  self:TableForEach(tbl2, function(v)
+    table.insert(tbl1, v)
+  end)
+  return tbl1
+end
