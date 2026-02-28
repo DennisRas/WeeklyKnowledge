@@ -34,27 +34,27 @@ local objectives = {
   {skillLineVariantID = 2883, categoryID = category, quests = {83735}, itemID = 222547, points = 1, loc = {m = Enum.WK_Map.Dornogal, x = 58.0, y = 56.4, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
 
   -- Midnight: Alchemy
-  {skillLineVariantID = 2906, categoryID = category, quests = {95127}, itemID = 245755, points = 1},
+  {skillLineVariantID = 2906, categoryID = category, quests = {95127}, itemID = 245755, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Blacksmithing
-  {skillLineVariantID = 2907, categoryID = category, quests = {95128}, itemID = 245763, points = 1},
+  {skillLineVariantID = 2907, categoryID = category, quests = {95128}, itemID = 245763, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Enchanting
-  {skillLineVariantID = 2909, categoryID = category, quests = {95129}, itemID = 245759, points = 1},
+  {skillLineVariantID = 2909, categoryID = category, quests = {95129}, itemID = 245759, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Engineering
-  {skillLineVariantID = 2910, categoryID = category, quests = {83728}, itemID = 245809, points = 1},
+  {skillLineVariantID = 2910, categoryID = category, quests = {83728}, itemID = 245809, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Herbalism
-  {skillLineVariantID = 2912, categoryID = category, quests = {95130}, itemID = 245761, points = 1},
+  {skillLineVariantID = 2912, categoryID = category, quests = {95130}, itemID = 245761, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Inscription
-  {skillLineVariantID = 2913, categoryID = category, quests = {95131}, itemID = 245757, points = 1},
+  {skillLineVariantID = 2913, categoryID = category, quests = {95131}, itemID = 245757, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Jewelcrafting
-  {skillLineVariantID = 2914, categoryID = category, quests = {95133}, itemID = 245760, points = 1},
+  {skillLineVariantID = 2914, categoryID = category, quests = {95133}, itemID = 245760, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Leatherworking
-  {skillLineVariantID = 2915, categoryID = category, quests = {95134}, itemID = 245758, points = 1},
+  {skillLineVariantID = 2915, categoryID = category, quests = {95134}, itemID = 245758, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Mining
-  {skillLineVariantID = 2916, categoryID = category, quests = {95135}, itemID = 245762, points = 1},
+  {skillLineVariantID = 2916, categoryID = category, quests = {95135}, itemID = 245762, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Skinning
-  {skillLineVariantID = 2917, categoryID = category, quests = {95136}, itemID = 245828, points = 1},
+  {skillLineVariantID = 2917, categoryID = category, quests = {95136}, itemID = 245828, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Tailoring
-  {skillLineVariantID = 2918, categoryID = category, quests = {95137}, itemID = 245756, points = 1},
+  {skillLineVariantID = 2918, categoryID = category, quests = {95137}, itemID = 245756, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
 }
 
 Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
