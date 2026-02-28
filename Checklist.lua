@@ -481,6 +481,13 @@ function Checklist:Render()
         return
       end
       local filteredObjectives = Utils:TableFilter(objectives, function(objective)
+        -- Hide objective if not the correct profession
+        if objective.skillLineVariantID ~= skillLineVariantID then
+          -- print("Checklist: Skipping objective", objective.name, "not the correct profession")
+          return false
+        end
+
+        -- Hide objectives that are not repeatable
         -- Hide Darkmoon objectives
         if not Data.cache.isDarkmoonOpen and objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
           -- print("Checklist: Skipping Darkmoon objective", objective.name)
