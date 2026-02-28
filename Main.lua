@@ -989,10 +989,10 @@ function Main:GetTableColumns(unfiltered)
 
   ---@type WK_DataColumn
   local dataColumn = {
-    name = "Progress",
+    name = "Catch-Up",
     onEnter = function(cellFrame)
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText("Progress", 1, 1, 1);
+      GameTooltip:SetText("Catch-Up", 1, 1, 1);
       local objective = Data:GetObjectiveCategoryByID(Enum.WK_ObjectiveCategory.CatchUp)
       if objective then
         GameTooltip:AddLine(objective.description, nil, nil, nil, true)
@@ -1016,7 +1016,7 @@ function Main:GetTableColumns(unfiltered)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText("No data", 1, 1, 1);
             if skillLineVariant and skillLineVariant.expansionID == Enum.ExpansionLevel.Dragonflight then
-              GameTooltip:AddLine("Data has not been added to the Dragonflight expansion yet.\nYou can still track your skill/knowledge level meanwhile.\nIt is not guaranteed that Dragonflight can be added if the system is too different from recent expansions.", nil, nil, nil, true);
+              GameTooltip:AddLine("Addon has not been updated for the Dragonflight expansion yet.\n\nYou can still track your skill/knowledge level meanwhile.\n\nIt is not guaranteed that the Dragonflight data will be added if the system is too different from the other expansions.", nil, nil, nil, true);
             else
               GameTooltip:AddLine("Log in to fetch the data for this character.", nil, nil, nil, true);
             end
@@ -1077,7 +1077,7 @@ function Main:GetTableColumns(unfiltered)
             local color = WHITE_FONT_COLOR
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText("Your Progress", 1, 1, 1)
+            GameTooltip:SetText("Catch-Up Progress", 1, 1, 1)
             color = sumPointsEarned == sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
             GameTooltip:AddDoubleLine("Points This Week:", format("%d / %d", sumPointsEarned, sumPointsTotal), nil, nil, nil, color.r, color.g, color.b)
             color = catchUpCurrent - sumPointsEarned == catchUpTotal - sumPointsTotal and GREEN_FONT_COLOR or WHITE_FONT_COLOR
