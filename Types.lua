@@ -76,6 +76,18 @@
 ---@field specializations WK_CharacterProfessionSpecialization[]
 ---@field catchUpCurrencyInfo CurrencyInfo?
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[] Recipes for the profession
+---@field concentration WK_CharacterProfessionConcentration?
+
+---@class WK_CharacterProfessionConcentration
+---@field currencyID integer Currency ID
+---@field lastUpdated number Last update time
+---@field name string Name
+---@field description string Description
+---@field icon integer Icon file ID
+---@field quantity integer Current quantity
+---@field maxQuantity integer Max quantity
+---@field rechargingCycleDurationMS integer Recharging cycle duration in milliseconds (e.g. 10000)
+---@field rechargingAmountPerCycle integer Recharging amount per cycle (e.g. 1)
 
 ---@class WK_CharacterProfessionSpecialization
 ---@field rootNodeID integer

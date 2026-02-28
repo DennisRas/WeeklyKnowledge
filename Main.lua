@@ -712,6 +712,80 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
+      name = "Concentration",
+      onEnter = function(cellFrame)
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Concentration", 1, 1, 1);
+        GameTooltip:AddLine("Current concentration.")
+        GameTooltip:Show()
+      end,
+      onLeave = function()
+        GameTooltip:Hide()
+      end,
+      width = 100,
+      align = "CENTER",
+      toggleHidden = true,
+      cell = function(_, characterProfession)
+        local concentration = characterProfession.concentration
+        if not concentration then
+          return {
+            text = "-",
+            onEnter = function(cellFrame)
+              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText("No data", 1, 1, 1);
+              GameTooltip:AddLine("Log in on this character to fetch concentration data.", nil, nil, nil, true);
+              GameTooltip:Show()
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+          }
+        end
+
+        local currentQuantity = concentration.quantity
+        local maxQuantity = concentration.maxQuantity
+        local timeDifference = GetServerTime() - concentration.lastUpdated
+        local cyclesSinceLastUpdate = timeDifference / (concentration.rechargingCycleDurationMS / 1000)
+        local estimatedQuantity = math.min(currentQuantity + cyclesSinceLastUpdate, maxQuantity)
+        local quantityToMax = math.max(0, maxQuantity - estimatedQuantity)
+        local timeToMax = quantityToMax * (concentration.rechargingCycleDurationMS / 1000)
+        local color = WHITE_FONT_COLOR
+
+        if estimatedQuantity >= concentration.maxQuantity then
+          color = GREEN_FONT_COLOR
+        end
+        if estimatedQuantity == 0 then
+          color = RED_FONT_COLOR
+        end
+
+        local text = maxQuantity > 0 and color:WrapTextInColorCode(format("%d / %d", estimatedQuantity, maxQuantity)) or "-"
+
+        return {
+          text = text,
+          color = color,
+          onEnter = function(cellFrame)
+            GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(concentration.name, 1, 1, 1);
+            if timeToMax > 0 then
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("Estimated", 1, 1, 1, true)
+              GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, concentration.maxQuantity), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine("Maxed at:", date("%c", concentration.lastUpdated + timeToMax), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddLine(" ")
+              GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
+            end
+            GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", concentration.quantity, concentration.maxQuantity), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Saved at:", date("%c", concentration.lastUpdated), nil, nil, nil, 1, 1, 1)
+            GameTooltip:Show()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+        }
+      end,
+    },
+    {
       name = "Knowledge",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")

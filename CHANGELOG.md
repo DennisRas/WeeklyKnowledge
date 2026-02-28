@@ -12,6 +12,7 @@
 - Added caching for checking completed quests/objectives in order to improve performance.
 - Added a new category named Weekly Quest; This is the old Artisan/Trainer columns merged.
 - Added a new column in the Main window: First Craft; This will show you the amount of first craft points available from your profession recipes.
+- ADded a new column in the Main window: Concentration; This will keep track of your concentration with an estimate of when it's maxed out.
 - Added a new setting in the Main window: You can now hide characters/professions with a skill level below 25.
 - Added a new column in the Checklist window: Repeatable
 - Added a new category filter in the Checklist window.

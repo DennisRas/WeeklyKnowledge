@@ -897,7 +897,7 @@ function Data:ScanProfession()
       Utils:TableForEach({prof1, prof2}, function(professionIndex)
         local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(professionIndex)
         if name and skillLine and skillLine == skillLineVariant.skillLineID then
-          --@type WK_CharacterProfession
+          ---@type WK_CharacterProfession
           profession = {
             enabled = true,
             skillLineID = skillLineVariant.skillLineID,
@@ -910,6 +910,17 @@ function Data:ScanProfession()
             specializations = {},
             catchUpCurrencyInfo = nil,
             tradeSkillRecipes = {},
+            concentration = {
+              currencyID = 0,
+              lastUpdated = 0,
+              name = "",
+              description = "",
+              icon = 0,
+              quantity = 0,
+              maxQuantity = 0,
+              rechargingCycleDurationMS = 0,
+              rechargingAmountPerCycle = 0,
+            },
           }
         end
       end)
@@ -957,6 +968,26 @@ function Data:ScanProfession()
       local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(skillLineVariant.catchUpCurrencyID)
       if currencyInfo and currencyInfo.quantity then
         profession.catchUpCurrencyInfo = currencyInfo
+      end
+    end
+
+    -- Get concentration info
+    local concentrationCurrencyID = C_TradeSkillUI.GetConcentrationCurrencyID(tradeSkillLineID)
+    if concentrationCurrencyID and concentrationCurrencyID > 0 then
+      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(concentrationCurrencyID)
+      if currencyInfo and currencyInfo.quantity and currencyInfo.maxQuantity then
+        ---@type WK_CharacterProfessionConcentration
+        profession.concentration = {
+          currencyID = currencyInfo.currencyID,
+          lastUpdated = GetServerTime(),
+          name = currencyInfo.name,
+          description = currencyInfo.description,
+          icon = currencyInfo.iconFileID,
+          quantity = currencyInfo.quantity,
+          maxQuantity = currencyInfo.maxQuantity,
+          rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
+          rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
+        }
       end
     end
 
