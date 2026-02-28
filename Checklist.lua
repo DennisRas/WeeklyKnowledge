@@ -683,15 +683,17 @@ function Checklist:GetColumns(unfiltered)
       cell = function(data)
         local text = ""
         local link = data.item.link
-        local canShare = false
+        local canLink = false
+        local isRecipe = false
         if data.item.id and data.item.id > 0 and data.item.link then
           text = data.item.link
-          canShare = true
+          canLink = true
           if data.item.texture then
             text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
           end
         elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
           text = format("Crafting Recipe: ID = %d", data.objective.spellID or "Unknown")
+          isRecipe = true
           local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[data.objective.spellID]
           if not recipeInfo then
             recipeInfo = C_TradeSkillUI.GetRecipeInfo(data.objective.spellID)
@@ -703,9 +705,9 @@ function Checklist:GetColumns(unfiltered)
             end
           end
           if recipeInfo then
-            canShare = true
+            canLink = true
             link = C_Spell.GetSpellLink(recipeInfo.recipeID or data.objective.spellID)
-            text = "|T" .. recipeInfo.icon .. ":0|t " .. (recipeInfo.hyperlink or recipeInfo.name)
+            text = format("|T%s:0|t %s", recipeInfo.icon, recipeInfo.name)
           end
         else
           text = "Quest"
@@ -722,9 +724,14 @@ function Checklist:GetColumns(unfiltered)
             GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
             if link and strlen(link) > 0 then
               GameTooltip:SetHyperlink(link)
-              if canShare then
+              if canLink or isRecipe then
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                if isRecipe then
+                  GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
+                if canLink then
+                  GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
               end
             end
             GameTooltip:Show()
@@ -733,12 +740,12 @@ function Checklist:GetColumns(unfiltered)
             GameTooltip:Hide()
           end,
           onClick = function()
-            if link and strlen(link) > 0 and canShare then
-              if IsModifiedClick("CHATLINK") then
-                if not ChatEdit_InsertLink(link) then
-                  ChatFrame_OpenChat(link);
-                end
+            if canLink and link and strlen(link) > 0 and IsModifiedClick("CHATLINK") then
+              if not ChatEdit_InsertLink(link) then
+                ChatFrame_OpenChat(link);
               end
+            elseif isRecipe then
+              C_TradeSkillUI.OpenRecipe(data.objective.spellID)
             end
           end,
         }
