@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 16
+Data.DBVersion = 17
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -271,6 +271,28 @@ function Data:MigrateDB()
       if self.db.global.checklist.hideCatchUpObjectives then
         self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.CatchUp] = true
         self.db.global.checklist.hideCatchUpObjectives = nil
+      end
+    end
+    -- Migrate profession catch up currency info
+    if self.db.global.DBVersion == 16 then
+      for _, character in pairs(self.db.global.characters) do
+        if type(character.currencies) ~= "table" then
+          character.currencies = {}
+        end
+        if type(character.professions) == "table" then
+          for _, characterProfession in pairs(character.professions) do
+            if type(characterProfession.catchUpCurrencyInfo) == "table" then
+              character.currencies[characterProfession.catchUpCurrencyInfo.currencyID] = {
+                id = characterProfession.catchUpCurrencyInfo.currencyID,
+                name = characterProfession.catchUpCurrencyInfo.name,
+                iconFileID = characterProfession.catchUpCurrencyInfo.iconFileID,
+                quality = characterProfession.catchUpCurrencyInfo.quality,
+                quantity = characterProfession.catchUpCurrencyInfo.quantity,
+                maxQuantity = characterProfession.catchUpCurrencyInfo.maxQuantity,
+              }
+            end
+          end
+        end
       end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
