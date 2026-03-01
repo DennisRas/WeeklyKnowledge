@@ -165,6 +165,7 @@
         "CreateSimpleTextureMarkup",
         "StaticPopupDialogs",
         "YES",
-        "StaticPopup_Show"
+        "StaticPopup_Show",
+        "ContinuableContainer"
     ]
 }

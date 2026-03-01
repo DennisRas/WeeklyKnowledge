@@ -401,8 +401,8 @@ function Checklist:Render()
         self.window.titlebar.toggleButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0.05)
         GameTooltip:SetOwner(self.window.titlebar.toggleButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Toggle objectives", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Expand/Collapse the list.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText("Toggle List", 1, 1, 1, 1, true)
+        GameTooltip:AddLine("Expand/Collapse the checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.toggleButton:SetScript("OnLeave", function()
@@ -479,7 +479,6 @@ function Checklist:Render()
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
-  local weeklyProgress = Data:GetWeeklyProgress()
   local characterProfessions = character.professions
 
   local rows = 0
@@ -497,111 +496,69 @@ function Checklist:Render()
         return
       end
       local filteredObjectives = Utils:TableFilter(objectives, function(objective)
+        local debugID = objective.quests[1] or objective.spellID or objective.itemID
+
         -- Hide objective if not the correct profession
         if objective.skillLineVariantID ~= skillLineVariantID then
-          -- print("Checklist: Skipping objective", objective.name, "not the correct profession")
+          -- print("Checklist: Skipping objective", debugID, "not the correct profession")
           return false
         end
 
         -- Hide objectives that are not repeatable
         -- Hide Darkmoon objectives
         if not Data.cache.isDarkmoonOpen and objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-          -- print("Checklist: Skipping Darkmoon objective", objective.name)
+          -- print("Checklist: Skipping Darkmoon objective", debugID)
           return false
         end
 
         -- Hide if category is hidden
         local hiddenCategories = Data.db.global.checklist.hiddenCategories
         if hiddenCategories and hiddenCategories[objective.categoryID] then
-          -- print("Checklist: Skipping hidden category objective", objective.name)
+          -- print("Checklist: Skipping hidden category objective", debugID)
           return false
         end
 
         -- Hide Uniques if enabled
         if Data.db.global.checklist.hideUniqueObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
-          -- print("Checklist: Skipping Unique objective", objective.name)
+          -- print("Checklist: Skipping Unique objective", debugID)
           return false
         end
 
         -- Hide Vendor Uniques if enabled
         if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and Utils:TableCount(objective.requires) > 0 then
-          -- print("Checklist: Skipping Unique Vendor objective", objective.name)
+          -- print("Checklist: Skipping Unique Vendor objective", debugID)
           return false
         end
 
         -- Hide Catch-Up if enabled
         if Data.db.global.checklist.hideCatchUpObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-          -- print("Checklist: Skipping Catch-Up objective", objective.name)
+          -- print("Checklist: Skipping Catch-Up objective", debugID)
           return false
         end
 
         return true
       end)
       Utils:TableForEach(filteredObjectives, function(objective)
-        local item = {
-          id = objective.itemID,
-          name = "",
-          link = "",
-          texture = "",
-        }
-
-        if objective.itemID then
-          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(objective.itemID)
-          if itemName then
-            item.name = itemName
-            item.link = itemLink
-            item.texture = itemTexture
-          end
-        end
-
-        local progress = Utils:TableFind(weeklyProgress, function(progress)
-          return progress.characterGUID == character.GUID and progress.objective == objective
-        end)
-        if not progress then
-          -- print("Checklist: Skipping objective", objective.name, "no progress found")
-          return
-        end
-
-        -- local progress = {
-        --   completed = 0,
-        --   total = 0,
-        --   points = 0,
-        --   pointsTotal = 0,
-        -- }
-
-        -- if objective.quests then
-        --   local limit = 0
-
-        --   for _, questID in ipairs(objective.quests) do
-        --     progress.questsTotal = progress.questsTotal + 1
-        --     progress.pointsEarnedTotal = progress.pointsTotal + objective.points
-        --     if objective.limit and progress.questsTotal > objective.limit then
-        --       progress.pointsTotal = objective.limit * objective.points
-        --       progress.questsTotal = objective.limit
-        --     end
-        --     if character.completed[questID] then
-        --       progress.questsCompleted = progress.questsCompleted + 1
-        --       progress.pointsEarned = progress.points + objective.points
-        --     end
-        --   end
-        -- end
+        local debugID = objective.quests[1] or objective.spellID or objective.itemID
+        local progress = Data:GetObjectiveProgress(character, objective)
 
         -- Skip if the objective is completed and hide completed objectives is enabled
-        if progress.questsTotal > 0 and progress.questsCompleted == progress.questsTotal and Data.db.global.checklist.hideCompletedObjectives then
-          -- print("Checklist: Skipping completed objective", objective.name)
+        if Data.db.global.checklist.hideCompletedObjectives and progress.questsCompleted == progress.questsTotal then
+          -- print("Checklist: Skipping completed objective", debugID)
           return
         end
 
         ---@type WK_TableDataRow
         local row = {columns = {}}
         Utils:TableForEach(dataColumns, function(dataColumn)
+          ---@type WK_ChecklistData
           local cellData = {
             character = character,
             characterProfession = characterProfession,
             skillLineVariantID = skillLineVariantID,
             objective = objective,
             progress = progress,
-            item = item
+            -- item = item
           }
           ---@type WK_TableDataCell
           local cell = dataColumn.cell(cellData)
@@ -661,39 +618,59 @@ function Checklist:Render()
   end
 end
 
----@class WK_ChecklistData
-
----@class WK_ChecklistColumn
----@field name string
----@field width number
----@field cell fun(data: WK_ChecklistData): WK_TableDataCell
-
 ---Get column data
 ---@param unfiltered boolean?
 ---@return table
 function Checklist:GetColumns(unfiltered)
-  local expansions = Data:GetExpansions()
   local hidden = Data.db.global.checklist.hiddenColumns
-  local objectives = Data:GetObjectives()
   ---@type WK_ChecklistColumn[]
   local columns = {
     {
       name = "Objective",
       width = 260,
       cell = function(data)
-        local text = ""
-        local link = data.item.link
-        local canLink = false
-        local isRecipe = false
-        if data.item.id and data.item.id > 0 and data.item.link then
-          text = data.item.link
-          canLink = true
-          if data.item.texture then
-            text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
+        if data.objective.itemID and data.objective.itemID > 0 then
+          local text = format("Error: ItemID %d not found", data.objective.itemID or "?")
+          local link = ""
+          -- Todo: Cache/Re-render item info
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(data.objective.itemID)
+          if itemName then
+            text = itemName
           end
+          if itemLink then
+            link = itemLink
+          end
+          if itemTexture then
+            text = format("|T%s:0|t %s", itemTexture, itemLink or text or "[Not Loaded]")
+          end
+
+          return {
+            text = text,
+            onEnter = function(columnFrame)
+              if link and strlen(link) > 0 then
+                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetHyperlink(link)
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:Show()
+              end
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+            onClick = function()
+              if link and strlen(link) > 0 then
+                if IsModifiedClick("CHATLINK") then
+                  if not ChatEdit_InsertLink(link) then
+                    ChatFrame_OpenChat(link);
+                  end
+                end
+              end
+            end,
+          }
         elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
-          text = format("Crafting Recipe: ID = %d", data.objective.spellID or "Unknown")
-          isRecipe = true
+          local text = format("Error: RecipeID %d not found", data.objective.spellID or "?")
+          local link = ""
           local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[data.objective.spellID]
           if not recipeInfo then
             recipeInfo = C_TradeSkillUI.GetRecipeInfo(data.objective.spellID)
@@ -705,50 +682,73 @@ function Checklist:GetColumns(unfiltered)
             end
           end
           if recipeInfo then
-            canLink = true
             link = C_Spell.GetSpellLink(recipeInfo.recipeID or data.objective.spellID)
             text = format("|T%s:0|t %s", recipeInfo.icon, recipeInfo.name)
           end
-        else
-          text = "Quest"
-          local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
+          return {
+            text = text,
+            onEnter = function(columnFrame)
+              if link and strlen(link) > 0 then
+                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetHyperlink(link)
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:Show()
+              end
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+            onClick = function()
+              if link and strlen(link) > 0 then
+                if IsModifiedClick("CHATLINK") then
+                  if not ChatEdit_InsertLink(link) then
+                    ChatFrame_OpenChat(link);
+                  end
+                else
+                  C_TradeSkillUI.OpenRecipe(data.objective.spellID)
+                end
+              end
+            end,
+          }
+        elseif data.objective.quests and Utils:TableCount(data.objective.quests) > 0 then
+          local text = format("Error: QuestID %d not found", data.objective.quests[1] or "?")
+          local link = format("quest:%d:-1", data.objective.quests[1])
+          local questTooltipData = C_TooltipInfo.GetHyperlink(link)
           if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
-            -- link = format("|cffffff00|Hquest:%d:70|h[%s]|h|r", data.objective.quests[1], questTooltipData.lines[1].leftText) -- Isn't working
-            link = "quest:" .. data.objective.quests[1] .. ":-1"
             text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
           end
-        end
-        return {
-          text = text,
-          onEnter = function(columnFrame)
-            GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-            if link and strlen(link) > 0 then
-              GameTooltip:SetHyperlink(link)
-              if canLink or isRecipe then
+          return {
+            text = text,
+            onEnter = function(columnFrame)
+              if link and strlen(link) > 0 then
+                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+                GameTooltip:SetHyperlink(link)
                 GameTooltip:AddLine(" ")
-                if isRecipe then
-                  GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                end
-                if canLink then
-                  GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:Show()
+              end
+            end,
+            onLeave = function()
+              GameTooltip:Hide()
+            end,
+            onClick = function()
+              if link and strlen(link) > 0 then
+                if IsModifiedClick("CHATLINK") then
+                  if not ChatEdit_InsertLink(link) then
+                    ChatFrame_OpenChat(link);
+                  end
                 end
               end
-            end
-            GameTooltip:Show()
-          end,
-          onLeave = function()
-            GameTooltip:Hide()
-          end,
-          onClick = function()
-            if canLink and link and strlen(link) > 0 and IsModifiedClick("CHATLINK") then
-              if not ChatEdit_InsertLink(link) then
-                ChatFrame_OpenChat(link);
-              end
-            elseif isRecipe then
-              C_TradeSkillUI.OpenRecipe(data.objective.spellID)
-            end
-          end,
-        }
+            end,
+          }
+        else
+          local text = "Unknown"
+          return {
+            text = text,
+          }
+        end
       end,
     },
     {
@@ -826,13 +826,12 @@ function Checklist:GetColumns(unfiltered)
       cell = function(data)
         local text = " "
         if data.objective and data.objective.loc and data.objective.loc.m then
-          local loc = data.objective.loc
-          if Data.cache.mapInfo[loc.m] then
-            text = Data.cache.mapInfo[loc.m].name
+          if Data.cache.mapInfo[data.objective.loc.m] then
+            text = Data.cache.mapInfo[data.objective.loc.m].name
           else
-            local mapInfo = C_Map.GetMapInfo(loc.m)
+            local mapInfo = C_Map.GetMapInfo(data.objective.loc.m)
             if mapInfo then
-              Data.cache.mapInfo[loc.m] = mapInfo
+              Data.cache.mapInfo[data.objective.loc.m] = mapInfo
               text = mapInfo.name
             end
           end
@@ -873,7 +872,7 @@ function Checklist:GetColumns(unfiltered)
         local result = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
         if data.progress.questsTotal == 0 then
           result = ""
-        elseif data.progress.questsCompleted == data.progress.questsTotal then
+        elseif data.progress.isCompleted then
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
@@ -891,7 +890,7 @@ function Checklist:GetColumns(unfiltered)
         local result = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
         if data.progress.questsTotal == 0 then
           result = ""
-        elseif data.progress.pointsEarned == data.progress.pointsTotal then
+        elseif data.progress.isCompleted then
           result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
         end
 
@@ -905,178 +904,116 @@ function Checklist:GetColumns(unfiltered)
       width = 50,
       align = "CENTER",
       cell = function(data)
-        local loc = data.objective.loc
-        local requires = data.objective.requires
         local TomTom = _G["TomTom"]
-        if data.objective then
-          local mapInfo = nil
-          local point = nil
-          if loc and loc.m then
-            mapInfo = C_Map.GetMapInfo(loc.m)
-          end
-          if mapInfo then
-            point = UiMapPoint.CreateFromCoordinates(loc.m, loc.x / 100, loc.y / 100)
-          end
-          return {
-            text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
-            onEnter = function(columnFrame)
-              local showTooltip = function()
-                GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-                GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
-                if loc and loc.hint then
-                  GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
-                end
-                if mapInfo then
-                  GameTooltip:AddLine(" ")
-                  GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
-                end
-                if loc and loc.x then
-                  if not mapInfo then
-                    GameTooltip:AddLine(" ")
-                  end
-                  GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", loc.x, loc.y), nil, nil, nil, 1, 1, 1)
-                end
-                if requires and Utils:TableCount(requires) > 0 then
-                  GameTooltip:AddLine(" ")
-                  GameTooltip:AddLine("Requirements:")
-                  Utils:TableForEach(requires, function(req)
-                    local leftText = " "
-                    local rightText = format("x%d", req.amount)
-                    local completed = false
-                    if req.type == "item" then
-                      local _, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(req.id)
-                      local itemCount = C_Item.GetItemCount(req.id)
-                      leftText = format("%s %s", CreateSimpleTextureMarkup(itemTexture or [[Interface\Icons\INV_Misc_QuestionMark]]), itemLink or "Loading...")
-                      if itemCount then
-                        rightText = format("%d / %d", itemCount, req.amount)
-                        if itemCount >= req.amount then
-                          completed = true
-                        end
-                      end
-                    end
-                    if req.type == "currency" then
-                      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(req.id)
-                      if currencyInfo then
-                        local _, _, _, hex = C_Item.GetItemQualityColor(currencyInfo.quality)
-                        leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(currencyInfo.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, currencyInfo.name)
-                        rightText = format("%d / %d", currencyInfo.quantity, req.amount)
-                        if currencyInfo.quantity >= req.amount then
-                          completed = true
-                        end
-                      end
-                    end
-                    if req.type == "quest" then
-                      leftText = req.name
-
-                      if not req.match or req.match == "all" then
-                        local numCompleted = 0
-
-                        completed = true
-                        for _, questID in ipairs(req.quests) do
-                          if not C_QuestLog.IsQuestFlaggedCompleted(questID) then
-                            completed = false
-                          else
-                            numCompleted = numCompleted + 1
-                          end
-                        end
-
-                        rightText = format("%d / %d", numCompleted, #req.quests)
-                      else
-                        for _, questID in ipairs(req.quests) do
-                          if C_QuestLog.IsQuestFlaggedCompleted(questID) then
-                            completed = true
-                          end
-                        end
-
-                        rightText = format("%d / %d", completed and 1 or 0, 1)
-                      end
-                    end
-                    if req.type == "renown" then
-                      local renownInfo = C_MajorFactions.GetMajorFactionData(req.id)
-                      local renownLevel = C_MajorFactions.GetCurrentRenownLevel(req.id) or 0
-                      if renownInfo and renownLevel > 0 then
-                        leftText = renownInfo.name
-                        rightText = format("%d / %d", renownLevel, req.amount)
-                        if renownLevel >= req.amount then
-                          completed = true
-                        end
-                      end
-                    end
-                    if req.type == "skill" then
-                      local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
-                      leftText = (skillLineVariant and skillLineVariant.name) or "Profession skill"
-                      local skillLevel = data.characterProfession and data.characterProfession.skillLevel or 0
-                      rightText = format("%d / %d", skillLevel, req.amount)
-                      if skillLevel >= req.amount then
-                        completed = true
-                      end
-                    end
-                    GameTooltip:AddDoubleLine(leftText, format("%s %s", rightText, CreateAtlasMarkup(completed and "common-icon-checkmark" or "common-icon-redx", 13, 13)), 1, 1, 1, 1, 1, 1)
-                  end)
-                end
-                if point then
-                  if C_Map.CanSetUserWaypointOnMap(loc.m) or TomTom then
-                    GameTooltip:AddLine(" ")
-                  end
-                  if C_Map.CanSetUserWaypointOnMap(loc.m) then
-                    GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                    GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                  end
-                  if TomTom then
-                    GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                  end
-                end
-                GameTooltip:Show()
-              end
-
-              if requires and Utils:TableCount(requires) > 0 then
-                Utils:TableForEach(requires, function(req)
-                  if req.type == "item" then
-                    Data.cache.items[req.id] = Item:CreateFromItemID(req.id)
-                    Data.cache.items[req.id]:ContinueOnItemLoad(showTooltip)
-                  end
-                end)
-              end
-
-              showTooltip()
-            end,
-            onLeave = function()
-              GameTooltip:Hide()
-            end,
-            onClick = function()
-              if point then
-                if IsAltKeyDown() and TomTom then
-                  local text = "Objective"
-                  if data.item.id and data.item.id > 0 and data.item.link then
-                    text = data.item.link
-                    if data.item.texture then
-                      text = "|T" .. data.item.texture .. ":0|t " .. data.item.link
-                    end
-                  else
-                    text = "Quest"
-                    local questTooltipData = C_TooltipInfo.GetHyperlink("quest:" .. data.objective.quests[1] .. ":-1")
-                    if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
-                      text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
-                    end
-                  end
-                  TomTom:AddWaypoint(loc.m, loc.x / 100, loc.y / 100, {title = text, from = addonName})
-                elseif C_Map.CanSetUserWaypointOnMap(loc.m) then
-                  if IsModifiedClick("CHATLINK") then
-                    local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", loc.m, loc.x * 100, loc.y * 100, MAP_PIN_HYPERLINK)
-                    if not ChatEdit_InsertLink(hyperlink) then
-                      ChatFrame_OpenChat(hyperlink);
-                    end
-                  else
-                    C_Map.SetUserWaypoint(point)
-                    C_SuperTrack.SetSuperTrackedUserWaypoint(true)
-                  end
-                end
-              end
-            end,
-          }
+        local mapInfo = nil
+        local point = nil
+        if data.objective.loc and data.objective.loc.m then
+          mapInfo = C_Map.GetMapInfo(data.objective.loc.m)
+        end
+        if mapInfo then
+          point = UiMapPoint.CreateFromCoordinates(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100)
         end
         return {
-          text = " "
+          text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
+          onEnter = function(columnFrame)
+            local showTooltip = function()
+              GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+              if data.objective.loc and data.objective.loc.hint then
+                GameTooltip:AddLine(data.objective.loc.hint, nil, nil, nil, true)
+              end
+              if mapInfo then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
+              end
+              if data.objective.loc and data.objective.loc.x then
+                if not mapInfo then
+                  GameTooltip:AddLine(" ")
+                end
+                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", data.objective.loc.x, data.objective.loc.y), nil, nil, nil, 1, 1, 1)
+              end
+              -- Show unlock requirements
+              if Utils:TableCount(data.progress.requirements) > 0 then
+                GameTooltip:AddLine(" ")
+                if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+                  GameTooltip:AddLine("Unlock Catch-Up This Week:")
+                  Utils:TableForEach(data.progress.requirements, function(requirement)
+                    GameTooltip:AddDoubleLine(requirement.leftText, CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12), 1, 1, 1, 1, 1, 1)
+                  end)
+                else
+                  GameTooltip:AddLine("Requirements:")
+                  Utils:TableForEach(data.progress.requirements, function(requirement)
+                    GameTooltip:AddDoubleLine(requirement.leftText, requirement.rightText, 1, 1, 1, 1, 1, 1)
+                  end)
+                end
+              end
+
+              -- Show item rewards
+              if Utils:TableCount(data.progress.items) > 0 then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("Rewards:")
+                for itemID, itemLooted in pairs(data.progress.items) do
+                  local item = Data.cache.items[itemID]
+                  local itemCached = item and item:IsItemDataCached()
+                  local icon = itemCached and item:GetItemIcon() or 134400
+                  local name = itemCached and item:GetItemLink() or "Loading..."
+                  if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+                    GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
+                  else
+                    GameTooltip:AddDoubleLine(
+                      format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name),
+                      CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12),
+                      1, 1, 1, 1, 1, 1
+                    )
+                  end
+                end
+              end
+
+              if point then
+                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) or TomTom then
+                  GameTooltip:AddLine(" ")
+                end
+                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
+                  GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
+                if TomTom then
+                  GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                end
+              end
+              GameTooltip:Show()
+            end
+
+            if Utils:TableCount(data.progress.items) > 0 then
+              for itemID, _ in pairs(data.progress.items) do
+                Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
+                Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
+              end
+            end
+
+            showTooltip()
+          end,
+          onLeave = function()
+            GameTooltip:Hide()
+          end,
+          onClick = function()
+            if point then
+              if IsAltKeyDown() and TomTom then
+                local text = "Objective"
+                TomTom:AddWaypoint(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100, {title = text, from = addonName})
+              elseif C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
+                if IsModifiedClick("CHATLINK") then
+                  local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", data.objective.loc.m, data.objective.loc.x * 100, data.objective.loc.y * 100, MAP_PIN_HYPERLINK)
+                  if not ChatEdit_InsertLink(hyperlink) then
+                    ChatFrame_OpenChat(hyperlink);
+                  end
+                else
+                  C_Map.SetUserWaypoint(point)
+                  C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+                end
+              end
+            end
+          end,
         }
       end,
     },

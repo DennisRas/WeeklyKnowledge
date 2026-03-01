@@ -105,7 +105,7 @@ function Core:OnEnable()
     },
     3,
     function()
-      Data:ClearWeeklyProgress()
+      Data:ClearProgressCache()
       Data:ScanCharacter()
       self:Render()
     end
@@ -118,7 +118,7 @@ function Core:OnEnable()
     },
     3,
     function()
-      Data:ClearWeeklyProgress()
+      Data:ClearProgressCache()
       Data:ScanQuests()
       self:Render()
     end
@@ -135,8 +135,8 @@ function Core:OnEnable()
     },
     1,
     function()
-      Data:ClearWeeklyProgress()
-      Data:ScanProfession()
+      Data:ClearProgressCache()
+      Data:ScanProfessions()
       self:Render()
     end
   )
@@ -146,13 +146,13 @@ function Core:OnEnable()
     },
     1,
     function()
-      Data:ClearWeeklyProgress()
+      Data:ClearProgressCache()
       Data:ScanCalendar()
       self:Render()
     end)
 
   Data:ScanCharacter()
-  Data:ScanProfession()
+  Data:ScanProfessions()
   Data:ScanQuests()
   Data:ScanCalendar()
   self:Render()

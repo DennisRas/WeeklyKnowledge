@@ -64,6 +64,34 @@
 ---@field lastUpdate number Last update time
 ---@field professions WK_CharacterProfession[] Profession information for the character
 ---@field completed table<integer, boolean> questID -> true Completed quests for the character
+---@field firstCrafts table<integer, WK_CharacterFirstCraft> spellID -> WK_CharacterFirstCraft
+---@field factions table<integer, WK_CharacterFaction> factionID -> WK_CharacterFaction
+---@field currencies table<integer, WK_CharacterCurrency> currencyID -> WK_CharacterCurrency
+---@field items table<integer, WK_CharacterItem> itemID -> WK_CharacterItem
+
+---@class WK_CharacterItem
+---@field id integer Item ID
+---@field name string Name
+---@field link string Item link
+---@field quantity integer Current quantity
+---@field iconFileID integer Icon file ID
+---@field quality integer Quality
+
+---@class WK_CharacterCurrency
+---@field id integer Currency ID
+---@field name string Name
+---@field iconFileID integer Icon file ID
+---@field quality integer Quality
+---@field quantity integer Current quantity
+---@field maxQuantity integer Max quantity
+
+---@class WK_CharacterFaction
+---@field id integer Faction ID
+---@field level integer Level
+
+---@class WK_CharacterFirstCraft
+---@field id integer Spell ID (Recipe ID)
+---@field completed boolean Whether the first craft has been completed
 
 ---@class WK_CharacterProfession
 ---@field enabled boolean
@@ -147,14 +175,48 @@
 ---@field loc WK_ObjectiveLocation?
 ---@field requires WK_ObjectiveRequirement[]?
 
----@class WK_Progress
----@field characterGUID string
----@field objective WK_Objective
----@field questsCompleted number
----@field questsTotal number
----@field pointsEarned number
----@field pointsTotal number
----@field items table<number, boolean>
+---@class WK_ObjectiveProgress
+---@field character WK_Character The character the progress is for.
+---@field objective WK_Objective The objective the progress is for.
+---@field isCompleted boolean Whether the objective is completed.
+---@field questsCompleted number The number of quests completed for the objective.
+---@field questsTotal number The total number of quests for the objective.
+---@field pointsEarned number The number of points earned for the objective.
+---@field pointsTotal number The total number of points for the objective.
+---@field requirementsMet number The number of requirements met for the objective.
+---@field requirementsTotal number The total number of requirements for the objective.
+---@field requirements WK_ObjectiveProgressRequirement[] A table of requirements completed for the objective.
+---@field items table<integer, boolean> A table of items that have been collected for the objective.
+
+---@class WK_ObjectiveProgressRequirement
+---@field requirement WK_ObjectiveRequirement The requirement.
+---@field leftText string The left text for the requirement.
+---@field rightText string The right text for the requirement.
+---@field isCompleted boolean Whether the requirement is completed.
+
+---@class WK_CategoryProgress
+---@field character WK_Character The character the progress is for.
+---@field objectiveCategory WK_ObjectiveCategory The category the progress is for.
+---@field objectivesCompleted number The number of objectives completed in the category.
+---@field objectivesTotal number The total number of objectives in the category.
+---@field pointsEarned number The number of points earned in the category.
+---@field pointsTotal number The total number of points in the category.
+---@field requirementsMet number The number of requirements met in the category.
+---@field requirementsTotal number The total number of requirements in the category.
+---@field requirements WK_ObjectiveProgressRequirement[] A table of requirement completions in the category.
+---@field items table<integer, boolean> A table of items that have been collected in the category.
+
+---@class WK_ProfessionProgress
+---@field character WK_Character The character the progress is for.
+---@field profession WK_CharacterProfession The profession the progress is for.
+---@field objectivesCompleted number The number of objectives completed in the profession.
+---@field objectivesTotal number The total number of objectives in the profession.
+---@field pointsEarned number The number of points earned in the profession.
+---@field pointsTotal number The total number of points in the profession.
+---@field requirementsMet number The number of requirements met in the profession.
+---@field requirementsTotal number The total number of requirements in the profession.
+---@field requirements WK_ObjectiveProgressRequirement[] A table of requirement completions in the profession.
+---@field items table<integer, boolean> A table of items that have been collected in the profession.
 
 ---@class WK_DataCache
 ---@field calendarOpened boolean
@@ -162,9 +224,22 @@
 ---@field inCombat boolean
 ---@field items table<integer, ItemMixin>
 ---@field mapInfo table<integer, UiMapDetails>
----@field weeklyProgress WK_Progress[]
+---@field progressCache table<string, WK_ObjectiveProgress[]> Character GUID -> WK_ObjectiveProgress[]
 ---@field completedQuests table<integer, boolean> questID -> true
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[] Trade skill recipes
+
+---@class WK_CategoryProfessionProgress
+---@field character WK_Character The character the progress is for.
+---@field category WK_ObjectiveCategory The category the progress is for.
+---@field profession WK_CharacterProfession The profession the progress is for.
+---@field objectivesCompleted number The number of objectives completed in the category and profession.
+---@field objectivesTotal number The total number of objectives in the category and profession.
+---@field pointsEarned number The number of points earned in the category and profession.
+---@field pointsTotal number The total number of points in the category and profession.
+---@field requirementsMet number The number of requirements met in the category and profession.
+---@field requirementsTotal number The total number of requirements in the category and profession.
+---@field requirements WK_ObjectiveProgressRequirement[] A table of requirement completions in the category and profession.
+---@field items table<integer, boolean> A table of items that have been collected in the category and profession.
 
 ---@class WK_DataColumn
 ---@field name string
@@ -174,6 +249,24 @@
 ---@field onLeave function?
 ---@field cell fun(character: WK_Character, characterProfession: WK_CharacterProfession, skillLineVariantID: integer): WK_TableDataCell
 ---@field toggleHidden boolean
+
+---@class WK_CheckListItem
+---@field id integer
+---@field name string
+---@field link string
+---@field texture integer
+
+---@class WK_ChecklistData
+---@field character WK_Character
+---@field characterProfession WK_CharacterProfession
+---@field skillLineVariantID integer
+---@field objective WK_Objective
+---@field progress WK_ObjectiveProgress
+
+---@class WK_ChecklistColumn
+---@field name string
+---@field width number
+---@field cell fun(data: WK_ChecklistData): WK_TableDataCell
 
 ---@class WK_TableData
 ---@field columns WK_TableDataColumn[]?

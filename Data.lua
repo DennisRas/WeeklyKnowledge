@@ -22,7 +22,7 @@ Data.cache = {
   inCombat = false,
   items = {},
   mapInfo = {},
-  weeklyProgress = {},
+  progressCache = {},
   completedQuests = {},
   tradeSkillRecipes = {},
 }
@@ -85,6 +85,10 @@ Data.defaultCharacter = {
   className = "",
   professions = {},
   completed = {},
+  firstCrafts = {},
+  factions = {},
+  currencies = {},
+  items = {},
 }
 
 ---@type WK_Objective[]
@@ -303,10 +307,18 @@ function Data:TaskWeeklyReset()
 end
 
 ---Clear the weekly progress cache.
-function Data:ClearWeeklyProgress()
-  if type(self.cache.weeklyProgress) == "table" then
-    self.cache.weeklyProgress = {}
+---@param clearAll boolean? Clear weekly progress for all characters if true
+---@return table<string, WK_ObjectiveProgress>
+function Data:ClearProgressCache(clearAll)
+  if clearAll then
+    self.cache.progressCache = wipe(self.cache.progressCache or {})
+  else
+    local character = self:GetCharacter()
+    if character then
+      self.cache.progressCache[character.GUID] = wipe(self.cache.progressCache[character.GUID] or {})
+    end
   end
+  return self.cache.progressCache
 end
 
 ---Get stored character by GUID
@@ -336,9 +348,7 @@ function Data:DeleteCharacter(characterOrGUID)
   local GUID = type(characterOrGUID) == "table" and characterOrGUID.GUID or characterOrGUID
   if not GUID or self.db.global.characters[GUID] == nil then return end
   self.db.global.characters[GUID] = nil
-  if type(self.cache.weeklyProgress) == "table" then
-    self.cache.weeklyProgress = {}
-  end
+  self:ClearProgressCache(true)
 end
 
 ---Check to see if the Darkmoon Faire event is live.
@@ -370,7 +380,8 @@ function Data:ScanCalendar()
   end
 end
 
-function Data:ScanProfession()
+--- Scan all professions and recipes
+function Data:ScanProfessions()
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -380,6 +391,33 @@ function Data:ScanProfession()
   if not tradeSkillLines then
     return
   end
+
+  -- Track recipes with first craft bonus
+  local completedFirstCrafts = {}
+  Utils:TableForEach(self:GetObjectives(), function(objective)
+    -- Skip non-recipe objectives
+    if objective.categoryID ~= Enum.WK_ObjectiveCategory.FirstCraft then
+      -- print("Skipping non-first craft objective", objective.categoryID)
+      return
+    end
+    -- Skip recipes that have a working quest associated with it
+    if objective.quests and #objective.quests > 0 then
+      -- print("Skipping recipe with working quest", objective.quests)
+      return
+    end
+
+    local spellID = objective.spellID
+    if not spellID then
+      -- print("Skipping recipe without spellID", objective)
+      return
+    end
+
+    local isFirstCraft = C_TradeSkillUI.IsRecipeFirstCraft(spellID)
+    if isFirstCraft ~= nil then
+      completedFirstCrafts[spellID] = not isFirstCraft
+    end
+  end)
+  character.firstCrafts = completedFirstCrafts
 
   local professions = {}
   Utils:TableForEach(tradeSkillLines, function(tradeSkillLineID)
@@ -543,33 +581,35 @@ function Data:ScanProfession()
   character.lastUpdate = GetServerTime()
 end
 
+--- Scan all quests for a character.
 function Data:ScanQuests()
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
 
-  -- Track completed quests
-  local completedQuests = {}
-  Utils:TableForEach(self:GetObjectives(), function(objective)
-    if not objective.quests then return end
-    Utils:TableForEach(objective.quests, function(questID)
-      if self.cache.completedQuests[questID] then
-        completedQuests[questID] = true
-        return
-      end
-      local isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
-      if isCompleted then
-        completedQuests[questID] = true
-        self.cache.completedQuests[questID] = true
-      end
-    end)
-  end)
+  -- -- Track completed quests
+  -- local completedQuests = {}
+  -- Utils:TableForEach(self:GetObjectives(), function(objective)
+  --   if not objective.quests then return end
+  --   Utils:TableForEach(objective.quests, function(questID)
+  --     if self.cache.completedQuests[questID] then
+  --       completedQuests[questID] = true
+  --       return
+  --     end
+  --     local isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
+  --     if isCompleted then
+  --       completedQuests[questID] = true
+  --       self.cache.completedQuests[questID] = true
+  --     end
+  --   end)
+  -- end)
 
-  character.completed = completedQuests
+  -- character.completed = completedQuests
   character.lastUpdate = GetServerTime()
 end
 
+--- Scan all character info for a character.
 function Data:ScanCharacter()
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
@@ -688,116 +728,422 @@ function Data:GetObjectiveCategoryByID(categoryID)
   return nil
 end
 
----@return WK_Progress[]
-function Data:GetWeeklyProgress()
-  local characters = self:GetCharacters()
-  local objectives = self:GetObjectives()
-  local objectiveCategories = self:GetObjectiveCategories()
+-- Get the progress for a single objective.
+---@param character WK_Character
+---@param objective WK_Objective
+---@return WK_ObjectiveProgress
+function Data:GetObjectiveProgress(character, objective)
+  local progressCache = self.cache.progressCache[character.GUID]
+  if progressCache then
+    local objectiveProgress = Utils:TableFind(progressCache, function(objectiveProgress)
+      return objectiveProgress.objective == objective
+    end)
+    if objectiveProgress then
+      return objectiveProgress
+    end
+  end
+  ---@type WK_ObjectiveProgress
+  local objectiveProgress = {
+    character = character,
+    objective = objective,
+    isCompleted = false,
+    questsCompleted = 0,
+    questsTotal = Utils:TableCount(objective.quests) or 0,
+    pointsEarned = 0,
+    pointsTotal = objective.points or 0,
+    requirementsMet = 0,
+    requirementsTotal = 0,
+    requirements = {},
+    items = {},
+  }
 
-  self.cache.weeklyProgress = wipe(self.cache.weeklyProgress or {})
-  Utils:TableForEach(characters, function(character)
-    local completed = (type(character.completed) == "table" and character.completed) or {}
-    Utils:TableForEach(character.professions, function(characterProfession)
-      local variant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-      if not variant then return end
+  local skillLineVariant = self:GetSkillLineVariantByID(objective.skillLineVariantID)
+  if not skillLineVariant then return objectiveProgress end
+  local skillLine = self:GetSkillLineByID(skillLineVariant.skillLineID)
+  if not skillLine then return objectiveProgress end
+  local currentCharacter = self:GetCharacter()
+  if not currentCharacter then return objectiveProgress end
 
-      local sumPointsEarned = 0
-      local sumPointsTotal = 0
+  if objective.itemID and objective.itemID > 0 then
+    objectiveProgress.items[objective.itemID] = false
+  end
 
-      for _, objective in pairs(objectives) do
-        if objective.skillLineVariantID ~= characterProfession.skillLineVariantID or not objective.quests then
-          -- skip
-        elseif objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-          -- handled below
-        else
-          ---@type WK_Progress
-          local progress = {
-            characterGUID = character.GUID,
-            objective = objective,
-            questsCompleted = 0,
-            questsTotal = 0,
-            pointsEarned = 0,
-            pointsTotal = 0,
-            items = {},
-          }
+  -- Catch Up
+  if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+    local characterCurrency = self:GetCharacterCurrency(character, skillLineVariant.catchUpCurrencyID)
+    objectiveProgress.pointsEarned = characterCurrency.quantity or 0
+    objectiveProgress.pointsTotal = characterCurrency.maxQuantity or 0
+    objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+    objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
+  end
 
-          if objective.itemID and objective.itemID > 0 then
-            progress.items[objective.itemID] = false
-          end
-
-          Utils:TableForEach(objective.quests, function(questID)
-            progress.questsTotal = progress.questsTotal + 1
-            progress.pointsTotal = progress.pointsTotal + objective.points
-            if objective.limit and progress.questsTotal > objective.limit then
-              progress.pointsTotal = objective.limit * objective.points
-              progress.questsTotal = objective.limit
-            end
-            if completed[questID] then
-              if objective.itemID and objective.itemID > 0 then
-                progress.items[objective.itemID] = true
-              end
-              progress.questsCompleted = progress.questsCompleted + 1
-              progress.pointsEarned = progress.pointsEarned + objective.points
-            end
-          end)
-
-          if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-            if not self.cache.isDarkmoonOpen then
-              progress.questsTotal = 0
-            end
-          end
-
-          if (
-              objective.categoryID == Enum.WK_ObjectiveCategory.ArtisanQuest
-              or objective.categoryID == Enum.WK_ObjectiveCategory.Treasure
-              or objective.categoryID == Enum.WK_ObjectiveCategory.Gathering
-              or objective.categoryID == Enum.WK_ObjectiveCategory.TrainerQuest
-            ) then
-            if progress.questsTotal > 0 then
-              sumPointsEarned = sumPointsEarned + progress.pointsEarned
-              sumPointsTotal = sumPointsTotal + progress.pointsTotal
-            end
-          end
-
-          table.insert(self.cache.weeklyProgress, progress)
-        end
+  -- Quests
+  if objective.quests and Utils:TableCount(objective.quests) > 0 then
+    for _, questID in pairs(objective.quests) do
+      local isCompleted = false
+      if character == currentCharacter then
+        isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
+        character.completed[questID] = isCompleted
+      else
+        isCompleted = character.completed[questID] or false
       end
+      if isCompleted then
+        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+        objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+      end
+    end
+  end
 
-      local catchUpInfo = characterProfession.catchUpCurrencyInfo
-      if variant.catchUpCurrencyID and catchUpInfo and catchUpInfo.quantity ~= nil and catchUpInfo.maxQuantity ~= nil then
-        for _, objective in pairs(self.Objectives) do
-          if objective.skillLineVariantID == characterProfession.skillLineVariantID and objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-            ---@type WK_Progress
-            local progress = {
-              characterGUID = character.GUID,
-              objective = objective,
-              questsCompleted = 0,
-              questsTotal = 0,
-              pointsEarned = 0,
-              pointsTotal = 0,
-              items = {},
-            }
+  -- First Craft
+  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+    character.firstCrafts = character.firstCrafts or {}
+    if character.firstCrafts[objective.spellID] then
+      objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+      objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+    end
+  end
 
-            if objective.itemID and objective.itemID > 0 then
-              progress.items[objective.itemID] = false
-            end
+  -- Darkmoon Quest
+  if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+    if not self.cache.isDarkmoonOpen then
+      objectiveProgress.pointsEarned = 0
+      objectiveProgress.pointsTotal = 0
+      objectiveProgress.questsCompleted = 0
+      objectiveProgress.questsTotal = 0
+    end
+  end
 
-            progress.pointsEarned = catchUpInfo.quantity - sumPointsEarned
-            progress.pointsTotal = catchUpInfo.maxQuantity - sumPointsTotal
-
-            if progress.pointsEarned < progress.pointsTotal then
-              progress.questsTotal = progress.pointsTotal - progress.pointsEarned
+  -- Requirements
+  if objective.requires and #objective.requires > 0 then
+    for _, requirement in pairs(objective.requires) do
+      ---@type WK_ObjectiveProgressRequirement
+      local objectiveProgressRequirement = {
+        requirement = requirement,
+        leftText = requirement.name or "",
+        rightText = format("%d", requirement.amount),
+        isCompleted = false,
+      }
+      if requirement.type == "quest" then
+        character.completed = character.completed or {}
+        if requirement.match == "all" then
+          for _, questID in pairs(requirement.quests) do
+            local isCompleted = false
+            if character == currentCharacter then
+              isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
+              character.completed[questID] = isCompleted
             else
-              progress.questsTotal = progress.pointsTotal
-              progress.questsCompleted = progress.pointsTotal
+              isCompleted = character.completed[questID] or false
             end
-
-            table.insert(self.cache.weeklyProgress, progress)
+            objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+            if isCompleted then
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+            end
+          end
+        end
+        if requirement.match == "any" then
+          objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+          for _, questID in pairs(requirement.quests) do
+            local isCompleted = false
+            if character == currentCharacter then
+              isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
+              character.completed[questID] = isCompleted
+            else
+              isCompleted = character.completed[questID] or false
+            end
+            if isCompleted then
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+              break
+            end
           end
         end
       end
+      if requirement.type == "item" then
+        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+        local itemID = requirement.id
+        if itemID and itemID > 0 then
+          local characterItem = self:GetCharacterItem(character, itemID)
+          if characterItem.quantity and characterItem.quantity >= requirement.amount then
+            objectiveProgressRequirement.isCompleted = true
+            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+          end
+          objectiveProgressRequirement.leftText = format("%s %s", CreateSimpleTextureMarkup(characterItem.iconFileID > 0 and characterItem.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), characterItem.link or "Loading...")
+          objectiveProgressRequirement.rightText = format("%d / %d", characterItem.quantity, requirement.amount)
+        end
+      end
+      if requirement.type == "currency" then
+        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+        local currencyID = requirement.id
+        if currencyID and currencyID > 0 then
+          local characterCurrency = self:GetCharacterCurrency(character, currencyID)
+          if characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
+            objectiveProgressRequirement.isCompleted = true
+            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+          end
+          local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency.quality or 0)
+          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
+          objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency.quantity, requirement.amount)
+        end
+      end
+      if requirement.type == "renown" then
+        character.factions = character.factions or {}
+        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+        local renownInfo = C_MajorFactions.GetMajorFactionData(requirement.id)
+        if renownInfo then
+          local renownLevel = 0
+          if character == currentCharacter then
+            renownLevel = C_MajorFactions.GetCurrentRenownLevel(requirement.id) or 0
+            character.factions[requirement.id] = character.factions[requirement.id] or {id = requirement.id, level = 0}
+            character.factions[requirement.id].level = renownLevel
+          elseif character.factions[requirement.id] then
+            renownLevel = character.factions[requirement.id].level
+          end
+          if renownLevel >= requirement.amount then
+            objectiveProgressRequirement.isCompleted = true
+            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+          end
+          objectiveProgressRequirement.leftText = renownInfo.name
+          objectiveProgressRequirement.rightText = format("%d / %d", renownLevel, requirement.amount)
+        end
+      end
+      if requirement.type == "skill" then
+        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+        objectiveProgressRequirement.leftText = (skillLine and skillLine.name) or "Profession skill"
+        objectiveProgressRequirement.rightText = format("%d / %d", 0, requirement.amount)
+
+        for _, characterProfession in pairs(character.professions) do
+          if characterProfession.skillLineVariantID == skillLineVariant.id then
+            local skillLevel = characterProfession.skillLevel or 0
+            if skillLevel >= requirement.amount then
+              objectiveProgressRequirement.isCompleted = true
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+            end
+            objectiveProgressRequirement.rightText = format("%d / %d", skillLevel, requirement.amount)
+            break
+          end
+        end
+      end
+      table.insert(objectiveProgress.requirements, objectiveProgressRequirement)
+    end
+  end
+
+  if objectiveProgress.pointsEarned >= objectiveProgress.pointsTotal then
+    objectiveProgress.isCompleted = true
+    -- Mark item rewards as looted
+    if objective.itemID and objective.itemID > 0 then
+      objectiveProgress.items[objective.itemID] = true
+    end
+  end
+
+  self.cache.progressCache[character.GUID] = self.cache.progressCache[character.GUID] or wipe(self.cache.progressCache[character.GUID] or {})
+  table.insert(self.cache.progressCache[character.GUID], objectiveProgress)
+  return objectiveProgress
+end
+
+-- Get the progress for all objectives for a single category
+---@param character WK_Character
+---@param objectiveCategory WK_ObjectiveCategory
+---@return WK_CategoryProgress
+function Data:GetCategoryProgress(character, objectiveCategory)
+  local categories = self:GetObjectiveCategories()
+  local objectives = self:GetObjectives()
+  ---@type WK_CategoryProgress
+  local categoryProgress = {
+    character = character,
+    objectiveCategory = objectiveCategory,
+    objectivesCompleted = 0,
+    objectivesTotal = 0,
+    pointsEarned = 0,
+    pointsTotal = 0,
+    requirementsMet = 0,
+    requirementsTotal = 0,
+    requirements = {},
+    items = {},
+  }
+
+  Utils:TableForEach(categories, function(category)
+    -- Skip categories we don't care about
+    if category.id ~= objectiveCategory.id then
+      return
+    end
+
+    Utils:TableForEach(objectives, function(objective)
+      -- Skip objectives we don't care about
+      if objective.categoryID ~= objectiveCategory.id then
+        return
+      end
+
+      local objectiveProgress = self:GetObjectiveProgress(character, objective)
+      if not objectiveProgress then return end
+      if objectiveProgress.isCompleted then
+        categoryProgress.objectivesCompleted = objectiveProgress.questsCompleted + 1
+      end
+      categoryProgress.objectivesTotal = objectiveProgress.questsTotal + 1
+      categoryProgress.pointsEarned = categoryProgress.pointsEarned + objectiveProgress.pointsEarned
+      categoryProgress.pointsTotal = categoryProgress.pointsTotal + objectiveProgress.pointsTotal
+      categoryProgress.requirementsMet = categoryProgress.requirementsMet + objectiveProgress.requirementsMet
+      categoryProgress.requirementsTotal = categoryProgress.requirementsTotal + objectiveProgress.requirementsTotal
+      categoryProgress.requirements = Utils:TableMerge(categoryProgress.requirements, objectiveProgress.requirements)
+      categoryProgress.items = Utils:TableMerge(categoryProgress.items, objectiveProgress.items, true)
     end)
   end)
 
-  return self.cache.weeklyProgress
+  return categoryProgress
+end
+
+-- Get the progress for all objectives for a single profession.
+---@param character WK_Character
+---@param profession WK_CharacterProfession
+---@return WK_ProfessionProgress
+function Data:GetProfessionProgress(character, profession)
+  ---@type WK_ProfessionProgress
+  local professionProgress = {
+    character = character,
+    profession = profession,
+    objectivesCompleted = 0,
+    objectivesTotal = 0,
+    pointsEarned = 0,
+    pointsTotal = 0,
+    requirementsMet = 0,
+    requirementsTotal = 0,
+    requirements = {},
+    items = {},
+  }
+
+  local objectives = self:GetObjectives()
+  Utils:TableForEach(objectives, function(objective)
+    if objective.skillLineVariantID ~= profession.skillLineVariantID then
+      return
+    end
+    local objectiveProgress = self:GetObjectiveProgress(character, objective)
+    professionProgress.objectivesCompleted = professionProgress.objectivesCompleted + objectiveProgress.questsCompleted
+    professionProgress.objectivesTotal = professionProgress.objectivesTotal + objectiveProgress.questsTotal
+    professionProgress.pointsEarned = professionProgress.pointsEarned + objectiveProgress.pointsEarned
+    professionProgress.pointsTotal = professionProgress.pointsTotal + objectiveProgress.pointsTotal
+    professionProgress.requirementsMet = professionProgress.requirementsMet + objectiveProgress.requirementsMet
+    professionProgress.requirementsTotal = professionProgress.requirementsTotal + objectiveProgress.requirementsTotal
+    professionProgress.requirements = Utils:TableMerge(professionProgress.requirements, objectiveProgress.requirements)
+    professionProgress.items = Utils:TableMerge(professionProgress.items, objectiveProgress.items, true)
+  end)
+
+  return professionProgress
+end
+
+---@param character WK_Character
+---@param objectiveCategory WK_ObjectiveCategory
+---@param characterProfession WK_CharacterProfession
+---@return WK_CategoryProfessionProgress
+function Data:GetCategoryProfessionProgress(character, objectiveCategory, characterProfession)
+  ---@type WK_CategoryProfessionProgress
+  local categoryProfessionProgress = {
+    character = character,
+    category = objectiveCategory,
+    profession = characterProfession,
+    objectivesCompleted = 0,
+    objectivesTotal = 0,
+    pointsEarned = 0,
+    pointsTotal = 0,
+    requirementsMet = 0,
+    requirementsTotal = 0,
+    requirements = {},
+    items = {},
+  }
+
+  local objectives = self:GetObjectives()
+  Utils:TableForEach(objectives, function(objective)
+    -- Skip objectives we don't care about
+    if objective.categoryID ~= objectiveCategory.id then
+      return
+    end
+    -- Skip objectives we don't care about
+    if objective.skillLineVariantID ~= characterProfession.skillLineVariantID then
+      return
+    end
+
+    local objectiveProgress = self:GetObjectiveProgress(character, objective)
+    categoryProfessionProgress.objectivesCompleted = categoryProfessionProgress.objectivesCompleted + objectiveProgress.questsCompleted
+    categoryProfessionProgress.objectivesTotal = categoryProfessionProgress.objectivesTotal + objectiveProgress.questsTotal
+    categoryProfessionProgress.pointsEarned = categoryProfessionProgress.pointsEarned + objectiveProgress.pointsEarned
+    categoryProfessionProgress.pointsTotal = categoryProfessionProgress.pointsTotal + objectiveProgress.pointsTotal
+    categoryProfessionProgress.requirementsMet = categoryProfessionProgress.requirementsMet + objectiveProgress.requirementsMet
+    categoryProfessionProgress.requirementsTotal = categoryProfessionProgress.requirementsTotal + objectiveProgress.requirementsTotal
+    categoryProfessionProgress.requirements = Utils:TableMerge(categoryProfessionProgress.requirements, objectiveProgress.requirements)
+    categoryProfessionProgress.items = Utils:TableMerge(categoryProfessionProgress.items, objectiveProgress.items, true)
+  end)
+
+  return categoryProfessionProgress
+end
+
+---@param character WK_Character
+---@param itemID integer Item ID
+---@return WK_CharacterItem
+function Data:GetCharacterItem(character, itemID)
+  local currentCharacter = self:GetCharacter()
+  character.items = character.items or {}
+
+  ---@type WK_CharacterItem
+  local characterItem = {
+    id = itemID,
+    name = "Loading...",
+    link = "",
+    quantity = 0,
+    iconFileID = 0,
+    quality = 0,
+  }
+
+  -- If the item is already in the character's items table, use that instead of creating a new one
+  if type(character.items[itemID]) == "table" then
+    characterItem = character.items[itemID]
+  end
+
+  -- If the character is the current character, get the item info from the game
+  if currentCharacter and character == currentCharacter then
+    local itemName, itemLink, itemQuality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
+    local itemCount = C_Item.GetItemCount(itemID)
+    characterItem.name = itemName
+    characterItem.link = itemLink
+    characterItem.quantity = itemCount
+    characterItem.iconFileID = itemTexture
+    characterItem.quality = itemQuality
+  end
+
+  character.items[itemID] = characterItem
+  return characterItem
+end
+
+---@param character WK_Character
+---@param currencyID integer Currency ID
+---@return WK_CharacterCurrency
+function Data:GetCharacterCurrency(character, currencyID)
+  local currentCharacter = self:GetCharacter()
+  character.currencies = character.currencies or {}
+
+  ---@type WK_CharacterCurrency
+  local characterCurrency = {
+    id = currencyID,
+    name = "Loading...",
+    quantity = 0,
+    maxQuantity = 0,
+    iconFileID = 0,
+    quality = 0,
+  }
+
+  -- If the currency is already in the character's currencies table, use that instead of creating a new one
+  if type(character.currencies[currencyID]) == "table" then
+    characterCurrency = character.currencies[currencyID]
+  end
+
+  -- If the character is the current character, get the currency info from the game
+  if currentCharacter and character == currentCharacter then
+    local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
+    if currencyInfo then
+      characterCurrency.name = currencyInfo.name
+      characterCurrency.quantity = currencyInfo.quantity
+      characterCurrency.maxQuantity = currencyInfo.maxQuantity
+      characterCurrency.iconFileID = currencyInfo.iconFileID
+      characterCurrency.quality = currencyInfo.quality
+    end
+  end
+
+  character.currencies[currencyID] = characterCurrency
+  return characterCurrency
 end

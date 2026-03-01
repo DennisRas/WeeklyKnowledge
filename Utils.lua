@@ -166,10 +166,15 @@ end
 ---@generic T
 ---@param tbl1 T[]
 ---@param tbl2 T[]
+---@param preserveKeys boolean?
 ---@return T[]
-function Utils:TableMerge(tbl1, tbl2)
-  self:TableForEach(tbl2, function(v)
-    table.insert(tbl1, v)
+function Utils:TableMerge(tbl1, tbl2, preserveKeys)
+  self:TableForEach(tbl2, function(v, k)
+    if preserveKeys then
+      tbl1[k] = v
+    else
+      table.insert(tbl1, v)
+    end
   end)
   return tbl1
 end
