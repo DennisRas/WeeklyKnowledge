@@ -328,8 +328,8 @@ function Data:TaskWeeklyReset()
   return hasReset
 end
 
----Clear the weekly progress cache.
----@param clearAll boolean? Clear weekly progress for all characters if true
+---Clear the progress cache.
+---@param clearAll boolean? Clear progress for all characters if true
 ---@return table<string, WK_ObjectiveProgress>
 function Data:ClearProgressCache(clearAll)
   if clearAll then
@@ -468,8 +468,8 @@ function Data:ScanProfessions()
             enabled = true,
             skillLineID = skillLineVariant.skillLineID,
             skillLineVariantID = tradeSkillLineID,
-            skillLevel = 0,
-            skillMaxLevel = 0,
+            skillLevel = skillLevel,
+            skillMaxLevel = maxSkillLevel,
             knowledgeLevel = 0,
             knowledgeMaxLevel = 0,
             knowledgeUnspent = 0,
@@ -494,6 +494,17 @@ function Data:ScanProfessions()
     -- Okay let's just give up here. This is not a profession we care about.
     if not profession then
       return
+    end
+
+    do -- This stuff only returns real data if the TradeSkillUI is open
+      local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+      if professionInfo.professionID > 0 then
+        local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(tradeSkillLineID)
+        if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
+          profession.skillLevel = professionVariantInfo.skillLevel
+          profession.skillMaxLevel = professionVariantInfo.maxSkillLevel
+        end
+      end
     end
 
     -- Get specialization currency info

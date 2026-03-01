@@ -690,9 +690,11 @@ function Main:GetTableColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(_, characterProfession)
+        local text = "-"
+        local color = WHITE_FONT_COLOR
         if not characterProfession.skillLevel or characterProfession.skillLevel == 0 then
           return {
-            text = "-",
+            text = color:WrapTextInColorCode(text),
             onEnter = function(cellFrame)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText("No data", 1, 1, 1);
@@ -704,7 +706,11 @@ function Main:GetTableColumns(unfiltered)
             end,
           }
         end
-        return {text = characterProfession.skillLevel > 0 and characterProfession.skillLevel == characterProfession.skillMaxLevel and GREEN_FONT_COLOR:WrapTextInColorCode(characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel) or characterProfession.skillLevel .. " / " .. characterProfession.skillMaxLevel}
+        if characterProfession.skillLevel > 0 and characterProfession.skillLevel == characterProfession.skillMaxLevel then
+          color = GREEN_FONT_COLOR
+        end
+        text = color:WrapTextInColorCode(format("%d / %d", characterProfession.skillLevel, characterProfession.skillMaxLevel))
+        return {text = text}
       end,
     },
     {
