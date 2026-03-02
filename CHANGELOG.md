@@ -1,9 +1,15 @@
 # Changelog
 
-## v1.1.11 - ?
+## v1.2.0 - 2026-03-02
+
+This is a massive update and there's a big chance that your character data may break.  
+If that happens then I urge you to log your characters again and open your profession windows.  
+Thank you to everyone who's been helping out testing, giving feedback and providing data and insight.  
+If you experience any issues, reach out on [https://github.com/DennisRas/WeeklyKnowledge](https://github.com/DennisRas/WeeklyKnowledge) or write a comment on CurseForge.
 
 ### Added
 
+- Added Midnight data - Some data still need to be found and/or updated.
 - Added a new option to remove a character from the addon via the Characters dropdown.
 - Added keybindings to toggle the windows (Options -> Keybindings -> WeeklyKnowledge). Credit to narcolic for the feature (PR #85).
 - Added Unique objectives for the Undermine renown quartermaster (Smaks Topskimmer). Credit to pepedressingroom for the data.
@@ -26,7 +32,7 @@
 - Removed the per-character checkbox in the Character dropdown. The character list is now based on the toggled professions.
 - The addon now only loads/updates while out of combat. You can open the windows after combat. You can always close them, even in combat.
 - Updated the Repeatable status to Catch-Up
-- Updated a shit ton of location hints - Yeah this took a lot of time :-P
+- Updated some location hints - Yeah this takes a lot of time and many are still missing :-P
 - Checklist window no longer changes window size when no professions or objectives are active.
 - Updated the addon description.
 
