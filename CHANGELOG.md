@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.1 - 2026-03-03
+
+### Added
+
+- Added new tooltips for First Craft, Darkmoon and Catch-Up.
+
+### Updated
+
+- Updated the tooltips for many of the columns and Checklist info.
+
+### Fixed
+
+- Fixed an issue during first login: Progress being processed for the first time was causing non-cached item issues.
+
 ## v1.2.0 - 2026-03-02
 
 This is a massive update and there's a big chance that your character data may break.  

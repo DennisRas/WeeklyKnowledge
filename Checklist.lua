@@ -904,55 +904,79 @@ function Checklist:GetColumns(unfiltered)
       width = 50,
       align = "CENTER",
       cell = function(data)
-        local TomTom = _G["TomTom"]
+        local TomTomGlobal = _G["TomTom"]
         local mapInfo = nil
-        local point = nil
+        local mapPoint = nil
+
         if data.objective.loc and data.objective.loc.m then
           mapInfo = C_Map.GetMapInfo(data.objective.loc.m)
         end
+
         if mapInfo then
-          point = UiMapPoint.CreateFromCoordinates(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100)
+          mapPoint = UiMapPoint.CreateFromCoordinates(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100)
         end
+
         return {
           text = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
           onEnter = function(columnFrame)
             local showTooltip = function()
               GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+
               if data.objective.loc and data.objective.loc.hint then
                 GameTooltip:AddLine(data.objective.loc.hint, nil, nil, nil, true)
+              elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+                local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
+                if objectiveCategory then
+                  GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
+                end
               end
+
               if mapInfo then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
               end
+
               if data.objective.loc and data.objective.loc.x then
                 if not mapInfo then
                   GameTooltip:AddLine(" ")
                 end
                 GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", data.objective.loc.x, data.objective.loc.y), nil, nil, nil, 1, 1, 1)
               end
-              -- Show unlock requirements
-              if Utils:TableCount(data.progress.requirements) > 0 then
-                GameTooltip:AddLine(" ")
-                if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-                  GameTooltip:AddLine("Unlock Catch-Up This Week:")
-                  Utils:TableForEach(data.progress.requirements, function(requirement)
-                    GameTooltip:AddDoubleLine(requirement.leftText, CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12), 1, 1, 1, 1, 1, 1)
-                  end)
-                else
-                  GameTooltip:AddLine("Requirements:")
-                  Utils:TableForEach(data.progress.requirements, function(requirement)
-                    GameTooltip:AddDoubleLine(requirement.leftText, requirement.rightText, 1, 1, 1, 1, 1, 1)
-                  end)
-                end
+
+              local requirementsHeading = "Requirements:"
+              if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+                requirementsHeading = "Unlock Catch-Up This Week:"
               end
 
-              -- Show item rewards
+              -- Requirements
+              if Utils:TableCount(data.progress.requirements) > 0 then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine(requirementsHeading)
+                Utils:TableForEach(data.progress.requirements, function(requirement)
+                  local leftText = requirement.leftText
+                  local rightText = requirement.rightText
+                  if requirement.requirement.type == "item" then
+                    local characterItem = Data:GetCharacterItem(data.character, requirement.requirement.id)
+                    local item = Data.cache.items[requirement.requirement.id]
+                    local itemCached = item and item:IsItemDataCached()
+                    local icon = itemCached and item:GetItemIcon() or 134400
+                    local name = itemCached and item:GetItemLink() or "Loading..."
+                    leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
+                    rightText = format("%d / %d", characterItem.quantity or 0, requirement.requirement.amount or 0)
+                  elseif requirement.requirement.type == "quest" then
+                    rightText = CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
+                  end
+
+                  GameTooltip:AddDoubleLine(leftText, rightText, 1, 1, 1, 1, 1, 1)
+                end)
+              end
+
+              -- Item Rewards
               if Utils:TableCount(data.progress.items) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("Rewards:")
-                for itemID, itemLooted in pairs(data.progress.items) do
+                Utils:TableForEach(data.progress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
@@ -962,33 +986,44 @@ function Checklist:GetColumns(unfiltered)
                   else
                     GameTooltip:AddDoubleLine(
                       format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name),
-                      CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12),
+                      CreateAtlasMarkup(isLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12),
                       1, 1, 1, 1, 1, 1
                     )
                   end
-                end
+                end)
               end
 
-              if point then
-                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) or TomTom then
+              if mapPoint then
+                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) or TomTomGlobal then
                   GameTooltip:AddLine(" ")
                 end
                 if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
                   GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                   GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 end
-                if TomTom then
+                if TomTomGlobal then
                   GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 end
               end
               GameTooltip:Show()
             end
 
+            -- Continue on item load
             if Utils:TableCount(data.progress.items) > 0 then
-              for itemID, _ in pairs(data.progress.items) do
+              Utils:TableForEach(data.progress.items, function(isLooted, itemID)
                 Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
                 Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
-              end
+              end)
+            end
+
+            -- Continue on item requirement load
+            if Utils:TableCount(data.progress.requirements) > 0 then
+              Utils:TableForEach(data.progress.requirements, function(requirement)
+                if requirement.requirement.type == "item" then
+                  Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
+                  Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
+                end
+              end)
             end
 
             showTooltip()
@@ -997,10 +1032,10 @@ function Checklist:GetColumns(unfiltered)
             GameTooltip:Hide()
           end,
           onClick = function()
-            if point then
-              if IsAltKeyDown() and TomTom then
+            if mapPoint then
+              if IsAltKeyDown() and TomTomGlobal then
                 local text = "Objective"
-                TomTom:AddWaypoint(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100, {title = text, from = addonName})
+                TomTomGlobal:AddWaypoint(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100, {title = text, from = addonName})
               elseif C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
                 if IsModifiedClick("CHATLINK") then
                   local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", data.objective.loc.m, data.objective.loc.x * 100, data.objective.loc.y * 100, MAP_PIN_HYPERLINK)
@@ -1008,7 +1043,7 @@ function Checklist:GetColumns(unfiltered)
                     ChatFrame_OpenChat(hyperlink);
                   end
                 else
-                  C_Map.SetUserWaypoint(point)
+                  C_Map.SetUserWaypoint(mapPoint)
                   C_SuperTrack.SetSuperTrackedUserWaypoint(true)
                 end
               end

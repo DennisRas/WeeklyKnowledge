@@ -899,8 +899,8 @@ function Data:GetObjectiveProgress(character, objective)
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
-          objectiveProgressRequirement.leftText = format("%s %s", CreateSimpleTextureMarkup(characterItem.iconFileID > 0 and characterItem.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), characterItem.link or "Loading...")
-          objectiveProgressRequirement.rightText = format("%d / %d", characterItem.quantity, requirement.amount)
+          objectiveProgressRequirement.leftText = format("ItemID: %d", itemID)
+          objectiveProgressRequirement.rightText = format("%d / %d", characterItem.quantity or 0, requirement.amount or 0)
         end
       end
       if requirement.type == "currency" then
@@ -913,7 +913,7 @@ function Data:GetObjectiveProgress(character, objective)
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
           local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency.quality or 0)
-          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
+          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
           objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency.quantity, requirement.amount)
         end
       end

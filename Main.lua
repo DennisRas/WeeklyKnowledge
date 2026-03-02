@@ -933,103 +933,97 @@ function Main:GetTableColumns(unfiltered)
         return {
           text = text,
           onEnter = function(cellFrame)
-            if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
-              local showTooltip = function()
-                GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                if categoryProfessionProgress.pointsTotal > 0 then
-                  GameTooltip:SetText(objectiveCategory.name, 1, 1, 1)
-                  GameTooltip:AddDoubleLine("Points Earned:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                  GameTooltip:AddDoubleLine("Points Available:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                  GameTooltip:AddDoubleLine("Max Points:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+            local showTooltip = function()
+              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+              GameTooltip:SetText(objectiveCategory.name, 1, 1, 1)
 
-                  -- Show unlock requirements
-                  if Utils:TableCount(categoryProfessionProgress.requirements) > 0 then
-                    GameTooltip:AddLine(" ")
-                    GameTooltip:AddLine("Unlock Catch-Up This Week:")
-                    Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
-                      GameTooltip:AddDoubleLine(requirement.leftText, CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12), 1, 1, 1, 1, 1, 1)
-                    end)
-                  end
+              local requirementsHeading = "Requirements:"
 
-                  -- Show item rewards
-                  if Utils:TableCount(categoryProfessionProgress.items) > 0 then
-                    GameTooltip:AddLine(" ")
-                    GameTooltip:AddLine("Rewards:")
-                    for itemID, _ in pairs(categoryProfessionProgress.items) do
-                      local item = Data.cache.items[itemID]
+              if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+                GameTooltip:AddDoubleLine("Points Earned:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Points Available:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Max Points:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+                requirementsHeading = "Unlock Catch-Up This Week:"
+              elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.FirstCraft then
+                GameTooltip:AddDoubleLine("Completed:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Remaining:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Max:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+              elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+                GameTooltip:AddDoubleLine("Quests:", format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+              else
+                GameTooltip:AddDoubleLine("Items:", format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+              end
+
+              -- Requirements
+              if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp or objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+                if Utils:TableCount(categoryProfessionProgress.requirements) > 0 then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddLine(requirementsHeading)
+                  Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
+                    local leftText = requirement.leftText
+                    local rightText = requirement.rightText
+                    if requirement.requirement.type == "item" then
+                      local characterItem = Data:GetCharacterItem(character, requirement.requirement.id)
+                      local item = Data.cache.items[requirement.requirement.id]
                       local itemCached = item and item:IsItemDataCached()
                       local icon = itemCached and item:GetItemIcon() or 134400
                       local name = itemCached and item:GetItemLink() or "Loading..."
-                      GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
+                      leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
+                      rightText = format("%d / %d", characterItem.quantity or 0, requirement.requirement.amount or 0)
+                    elseif requirement.requirement.type == "quest" then
+                      rightText = CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
                     end
-                  end
-                else
-                  GameTooltip:SetText("No data", 1, 1, 1);
-                  if skillLineVariant and skillLineVariant.expansionID == Enum.ExpansionLevel.Dragonflight then
-                    GameTooltip:AddLine("Addon has not been updated for the Dragonflight expansion yet.\n\nYou can still track your skill/knowledge level meanwhile.\n\nIt is not guaranteed that the Dragonflight data will be added if the system is too different from the other expansions.", nil, nil, nil, true);
-                  else
-                    GameTooltip:AddLine("Log in to fetch the data for this character.", nil, nil, nil, true);
-                  end
+
+                    GameTooltip:AddDoubleLine(leftText, rightText, 1, 1, 1, 1, 1, 1)
+                  end)
                 end
-                GameTooltip:Show()
               end
 
+              -- Item Rewards
               if Utils:TableCount(categoryProfessionProgress.items) > 0 then
-                for itemID, _ in pairs(categoryProfessionProgress.items) do
-                  Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
-                  Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
-                end
-              end
-
-              showTooltip()
-            elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.FirstCraft then
-              GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
-              GameTooltip:AddDoubleLine("Completed:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Remaining:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Max:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
-              GameTooltip:Show()
-            else
-              local label = "Items:"
-              if objectiveCategory.type == "quest" then
-                label = "Quests:"
-              elseif objectiveCategory.type == "recipe" then
-                label = "Crafting Recipes:"
-              end
-
-              local showTooltip = function()
-                GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-                GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
-                GameTooltip:AddDoubleLine(label, format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
-
-                -- Show item rewards
-                if Utils:TableCount(categoryProfessionProgress.items) > 0 then
-                  GameTooltip:AddLine(" ")
-                  for itemID, itemLooted in pairs(categoryProfessionProgress.items) do
-                    local item = Data.cache.items[itemID]
-                    local itemCached = item and item:IsItemDataCached()
-                    local icon = itemCached and item:GetItemIcon() or 134400
-                    local name = itemCached and item:GetItemLink() or "Loading..."
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("Rewards:")
+                Utils:TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
+                  local item = Data.cache.items[itemID]
+                  local itemCached = item and item:IsItemDataCached()
+                  local icon = itemCached and item:GetItemIcon() or 134400
+                  local name = itemCached and item:GetItemLink() or "Loading..."
+                  if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+                    GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
+                  else
                     GameTooltip:AddDoubleLine(
                       format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name),
-                      CreateAtlasMarkup(itemLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12),
+                      CreateAtlasMarkup(isLooted and "common-icon-checkmark" or "common-icon-redx", 12, 12),
                       1, 1, 1, 1, 1, 1
                     )
                   end
-                end
-                GameTooltip:Show()
+                end)
               end
 
-              if Utils:TableCount(categoryProfessionProgress.items) > 0 then
-                for itemID, _ in pairs(categoryProfessionProgress.items) do
-                  Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
-                  Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
-                end
-              end
-
-              showTooltip()
+              GameTooltip:Show()
             end
+
+            -- Continue on item load
+            if Utils:TableCount(categoryProfessionProgress.items) > 0 then
+              Utils:TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
+                Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
+                Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
+              end)
+            end
+
+            -- Continue on item requirement load
+            if Utils:TableCount(categoryProfessionProgress.requirements) > 0 then
+              Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
+                if requirement.requirement.type == "item" then
+                  Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
+                  Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
+                end
+              end)
+            end
+
+            showTooltip()
           end,
           onLeave = function()
             GameTooltip:Hide()
