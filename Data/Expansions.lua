@@ -8,7 +8,7 @@ local Data = addon.Data
 
 ---@type WK_Expansion[]
 Data.Expansions = {
-  {id = Enum.ExpansionLevel.Dragonflight, abbr = "DF",       name = "Dragonflight"},
-  {id = Enum.ExpansionLevel.WarWithin,    abbr = "TWW",      name = "The War Within"},
-  {id = Enum.ExpansionLevel.Midnight,     abbr = "Midnight", name = "Midnight"},
+  -- {id = Enum.ExpansionLevel.Dragonflight, abbr = "DF",       name = "Dragonflight"}, -- Disable for now since it's not set up yet.
+  {id = Enum.ExpansionLevel.WarWithin, abbr = "TWW",      name = "The War Within"},
+  {id = Enum.ExpansionLevel.Midnight,  abbr = "Midnight", name = "Midnight"},
 }
