@@ -132,6 +132,7 @@ function Core:OnEnable()
       "TRADE_SKILL_LIST_UPDATE",
       "TRADE_SKILL_SHOW",
       "TRAIT_CONFIG_UPDATED",
+      "TRAIT_TREE_CURRENCY_INFO_UPDATED",
     },
     1,
     function()

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.2 - 2026-03-03
+
+### Fixed
+
+- Knowledge and other numbers now update when you open an item that gives knowledge points
+
 ## v1.2.1 - 2026-03-03
 
 ### Added
