@@ -869,15 +869,13 @@ function Checklist:GetColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
-        local result = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
-        if data.progress.questsTotal == 0 then
-          result = ""
-        elseif data.progress.isCompleted then
-          result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
+        local text = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
+        if data.progress.isCompleted then
+          text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
         end
 
         return {
-          text = result,
+          text = text,
         }
       end,
     },
@@ -887,15 +885,13 @@ function Checklist:GetColumns(unfiltered)
       align = "CENTER",
       toggleHidden = true,
       cell = function(data)
-        local result = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
-        if data.progress.questsTotal == 0 then
-          result = ""
-        elseif data.progress.isCompleted then
-          result = GREEN_FONT_COLOR:WrapTextInColorCode(result)
+        local text = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
+        if data.progress.isCompleted then
+          text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
         end
 
         return {
-          text = result,
+          text = text,
         }
       end,
     },

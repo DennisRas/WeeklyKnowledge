@@ -804,10 +804,12 @@ function Data:GetObjectiveProgress(character, objective)
   -- Catch Up
   if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
     local characterCurrency = self:GetCharacterCurrency(character, skillLineVariant.catchUpCurrencyID)
-    objectiveProgress.pointsEarned = characterCurrency.quantity or 0
-    objectiveProgress.pointsTotal = characterCurrency.maxQuantity or 0
-    objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
-    objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
+    if characterCurrency then
+      objectiveProgress.pointsEarned = characterCurrency.quantity or 0
+      objectiveProgress.pointsTotal = characterCurrency.maxQuantity or 0
+      objectiveProgress.questsCompleted = characterCurrency.quantity or 0
+      objectiveProgress.questsTotal = characterCurrency.maxQuantity or 0
+    end
   end
 
   -- Quests
@@ -908,13 +910,13 @@ function Data:GetObjectiveProgress(character, objective)
         local currencyID = requirement.id
         if currencyID and currencyID > 0 then
           local characterCurrency = self:GetCharacterCurrency(character, currencyID)
-          if characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
+          if characterCurrency and characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
-          local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency.quality or 0)
-          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
-          objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency.quantity, requirement.amount)
+          local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency and characterCurrency.quality or 0)
+          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency and characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency and characterCurrency.name)
+          objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency and characterCurrency.quantity or 0, requirement.amount)
         end
       end
       if requirement.type == "renown" then
@@ -959,7 +961,7 @@ function Data:GetObjectiveProgress(character, objective)
     end
   end
 
-  if objectiveProgress.pointsEarned >= objectiveProgress.pointsTotal then
+  if objectiveProgress.pointsEarned >= objectiveProgress.pointsTotal and objectiveProgress.pointsTotal > 0 then
     objectiveProgress.isCompleted = true
     -- Mark item rewards as looted
     if objective.itemID and objective.itemID > 0 then
@@ -1145,7 +1147,7 @@ end
 
 ---@param character WK_Character
 ---@param currencyID integer Currency ID
----@return WK_CharacterCurrency
+---@return WK_CharacterCurrency|nil
 function Data:GetCharacterCurrency(character, currencyID)
   local currentCharacter = self:GetCharacter()
   character.currencies = character.currencies or {}
@@ -1174,6 +1176,9 @@ function Data:GetCharacterCurrency(character, currencyID)
       characterCurrency.maxQuantity = currencyInfo.maxQuantity
       characterCurrency.iconFileID = currencyInfo.iconFileID
       characterCurrency.quality = currencyInfo.quality
+    else
+      character.currencies[currencyID] = nil
+      return nil
     end
   end
 

@@ -760,7 +760,7 @@ function Main:GetTableColumns(unfiltered)
           color = RED_FONT_COLOR
         end
 
-        local text = maxQuantity > 0 and color:WrapTextInColorCode(format("%d / %d", estimatedQuantity, maxQuantity)) or "-"
+        local text = maxQuantity > 0 and color:WrapTextInColorCode(format("%d / %d", estimatedQuantity, maxQuantity)) or ""
 
         return {
           text = text,
@@ -913,17 +913,15 @@ function Main:GetTableColumns(unfiltered)
           return {text = "Error"}
         end
 
-        if categoryProfessionProgress.objectivesTotal == 0 then
-          return {text = ""}
-        end
-
         local text = format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal)
 
         if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
           text = format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal)
-          if categoryProfessionProgress.pointsEarned == 0 then
-            text = "-"
-          end
+          -- if categoryProfessionProgress.objectivesTotal == 0 then
+          --   text = "-"
+          -- end
+        elseif categoryProfessionProgress.objectivesTotal == 0 then
+          return {text = ""}
         end
 
         if categoryProfessionProgress.pointsEarned > 0 and categoryProfessionProgress.pointsEarned >= categoryProfessionProgress.pointsTotal then

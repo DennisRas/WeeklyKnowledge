@@ -2,9 +2,14 @@
 
 ## v1.2.2 - 2026-03-03
 
+### Updated
+
+- Catch-Up column now shows 0/0 when Catch-Up isn't active yet.
+- Checklist now shows 0/0 when Catch-Up isn't active yet.
+
 ### Fixed
 
-- Knowledge and other numbers now update when you open an item that gives knowledge points
+- The column Knowledge now actually updates when you open an item that gives knowledge points.
 
 ## v1.2.1 - 2026-03-03
 
