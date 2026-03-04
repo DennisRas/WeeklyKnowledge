@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.3 - ?
+
+### Added
+
+- Added more hints to unique items.
+
 ## v1.2.2 - 2026-03-04
 
 ### Added
