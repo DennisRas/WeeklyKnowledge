@@ -967,14 +967,28 @@ function Data:GetObjectiveProgress(character, objective)
   -- Quests
   if objective.quests and Utils:TableCount(objective.quests) > 0 then
     character.completed = character.completed or {}
-    for _, questID in pairs(objective.quests) do
-      if character.completed[questID] then
-        objectiveProgress.isCompleted = true
-        objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
-        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
-      end
+    -- Weekly Quests is just one quest id
+    if objective.categoryID == Enum.WK_ObjectiveCategory.WeeklyQuest then
+      Utils:TableForEach(objective.quests, function(questID)
+        if character.completed[questID] then
+          objectiveProgress.isCompleted = true
+          objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+          objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+          return
+        end
+      end)
       objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + objective.points
       objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
+    else
+      Utils:TableForEach(objective.quests, function(questID)
+        if character.completed[questID] then
+          objectiveProgress.isCompleted = true
+          objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+          objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+        end
+        objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + objective.points
+        objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
+      end)
     end
   else
     -- First Craft fallback on spellID
