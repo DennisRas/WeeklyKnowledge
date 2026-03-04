@@ -14,6 +14,7 @@
 - You can now filter the main window and checklist by multiple expansions at once instead of just one.
 - Character progress, items, quests and currencies are now stored and updated in a more reliable way to reduce missing or outdated data between sessions.
 - Changed the default expansion filter to Midnight.
+- Updated addon description with additional credit.
 
 ### Fixed
 

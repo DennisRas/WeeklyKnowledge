@@ -33,9 +33,11 @@ Special thanks to:
 - My friend Shikimi - The guy that helped me build the prototype and still to this day provides incredible feedback
 - The [No Pressure Discord](https://www.no-pressure.eu/) - Many players involved in the feedback and testing
 - The [WoWUIDev Discord](https://discord.gg/txUg39Vhc6) - Many awesome addon developers with the assist!
+- The [Myu's Knowledge Points Tracker](https://www.curseforge.com/wow/addons/myus-knowledge-points-tracker) addon - Big shoutout for data collection/updates
 - [Entelligente Ente](https://github.com/EntelligenteEnte) - Data updates and new features
 - [pepedressingroom](https://github.com/pepedressingroom) - Data updates and new features
 - [Fillip H.](https://github.com/filliph) - Feature updates and feedback
 - Many others helping out on the [WeeklyKnowledge GitHub repository](https://github.com/DennisRas/WeeklyKnowledge)
 
-If you help test, provide data, or give feedback, your contributions can be added here. Please reach out if you’d like your name included <3
+If you help test, provide data, or give feedback, your contributions may be added above.  
+Please reach out if you'd like your name included <3
