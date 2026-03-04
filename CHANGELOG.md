@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.2.3 - 2026-03-04
+## v1.2.2 - 2026-03-04
 
 ### Added
 
@@ -8,6 +8,8 @@
 
 ### Updated
 
+- Catch-Up column now shows 0/0 when Catch-Up isn't active yet.
+- Checklist now shows 0/0 when Catch-Up isn't active yet.
 - Disable Dragonflight for now.
 - You can now filter the main window and checklist by multiple expansions at once instead of just one.
 - Character progress, items, quests and currencies are now stored and updated in a more reliable way to reduce missing or outdated data between sessions.
@@ -15,19 +17,9 @@
 
 ### Fixed
 
+- The column Knowledge now actually updates when you open an item that gives knowledge points.
 - Reduced crashes and errors caused by missing or partially loaded item or currency data.
 - Fixed issues where some profession variants and first crafts were not tracked or awarded correctly in the overview.
-
-## v1.2.2 - 2026-03-03
-
-### Updated
-
-- Catch-Up column now shows 0/0 when Catch-Up isn't active yet.
-- Checklist now shows 0/0 when Catch-Up isn't active yet.
-
-### Fixed
-
-- The column Knowledge now actually updates when you open an item that gives knowledge points.
 
 ## v1.2.1 - 2026-03-03
 
