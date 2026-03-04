@@ -469,6 +469,8 @@ function Checklist:Render()
   local rows = 0
   local professionCount = 0
   local objectives = Data:GetObjectives()
+  local selectedExpansions = Data.db.global.checklist.selectedExpansions or {}
+
   do -- Table data
     Utils:TableForEach(characterProfessions, function(characterProfession)
       local skillLineVariantID = characterProfession.skillLineVariantID
@@ -476,7 +478,7 @@ function Checklist:Render()
       if not skillLineVariant then return end
 
       -- Skip if the skill line variant is not the selected expansion
-      if Data.db.global.checklist.selectedExpansion and skillLineVariant.expansionID ~= Data.db.global.checklist.selectedExpansion then
+      if Utils:TableCount(selectedExpansions) > 0 and not Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then
         -- print("Checklist: Skipping skill line variant", skillLineVariant.name, Data.db.global.checklist.selectedExpansion, skillLineVariant.expansionID)
         return
       end
