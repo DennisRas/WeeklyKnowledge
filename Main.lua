@@ -737,7 +737,7 @@ function Main:GetTableColumns(unfiltered)
       cell = function(character, characterProfession)
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return {text = ""} end
-        if not skillLineVariant.concentrationCurrencyID then return {text = ""} end
+        if not skillLineVariant.concentrationCurrencyID or skillLineVariant.concentrationCurrencyID == 0 then return {text = ""} end
         local currencyInfo = Data:GetCharacterCurrency(character, skillLineVariant.concentrationCurrencyID)
         if not currencyInfo then
           return {
