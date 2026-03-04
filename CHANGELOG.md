@@ -9,6 +9,7 @@
 ### Updated
 
 - Character progress, items, quests and currencies are now stored and updated in a more reliable way to reduce missing or outdated data between sessions.
+- Changed the default to Midnight.
 
 ### Fixed
 
