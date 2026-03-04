@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.2.3 - 2026-03-04
+
+### Added
+
+- You can now filter the main window and checklist by multiple expansions at once instead of just one.
+
+### Updated
+
+- Character progress, items, quests and currencies are now stored and updated in a more reliable way to reduce missing or outdated data between sessions.
+
+### Fixed
+
+- Reduced crashes and errors caused by missing or partially loaded item or currency data.
+- Fixed issues where some profession variants and first crafts were not tracked or awarded correctly in the overview.
+
 ## v1.2.2 - 2026-03-03
 
 ### Updated
