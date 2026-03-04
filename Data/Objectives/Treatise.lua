@@ -40,7 +40,7 @@ local objectives = {
   -- Midnight: Enchanting
   {skillLineVariantID = 2909, categoryID = category, quests = {95129}, itemID = 245759, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Engineering
-  {skillLineVariantID = 2910, categoryID = category, quests = {83728}, itemID = 245809, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  {skillLineVariantID = 2910, categoryID = category, quests = {95138}, itemID = 245809, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Herbalism
   {skillLineVariantID = 2912, categoryID = category, quests = {95130}, itemID = 245761, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Inscription

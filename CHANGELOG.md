@@ -20,6 +20,7 @@
 - The column Knowledge now actually updates when you open an item that gives knowledge points.
 - Reduced crashes and errors caused by missing or partially loaded item or currency data.
 - Fixed issues where some profession variants and first crafts were not tracked or awarded correctly in the overview.
+- Fixed treatise: Thalassian Treatise on Engineering
 
 ## v1.2.1 - 2026-03-03
 
