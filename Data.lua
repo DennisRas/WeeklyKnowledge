@@ -562,34 +562,6 @@ function Data:ScanProfessions()
     return
   end
 
-  -- MOVE THIS TO GETOBJECTIVEPROGRESS
-  -- -- Track recipes with first craft bonus
-  -- local completedFirstCrafts = {}
-  -- Utils:TableForEach(self:GetObjectives(), function(objective)
-  --   -- Skip non-recipe objectives
-  --   if objective.categoryID ~= Enum.WK_ObjectiveCategory.FirstCraft then
-  --     -- Utils:Log("Skipping non-first craft objective", objective.categoryID)
-  --     return
-  --   end
-  --   -- Skip recipes that have a working quest associated with it
-  --   if objective.quests and #objective.quests > 0 then
-  --     -- Utils:Log("Skipping recipe with working quest", objective.quests)
-  --     return
-  --   end
-
-  --   local spellID = objective.spellID
-  --   if not spellID then
-  --     -- Utils:Log("Skipping recipe without spellID", objective)
-  --     return
-  --   end
-
-  --   local isFirstCraft = C_TradeSkillUI.IsRecipeFirstCraft(spellID)
-  --   if isFirstCraft ~= nil then
-  --     completedFirstCrafts[spellID] = not isFirstCraft
-  --   end
-  -- end)
-  -- character.firstCrafts = completedFirstCrafts
-
   Utils:TableForEach(skillLineVariants, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return end
@@ -604,11 +576,11 @@ function Data:ScanProfessions()
 
     -- We are now only adding a new profession if we can actually access the profession info.
     -- This means that the TradeSKillUI must have been opened once this session.
-    if not characterProfession then
-      local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-      if professionInfo and professionInfo.professionID > 0 then
-        local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillLineVariantID)
-        if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
+    local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+    if professionInfo and professionInfo.professionID > 0 then
+      local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillLineVariantID)
+      if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
+        if not characterProfession then
           ---@type WK_CharacterProfession
           characterProfession = {
             enabled = true,
@@ -621,6 +593,9 @@ function Data:ScanProfessions()
             specializations = {},
           }
           table.insert(character.professions, characterProfession)
+        else
+          characterProfession.skillLevel = professionVariantInfo.skillLevel
+          characterProfession.skillMaxLevel = professionVariantInfo.maxSkillLevel
         end
       end
     end
@@ -635,26 +610,6 @@ function Data:ScanProfessions()
     if specializationCurrencyInfo and specializationCurrencyInfo.numAvailable then
       characterProfession.knowledgeUnspent = specializationCurrencyInfo.numAvailable or 0
     end
-
-    -- Get concentration info
-    -- local concentrationCurrencyID = C_TradeSkillUI.GetConcentrationCurrencyID(skillLineVariantID)
-    -- if concentrationCurrencyID and concentrationCurrencyID > 0 then
-    --   local currencyInfo = self:GetCharacterCurrency(character, concentrationCurrencyID)
-    --   if currencyInfo then
-    --     ---@type WK_CharacterProfessionConcentration
-    --     characterProfession.concentration = {
-    --       currencyID = currencyInfo.currencyID,
-    --       lastUpdated = GetServerTime(),
-    --       name = currencyInfo.name,
-    --       description = currencyInfo.description,
-    --       icon = currencyInfo.iconFileID,
-    --       quantity = currencyInfo.quantity,
-    --       maxQuantity = currencyInfo.maxQuantity,
-    --       rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
-    --       rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
-    --     }
-    --   end
-    -- end
 
     -- Scan knowledge trees for the profession
     local totalKnowledgeLevel = 0
@@ -739,19 +694,21 @@ function Data:ScanQuests()
   local completedQuests = {}
 
   local firstCrafts = {}
-  local firstCraftsCompleted = 0
+  local firstCraftsAvailable = 0
 
   Utils:TableForEach(objectives, function(objective)
+    -- Quests
     if objective.quests and Utils:TableCount(objective.quests) > 0 then
       Utils:TableForEach(objective.quests or {}, function(questID)
         if questID and questID > 0 then
           table.insert(quests, questID)
         end
       end)
+      -- First Craft fallback on spellID
     elseif objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
       firstCrafts[objective.spellID] = C_TradeSkillUI.IsRecipeFirstCraft(objective.spellID)
       if firstCrafts[objective.spellID] then
-        firstCraftsCompleted = firstCraftsCompleted + 1
+        firstCraftsAvailable = firstCraftsAvailable + 1
       end
     end
     if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
@@ -781,7 +738,7 @@ function Data:ScanQuests()
   character.completed = completedQuests
   character.lastUpdate = GetServerTime()
   Utils:Debug("├ Quests: ", Utils:TableCount(quests), "Completed: ", Utils:TableCount(completedQuests))
-  Utils:Debug("├ FirstCrafts: ", Utils:TableCount(firstCrafts), "Completed: ", firstCraftsCompleted)
+  Utils:Debug("├ SsellIDs: ", Utils:TableCount(firstCrafts), "FirstCrafts: ", firstCraftsAvailable)
   Utils:Debug("└ Finshed")
 end
 
@@ -976,9 +933,9 @@ function Data:GetObjectiveProgress(character, objective)
     objective = objective,
     isCompleted = false,
     questsCompleted = 0,
-    questsTotal = Utils:TableCount(objective.quests) or 0,
+    questsTotal = 0,
     pointsEarned = 0,
-    pointsTotal = objective.points or 0,
+    pointsTotal = 0,
     requirementsMet = 0,
     requirementsTotal = 0,
     requirements = {},
@@ -1009,34 +966,27 @@ function Data:GetObjectiveProgress(character, objective)
 
   -- Quests
   if objective.quests and Utils:TableCount(objective.quests) > 0 then
+    character.completed = character.completed or {}
     for _, questID in pairs(objective.quests) do
       if character.completed[questID] then
-        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+        objectiveProgress.isCompleted = true
         objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
       end
+      objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + objective.points
+      objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
     end
-  end
-
-  -- First Craft
-  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
-    character.firstCrafts = character.firstCrafts or {}
-    local isCompleted = false
-    if objective.quests and Utils:TableCount(objective.quests) > 0 then
-      Utils:TableForEach(objective.quests or {}, function(questID)
-        if questID and questID > 0 and character.completed[questID] then
-          isCompleted = true
-          return
-        end
-      end)
-    elseif objective.spellID and objective.spellID > 0 then
-      isCompleted = true
-      if character.firstCrafts[objective.spellID] then
-        isCompleted = false
+  else
+    -- First Craft fallback on spellID
+    if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+      character.firstCrafts = character.firstCrafts or {}
+      if character.firstCrafts[objective.spellID] ~= true then
+        -- objectiveProgress.isCompleted = true
+        objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
+        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
       end
-    end
-    if isCompleted then
-      objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
-      objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
+      objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + objective.points
+      objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
     end
   end
 
