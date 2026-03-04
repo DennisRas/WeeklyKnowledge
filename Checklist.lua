@@ -83,7 +83,6 @@ function Checklist:Render()
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText("Checklist")
 
-
     self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
     self.window.textbox:SetFontObject("SystemFont_Med1")
     self.window.textbox:SetPoint("TOPLEFT", self.window, "TOPLEFT", 20, -Constants.TITLEBAR_HEIGHT - 20)
@@ -568,7 +567,13 @@ function Checklist:Render()
     self.window.table:Hide()
     self.window.textbox:Hide()
   else
-    if rows == 0 then
+    if professionCount == 0 then
+      windowHeight = 100
+      self.window.textbox:SetText("It does not look like you have any active professions.\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+      self.window.textbox:Show()
+      self.window.table:Hide()
+    elseif rows == 0 then
+      self.window.textbox:SetText("It does not look like you have any objectives.\nMake sure to check the settings above.")
       windowHeight = 100
       self.window.textbox:Show()
       self.window.table:Hide()
@@ -581,15 +586,6 @@ function Checklist:Render()
   windowHeight = math.min(windowHeight, maxWindowHeight)
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
-  if professionCount == 0 then
-    self.window.textbox:SetText("It does not look like you have any active professions.\nDid you check the wrong expansion?")
-  else
-    if rows == 0 then
-      self.window.textbox:SetText("It does not look like you have any objectives.\nMake sure to check the settings top right.")
-    else
-      self.window.textbox:SetText("Good job! You are done :-)\nMake sure to take a look at your Patron Orders!")
-    end
-  end
   self.window:SetShown(Data.db.global.checklist.open)
   self.window.border:SetShown(Data.db.global.checklist.windowBorder)
   self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)

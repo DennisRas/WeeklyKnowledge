@@ -51,7 +51,6 @@ function Main:Render()
   local objectiveCategories = Data:GetObjectiveCategories()
   local tableWidth = 0
   local tableHeight = 0
-  local minWindowWidth = 300
   ---@type WK_TableData
   local tableData = {
     columns = {},
@@ -105,6 +104,13 @@ function Main:Render()
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText(addonName)
 
+    self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
+    self.window.textbox:SetFontObject("SystemFont_Med1")
+    self.window.textbox:SetPoint("TOPLEFT", self.window, "TOPLEFT", 50, -Constants.TITLEBAR_HEIGHT - 20)
+    self.window.textbox:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", -50, 20)
+    self.window.textbox:SetJustifyH("CENTER")
+    self.window.textbox:SetJustifyV("MIDDLE")
+    self.window.textbox:Hide()
 
     do -- Close Button
       self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
@@ -506,6 +512,7 @@ function Main:Render()
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
+  local rowCount = 0
   do -- Table data rows
     Utils:TableForEach(characters, function(character)
       local professions = Utils:TableFilter(character.professions or {}, function(characterProfession)
@@ -527,15 +534,31 @@ function Main:Render()
         end)
         table.insert(tableData.rows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
+        rowCount = rowCount + 1
       end)
     end)
   end
 
-  self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
+  local minWindowWidth = 500
+  local windowHeight = math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT) + 2
+  local windowWidth = math.max(tableWidth, minWindowWidth)
+
+  if rowCount == 0 then
+    windowHeight = 250
+    windowWidth = minWindowWidth
+    self.window.textbox:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    self.window.textbox:Show()
+    self.window.table:Hide()
+  else
+    self.window.textbox:Hide()
+    self.window.table:Show()
+  end
+
+  self.window.titlebar.title:SetShown(windowWidth > minWindowWidth)
   self.window.border:SetShown(Data.db.global.main.windowBorder)
   self.window.table:SetData(tableData)
-  self.window:SetWidth(math.max(tableWidth, minWindowWidth))
-  self.window:SetHeight(math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT) + 2)
+  self.window:SetWidth(windowWidth)
+  self.window:SetHeight(windowHeight)
   self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
   self.window:SetScale(Data.db.global.main.windowScale / 100)
 end
