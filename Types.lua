@@ -9,6 +9,7 @@
 
 ---@class WK_Expansion
 ---@field id Enum.ExpansionLevel
+---@field enabled boolean Whether the expansion is enabled in the addon
 ---@field abbr string Abbreviation key, e.g. "DF", "TWW", "Midnight"
 ---@field name string Full name
 
@@ -23,7 +24,7 @@
 ---@field name string
 
 ---@class WK_DefaultGlobalMain
----@field selectedExpansion Enum.ExpansionLevel? or nil for all
+---@field selectedExpansions Enum.ExpansionLevel[]? or empty table for all
 ---@field hiddenColumns table<string, boolean>
 ---@field windowScale integer
 ---@field windowBackgroundColor {r: number, g: number, b: number, a: number}
@@ -33,7 +34,7 @@
 ---@field hideLowLevelProfessions boolean? Hide professions with a skill level below 25
 
 ---@class WK_DefaultGlobalhecklist
----@field selectedExpansion Enum.ExpansionLevel? or nil for all
+---@field selectedExpansions Enum.ExpansionLevel[]? or empty table for all
 ---@field hiddenColumns table<string, boolean>
 ---@field hiddenCategories table<Enum.WK_ObjectiveCategory, boolean>
 ---@field windowScale integer
@@ -67,15 +68,7 @@
 ---@field firstCrafts table<integer, WK_CharacterFirstCraft> spellID -> WK_CharacterFirstCraft
 ---@field factions table<integer, WK_CharacterFaction> factionID -> WK_CharacterFaction
 ---@field currencies table<integer, WK_CharacterCurrency> currencyID -> WK_CharacterCurrency
----@field items table<integer, WK_CharacterItem> itemID -> WK_CharacterItem
-
----@class WK_CharacterItem
----@field id integer Item ID
----@field name string Name
----@field link string Item link
----@field quantity integer Current quantity
----@field iconFileID integer Icon file ID
----@field quality integer Quality
+---@field items table<integer, integer> itemID -> quantity
 
 ---@class WK_CharacterCurrency
 ---@field id integer Currency ID
@@ -84,6 +77,9 @@
 ---@field quality integer Quality
 ---@field quantity integer Current quantity
 ---@field maxQuantity integer Max quantity
+---@field rechargingCycleDurationMS integer Recharging cycle duration in milliseconds (e.g. 10000)
+---@field rechargingAmountPerCycle integer Recharging amount per cycle (e.g. 1)
+---@field lastUpdated number Last update time
 
 ---@class WK_CharacterFaction
 ---@field id integer Faction ID
@@ -102,19 +98,6 @@
 ---@field knowledgeMaxLevel integer
 ---@field knowledgeUnspent integer
 ---@field specializations WK_CharacterProfessionSpecialization[]
----@field catchUpCurrencyInfo CurrencyInfo?
----@field concentration WK_CharacterProfessionConcentration?
-
----@class WK_CharacterProfessionConcentration
----@field currencyID integer Currency ID
----@field lastUpdated number Last update time
----@field name string Name
----@field description string Description
----@field icon integer Icon file ID
----@field quantity integer Current quantity
----@field maxQuantity integer Max quantity
----@field rechargingCycleDurationMS integer Recharging cycle duration in milliseconds (e.g. 10000)
----@field rechargingAmountPerCycle integer Recharging amount per cycle (e.g. 1)
 
 ---@class WK_CharacterProfessionSpecialization
 ---@field rootNodeID integer
@@ -138,6 +121,7 @@
 ---@field name string Expansion-specific name (e.g. "Khaz Algar Alchemy")
 ---@field catchUpCurrencyID integer
 ---@field catchUpItemID integer
+---@field concentrationCurrencyID integer
 
 ---@class WK_ObjectiveCategory
 ---@field id Enum.WK_ObjectiveCategory

@@ -178,3 +178,56 @@ function Utils:TableMerge(tbl1, tbl2, preserveKeys)
   end)
   return tbl1
 end
+
+---Check if a table contains a specific value
+---@generic T
+---@param tbl T[]
+---@param value T
+---@return boolean
+function Utils:TableContains(tbl, value)
+  for _, v in pairs(tbl) do
+    if v == value then
+      return true
+    end
+  end
+  return false
+end
+
+---Toggle a value in a table
+---@generic T
+---@param tbl T[]
+---@param value T
+---@return T[]
+function Utils:TableToggle(tbl, value)
+  if self:TableContains(tbl, value) then
+    return self:TableFilter(tbl, function(v)
+      return v ~= value
+    end)
+  end
+  return self:TableMerge(tbl, {value})
+end
+
+---Remove duplicates from a table
+---@generic T
+---@param tbl T[]
+---@return T[]
+function Utils:TableUnique(tbl)
+  local u = {}
+  for _, v in pairs(tbl) do
+    u[v] = true
+  end
+
+  local t = {}
+  for v, _ in pairs(u) do
+    table.insert(t, v)
+  end
+  return t
+end
+
+---Print a debug message
+---@param ... any
+function Utils:Debug(...)
+  if addon.debug then
+    addon.Core:Print(...)
+  end
+end

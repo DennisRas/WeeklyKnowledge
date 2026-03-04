@@ -44,7 +44,7 @@ function Main:ToggleWindow()
 end
 
 function Main:Render()
-  local selectedExpansion = Data.db.global.main.selectedExpansion
+  local selectedExpansions = Data.db.global.main.selectedExpansions or {}
   local expansions = Data:GetExpansions()
   local characters = Data:GetCharacters()
   local columns = self:GetTableColumns()
@@ -105,12 +105,6 @@ function Main:Render()
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText(addonName)
 
-    self.window.titlebar.selectedExpansion = self.window.titlebar:CreateFontString("$parentSelectedExpansion", "OVERLAY")
-    self.window.titlebar.selectedExpansion:SetFontObject("SystemFont_Med2")
-    self.window.titlebar.selectedExpansion:SetPoint("CENTER", self.window.titlebar, "CENTER", 0, 0)
-    self.window.titlebar.selectedExpansion:SetJustifyH("CENTER")
-    self.window.titlebar.selectedExpansion:SetJustifyV("MIDDLE")
-    self.window.titlebar.selectedExpansion:SetTextColor(1, 1, 1, 1)
 
     do -- Close Button
       self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
@@ -360,7 +354,7 @@ function Main:Render()
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
         GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:AddLine("Filter rows by selected expansions.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
         GameTooltip:Show()
       end)
       self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
@@ -374,21 +368,12 @@ function Main:Render()
       self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_House.blp")
       self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
-        rootMenu:CreateRadio(
-          "All expansions",
-          function() return Data.db.global.main.selectedExpansion == nil end,
-          function()
-            Data.db.global.main.selectedExpansion = nil
-            self:Render()
-          end,
-          nil
-        )
         Utils:TableForEach(expansions, function(expansion)
-          rootMenu:CreateRadio(
+          rootMenu:CreateCheckbox(
             expansion.name,
-            function() return Data.db.global.main.selectedExpansion == expansion.id end,
+            function() return Utils:TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
             function()
-              Data.db.global.main.selectedExpansion = expansion.id
+              Data.db.global.main.selectedExpansions = Utils:TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
               self:Render()
             end,
             expansion.id
@@ -526,7 +511,7 @@ function Main:Render()
       local professions = Utils:TableFilter(character.professions or {}, function(characterProfession)
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return false end
-        if selectedExpansion and skillLineVariant.expansionID ~= selectedExpansion then return false end
+        if Utils:TableCount(selectedExpansions) > 0 and not Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then return false end
         if not characterProfession.enabled then return false end
         if Data.db.global.main.hideLowLevelProfessions and (characterProfession.skillLevel and characterProfession.skillLevel > 0 and characterProfession.skillLevel < 25) then return false end
         return true
@@ -547,7 +532,6 @@ function Main:Render()
   end
 
   self.window.titlebar.title:SetShown(tableWidth > minWindowWidth)
-  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.main.selectedExpansion and Data:GetExpansionByID(Data.db.global.main.selectedExpansion) or {}).name or "All Expansions"))
   self.window.border:SetShown(Data.db.global.main.windowBorder)
   self.window.table:SetData(tableData)
   self.window:SetWidth(math.max(tableWidth, minWindowWidth))
@@ -727,9 +711,12 @@ function Main:GetTableColumns(unfiltered)
       width = 100,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(_, characterProfession)
-        local concentration = characterProfession.concentration
-        if not concentration then
+      cell = function(character, characterProfession)
+        local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+        if not skillLineVariant then return {text = ""} end
+        if not skillLineVariant.concentrationCurrencyID then return {text = ""} end
+        local currencyInfo = Data:GetCharacterCurrency(character, skillLineVariant.concentrationCurrencyID)
+        if not currencyInfo then
           return {
             text = "-",
             onEnter = function(cellFrame)
@@ -744,16 +731,16 @@ function Main:GetTableColumns(unfiltered)
           }
         end
 
-        local currentQuantity = concentration.quantity
-        local maxQuantity = concentration.maxQuantity
-        local timeDifference = GetServerTime() - concentration.lastUpdated
-        local cyclesSinceLastUpdate = timeDifference / (concentration.rechargingCycleDurationMS / 1000)
+        local currentQuantity = currencyInfo.quantity
+        local maxQuantity = currencyInfo.maxQuantity
+        local timeDifference = GetServerTime() - currencyInfo.lastUpdated
+        local cyclesSinceLastUpdate = timeDifference / (currencyInfo.rechargingCycleDurationMS / 1000)
         local estimatedQuantity = math.min(currentQuantity + cyclesSinceLastUpdate, maxQuantity)
         local quantityToMax = math.max(0, maxQuantity - estimatedQuantity)
-        local timeToMax = quantityToMax * (concentration.rechargingCycleDurationMS / 1000)
+        local timeToMax = quantityToMax * (currencyInfo.rechargingCycleDurationMS / 1000)
         local color = WHITE_FONT_COLOR
 
-        if estimatedQuantity >= concentration.maxQuantity then
+        if estimatedQuantity >= currencyInfo.maxQuantity then
           color = GREEN_FONT_COLOR
         end
         if estimatedQuantity == 0 then
@@ -767,18 +754,18 @@ function Main:GetTableColumns(unfiltered)
           color = color,
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-            GameTooltip:SetText(concentration.name, 1, 1, 1);
+            GameTooltip:SetText(currencyInfo.name, 1, 1, 1);
             if timeToMax > 0 then
               GameTooltip:AddLine(" ")
               GameTooltip:AddLine("Estimated", 1, 1, 1, true)
-              GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, concentration.maxQuantity), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
               GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Maxed at:", date("%c", concentration.lastUpdated + timeToMax), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine("Maxed at:", date("%c", currencyInfo.lastUpdated + timeToMax), nil, nil, nil, 1, 1, 1)
               GameTooltip:AddLine(" ")
               GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
             end
-            GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", concentration.quantity, concentration.maxQuantity), nil, nil, nil, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Saved at:", date("%c", concentration.lastUpdated), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", currencyInfo.quantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Saved at:", date("%c", currencyInfo.lastUpdated), nil, nil, nil, 1, 1, 1)
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -963,13 +950,13 @@ function Main:GetTableColumns(unfiltered)
                     local leftText = requirement.leftText
                     local rightText = requirement.rightText
                     if requirement.requirement.type == "item" then
-                      local characterItem = Data:GetCharacterItem(character, requirement.requirement.id)
+                      local quantity = character.items[requirement.requirement.id] or 0
                       local item = Data.cache.items[requirement.requirement.id]
                       local itemCached = item and item:IsItemDataCached()
                       local icon = itemCached and item:GetItemIcon() or 134400
                       local name = itemCached and item:GetItemLink() or "Loading..."
                       leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
-                      rightText = format("%d / %d", characterItem.quantity or 0, requirement.requirement.amount or 0)
+                      rightText = format("%d / %d", quantity, requirement.requirement.amount or 0)
                     elseif requirement.requirement.type == "quest" then
                       rightText = CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
                     end

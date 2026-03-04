@@ -83,12 +83,6 @@ function Checklist:Render()
     self.window.titlebar.title:SetJustifyV("MIDDLE")
     self.window.titlebar.title:SetText("Checklist")
 
-    self.window.titlebar.selectedExpansion = self.window.titlebar:CreateFontString("$parentSelectedExpansion", "OVERLAY")
-    self.window.titlebar.selectedExpansion:SetFontObject("SystemFont_Med2")
-    self.window.titlebar.selectedExpansion:SetPoint("CENTER", self.window.titlebar, "CENTER", 0, 0)
-    self.window.titlebar.selectedExpansion:SetJustifyH("CENTER")
-    self.window.titlebar.selectedExpansion:SetJustifyV("MIDDLE")
-    self.window.titlebar.selectedExpansion:SetTextColor(1, 1, 1, 1)
 
     self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
     self.window.textbox:SetFontObject("SystemFont_Med1")
@@ -285,21 +279,12 @@ function Checklist:Render()
       self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_House.blp")
       self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
-        rootMenu:CreateRadio(
-          "All expansions",
-          function() return Data.db.global.checklist.selectedExpansion == nil end,
-          function()
-            Data.db.global.checklist.selectedExpansion = nil
-            self:Render()
-          end,
-          nil
-        )
         Utils:TableForEach(expansions, function(expansion)
-          rootMenu:CreateRadio(
+          rootMenu:CreateCheckbox(
             expansion.name,
-            function() return Data.db.global.checklist.selectedExpansion == expansion.id end,
+            function() return Utils:TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
             function()
-              Data.db.global.checklist.selectedExpansion = expansion.id
+              Data.db.global.checklist.selectedExpansions = Utils:TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
               self:Render()
             end,
             expansion.id
@@ -594,8 +579,6 @@ function Checklist:Render()
   windowHeight = math.min(windowHeight, maxWindowHeight)
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
-  self.window.titlebar.selectedExpansion:SetText(format("Expansion: %s", (Data.db.global.checklist.selectedExpansion and Data:GetExpansionByID(Data.db.global.checklist.selectedExpansion) or {}).name or "All Expansions"))
-  self.window.titlebar.selectedExpansion:SetShown(windowWidth >= 600)
   if professionCount == 0 then
     self.window.textbox:SetText("It does not look like you have any active professions.\nDid you check the wrong expansion?")
   else
@@ -953,13 +936,13 @@ function Checklist:GetColumns(unfiltered)
                   local leftText = requirement.leftText
                   local rightText = requirement.rightText
                   if requirement.requirement.type == "item" then
-                    local characterItem = Data:GetCharacterItem(data.character, requirement.requirement.id)
+                    local quantity = data.character.items[requirement.requirement.id] or 0
                     local item = Data.cache.items[requirement.requirement.id]
                     local itemCached = item and item:IsItemDataCached()
                     local icon = itemCached and item:GetItemIcon() or 134400
                     local name = itemCached and item:GetItemLink() or "Loading..."
                     leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
-                    rightText = format("%d / %d", characterItem.quantity or 0, requirement.requirement.amount or 0)
+                    rightText = format("%d / %d", quantity, requirement.requirement.amount or 0)
                   elseif requirement.requirement.type == "quest" then
                     rightText = CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
                   end

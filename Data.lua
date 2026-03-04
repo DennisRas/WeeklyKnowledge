@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 17
+Data.DBVersion = 19
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -39,7 +39,7 @@ Data.defaultDB = {
     characters = {},
     showFullProfessionName = true,
     main = {
-      selectedExpansion = nil,
+      selectedExpansions = {},
       hiddenColumns = {},
       windowScale = 100,
       windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
@@ -48,7 +48,7 @@ Data.defaultDB = {
       hideLowLevelProfessions = false,
     },
     checklist = {
-      selectedExpansion = nil,
+      selectedExpansions = {},
       open = false,
       hiddenColumns = {},
       hiddenCategories = {},
@@ -273,7 +273,7 @@ function Data:MigrateDB()
         self.db.global.checklist.hideCatchUpObjectives = nil
       end
     end
-    -- Migrate profession catch up currency info
+    -- Migrate profession currencies
     if self.db.global.DBVersion == 16 then
       for _, character in pairs(self.db.global.characters) do
         if type(character.currencies) ~= "table" then
@@ -281,15 +281,76 @@ function Data:MigrateDB()
         end
         if type(character.professions) == "table" then
           for _, characterProfession in pairs(character.professions) do
+            -- Migrate catch up currency info
             if type(characterProfession.catchUpCurrencyInfo) == "table" then
-              character.currencies[characterProfession.catchUpCurrencyInfo.currencyID] = {
+              ---@type WK_CharacterCurrency
+              local characterCurrency = {
                 id = characterProfession.catchUpCurrencyInfo.currencyID,
                 name = characterProfession.catchUpCurrencyInfo.name,
                 iconFileID = characterProfession.catchUpCurrencyInfo.iconFileID,
                 quality = characterProfession.catchUpCurrencyInfo.quality,
                 quantity = characterProfession.catchUpCurrencyInfo.quantity,
                 maxQuantity = characterProfession.catchUpCurrencyInfo.maxQuantity,
+                rechargingCycleDurationMS = characterProfession.catchUpCurrencyInfo.rechargingCycleDurationMS,
+                rechargingAmountPerCycle = characterProfession.catchUpCurrencyInfo.rechargingAmountPerCycle,
+                lastUpdated = characterProfession.catchUpCurrencyInfo.lastUpdated,
               }
+              character.currencies[characterProfession.catchUpCurrencyInfo.currencyID] = characterCurrency
+            end
+            -- Migrate concentration currency info
+            if type(characterProfession.concentration) == "table" then
+              ---@type WK_CharacterCurrency
+              local characterCurrency = {
+                id = characterProfession.concentration.currencyID,
+                name = characterProfession.concentration.name,
+                iconFileID = characterProfession.concentration.iconFileID,
+                quality = characterProfession.concentration.quality or 0,
+                quantity = characterProfession.concentration.quantity,
+                maxQuantity = characterProfession.concentration.maxQuantity or 0,
+                rechargingCycleDurationMS = characterProfession.concentration.rechargingCycleDurationMS or 0,
+                rechargingAmountPerCycle = characterProfession.concentration.rechargingAmountPerCycle or 0,
+                lastUpdated = characterProfession.concentration.lastUpdated or 0,
+              }
+              character.currencies[characterProfession.concentration.currencyID] = characterCurrency
+            end
+          end
+        end
+      end
+    end
+    -- Migrate selected expansions
+    -- Remove Dragonflight professions
+    if self.db.global.DBVersion == 17 then
+      if not self.db.global.main.selectedExpansions then
+        self.db.global.main.selectedExpansions = {}
+      end
+      if not self.db.global.checklist.selectedExpansions then
+        self.db.global.checklist.selectedExpansions = {}
+      end
+      if self.db.global.main.selectedExpansion then
+        self.db.global.main.selectedExpansions = {self.db.global.main.selectedExpansion}
+        self.db.global.main.selectedExpansion = nil
+      end
+      if self.db.global.checklist.selectedExpansion then
+        self.db.global.checklist.selectedExpansions = {self.db.global.checklist.selectedExpansion}
+        self.db.global.checklist.selectedExpansion = nil
+      end
+      for _, character in pairs(self.db.global.characters) do
+        if type(character.professions) == "table" then
+          character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+            local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+            if not skillLineVariant then return false end
+            return skillLineVariant.expansionID ~= Enum.ExpansionLevel.Dragonflight
+          end)
+        end
+      end
+    end
+    -- Transform item table to counts
+    if self.db.global.DBVersion == 18 then
+      for _, character in pairs(self.db.global.characters) do
+        if type(character.items) == "table" then
+          for k, v in pairs(character.items) do
+            if type(v) == "table" and v.quantity then
+              character.items[k] = v.quantity
             end
           end
         end
@@ -373,9 +434,84 @@ function Data:DeleteCharacter(characterOrGUID)
   self:ClearProgressCache(true)
 end
 
+---Update the current character.
+function Data:ScanAll()
+  self:ScanCharacterInfo()
+  self:ScanCurrencies()
+  self:ScanItems()
+  self:ScanQuests()
+  self:ScanProfessions()
+  self:ScanCalendar()
+end
+
+--- Scan currencies for a character.
+function Data:ScanCurrencies()
+  Utils:Debug("┌ ScanCurrencies()")
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
+  local objectives = self:GetObjectives()
+  if not objectives then return end
+  local skillLineVariants = self:GetSkillLineVariants()
+  if not skillLineVariants then return end
+
+  ---@type table<integer, WK_CharacterCurrency> currencyID -> WK_CharacterCurrency
+  local currencies = {}
+  ---@type table<integer, boolean> currencyID -> true
+  local currencyIDs = {}
+
+  -- Track currency IDs from objectives
+  Utils:TableForEach(objectives, function(objective)
+    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
+      Utils:TableForEach(objective.requirements, function(requirement)
+        if requirement.type == "currency" then
+          currencyIDs[requirement.id] = true
+        end
+      end)
+    end
+  end)
+
+  -- Track currency IDs from skill line variants
+  Utils:TableForEach(skillLineVariants, function(skillLineVariant)
+    if skillLineVariant.catchUpCurrencyID and skillLineVariant.catchUpCurrencyID > 0 then
+      currencyIDs[skillLineVariant.catchUpCurrencyID] = true
+    end
+    if skillLineVariant.concentrationCurrencyID and skillLineVariant.concentrationCurrencyID > 0 then
+      currencyIDs[skillLineVariant.concentrationCurrencyID] = true
+    end
+  end)
+
+  -- Get currency info from the game
+  Utils:TableForEach(currencyIDs, function(_, currencyID)
+    local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
+    if currencyInfo then
+      ---@type WK_CharacterCurrency
+      local characterCurrency = {
+        id = currencyID,
+        name = currencyInfo.name,
+        iconFileID = currencyInfo.iconFileID,
+        quality = currencyInfo.quality,
+        quantity = currencyInfo.quantity,
+        maxQuantity = currencyInfo.maxQuantity,
+        rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
+        rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
+        lastUpdated = GetServerTime(),
+      }
+      currencies[currencyID] = characterCurrency
+    end
+  end)
+
+  character.currencies = currencies
+  character.lastUpdate = GetServerTime()
+  Utils:Debug("├ Currencies: ", Utils:TableCount(currencies))
+  Utils:Debug("└ Finshed")
+end
+
 ---Check to see if the Darkmoon Faire event is live.
 ---Bails early when calendar may return secret values (SecretInChatMessagingLockdown; taint-safe).
 function Data:ScanCalendar()
+  Utils:Debug("┌ ScanCalendar()")
   if self:IsInChatMessagingLockdown() then return end
   if not self.cache.calendarOpened then
     local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
@@ -400,152 +536,131 @@ function Data:ScanCalendar()
       self.cache.isDarkmoonOpen = true
     end
   end
+  Utils:Debug("├ Darkmoon Faire is open: ", self.cache.isDarkmoonOpen and "Yes" or "No")
+  Utils:Debug("└ Finshed")
 end
 
 --- Scan all professions and recipes
 function Data:ScanProfessions()
+  Utils:Debug("┌ ScanProfessions()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
 
-  local tradeSkillLines = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
-  if not tradeSkillLines then
+  -- Get all profession trade skill lines variants from the game that we care about
+  local skillLineVariants = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
+  local filteredSkillLineVariants = Utils:TableFilter(skillLineVariants or {}, function(skillLineVariantID)
+    local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
+    if not skillLineVariant then return false end
+    local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
+    if not expansion then return false end
+    if not expansion.enabled then return false end
+    return true
+  end)
+  if Utils:TableCount(filteredSkillLineVariants) == 0 then
     return
   end
 
-  -- Track recipes with first craft bonus
-  local completedFirstCrafts = {}
-  Utils:TableForEach(self:GetObjectives(), function(objective)
-    -- Skip non-recipe objectives
-    if objective.categoryID ~= Enum.WK_ObjectiveCategory.FirstCraft then
-      -- print("Skipping non-first craft objective", objective.categoryID)
-      return
-    end
-    -- Skip recipes that have a working quest associated with it
-    if objective.quests and #objective.quests > 0 then
-      -- print("Skipping recipe with working quest", objective.quests)
-      return
-    end
+  -- MOVE THIS TO GETOBJECTIVEPROGRESS
+  -- -- Track recipes with first craft bonus
+  -- local completedFirstCrafts = {}
+  -- Utils:TableForEach(self:GetObjectives(), function(objective)
+  --   -- Skip non-recipe objectives
+  --   if objective.categoryID ~= Enum.WK_ObjectiveCategory.FirstCraft then
+  --     -- Utils:Log("Skipping non-first craft objective", objective.categoryID)
+  --     return
+  --   end
+  --   -- Skip recipes that have a working quest associated with it
+  --   if objective.quests and #objective.quests > 0 then
+  --     -- Utils:Log("Skipping recipe with working quest", objective.quests)
+  --     return
+  --   end
 
-    local spellID = objective.spellID
-    if not spellID then
-      -- print("Skipping recipe without spellID", objective)
-      return
-    end
+  --   local spellID = objective.spellID
+  --   if not spellID then
+  --     -- Utils:Log("Skipping recipe without spellID", objective)
+  --     return
+  --   end
 
-    local isFirstCraft = C_TradeSkillUI.IsRecipeFirstCraft(spellID)
-    if isFirstCraft ~= nil then
-      completedFirstCrafts[spellID] = not isFirstCraft
-    end
-  end)
-  character.firstCrafts = completedFirstCrafts
+  --   local isFirstCraft = C_TradeSkillUI.IsRecipeFirstCraft(spellID)
+  --   if isFirstCraft ~= nil then
+  --     completedFirstCrafts[spellID] = not isFirstCraft
+  --   end
+  -- end)
+  -- character.firstCrafts = completedFirstCrafts
 
-  local professions = {}
-  Utils:TableForEach(tradeSkillLines, function(tradeSkillLineID)
-    -- Skip professions we don't care about
-    local skillLineVariant = self:GetSkillLineVariantByID(tradeSkillLineID)
-    if not skillLineVariant then
-      return
-    end
+  Utils:TableForEach(skillLineVariants, function(skillLineVariantID)
+    local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
+    if not skillLineVariant then return end
+    local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
+    if not expansion then return end
+    if not expansion.enabled then return end
 
     -- Find the character profession if it exists.
-    local profession = Utils:TableFind(character.professions, function(characterProfession)
-      return characterProfession.skillLineVariantID == tradeSkillLineID
+    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
+      return characterProfession.skillLineVariantID == skillLineVariantID
     end)
 
-    -- If we didn't find a profession, let's try to create one with basic info if possible.
-    if not profession then
-      local prof1, prof2 = GetProfessions()
-      if not prof1 and not prof2 then
-        return
-      end
-      Utils:TableForEach({prof1, prof2}, function(professionIndex)
-        local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(professionIndex)
-        if name and skillLine and skillLine == skillLineVariant.skillLineID then
+    -- We are now only adding a new profession if we can actually access the profession info.
+    -- This means that the TradeSKillUI must have been opened once this session.
+    if not characterProfession then
+      local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+      if professionInfo and professionInfo.professionID > 0 then
+        local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillLineVariantID)
+        if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
           ---@type WK_CharacterProfession
-          profession = {
+          characterProfession = {
             enabled = true,
-            skillLineID = skillLineVariant.skillLineID,
-            skillLineVariantID = tradeSkillLineID,
-            skillLevel = skillLevel,
-            skillMaxLevel = maxSkillLevel,
+            skillLineVariantID = skillLineVariantID,
+            skillLevel = professionVariantInfo.skillLevel,
+            skillMaxLevel = professionVariantInfo.maxSkillLevel,
             knowledgeLevel = 0,
             knowledgeMaxLevel = 0,
             knowledgeUnspent = 0,
             specializations = {},
-            catchUpCurrencyInfo = nil,
-            concentration = {
-              currencyID = 0,
-              lastUpdated = 0,
-              name = "",
-              description = "",
-              icon = 0,
-              quantity = 0,
-              maxQuantity = 0,
-              rechargingCycleDurationMS = 0,
-              rechargingAmountPerCycle = 0,
-            },
           }
+          table.insert(character.professions, characterProfession)
         end
-      end)
+      end
     end
 
     -- Okay let's just give up here. This is not a profession we care about.
-    if not profession then
+    if not characterProfession then
       return
     end
 
-    do -- This stuff only returns real data if the TradeSkillUI is open
-      local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-      if professionInfo.professionID > 0 then
-        local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(tradeSkillLineID)
-        if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
-          profession.skillLevel = professionVariantInfo.skillLevel
-          profession.skillMaxLevel = professionVariantInfo.maxSkillLevel
-        end
-      end
-    end
-
     -- Get specialization currency info
-    local specializationCurrencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(tradeSkillLineID)
+    local specializationCurrencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(skillLineVariantID)
     if specializationCurrencyInfo and specializationCurrencyInfo.numAvailable then
-      profession.knowledgeUnspent = specializationCurrencyInfo.numAvailable or 0
-    end
-
-    -- Get catch up currency info
-    if skillLineVariant.catchUpCurrencyID then
-      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(skillLineVariant.catchUpCurrencyID)
-      if currencyInfo and currencyInfo.quantity then
-        profession.catchUpCurrencyInfo = currencyInfo
-      end
+      characterProfession.knowledgeUnspent = specializationCurrencyInfo.numAvailable or 0
     end
 
     -- Get concentration info
-    local concentrationCurrencyID = C_TradeSkillUI.GetConcentrationCurrencyID(tradeSkillLineID)
-    if concentrationCurrencyID and concentrationCurrencyID > 0 then
-      local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(concentrationCurrencyID)
-      if currencyInfo and currencyInfo.quantity and currencyInfo.maxQuantity then
-        ---@type WK_CharacterProfessionConcentration
-        profession.concentration = {
-          currencyID = currencyInfo.currencyID,
-          lastUpdated = GetServerTime(),
-          name = currencyInfo.name,
-          description = currencyInfo.description,
-          icon = currencyInfo.iconFileID,
-          quantity = currencyInfo.quantity,
-          maxQuantity = currencyInfo.maxQuantity,
-          rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
-          rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
-        }
-      end
-    end
+    -- local concentrationCurrencyID = C_TradeSkillUI.GetConcentrationCurrencyID(skillLineVariantID)
+    -- if concentrationCurrencyID and concentrationCurrencyID > 0 then
+    --   local currencyInfo = self:GetCharacterCurrency(character, concentrationCurrencyID)
+    --   if currencyInfo then
+    --     ---@type WK_CharacterProfessionConcentration
+    --     characterProfession.concentration = {
+    --       currencyID = currencyInfo.currencyID,
+    --       lastUpdated = GetServerTime(),
+    --       name = currencyInfo.name,
+    --       description = currencyInfo.description,
+    --       icon = currencyInfo.iconFileID,
+    --       quantity = currencyInfo.quantity,
+    --       maxQuantity = currencyInfo.maxQuantity,
+    --       rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
+    --       rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
+    --     }
+    --   end
+    -- end
 
-    -- Scan knowledge spent/max for the profession
+    -- Scan knowledge trees for the profession
     local totalKnowledgeLevel = 0
     local totalKnowledgeMaxLevel = 0
     local specializations = {}
-    local configID = C_ProfSpecs.GetConfigIDForSkillLine(tradeSkillLineID)
+    local configID = C_ProfSpecs.GetConfigIDForSkillLine(skillLineVariantID)
     if configID and configID > 0 then
       local configInfo = C_Traits.GetConfigInfo(configID)
       if configInfo then
@@ -598,58 +713,87 @@ function Data:ScanProfessions()
       end
     end
 
-    profession.knowledgeLevel = totalKnowledgeLevel
-    profession.knowledgeMaxLevel = totalKnowledgeMaxLevel
-    profession.specializations = specializations
-
-    -- Remove profession if it do not have a max knowledge level or is 0
-    if profession and (not profession.knowledgeMaxLevel or profession.knowledgeMaxLevel == 0) then
-      return
-    end
-
-    table.insert(professions, profession)
+    characterProfession.knowledgeLevel = totalKnowledgeLevel
+    characterProfession.knowledgeMaxLevel = totalKnowledgeMaxLevel
+    characterProfession.specializations = specializations
   end)
 
-  character.professions = professions
   character.lastUpdate = GetServerTime()
+  Utils:Debug("├ Professions: ", Utils:TableCount(character.professions))
+  Utils:Debug("└ Finshed")
 end
 
 --- Scan all quests for a character.
 function Data:ScanQuests()
+  Utils:Debug("┌ ScanQuests()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
+  local objectives = self:GetObjectives()
+  if not objectives then return end
 
-  -- -- Track completed quests
-  -- local completedQuests = {}
-  -- Utils:TableForEach(self:GetObjectives(), function(objective)
-  --   if not objective.quests then return end
-  --   Utils:TableForEach(objective.quests, function(questID)
-  --     if self.cache.completedQuests[questID] then
-  --       completedQuests[questID] = true
-  --       return
-  --     end
-  --     local isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
-  --     if isCompleted then
-  --       completedQuests[questID] = true
-  --       self.cache.completedQuests[questID] = true
-  --     end
-  --   end)
-  -- end)
+  ---@type number[]
+  local quests = {}
+  ---@type table<number, boolean>
+  local completedQuests = {}
 
-  -- character.completed = completedQuests
+  local firstCrafts = {}
+  local firstCraftsCompleted = 0
+
+  Utils:TableForEach(objectives, function(objective)
+    if objective.quests and Utils:TableCount(objective.quests) > 0 then
+      Utils:TableForEach(objective.quests or {}, function(questID)
+        if questID and questID > 0 then
+          table.insert(quests, questID)
+        end
+      end)
+    elseif objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+      firstCrafts[objective.spellID] = C_TradeSkillUI.IsRecipeFirstCraft(objective.spellID)
+      if firstCrafts[objective.spellID] then
+        firstCraftsCompleted = firstCraftsCompleted + 1
+      end
+    end
+    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
+      Utils:TableForEach(objective.requirements, function(requirement)
+        if requirement.type == "quest" then
+          Utils:TableForEach(requirement.quests or {}, function(questID)
+            if questID and questID > 0 then
+              table.insert(quests, questID)
+            end
+          end)
+        end
+      end)
+    end
+  end)
+
+  quests = Utils:TableUnique(quests)
+  if Utils:TableCount(quests) > 0 then
+    Utils:TableForEach(quests, function(questID)
+      local isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
+      if isCompleted then
+        completedQuests[questID] = true
+      end
+    end)
+  end
+
+  character.firstCrafts = firstCrafts
+  character.completed = completedQuests
   character.lastUpdate = GetServerTime()
+  Utils:Debug("├ Quests: ", Utils:TableCount(quests), "Completed: ", Utils:TableCount(completedQuests))
+  Utils:Debug("├ FirstCrafts: ", Utils:TableCount(firstCrafts), "Completed: ", firstCraftsCompleted)
+  Utils:Debug("└ Finshed")
 end
 
---- Scan all character info for a character.
-function Data:ScanCharacter()
+--- Scan all character information for the current character.
+function Data:ScanCharacterInfo()
+  Utils:Debug("┌ ScanCharacterInfo()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
 
-  -- Update character info
+  -- Update character information
   local localizedRaceName, englishRaceName, raceID = UnitRace("player")
   local localizedClassName, classFile, classID = UnitClass("player")
   local englishFactionName, localizedFactionName = UnitFactionGroup("player")
@@ -665,20 +809,57 @@ function Data:ScanCharacter()
   character.classFile = classFile
   character.className = localizedClassName
   character.lastUpdate = GetServerTime()
+  Utils:Debug("└ Finshed")
+end
 
-  -- -- Don't track a character without any professions
-  -- if Utils:TableCount(character.professions) < 1 then
-  --   self.db.global.characters[character.GUID] = nil
-  -- end
+--- Scan all character item counts for the current character.
+function Data:ScanItems()
+  Utils:Debug("┌ ScanItems()")
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
+  local objectives = self:GetObjectives()
+  if not objectives then return end
+
+  ---@type table<number, number>
+  local itemCounts = {}
+  local itemCountTotal = 0
+  ---@type number[]
+  local itemIDs = {}
+  Utils:TableForEach(objectives, function(objective)
+    if objective.itemID and objective.itemID > 0 then
+      table.insert(itemIDs, objective.itemID)
+    end
+    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
+      Utils:TableForEach(objective.requirements, function(requirement)
+        if requirement.type == "item" then
+          table.insert(itemIDs, requirement.id)
+        end
+      end)
+    end
+  end)
+  itemIDs = Utils:TableUnique(itemIDs)
+  if Utils:TableCount(itemIDs) > 0 then
+    Utils:TableForEach(itemIDs, function(itemID)
+      if itemID and itemID > 0 then
+        local itemCount = C_Item.GetItemCount(itemID)
+        if itemCount and itemCount > 0 then
+          itemCounts[itemID] = itemCount
+          itemCountTotal = itemCountTotal + itemCount
+        end
+      end
+    end)
+  end
+  character.items = itemCounts
+  character.lastUpdate = GetServerTime()
+  Utils:Debug("├ Items: ", Utils:TableCount(itemIDs), "Count: ", itemCountTotal)
+  Utils:Debug("└ Finshed")
 end
 
 ---@return table<WOWGUID, WK_Character>
 function Data:GetCharacters()
-  local characters = Utils:TableFilter(self.db.global.characters, function(character)
-    -- Ignore ghost characters (Bug: https://github.com/DennisRas/WeeklyKnowledge/issues/47)
-    if not character.name or character.name == "" then
-      return false
-    end
+  local characters = Utils:TableFilter(self.db.global.characters or {}, function(character)
     return true
   end)
 
@@ -694,7 +875,10 @@ end
 
 ---@return WK_Expansion[]
 function Data:GetExpansions()
-  return self.Expansions
+  local expansions = Utils:TableFilter(self.Expansions, function(expansion)
+    return expansion.enabled
+  end)
+  return expansions
 end
 
 ---@param expansionID Enum.ExpansionLevel
@@ -761,6 +945,17 @@ function Data:GetObjectiveCategoryByID(categoryID)
   return nil
 end
 
+-- Get the progress for all objectives for the current character.
+function Data:GetAllProgress()
+  local character = self:GetCharacter()
+  if not character then return end
+  local objectives = self:GetObjectives()
+  if not objectives then return end
+  Utils:TableForEach(objectives, function(objective)
+    self:GetObjectiveProgress(character, objective)
+  end)
+end
+
 -- Get the progress for a single objective.
 ---@param character WK_Character
 ---@param objective WK_Objective
@@ -815,14 +1010,7 @@ function Data:GetObjectiveProgress(character, objective)
   -- Quests
   if objective.quests and Utils:TableCount(objective.quests) > 0 then
     for _, questID in pairs(objective.quests) do
-      local isCompleted = false
-      if character == currentCharacter then
-        isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
-        character.completed[questID] = isCompleted
-      else
-        isCompleted = character.completed[questID] or false
-      end
-      if isCompleted then
+      if character.completed[questID] then
         objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
         objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
       end
@@ -830,9 +1018,23 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- First Craft
-  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
     character.firstCrafts = character.firstCrafts or {}
-    if character.firstCrafts[objective.spellID] then
+    local isCompleted = false
+    if objective.quests and Utils:TableCount(objective.quests) > 0 then
+      Utils:TableForEach(objective.quests or {}, function(questID)
+        if questID and questID > 0 and character.completed[questID] then
+          isCompleted = true
+          return
+        end
+      end)
+    elseif objective.spellID and objective.spellID > 0 then
+      isCompleted = true
+      if character.firstCrafts[objective.spellID] then
+        isCompleted = false
+      end
+    end
+    if isCompleted then
       objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
       objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
     end
@@ -896,13 +1098,13 @@ function Data:GetObjectiveProgress(character, objective)
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
         local itemID = requirement.id
         if itemID and itemID > 0 then
-          local characterItem = self:GetCharacterItem(character, itemID)
-          if characterItem.quantity and characterItem.quantity >= requirement.amount then
+          local quantity = character.items[itemID] or 0
+          if quantity >= requirement.amount then
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
           objectiveProgressRequirement.leftText = format("ItemID: %d", itemID)
-          objectiveProgressRequirement.rightText = format("%d / %d", characterItem.quantity or 0, requirement.amount or 0)
+          objectiveProgressRequirement.rightText = format("%d / %d", quantity, requirement.amount or 0)
         end
       end
       if requirement.type == "currency" then
@@ -910,13 +1112,15 @@ function Data:GetObjectiveProgress(character, objective)
         local currencyID = requirement.id
         if currencyID and currencyID > 0 then
           local characterCurrency = self:GetCharacterCurrency(character, currencyID)
-          if characterCurrency and characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
-            objectiveProgressRequirement.isCompleted = true
-            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+          if characterCurrency then
+            if characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
+              objectiveProgressRequirement.isCompleted = true
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+            end
+            local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency.quality or 0)
+            objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
+            objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency.quantity or 0, requirement.amount)
           end
-          local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency and characterCurrency.quality or 0)
-          objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency and characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency and characterCurrency.name)
-          objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency and characterCurrency.quantity or 0, requirement.amount)
         end
       end
       if requirement.type == "renown" then
@@ -1109,79 +1313,10 @@ function Data:GetCategoryProfessionProgress(character, objectiveCategory, charac
 end
 
 ---@param character WK_Character
----@param itemID integer Item ID
----@return WK_CharacterItem
-function Data:GetCharacterItem(character, itemID)
-  local currentCharacter = self:GetCharacter()
-  character.items = character.items or {}
-
-  ---@type WK_CharacterItem
-  local characterItem = {
-    id = itemID,
-    name = "Loading...",
-    link = "",
-    quantity = 0,
-    iconFileID = 0,
-    quality = 0,
-  }
-
-  -- If the item is already in the character's items table, use that instead of creating a new one
-  if type(character.items[itemID]) == "table" then
-    characterItem = character.items[itemID]
-  end
-
-  -- If the character is the current character, get the item info from the game
-  if currentCharacter and character == currentCharacter then
-    local itemName, itemLink, itemQuality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
-    local itemCount = C_Item.GetItemCount(itemID)
-    characterItem.name = itemName
-    characterItem.link = itemLink
-    characterItem.quantity = itemCount
-    characterItem.iconFileID = itemTexture
-    characterItem.quality = itemQuality
-  end
-
-  character.items[itemID] = characterItem
-  return characterItem
-end
-
----@param character WK_Character
 ---@param currencyID integer Currency ID
----@return WK_CharacterCurrency|nil
+---@return CurrencyInfo|nil
 function Data:GetCharacterCurrency(character, currencyID)
-  local currentCharacter = self:GetCharacter()
   character.currencies = character.currencies or {}
 
-  ---@type WK_CharacterCurrency
-  local characterCurrency = {
-    id = currencyID,
-    name = "Loading...",
-    quantity = 0,
-    maxQuantity = 0,
-    iconFileID = 0,
-    quality = 0,
-  }
-
-  -- If the currency is already in the character's currencies table, use that instead of creating a new one
-  if type(character.currencies[currencyID]) == "table" then
-    characterCurrency = character.currencies[currencyID]
-  end
-
-  -- If the character is the current character, get the currency info from the game
-  if currentCharacter and character == currentCharacter then
-    local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
-    if currencyInfo then
-      characterCurrency.name = currencyInfo.name
-      characterCurrency.quantity = currencyInfo.quantity
-      characterCurrency.maxQuantity = currencyInfo.maxQuantity
-      characterCurrency.iconFileID = currencyInfo.iconFileID
-      characterCurrency.quality = currencyInfo.quality
-    else
-      character.currencies[currencyID] = nil
-      return nil
-    end
-  end
-
-  character.currencies[currencyID] = characterCurrency
-  return characterCurrency
+  return character.currencies and character.currencies and Utils:TableCount(character.currencies) > 0 and character.currencies[currencyID] or nil
 end

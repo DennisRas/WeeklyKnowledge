@@ -11,8 +11,13 @@ local LibDBIcon = LibStub("LibDBIcon-1.0")
 
 local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
+addon.debug = false
 
-_G.WeeklyKnowledge = addon
+_G[addonName] = addon
+
+--@debug@
+addon.debug = true
+--@end-debug@
 
 function Core:Render()
   Main:Render()
@@ -106,7 +111,18 @@ function Core:OnEnable()
     3,
     function()
       Data:ClearProgressCache()
-      Data:ScanCharacter()
+      Data:ScanAll()
+      self:Render()
+    end
+  )
+  self:RegisterBucketEvent(
+    {
+      "BAG_UPDATE_DELAYED",
+    },
+    2,
+    function()
+      Data:ClearProgressCache()
+      Data:ScanItems()
       self:Render()
     end
   )
@@ -120,6 +136,7 @@ function Core:OnEnable()
     function()
       Data:ClearProgressCache()
       Data:ScanQuests()
+      Data:ScanCurrencies()
       self:Render()
     end
   )
@@ -137,7 +154,7 @@ function Core:OnEnable()
     1,
     function()
       Data:ClearProgressCache()
-      Data:ScanProfessions()
+      Data:ScanAll()
       self:Render()
     end
   )
@@ -150,12 +167,21 @@ function Core:OnEnable()
       Data:ClearProgressCache()
       Data:ScanCalendar()
       self:Render()
-    end)
+    end
+  )
+  self:RegisterBucketEvent(
+    {
+      "CURRENCY_DISPLAY_UPDATE",
+    },
+    1,
+    function()
+      Data:ClearProgressCache()
+      Data:ScanCurrencies()
+      self:Render()
+    end
+  )
 
-  Data:ScanCharacter()
-  Data:ScanProfessions()
-  Data:ScanQuests()
-  Data:ScanCalendar()
+  Data:ScanAll()
   self:Render()
 end
 
