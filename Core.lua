@@ -16,7 +16,7 @@ addon.debug = false
 _G[addonName] = addon
 
 --@debug@
-addon.debug = true
+addon.debug = false
 --@end-debug@
 
 function Core:Render()
