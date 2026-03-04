@@ -968,17 +968,20 @@ function Data:GetObjectiveProgress(character, objective)
   if objective.quests and Utils:TableCount(objective.quests) > 0 then
     character.completed = character.completed or {}
     -- Weekly Quests is just one quest id
-    if objective.categoryID == Enum.WK_ObjectiveCategory.WeeklyQuest then
+    if objective.limit and objective.limit > 0 then
+      local isCompleted = 0
       Utils:TableForEach(objective.quests, function(questID)
         if character.completed[questID] then
-          objectiveProgress.isCompleted = true
-          objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
-          objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + 1
-          return
+          isCompleted = isCompleted + 1
         end
       end)
-      objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + objective.points
-      objectiveProgress.questsTotal = objectiveProgress.questsTotal + 1
+      if isCompleted >= objective.limit then
+        objectiveProgress.isCompleted = true
+        objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + (objective.points * objective.limit)
+        objectiveProgress.questsCompleted = objectiveProgress.questsCompleted + objective.limit
+      end
+      objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + (objective.points * objective.limit)
+      objectiveProgress.questsTotal = objectiveProgress.questsTotal + objective.limit
     else
       Utils:TableForEach(objective.quests, function(questID)
         if character.completed[questID] then

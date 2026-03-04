@@ -5,6 +5,7 @@
 ### Added
 
 - Added an introduction message for first time users.
+- Added missing skinning trainer quest.
 
 ### Updated
 
