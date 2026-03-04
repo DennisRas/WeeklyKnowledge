@@ -39,7 +39,7 @@ Data.defaultDB = {
     characters = {},
     showFullProfessionName = true,
     main = {
-      selectedExpansions = {Enum.ExpansionLevel.Midnight},
+      selectedExpansions = {},
       hiddenColumns = {},
       windowScale = 100,
       windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
@@ -48,7 +48,7 @@ Data.defaultDB = {
       hideLowLevelProfessions = false,
     },
     checklist = {
-      selectedExpansions = {Enum.ExpansionLevel.Midnight},
+      selectedExpansions = {},
       open = false,
       hiddenColumns = {},
       hiddenCategories = {},

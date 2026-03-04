@@ -465,8 +465,7 @@ function Checklist:Render()
 
   local characterProfessions = character.professions
 
-  local rows = 0
-  local professionCount = 0
+  local rowCount = 0
   local objectives = Data:GetObjectives()
   local selectedExpansions = Data.db.global.checklist.selectedExpansions or {}
 
@@ -525,7 +524,6 @@ function Checklist:Render()
         return true
       end)
       Utils:TableForEach(filteredObjectives, function(objective)
-        local debugID = objective.quests[1] or objective.spellID or objective.itemID
         local progress = Data:GetObjectiveProgress(character, objective)
 
         -- Skip if the objective is completed and hide completed objectives is enabled
@@ -553,9 +551,8 @@ function Checklist:Render()
 
         table.insert(tableData.rows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
-        rows = rows + 1
+        rowCount = rowCount + 1
       end)
-      professionCount = professionCount + 1
     end)
   end
 
@@ -567,14 +564,9 @@ function Checklist:Render()
     self.window.table:Hide()
     self.window.textbox:Hide()
   else
-    if professionCount == 0 then
-      windowHeight = 100
-      self.window.textbox:SetText("It does not look like you have any active professions.\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-      self.window.textbox:Show()
-      self.window.table:Hide()
-    elseif rows == 0 then
-      self.window.textbox:SetText("It does not look like you have any objectives.\nMake sure to check the settings above.")
-      windowHeight = 100
+    if rowCount == 0 then
+      self.window.textbox:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+      windowHeight = 200
       self.window.textbox:Show()
       self.window.table:Hide()
     else
