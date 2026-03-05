@@ -463,8 +463,8 @@ function Data:ScanCurrencies()
 
   -- Track currency IDs from objectives
   Utils:TableForEach(objectives, function(objective)
-    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
-      Utils:TableForEach(objective.requirements, function(requirement)
+    if objective.requires and Utils:TableCount(objective.requires) > 0 then
+      Utils:TableForEach(objective.requires, function(requirement)
         if requirement.type == "currency" then
           currencyIDs[requirement.id] = true
         end
@@ -711,8 +711,8 @@ function Data:ScanQuests()
         firstCraftsAvailable = firstCraftsAvailable + 1
       end
     end
-    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
-      Utils:TableForEach(objective.requirements, function(requirement)
+    if objective.requires and Utils:TableCount(objective.requires) > 0 then
+      Utils:TableForEach(objective.requires, function(requirement)
         if requirement.type == "quest" then
           Utils:TableForEach(requirement.quests or {}, function(questID)
             if questID and questID > 0 then
@@ -788,8 +788,8 @@ function Data:ScanItems()
     if objective.itemID and objective.itemID > 0 then
       table.insert(itemIDs, objective.itemID)
     end
-    if objective.requirements and Utils:TableCount(objective.requirements) > 0 then
-      Utils:TableForEach(objective.requirements, function(requirement)
+    if objective.requires and Utils:TableCount(objective.requires) > 0 then
+      Utils:TableForEach(objective.requires, function(requirement)
         if requirement.type == "item" then
           table.insert(itemIDs, requirement.id)
         end
@@ -1023,42 +1023,35 @@ function Data:GetObjectiveProgress(character, objective)
       ---@type WK_ObjectiveProgressRequirement
       local objectiveProgressRequirement = {
         requirement = requirement,
-        leftText = requirement.name or "",
-        rightText = format("%d", requirement.amount),
+        leftText = "-",
+        rightText = "-",
         isCompleted = false,
       }
       if requirement.type == "quest" then
+        local isCompleted = 0
         character.completed = character.completed or {}
         if requirement.match == "all" then
-          for _, questID in pairs(requirement.quests) do
-            local isCompleted = false
-            if character == currentCharacter then
-              isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
-              character.completed[questID] = isCompleted
-            else
-              isCompleted = character.completed[questID] or false
-            end
+          Utils:TableForEach(requirement.quests, function(questID)
             objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-            if isCompleted then
+            local questCompleted = character.completed[questID]
+            if questCompleted then
+              isCompleted = isCompleted + 1
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
             end
+          end)
+          if objectiveProgress.requirementsMet >= objectiveProgress.requirementsTotal then
+            objectiveProgressRequirement.isCompleted = true
           end
         end
         if requirement.match == "any" then
           objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-          for _, questID in pairs(requirement.quests) do
-            local isCompleted = false
-            if character == currentCharacter then
-              isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
-              character.completed[questID] = isCompleted
-            else
-              isCompleted = character.completed[questID] or false
-            end
-            if isCompleted then
+          Utils:TableForEach(requirement.quests, function(questID)
+            if character.completed[questID] then
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
-              break
+              objectiveProgressRequirement.isCompleted = true
+              return
             end
-          end
+          end)
         end
       end
       if requirement.type == "item" then
@@ -1070,23 +1063,19 @@ function Data:GetObjectiveProgress(character, objective)
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
-          objectiveProgressRequirement.leftText = format("ItemID: %d", itemID)
-          objectiveProgressRequirement.rightText = format("%d / %d", quantity, requirement.amount or 0)
         end
       end
       if requirement.type == "currency" then
+        character.currencies = character.currencies or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
         local currencyID = requirement.id
         if currencyID and currencyID > 0 then
-          local characterCurrency = self:GetCharacterCurrency(character, currencyID)
+          local characterCurrency = character.currencies and character.currencies[currencyID] or nil
           if characterCurrency then
             if characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
               objectiveProgressRequirement.isCompleted = true
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
             end
-            local _, _, _, hex = C_Item.GetItemQualityColor(characterCurrency.quality or 0)
-            objectiveProgressRequirement.leftText = format("%s |c%s%s|r", CreateSimpleTextureMarkup(characterCurrency.iconFileID and characterCurrency.iconFileID > 0 and characterCurrency.iconFileID or [[Interface\Icons\INV_Misc_QuestionMark]]), hex, characterCurrency.name)
-            objectiveProgressRequirement.rightText = format("%d / %d", characterCurrency.quantity or 0, requirement.amount)
           end
         end
       end
@@ -1107,15 +1096,10 @@ function Data:GetObjectiveProgress(character, objective)
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
           end
-          objectiveProgressRequirement.leftText = renownInfo.name
-          objectiveProgressRequirement.rightText = format("%d / %d", renownLevel, requirement.amount)
         end
       end
       if requirement.type == "skill" then
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        objectiveProgressRequirement.leftText = (skillLine and skillLine.name) or "Profession skill"
-        objectiveProgressRequirement.rightText = format("%d / %d", 0, requirement.amount)
-
         for _, characterProfession in pairs(character.professions) do
           if characterProfession.skillLineVariantID == skillLineVariant.id then
             local skillLevel = characterProfession.skillLevel or 0
@@ -1123,7 +1107,6 @@ function Data:GetObjectiveProgress(character, objective)
               objectiveProgressRequirement.isCompleted = true
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
             end
-            objectiveProgressRequirement.rightText = format("%d / %d", skillLevel, requirement.amount)
             break
           end
         end
@@ -1281,9 +1264,9 @@ end
 
 ---@param character WK_Character
 ---@param currencyID integer Currency ID
----@return CurrencyInfo|nil
+---@return WK_CharacterCurrency|nil
 function Data:GetCharacterCurrency(character, currencyID)
   character.currencies = character.currencies or {}
 
-  return character.currencies and character.currencies and Utils:TableCount(character.currencies) > 0 and character.currencies[currencyID] or nil
+  return character.currencies and character.currencies[currencyID] or nil
 end

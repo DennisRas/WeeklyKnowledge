@@ -970,21 +970,7 @@ function Main:GetTableColumns(unfiltered)
                   GameTooltip:AddLine(" ")
                   GameTooltip:AddLine(requirementsHeading)
                   Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
-                    local leftText = requirement.leftText
-                    local rightText = requirement.rightText
-                    if requirement.requirement.type == "item" then
-                      local quantity = character.items[requirement.requirement.id] or 0
-                      local item = Data.cache.items[requirement.requirement.id]
-                      local itemCached = item and item:IsItemDataCached()
-                      local icon = itemCached and item:GetItemIcon() or 134400
-                      local name = itemCached and item:GetItemLink() or "Loading..."
-                      leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
-                      rightText = format("%d / %d", quantity, requirement.requirement.amount or 0)
-                    elseif requirement.requirement.type == "quest" then
-                      rightText = CreateAtlasMarkup(requirement.isCompleted and "common-icon-checkmark" or "common-icon-redx", 12, 12)
-                    end
-
-                    GameTooltip:AddDoubleLine(leftText, rightText, 1, 1, 1, 1, 1, 1)
+                    Utils:RenderRequirementTooltip(requirement, character, skillLineVariantID, objectiveCategory.id)
                   end)
                 end
               end

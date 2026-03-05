@@ -174,8 +174,6 @@
 
 ---@class WK_ObjectiveProgressRequirement
 ---@field requirement WK_ObjectiveRequirement The requirement.
----@field leftText string The left text for the requirement.
----@field rightText string The right text for the requirement.
 ---@field isCompleted boolean Whether the requirement is completed.
 
 ---@class WK_CategoryProgress

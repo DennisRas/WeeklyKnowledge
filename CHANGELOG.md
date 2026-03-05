@@ -6,6 +6,10 @@
 
 - Added more hints to unique items.
 
+### Fixed
+
+- Fixed an issue with bugged text under requirements in the checklist tooltips. Fixes #107
+
 ## v1.2.2 - 2026-03-04
 
 ### Added
