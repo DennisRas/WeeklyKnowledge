@@ -5,6 +5,7 @@
 ### Added
 
 - Added more hints to unique items.
+- Invalid or unlearned professions will now automatically be removed.
 
 ### Fixed
 

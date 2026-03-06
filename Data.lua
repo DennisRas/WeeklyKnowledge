@@ -673,6 +673,20 @@ function Data:ScanProfessions()
     characterProfession.specializations = specializations
   end)
 
+  -- Detect if a profession still exists on the character
+  local prof1, prof2 = GetProfessions()
+  if not prof1 or not prof2 then
+    local _, _, _, _, _, _, skillLine1 = GetProfessionInfo(prof1 or 0)
+    local _, _, _, _, _, _, skillLine2 = GetProfessionInfo(prof2 or 0)
+    Utils:TableForEach(character.professions, function(characterProfession, index)
+      local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+      if not skillLineVariant or not Utils:TableContains({skillLine1 or 0, skillLine2 or 0}, skillLineVariant.skillLineID) then
+        addon.Core:Print(format("Removing profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
+        table.remove(character.professions, index)
+      end
+    end)
+  end
+
   character.lastUpdate = GetServerTime()
   Utils:Debug("├ Professions: ", Utils:TableCount(character.professions))
   Utils:Debug("└ Finshed")
