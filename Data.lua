@@ -1028,12 +1028,12 @@ function Data:GetObjectiveProgress(character, objective)
         isCompleted = false,
       }
       if requirement.type == "quest" then
+        local characterQuests = character.completed or {}
         local isCompleted = 0
-        character.completed = character.completed or {}
         if requirement.match == "all" then
           Utils:TableForEach(requirement.quests, function(questID)
             objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-            local questCompleted = character.completed[questID]
+            local questCompleted = characterQuests[questID]
             if questCompleted then
               isCompleted = isCompleted + 1
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
@@ -1046,7 +1046,7 @@ function Data:GetObjectiveProgress(character, objective)
         if requirement.match == "any" then
           objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
           Utils:TableForEach(requirement.quests, function(questID)
-            if character.completed[questID] then
+            if characterQuests[questID] then
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
               objectiveProgressRequirement.isCompleted = true
               return
@@ -1055,10 +1055,11 @@ function Data:GetObjectiveProgress(character, objective)
         end
       end
       if requirement.type == "item" then
+        local characterItems = character.items or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
         local itemID = requirement.id
         if itemID and itemID > 0 then
-          local quantity = character.items[itemID] or 0
+          local quantity = characterItems[itemID] or 0
           if quantity >= requirement.amount then
             objectiveProgressRequirement.isCompleted = true
             objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
@@ -1066,11 +1067,11 @@ function Data:GetObjectiveProgress(character, objective)
         end
       end
       if requirement.type == "currency" then
-        character.currencies = character.currencies or {}
+        local characterCurrencies = character.currencies or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
         local currencyID = requirement.id
         if currencyID and currencyID > 0 then
-          local characterCurrency = character.currencies and character.currencies[currencyID] or nil
+          local characterCurrency = characterCurrencies[currencyID]
           if characterCurrency then
             if characterCurrency.quantity and characterCurrency.quantity >= requirement.amount then
               objectiveProgressRequirement.isCompleted = true
@@ -1080,17 +1081,17 @@ function Data:GetObjectiveProgress(character, objective)
         end
       end
       if requirement.type == "renown" then
-        character.factions = character.factions or {}
-        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
+        local characterFactions = character.factions or {}
         local renownInfo = C_MajorFactions.GetMajorFactionData(requirement.id)
+        objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
         if renownInfo then
           local renownLevel = 0
           if character == currentCharacter then
             renownLevel = C_MajorFactions.GetCurrentRenownLevel(requirement.id) or 0
-            character.factions[requirement.id] = character.factions[requirement.id] or {id = requirement.id, level = 0}
-            character.factions[requirement.id].level = renownLevel
-          elseif character.factions[requirement.id] then
-            renownLevel = character.factions[requirement.id].level
+            characterFactions[requirement.id] = characterFactions[requirement.id] or {id = requirement.id, level = 0}
+            characterFactions[requirement.id].level = renownLevel
+          elseif characterFactions[requirement.id] then
+            renownLevel = characterFactions[requirement.id].level
           end
           if renownLevel >= requirement.amount then
             objectiveProgressRequirement.isCompleted = true
@@ -1099,17 +1100,18 @@ function Data:GetObjectiveProgress(character, objective)
         end
       end
       if requirement.type == "skill" then
+        local characterProfessions = character.professions or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        for _, characterProfession in pairs(character.professions) do
-          if characterProfession.skillLineVariantID == skillLineVariant.id then
+        Utils:TableForEach(characterProfessions, function(key, characterProfession)
+          if characterProfession.skillLineVariantID == requirement.id then
             local skillLevel = characterProfession.skillLevel or 0
             if skillLevel >= requirement.amount then
               objectiveProgressRequirement.isCompleted = true
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
             end
-            break
+            return
           end
-        end
+        end)
       end
       table.insert(objectiveProgress.requirements, objectiveProgressRequirement)
     end

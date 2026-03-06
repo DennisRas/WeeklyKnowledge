@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.2.3 - ?
+## v1.2.3 - 2026-03-06
 
 ### Added
 
@@ -9,6 +9,7 @@
 ### Fixed
 
 - Fixed an issue with bugged text under requirements in the checklist tooltips. Fixes #107
+- Fixed an issue with some characters having no itemCount data. Fixes #110 (Thank you Jinatha for the report).
 
 ## v1.2.2 - 2026-03-04
 
