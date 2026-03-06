@@ -294,7 +294,7 @@ local objectives = {
   {skillLineVariantID = 2917, categoryID = category, quests = {92188}, itemID = 250360, points = 10, loc = {hint = "<Abundance Vendor> Chel the Chip"},                                                                                                                                                                                requires = {{type = "currency", id = Enum.WK_Currency.UnalloyedAbundance, amount = 400}, {type = "currency", id = Enum.WK_Currency.ArtisanSkinnerMoxie, amount = 75}}},                                                            -- Echo of Abundance: Skinning
   -- Midnight: Tailoring
   {skillLineVariantID = 2918, categoryID = category, quests = {89078}, itemID = 238612, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 70.56, y = 50.90, hint = ""}},
-  {skillLineVariantID = 2918, categoryID = category, quests = {89079}, itemID = 238613, points = 3,  loc = {m = Enum.WK_Map.SilvermoonCity, x = 35.73, y = 61.22, hint = ""}},
+  {skillLineVariantID = 2918, categoryID = category, quests = {89079}, itemID = 238613, points = 3,  loc = {m = Enum.WK_Map.SilvermoonCity, x = 35.75, y = 61.23, hint = "Big purple curtain on the first floor inside the building."}}, -- A Really Nice Curtain
   {skillLineVariantID = 2918, categoryID = category, quests = {89080}, itemID = 238614, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 46.36, y = 34.87, hint = ""}},
   {skillLineVariantID = 2918, categoryID = category, quests = {89081}, itemID = 238615, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 69.76, y = 51.05, hint = ""}},
   {skillLineVariantID = 2918, categoryID = category, quests = {89082}, itemID = 238616, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 62.01, y = 83.52, hint = ""}},
