@@ -263,7 +263,7 @@ local objectives = {
   -- Midnight: Leatherworking
   {skillLineVariantID = 2915, categoryID = category, quests = {89089}, itemID = 238588, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 33.08, y = 78.91, hint = ""}},
   {skillLineVariantID = 2915, categoryID = category, quests = {89090}, itemID = 238589, points = 3,  loc = {m = Enum.WK_Map.Voidstorm, x = 34.72, y = 56.92, hint = ""}},
-  {skillLineVariantID = 2915, categoryID = category, quests = {89091}, itemID = 238590, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 30.75, y = 83.97, hint = ""}},
+  {skillLineVariantID = 2915, categoryID = category, quests = {89091}, itemID = 238590, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 30.75, y = 83.99, hint = "A rack inside the temple to the right."}}, -- Prestigiously Racked Hide
   {skillLineVariantID = 2915, categoryID = category, quests = {89092}, itemID = 238591, points = 3,  loc = {m = Enum.WK_Map.AtalAman, x = 45.29, y = 45.61, hint = ""}},
   {skillLineVariantID = 2915, categoryID = category, quests = {89093}, itemID = 238592, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 53.74, y = 51.67, hint = ""}},
   {skillLineVariantID = 2915, categoryID = category, quests = {89094}, itemID = 238593, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 51.69, y = 51.32, hint = ""}},
