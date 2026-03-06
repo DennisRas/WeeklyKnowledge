@@ -243,7 +243,7 @@ local objectives = {
   -- Midnight: Inscription
   {skillLineVariantID = 2913, categoryID = category, quests = {89067}, itemID = 238572, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 60.69, y = 84.26, hint = ""}},
   {skillLineVariantID = 2913, categoryID = category, quests = {89068}, itemID = 238573, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 40.48, y = 49.35, hint = ""}},
-  {skillLineVariantID = 2913, categoryID = category, quests = {89069}, itemID = 238574, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 48.31, y = 75.55, hint = ""}},
+  {skillLineVariantID = 2913, categoryID = category, quests = {89069}, itemID = 238574, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 48.31, y = 75.54, hint = "Bottle of ink on the bench next to the tent."}}, -- Spare Ink
   {skillLineVariantID = 2913, categoryID = category, quests = {89070}, itemID = 238575, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 52.43, y = 52.61, hint = ""}},
   {skillLineVariantID = 2913, categoryID = category, quests = {89071}, itemID = 238576, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 52.75, y = 49.98, hint = ""}},
   {skillLineVariantID = 2913, categoryID = category, quests = {89072}, itemID = 238577, points = 3,  loc = {hint = "Location unknown?"}},
