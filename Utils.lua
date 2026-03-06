@@ -7,8 +7,6 @@ local addon = select(2, ...)
 local Utils = {}
 addon.Utils = Utils
 
-local Data = addon.Data
-
 ---True if the value is a secret (WoW API); use before comparing/using API return values that may be secret.
 ---@param value any
 ---@return boolean
@@ -247,7 +245,7 @@ function Utils:RenderRequirementTooltip(objectiveProgressRequirement, character,
     leftText = format("ItemID: %d", objectiveProgressRequirement.requirement.id)
     rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
     local quantity = character.items and character.items[objectiveProgressRequirement.requirement.id] or 0
-    local item = Data.cache.items[objectiveProgressRequirement.requirement.id]
+    local item = addon.Data.cache.items[objectiveProgressRequirement.requirement.id]
     local itemCached = item and item:IsItemDataCached()
     local name = "Loading..."
     local icon = 134400
