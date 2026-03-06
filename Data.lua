@@ -1102,7 +1102,7 @@ function Data:GetObjectiveProgress(character, objective)
       if requirement.type == "skill" then
         local characterProfessions = character.professions or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        Utils:TableForEach(characterProfessions, function(key, characterProfession)
+        Utils:TableForEach(characterProfessions, function(characterProfession)
           if characterProfession.skillLineVariantID == requirement.id then
             local skillLevel = characterProfession.skillLevel or 0
             if skillLevel >= requirement.amount then
