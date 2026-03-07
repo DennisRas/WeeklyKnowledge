@@ -232,9 +232,9 @@ local objectives = {
   -- Midnight: Herbalism
   {skillLineVariantID = 2912, categoryID = category, quests = {89162}, itemID = 238468, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 38.32, y = 67.04, hint = ""}},
   {skillLineVariantID = 2912, categoryID = category, quests = {89161}, itemID = 238469, points = 3,  loc = {hint = "Location unknown?"}},
-  {skillLineVariantID = 2912, categoryID = category, quests = {89160}, itemID = 238470, points = 3,  loc = {m = Enum.WK_Map.SilvermoonCity, x = 49.01, y = 75.92, hint = "Tool on the table."}}, -- Simple Leaf Pruners
+  {skillLineVariantID = 2912, categoryID = category, quests = {89160}, itemID = 238470, points = 3,  loc = {m = Enum.WK_Map.SilvermoonCity, x = 49.01, y = 75.92, hint = "Tool on the table."}},       -- Simple Leaf Pruners
   {skillLineVariantID = 2912, categoryID = category, quests = {89159}, itemID = 238471, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 36.66, y = 25.06, hint = ""}},
-  {skillLineVariantID = 2912, categoryID = category, quests = {89158}, itemID = 238472, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 64.25, y = 30.46, hint = ""}},
+  {skillLineVariantID = 2912, categoryID = category, quests = {89158}, itemID = 238472, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 64.24, y = 30.46, hint = "A spade... on the ground."}}, -- A Spade
   {skillLineVariantID = 2912, categoryID = category, quests = {89157}, itemID = 238473, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 76.13, y = 51.05, hint = ""}},
   {skillLineVariantID = 2912, categoryID = category, quests = {89156}, itemID = 238474, points = 3,  loc = {m = Enum.WK_Map.Voidstorm, x = 34.69, y = 57.07, hint = ""}},
   {skillLineVariantID = 2912, categoryID = category, quests = {89155}, itemID = 238475, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 51.11, y = 55.71, hint = ""}},
