@@ -283,7 +283,7 @@ local objectives = {
   {skillLineVariantID = 2916, categoryID = category, quests = {92187}, itemID = 250444, points = 10, loc = {hint = "<Abundance Vendor> Chel the Chip"},                                                                                                                                                                                                                                requires = {{type = "currency", id = Enum.WK_Currency.UnalloyedAbundance, amount = 400}, {type = "currency", id = Enum.WK_Currency.ArtisanMinerMoxie, amount = 75}}},                                                            -- Echo of Abundance: Mining
   -- Midnight: Skinning
   {skillLineVariantID = 2917, categoryID = category, quests = {89166}, itemID = 238628, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 76.09, y = 51.08, hint = ""}},
-  {skillLineVariantID = 2917, categoryID = category, quests = {89167}, itemID = 238629, points = 3,  loc = {m = Enum.WK_Map.AtalAman, x = 44.90, y = 45.17, hint = ""}},
+  {skillLineVariantID = 2917, categoryID = category, quests = {89167}, itemID = 238629, points = 3,  loc = {m = Enum.WK_Map.AtalAman, x = 44.92, y = 45.22, hint = "Knife on the ground next to the weapon rack."}}, -- Cadre Skinning Knife
   {skillLineVariantID = 2917, categoryID = category, quests = {89168}, itemID = 238630, points = 3,  loc = {m = Enum.WK_Map.Harandar, x = 69.52, y = 49.17, hint = ""}},
   {skillLineVariantID = 2917, categoryID = category, quests = {89169}, itemID = 238631, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 45.50, y = 42.40, hint = ""}},
   {skillLineVariantID = 2917, categoryID = category, quests = {89170}, itemID = 238632, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 40.39, y = 36.01, hint = ""}},
