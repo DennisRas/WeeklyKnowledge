@@ -274,7 +274,7 @@ local objectives = {
   {skillLineVariantID = 2916, categoryID = category, quests = {89144}, itemID = 238596, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 30.48, y = 69.07, hint = ""}},
   {skillLineVariantID = 2916, categoryID = category, quests = {89145}, itemID = 238597, points = 3,  loc = {m = Enum.WK_Map.ZulAman, x = 42.00, y = 46.53, hint = ""}},
   {skillLineVariantID = 2916, categoryID = category, quests = {89146}, itemID = 238598, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 54.24, y = 51.59, hint = ""}},
-  {skillLineVariantID = 2916, categoryID = category, quests = {89147}, itemID = 238599, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 37.98, y = 45.38, hint = ""}},
+  {skillLineVariantID = 2916, categoryID = category, quests = {89147}, itemID = 238599, points = 3,  loc = {m = Enum.WK_Map.EversongWoods, x = 37.98, y = 45.37, hint = "Gloves hanging on the side of the wagon."}}, -- Solid Ore Punchers
   {skillLineVariantID = 2916, categoryID = category, quests = {89148}, itemID = 238600, points = 3,  loc = {m = Enum.WK_Map.SlayersRise, x = 28.73, y = 38.56, hint = ""}},
   {skillLineVariantID = 2916, categoryID = category, quests = {89149}, itemID = 238601, points = 3,  loc = {m = Enum.WK_Map.AtalAman, x = 33.29, y = 65.91, hint = ""}},
   {skillLineVariantID = 2916, categoryID = category, quests = {89150}, itemID = 238602, points = 3,  loc = {m = Enum.WK_Map.Voidstorm, x = 41.84, y = 38.21, hint = ""}},
