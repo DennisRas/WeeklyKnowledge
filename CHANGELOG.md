@@ -4,13 +4,27 @@
 
 ### Added
 
-- Added more hints to unique items.
 - Invalid or unlearned professions will now automatically be removed.
+- Quest requirement added to Unique: Pure Void Crystal. Fixes #107
+
+### Updated
+
+- ~80 unique items have received updated or new location hints and coords.
+- Location or requirement data corrected for several uniques:
+  - Silvermoon Blacksmith's Hammer
+  - Sin'dorei Master's Forgemace
+  - Speculative Voidstorm Crystal
+  - Voidstorm Defense Spear
+  - Vial of Eversong Oddities
+  - Enchanted Sunfire Silk
+  - What To Do When Nothing Works.
 
 ### Fixed
 
-- Fixed an issue with bugged text under requirements in the checklist tooltips. Fixes #107
-- Fixed an issue with some characters having no itemCount data. Fixes #110 (Thank you Jinatha for the report).
+- Fixed bugged text under requirements in the checklist tooltips. Fixes #107
+- Fixed an issue where a character could have no itemCount or .items data. Fixes #110 (Thank you Jinatha for the report).
+- Fixed an upvalue bug in the Checklist tooltips that could cause errors.
+- Fixed a small loop bug when processing skills.
 
 ## v1.2.2 - 2026-03-04
 
