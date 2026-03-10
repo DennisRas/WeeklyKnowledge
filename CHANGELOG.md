@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.4 - 2026-03-10
+
+### Added
+
+- The addon will now attempt to add your professions when using the addon for the first time. It's still recommended that you open your professions for full data.
+
+### Fixed
+
+- Fixed an issue with invalid/fake professions being added when opening a guild or chat link profession. They should be removed automatically with this update.
+
 ## v1.2.3 - 2026-03-06
 
 ### Added

@@ -547,60 +547,144 @@ function Data:ScanProfessions()
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
   if not character then return end
+  local skillLineVariants = self:GetSkillLineVariants()
+  local allSkillLineIDs = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
 
-  -- Get all profession trade skill lines variants from the game that we care about
-  local skillLineVariants = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
-  local filteredSkillLineVariants = Utils:TableFilter(skillLineVariants or {}, function(skillLineVariantID)
+  -- Filter skillLineVariants that we care about
+  local filteredSkillLineIDs = Utils:TableFilter(allSkillLineIDs or {}, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return false end
     local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
-    if not expansion then return false end
-    if not expansion.enabled then return false end
+    if not expansion or not expansion.enabled then return false end
     return true
   end)
-  if Utils:TableCount(filteredSkillLineVariants) == 0 then
+
+  -- Something went wrong and the game doesn't have any profession data available
+  if Utils:TableCount(filteredSkillLineIDs) == 0 then
     return
   end
 
-  Utils:TableForEach(skillLineVariants, function(skillLineVariantID)
+  ---@class WK_LearnedProfession
+  ---@field skillLineID number
+  ---@field skillLineName string
+  ---@field skillLineVariant WK_SkillLineVariant|nil
+  ---@field skillLineVariantName string|nil
+  ---@field skillLevel number
+  ---@field skillMaxLevel number
+
+  -- Let's get the ProfessionsBook professions
+  ---@type WK_LearnedProfession[]
+  local learnedProfessions = {}
+  local professionIndex1, professionIndex2 = GetProfessions()
+  Utils:TableForEach({professionIndex1 or 0, professionIndex2 or 0}, function(professionIndex)
+    local skillLineName, _, skillLevel, skillMaxLevel, _, _, skillLineID, _, _, _, skillLineVariantName = GetProfessionInfo(professionIndex)
+    if not skillLineName then return end
+    local skillLine = self:GetSkillLineByID(skillLineID)
+    if not skillLine then return end
+    local skillLineVariant = Utils:TableGet(skillLineVariants, "name", skillLineVariantName)
+    ---@type WK_LearnedProfession
+    local learnedProfession = {
+      skillLineID = skillLineID,
+      skillLineName = skillLineName,
+      skillLineVariant = skillLineVariant,
+      skillLineVariantName = skillLineVariantName,
+      skillLevel = skillLevel,
+      skillMaxLevel = skillMaxLevel,
+    }
+    table.insert(learnedProfessions, learnedProfession)
+    Utils:Debug("├ Found Spellbook Profession: " .. (skillLineVariantName or skillLineName))
+  end)
+
+  local learnedSkillLineIDs = Utils:TableMap(learnedProfessions, function(spellbookProfession)
+    return spellbookProfession.skillLineID
+  end)
+
+  -- Detect if an old character profession should be removed (not in spellbook)
+  character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+    local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+    if not skillLineVariant or not Utils:TableContains(learnedSkillLineIDs or {}, skillLineVariant.skillLineID) then
+      addon.Core:Print(format("Removing old profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
+      return false
+    end
+    return true
+  end)
+
+  -- Detect if an invalid character profession should be removed (knowledge = 0/0)
+  character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+    local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+    if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
+      addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
+      return false
+    end
+    return true
+  end)
+
+  -- Add/update character professions based on the spellbook professions
+  Utils:TableForEach(learnedProfessions, function(learnedProfession)
+    local skillLineVariant = learnedProfession.skillLineVariant
+    if not skillLineVariant then return end
+    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
+      return characterProfession.skillLineVariantID == skillLineVariant.id
+    end)
+    if not characterProfession then
+      ---@type WK_CharacterProfession
+      characterProfession = {
+        enabled = true,
+        skillLineVariantID = skillLineVariant.id,
+        skillLevel = learnedProfession.skillLevel,
+        skillMaxLevel = learnedProfession.skillMaxLevel,
+        knowledgeLevel = 0,
+        knowledgeMaxLevel = 0,
+        knowledgeUnspent = 0,
+        specializations = {},
+      }
+      table.insert(character.professions, characterProfession)
+      addon.Core:Print(format("Added profession: %s", learnedProfession.skillLineVariantName or learnedProfession.skillLineName or "Unknown"))
+    end
+    characterProfession.skillLevel = learnedProfession.skillLevel
+    characterProfession.skillMaxLevel = learnedProfession.skillMaxLevel
+  end)
+
+  -- Let's update all character professions
+  Utils:TableForEach(filteredSkillLineIDs, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return end
-    local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
-    if not expansion then return end
-    if not expansion.enabled then return end
+    local skillLine = self:GetSkillLineByID(skillLineVariant.skillLineID)
+    if not skillLine then return end
 
-    -- Find the character profession if it exists.
     local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
       return characterProfession.skillLineVariantID == skillLineVariantID
     end)
 
-    -- We are now only adding a new profession if we can actually access the profession info.
-    -- This means that the TradeSKillUI must have been opened once this session.
-    local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-    if professionInfo and professionInfo.professionID > 0 then
-      local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillLineVariantID)
-      if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
-        if not characterProfession then
-          ---@type WK_CharacterProfession
-          characterProfession = {
-            enabled = true,
-            skillLineVariantID = skillLineVariantID,
-            skillLevel = professionVariantInfo.skillLevel,
-            skillMaxLevel = professionVariantInfo.maxSkillLevel,
-            knowledgeLevel = 0,
-            knowledgeMaxLevel = 0,
-            knowledgeUnspent = 0,
-            specializations = {},
-          }
-          table.insert(character.professions, characterProfession)
-        else
+    -- Only update if the opened profession window is our own
+    if not C_TradeSkillUI.IsTradeSkillGuild() and not C_TradeSkillUI.IsTradeSkillLinked() then
+      local professionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+      if professionInfo and professionInfo.professionID > 0 then
+        local professionVariantInfo = C_TradeSkillUI.GetProfessionInfoBySkillLineID(skillLineVariantID)
+        if professionVariantInfo and professionVariantInfo.skillLevel and professionVariantInfo.skillLevel > 0 and professionVariantInfo.maxSkillLevel and professionVariantInfo.maxSkillLevel > 0 then
+          -- Add missing/new profession variants if they're relevant
+          if not characterProfession then
+            ---@type WK_CharacterProfession
+            characterProfession = {
+              enabled = true,
+              skillLineVariantID = skillLineVariantID,
+              skillLevel = professionVariantInfo.skillLevel,
+              skillMaxLevel = professionVariantInfo.maxSkillLevel,
+              knowledgeLevel = 0,
+              knowledgeMaxLevel = 0,
+              knowledgeUnspent = 0,
+              specializations = {},
+            }
+            table.insert(character.professions, characterProfession)
+            addon.Core:Print(format("Added profession: %s", skillLineVariant.name or skillLine.name or professionVariantInfo.professionName or "Unknown"))
+          end
           characterProfession.skillLevel = professionVariantInfo.skillLevel
           characterProfession.skillMaxLevel = professionVariantInfo.maxSkillLevel
         end
       end
     end
 
-    -- Okay let's just give up here. This is not a profession we care about.
+    -- Okay let's just stop here.
     if not characterProfession then
       return
     end
@@ -672,20 +756,6 @@ function Data:ScanProfessions()
     characterProfession.knowledgeMaxLevel = totalKnowledgeMaxLevel
     characterProfession.specializations = specializations
   end)
-
-  -- Detect if a profession still exists on the character
-  local prof1, prof2 = GetProfessions()
-  if not prof1 or not prof2 then
-    local _, _, _, _, _, _, skillLine1 = GetProfessionInfo(prof1 or 0)
-    local _, _, _, _, _, _, skillLine2 = GetProfessionInfo(prof2 or 0)
-    Utils:TableForEach(character.professions, function(characterProfession, index)
-      local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-      if not skillLineVariant or not Utils:TableContains({skillLine1 or 0, skillLine2 or 0}, skillLineVariant.skillLineID) then
-        addon.Core:Print(format("Removing profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
-        table.remove(character.professions, index)
-      end
-    end)
-  end
 
   character.lastUpdate = GetServerTime()
   Utils:Debug("├ Professions: ", Utils:TableCount(character.professions))
