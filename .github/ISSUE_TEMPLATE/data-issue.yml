@@ -53,14 +53,16 @@ body:
     id: context
     attributes:
       label: "Describe the context and issue"
-      description: "Is this about an item, quest, vendor, renown reward, world event, treasure...?  
+      description: |
+        Is this about an item, quest, vendor, renown reward, world event, treasure...?  
         Is the source missing, showing the wrong amount, appearing on the wrong characters...?  
-        Something else?"
-      placeholder: "For example:  
-        A renown reward from faction X gives 3 KP when it should be 2...  
-        The item X is not listed in the profession Y...  
-        A quest is not shown as available when it should be...  
-        A column is showing the wrong data when it should be showing the correct data..."
+        Something else?
+      placeholder: |
+        For example:  
+        - A renown reward X from faction Y gives 3 KP when it should be 2...  
+        - The item X is not listed in the profession Y...  
+        - A quest is not shown as available when it should be...  
+        - A column is showing the wrong data when it should be showing the correct data...
     validations:
       required: true
 
