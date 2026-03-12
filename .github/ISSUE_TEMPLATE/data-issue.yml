@@ -3,6 +3,12 @@ description: "Report incorrect or missing data"
 title: "[Data] "
 labels: ["Data"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this data issue report!
+        Please fill out the following fields to help us investigate the issue.
+
   - type: input
     id: addon_version
     attributes:
@@ -17,8 +23,8 @@ body:
     attributes:
       label: "Expansion"
       options:
-        - "The War Within"
         - "Midnight"
+        - "The War Within"
         - "Other"
     validations:
       required: true
@@ -46,12 +52,14 @@ body:
   - type: textarea
     id: context
     attributes:
-      label: "Describe the context/issue"
-      description: "Is this about an item, quest, vendor, renown reward, world event, treasure...? Is the source missing, showing the wrong amount, appearing on the wrong characters...? Something else?"
-      placeholder: "For example: |
-        A renown reward from faction X gives 3 KP when it should be 2... |
-        The item X is not listed in the profession Y... |
-        A quest is not shown as available when it should be... |
+      label: "Describe the context and issue"
+      description: "Is this about an item, quest, vendor, renown reward, world event, treasure...?  
+        Is the source missing, showing the wrong amount, appearing on the wrong characters...?  
+        Something else?"
+      placeholder: "For example:  
+        A renown reward from faction X gives 3 KP when it should be 2...  
+        The item X is not listed in the profession Y...  
+        A quest is not shown as available when it should be...  
         A column is showing the wrong data when it should be showing the correct data..."
     validations:
       required: true
@@ -68,9 +76,3 @@ body:
     attributes:
       label: "Screenshots"
       description: "Upload screenshots here or paste image links."
-
-  - type: textarea
-    id: extra
-    attributes:
-      label: "Anything else?"
-      description: "Any extra details that might help."
