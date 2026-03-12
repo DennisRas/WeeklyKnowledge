@@ -3,6 +3,15 @@ description: "Report incorrect or missing data"
 title: "[Data] "
 labels: ["Data"]
 body:
+  - type: input
+    id: addon_version
+    attributes:
+      label: "Addon version"
+      description: "Which addon version are you using? Check in-game addon menu or your addon manager."
+      placeholder: "v1.4.0, alpha, beta, git branch name, etc."
+    validations:
+      required: true
+
   - type: dropdown
     id: expansion
     attributes:
@@ -37,18 +46,13 @@ body:
   - type: textarea
     id: context
     attributes:
-      label: "Describe the context"
-      description: "Is this about an item, quest, vendor, renown reward, world event, treasure, etc.?"
-      placeholder: "For example: a renown reward from faction X that gives 3 KP..."
-    validations:
-      required: true
-
-  - type: textarea
-    id: problem
-    attributes:
-      label: "What’s wrong with the data?"
-      description: "Missing, wrong count, wrong reset cadence, wrong expansion flag, etc."
-      placeholder: "This source is missing / shows the wrong amount / appears on the wrong characters..."
+      label: "Describe the context/issue"
+      description: "Is this about an item, quest, vendor, renown reward, world event, treasure...? Is the source missing, showing the wrong amount, appearing on the wrong characters...? Something else?"
+      placeholder: "For example: |
+        A renown reward from faction X gives 3 KP when it should be 2... |
+        The item X is not listed in the profession Y... |
+        A quest is not shown as available when it should be... |
+        A column is showing the wrong data when it should be showing the correct data..."
     validations:
       required: true
 
