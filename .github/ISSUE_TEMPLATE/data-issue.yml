@@ -14,7 +14,7 @@ body:
     validations:
       required: true
 
-  - type: input
+  - type: dropdown
     id: profession
     attributes:
       label: "Profession"
