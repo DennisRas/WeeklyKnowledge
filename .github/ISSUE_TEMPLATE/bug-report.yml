@@ -63,9 +63,3 @@ body:
     attributes:
       label: "Screenshots"
       description: "Upload screenshots here or paste image links."
-
-  - type: textarea
-    id: extra
-    attributes:
-      label: "Anything else?"
-      description: "Any extra details that might help."
