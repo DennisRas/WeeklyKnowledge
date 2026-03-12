@@ -163,6 +163,7 @@
     "StaticPopupDialogs",
     "YES",
     "StaticPopup_Show",
-    "ContinuableContainer"
+    "ContinuableContainer",
+    "C_TradeSkillUI"
   ]
 }
