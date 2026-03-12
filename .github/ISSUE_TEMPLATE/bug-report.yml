@@ -21,9 +21,9 @@ body:
       label: "Tested with only this addon enabled?"
       description: "Did you disable all other addons when reproducing this bug?"
       options:
+        - "Not tested"
         - "Yes"
         - "No"
-        - "Not tested"
     validations:
       required: true
 
@@ -62,9 +62,9 @@ body:
     attributes:
       label: "Lua error(s)"
       description: "Paste any Lua errors here (between the three backticks)."
-      placeholder: |
+      value: |
         ```lua
-        -- error message here
+        [error message here]
         ```
       render: markdown
 

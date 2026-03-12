@@ -1,20 +1,8 @@
 name: "Feature Request"
 description: "Suggest a new feature or improvement"
-title: "[Feature] "
+title: "[Feature Request] "
 labels: ["Feature Request"]
 body:
-  - type: dropdown
-    id: addon_version
-    attributes:
-      label: "Addon version"
-      description: "Which addon version are you using?"
-      options:
-        - "Latest release (CurseForge/Wago etc.)"
-        - "Alpha / Beta"
-        - "Git development version"
-    validations:
-      required: true
-
   - type: textarea
     id: needs
     attributes:
@@ -30,8 +18,6 @@ body:
       label: "Desired data / layout / solution"
       description: "What would you like to see in the UI or data?"
       placeholder: "For example, a new column that shows..."
-    validations:
-      required: true
 
   - type: textarea
     id: inspiration

@@ -7,7 +7,7 @@ body:
     id: question
     attributes:
       label: "Your question"
-      description: "Describe what you’re unsure about."
+      description: "Describe what you're unsure about."
       placeholder: "How do I...?"
 
   - type: textarea
