@@ -3,6 +3,12 @@ description: "Report a bug"
 title: "[Bug] "
 labels: ["Bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        Please fill out the following fields to help us investigate the issue.
+
   - type: input
     id: addon_version
     attributes:
