@@ -1,0 +1,72 @@
+name: "Data Issue"
+description: "Report incorrect or missing data"
+title: "[Data] "
+labels: ["Data"]
+body:
+  - type: dropdown
+    id: expansion
+    attributes:
+      label: "Expansion"
+      options:
+        - "The War Within"
+        - "Midnight"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: profession
+    attributes:
+      label: "Profession"
+      options:
+        - "Alchemy"
+        - "Blacksmithing"
+        - "Enchanting"
+        - "Engineering"
+        - "Herbalism"
+        - "Inscription"
+        - "Jewelcrafting"
+        - "Leatherworking"
+        - "Mining"
+        - "Skinning"
+        - "Tailoring"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Describe the context"
+      description: "Is this about an item, quest, vendor, renown reward, world event, treasure, etc.?"
+      placeholder: "For example: a renown reward from faction X that gives 3 KP..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "What’s wrong with the data?"
+      description: "Missing, wrong count, wrong reset cadence, wrong expansion flag, etc."
+      placeholder: "This source is missing / shows the wrong amount / appears on the wrong characters..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: "Links to valid sources"
+      description: "Wowhead, Warcraft Wiki, or other authoritative links."
+      placeholder: "https://www.wowhead.com/..."
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: "Upload screenshots here or paste image links."
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Anything else?"
+      description: "Any extra details that might help."
