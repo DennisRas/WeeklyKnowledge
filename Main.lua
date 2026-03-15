@@ -306,6 +306,7 @@ function Main:Render()
       self.window.titlebar.CharactersButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Characters.blp")
       self.window.titlebar.CharactersButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
       self.window.titlebar.CharactersButton:SetupMenu(function(_, rootMenu)
+        rootMenu:SetScrollMode(GetScreenHeight() - 20)
         Utils:TableForEach(characters, function(character)
           local name = character.name
           if character.realmName then

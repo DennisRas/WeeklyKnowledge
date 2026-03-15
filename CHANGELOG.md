@@ -2,6 +2,10 @@
 
 ## v1.2.5 - 2026-03-15
 
+### New
+
+- Scrollbar for the character list (for the truly dedicated altoholics with 60+ characters).
+
 ### Fixes
 
 - Changed incorrect KP points from 2 to 1 for Alchemy and Engineering treasures.
