@@ -39,8 +39,8 @@ local objectives = {
   {skillLineVariantID = 2883, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {83270}, itemID = 225220, points = 1, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Chitin Needle
 
   -- Midnight: Alchemy
-  {skillLineVariantID = 2906, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93528}, itemID = 259188, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Lightbloomed Spore Sample
-  {skillLineVariantID = 2906, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93529}, itemID = 259189, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Aged Cruor
+  {skillLineVariantID = 2906, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93528}, itemID = 259188, points = 1, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Lightbloomed Spore Sample
+  {skillLineVariantID = 2906, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93529}, itemID = 259189, points = 1, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Aged Cruor
   -- Midnight: Blacksmithing
   {skillLineVariantID = 2907, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93530}, itemID = 259190, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Thalassian Whestone
   {skillLineVariantID = 2907, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93531}, itemID = 259191, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Infused Quenching Oil
@@ -48,8 +48,8 @@ local objectives = {
   {skillLineVariantID = 2909, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93532}, itemID = 259192, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Voidstorm Ashes
   {skillLineVariantID = 2909, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93533}, itemID = 259193, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Lost Thalassian Vellum
   -- Midnight: Engineering
-  {skillLineVariantID = 2910, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93534}, itemID = 259194, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Dance Gear
-  {skillLineVariantID = 2910, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93535}, itemID = 259195, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Dawn Capacitor
+  {skillLineVariantID = 2910, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93534}, itemID = 259194, points = 1, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Dance Gear
+  {skillLineVariantID = 2910, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93535}, itemID = 259195, points = 1, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Dawn Capacitor
   -- Midnight: Herbalism
   -- Midnight: Inscription
   {skillLineVariantID = 2913, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93536}, itemID = 259196, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Brilliant Phoenix Ink
