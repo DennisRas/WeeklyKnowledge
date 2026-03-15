@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.5 - 2026-03-15
+
+### Fixes
+
+- Changed incorrect KP points from 2 to 1 for Alchemy and Engineering treasures.
+
 ## v1.2.4 - 2026-03-10
 
 ### Added
