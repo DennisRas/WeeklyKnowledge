@@ -39,7 +39,7 @@ local objectives = {
   -- Midnight: Blacksmithing
   {skillLineVariantID = 2907, categoryID = category, quests = {93691},                             itemID = 263455, points = 2, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
   -- Midnight: Enchanting
-  {skillLineVariantID = 2909, categoryID = category, quests = {93698, 93699},                      itemID = 263464, points = 3, limit = 1,                                                                                                                      loc = {m = Enum.WK_Map.SilvermoonCity, x = 47.8, y = 53.8, hint = "Complete a quest from |cffffff00Dolothos|r <Enchanting Trainer>."}},
+  {skillLineVariantID = 2909, categoryID = category, quests = {93697, 93698, 93699},               itemID = 263464, points = 3, limit = 1,                                                                                                                      loc = {m = Enum.WK_Map.SilvermoonCity, x = 47.8, y = 53.8, hint = "Complete a quest from |cffffff00Dolothos|r <Enchanting Trainer>."}},
   -- Midnight: Engineering
   {skillLineVariantID = 2910, categoryID = category, quests = {93692},                             itemID = 263456, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
   -- Midnight: Herbalism
