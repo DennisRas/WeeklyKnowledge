@@ -13,11 +13,12 @@ local UI = addon.UI
 local Data = addon.Data
 local Checklist = addon.Checklist
 local LibDBIcon = LibStub("LibDBIcon-1.0")
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
   StaticPopupDialogs[dialogName] = {
-    text = "Remove %s?\nThis cannot be undone.\nTo add this character again, log in on them.",
+    text = L["popup_delete_character"],
     button1 = YES,
     button2 = CANCEL,
     OnAccept = function(_, character)
@@ -121,7 +122,7 @@ function Main:Render()
         self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
         Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
         GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+        GameTooltip:SetText(L["tooltip_close_window"], 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
       self.window.titlebar.closeButton:SetScript("OnLeave", function()
@@ -146,8 +147,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_settings"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_customize"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
@@ -157,7 +158,7 @@ function Main:Render()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         local showFullProfessionName = rootMenu:CreateCheckbox(
-          "Show full profession name",
+          L["button_show_full_profession_name"],
           function() return Data.db.global.showFullProfessionName end,
           function()
             Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
@@ -169,11 +170,11 @@ function Main:Render()
         )
         showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
+          GameTooltip_AddNormalLine(tooltip, L["tooltip_show_full_profession_name"]);
         end)
 
         local hideLowLevelProfessions = rootMenu:CreateCheckbox(
-          "Hide low level professions",
+          L["menu_hide_low_level_professions"],
           function() return Data.db.global.main.hideLowLevelProfessions end,
           function()
             Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
@@ -182,11 +183,11 @@ function Main:Render()
         )
         hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.");
+          GameTooltip_AddNormalLine(tooltip, L["tooltip_hide_low_level_professions"]);
         end)
 
         local showMinimapIcon = rootMenu:CreateCheckbox(
-          "Show the minimap button",
+          L["button_show_minimap"],
           function() return not Data.db.global.minimap.hide end,
           function()
             Data.db.global.minimap.hide = not Data.db.global.minimap.hide
@@ -195,11 +196,11 @@ function Main:Render()
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.");
+          GameTooltip_AddNormalLine(tooltip, L["tooltip_move_minimap_crowded"]);
         end)
 
         local lockMinimapIcon = rootMenu:CreateCheckbox(
-          "Lock the minimap button",
+          L["button_lock_minimap"],
           function() return Data.db.global.minimap.lock end,
           function()
             Data.db.global.minimap.lock = not Data.db.global.minimap.lock
@@ -208,11 +209,11 @@ function Main:Render()
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
+          GameTooltip_AddNormalLine(tooltip, L["tooltip_no_more_moving_minimap"]);
         end)
 
-        rootMenu:CreateTitle("Window")
-        local windowScale = rootMenu:CreateButton("Scaling")
+        rootMenu:CreateTitle(L["label_window"])
+        local windowScale = rootMenu:CreateButton(L["button_scaling"])
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
@@ -258,7 +259,7 @@ function Main:Render()
           hasOpacity = 1,
         }
         rootMenu:CreateColorSwatch(
-          "Background color",
+          L["button_background_color"],
           function()
             ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
           end,
@@ -266,7 +267,7 @@ function Main:Render()
         )
 
         rootMenu:CreateCheckbox(
-          "Show the border",
+          L["button_show_border"],
           function() return Data.db.global.main.windowBorder end,
           function()
             Data.db.global.main.windowBorder = not Data.db.global.main.windowBorder
@@ -291,8 +292,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.CharactersButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.CharactersButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Characters", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable your characters.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_characters"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_characters"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.CharactersButton:SetScript("OnLeave", function()
@@ -339,7 +340,7 @@ function Main:Render()
             end)
           end
           if character.GUID ~= UnitGUID("player") then
-            characterButton:CreateButton("Remove character", function()
+            characterButton:CreateButton(L["button_remove_character"], function()
               local characterName = character.name
               if character.realmName then
                 characterName = format("%s - %s", character.name, character.realmName)
@@ -360,8 +361,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Filter rows by selected expansions.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:SetText(L["label_expansion"], 1, 1, 1, 1, true)
+        GameTooltip:AddLine(L["tooltip_expansion_filter_main"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
         GameTooltip:Show()
       end)
       self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
@@ -398,8 +399,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Enable/Disable table columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_columns"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_columns"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
@@ -439,8 +440,8 @@ function Main:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ChecklistButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ChecklistButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Checklist", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle the Checklist window", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_checklist"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_checklist_button"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ChecklistButton:SetScript("OnLeave", function()
@@ -547,7 +548,7 @@ function Main:Render()
   if rowCount == 0 then
     windowHeight = 250
     windowWidth = minWindowWidth
-    self.window.textbox:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    self.window.textbox:SetText(L["main_empty_state"])
     self.window.textbox:Show()
     self.window.table:Hide()
   else
@@ -575,11 +576,11 @@ function Main:GetTableColumns(unfiltered)
   ---@type WK_DataColumn[]
   local columns = {
     {
-      name = "Name",
+      name = L["label_name"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Name", 1, 1, 1);
-        GameTooltip:AddLine("Your characters.")
+        GameTooltip:SetText(L["label_name"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_your_characters"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -602,11 +603,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Realm",
+      name = L["label_realm"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Realm", 1, 1, 1);
-        GameTooltip:AddLine("Realm names.")
+        GameTooltip:SetText(L["label_realm"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_realms"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -619,11 +620,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Profession",
+      name = L["label_profession"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Profession", 1, 1, 1);
-        GameTooltip:AddLine("Your professions.")
+        GameTooltip:SetText(L["label_profession"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_professions"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -647,7 +648,7 @@ function Main:GetTableColumns(unfiltered)
             if character == currentCharacter then
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText(text, 1, 1, 1);
-              GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+              GameTooltip:AddLine(L["tooltip_click_open_profession"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
               GameTooltip:Show()
             end
           end,
@@ -663,11 +664,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Expansion",
+      name = L["label_expansion"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Expansion", 1, 1, 1);
-        GameTooltip:AddLine("Expansion for this profession row.")
+        GameTooltip:SetText(L["label_expansion"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_expansion_row"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -684,11 +685,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Skill",
+      name = L["label_skill"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Skill", 1, 1, 1);
-        GameTooltip:AddLine("Current skill levels.\n\nNote: This is only updated when you open the profession window or craft a recipe.", nil, nil, nil, true)
+        GameTooltip:SetText(L["label_skill"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_current_skill"], nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -705,8 +706,8 @@ function Main:GetTableColumns(unfiltered)
             text = color:WrapTextInColorCode(text),
             onEnter = function(cellFrame)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText("No data", 1, 1, 1);
-              GameTooltip:AddLine("Log in on this character and open the profession window one time to fetch skill level data.", nil, nil, nil, true);
+              GameTooltip:SetText(L["label_no_data"], 1, 1, 1);
+              GameTooltip:AddLine(L["tooltip_log_in_skill"], nil, nil, nil, true);
               GameTooltip:Show()
             end,
             onLeave = function()
@@ -722,11 +723,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Concentration",
+      name = L["label_concentration"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Concentration", 1, 1, 1);
-        GameTooltip:AddLine("Current concentration.")
+        GameTooltip:SetText(L["label_concentration"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_current_concentration"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -745,8 +746,8 @@ function Main:GetTableColumns(unfiltered)
             text = "-",
             onEnter = function(cellFrame)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText("No data", 1, 1, 1);
-              GameTooltip:AddLine("Log in on this character to fetch concentration data.", nil, nil, nil, true);
+              GameTooltip:SetText(L["label_no_data"], 1, 1, 1);
+              GameTooltip:AddLine(L["tooltip_log_in_concentration"], nil, nil, nil, true);
               GameTooltip:Show()
             end,
             onLeave = function()
@@ -781,15 +782,15 @@ function Main:GetTableColumns(unfiltered)
             GameTooltip:SetText(currencyInfo.name, 1, 1, 1);
             if timeToMax > 0 then
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Estimated", 1, 1, 1, true)
-              GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
-              GameTooltip:AddDoubleLine("Maxed at:", tostring(date("%c", currencyInfo.lastUpdated + timeToMax)), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddLine(L["label_estimated"], 1, 1, 1, true)
+              GameTooltip:AddDoubleLine(L["label_concentration"] .. ":", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine(L["label_maxed_at"], tostring(date("%c", currencyInfo.lastUpdated + timeToMax)), nil, nil, nil, 1, 1, 1)
+              GameTooltip:AddDoubleLine(L["label_time_to_max"], SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
+              GameTooltip:AddLine(L["label_last_saved"], 1, 1, 1, true)
             end
-            GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", currencyInfo.quantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Saved at:", tostring(date("%c", currencyInfo.lastUpdated)), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["label_concentration"] .. ":", format("%d / %d", currencyInfo.quantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["label_saved_at"], tostring(date("%c", currencyInfo.lastUpdated)), nil, nil, nil, 1, 1, 1)
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -799,11 +800,11 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Knowledge",
+      name = L["label_knowledge"],
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Knowledge Points", 1, 1, 1);
-        GameTooltip:AddLine("Current knowledge gained.")
+        GameTooltip:SetText(L["label_knowledge_points"], 1, 1, 1);
+        GameTooltip:AddLine(L["tooltip_current_knowledge"])
         GameTooltip:Show()
       end,
       onLeave = function()
@@ -859,13 +860,13 @@ function Main:GetTableColumns(unfiltered)
 
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText(skillLineVariant and skillLineVariant.name or "", 1, 1, 1)
-            GameTooltip:AddDoubleLine("Points Spent:", pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
-            GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
-            GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
+            GameTooltip:AddDoubleLine(L["label_points_spent"], pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
+            GameTooltip:AddDoubleLine(L["label_points_unspent"], pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
+            GameTooltip:AddDoubleLine(L["label_max"], pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
 
             if characterProfession.specializations and Utils:TableCount(characterProfession.specializations) > 0 then
               GameTooltip:AddLine(" ")
-              GameTooltip:AddLine("Specializations:")
+              GameTooltip:AddLine(L["label_specializations"])
               Utils:TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
                 local name = characterProfessionSpecialization.name
                 if strlenutf8(name) > 20 then
@@ -876,10 +877,10 @@ function Main:GetTableColumns(unfiltered)
                   name = "|T" .. characterProfessionSpecialization.rootIconID .. ":12|t " .. name
                 end
                 if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Locked then
-                  value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode("Locked")
+                  value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode(L["label_locked"])
                 end
                 if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Unlockable then
-                  value = DIM_GREEN_FONT_COLOR:WrapTextInColorCode("Can Unlock")
+                  value = DIM_GREEN_FONT_COLOR:WrapTextInColorCode(L["status_can_unlock"])
                 end
                 GameTooltip:AddDoubleLine(name, value, 1, 1, 1, 1, 1, 1)
               end)
@@ -921,7 +922,7 @@ function Main:GetTableColumns(unfiltered)
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local categoryProfessionProgress = Data:GetCategoryProfessionProgress(character, objectiveCategory, characterProfession)
         if not categoryProfessionProgress then
-          return {text = "Error"}
+          return {text = L["label_error"]}
         end
 
         local text = format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal)
@@ -946,23 +947,23 @@ function Main:GetTableColumns(unfiltered)
               GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText(objectiveCategory.name, 1, 1, 1)
 
-              local requirementsHeading = "Requirements:"
+              local requirementsHeading = L["label_requirements"]
 
               if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
-                GameTooltip:AddDoubleLine("Points Earned:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Points Available:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Max Points:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
-                requirementsHeading = "Unlock Catch-Up This Week:"
+                GameTooltip:AddDoubleLine(L["label_points_earned"], format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_points_available"], format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_max"], format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+                requirementsHeading = L["label_unlock_catch_up"]
               elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.FirstCraft then
-                GameTooltip:AddDoubleLine("Completed:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Remaining:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Max:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_completed"], format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_remaining"], format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_max"], format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
               elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-                GameTooltip:AddDoubleLine("Quests:", format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_quests"], format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_knowledge_points"], format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
               else
-                GameTooltip:AddDoubleLine("Items:", format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
-                GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_items"], format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_knowledge_points"], format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
               end
 
               -- Requirements
@@ -979,12 +980,12 @@ function Main:GetTableColumns(unfiltered)
               -- Item Rewards
               if Utils:TableCount(categoryProfessionProgress.items) > 0 then
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("Rewards:")
+                GameTooltip:AddLine(L["label_rewards"])
                 Utils:TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
-                  local name = itemCached and item:GetItemLink() or "Loading..."
+                  local name = itemCached and item:GetItemLink() or L["label_loading"]
                   if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
                     GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
                   else

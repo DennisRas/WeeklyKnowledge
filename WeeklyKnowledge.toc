@@ -33,11 +33,14 @@ Libs\AceDB-3.0\AceDB-3.0.xml
 Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.lua
 
 Types.lua
 Constants.lua
 Utils.lua
 Interface.lua
+Locales\enUS.lua
+Locales\frFR.lua
 
 Data.lua
 Data\Expansions.lua

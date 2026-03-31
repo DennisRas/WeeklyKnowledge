@@ -11,6 +11,7 @@ local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
 local Data = addon.Data
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 function Checklist:ToggleWindow()
   if not self.window then return end
@@ -81,7 +82,7 @@ function Checklist:Render()
     self.window.titlebar.title:SetPoint("LEFT", self.window.titlebar, 28, 0)
     self.window.titlebar.title:SetJustifyH("LEFT")
     self.window.titlebar.title:SetJustifyV("MIDDLE")
-    self.window.titlebar.title:SetText("Checklist")
+    self.window.titlebar.title:SetText(L["label_checklist"])
 
     self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
     self.window.textbox:SetFontObject("SystemFont_Med1")
@@ -100,7 +101,7 @@ function Checklist:Render()
         self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
         Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
         GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
+        GameTooltip:SetText(L["tooltip_close_window"], 1, 1, 1, 1, true);
         GameTooltip:Show()
       end)
       self.window.titlebar.closeButton:SetScript("OnLeave", function()
@@ -125,8 +126,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_settings"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_customize"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
@@ -136,7 +137,7 @@ function Checklist:Render()
       end)
       self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
         local showFullProfessionName = rootMenu:CreateCheckbox(
-          "Show full profession name",
+          L["button_show_full_profession_name"],
           function() return Data.db.global.showFullProfessionName end,
           function()
             Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
@@ -148,11 +149,11 @@ function Checklist:Render()
         )
         showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
+          GameTooltip_AddNormalLine(tooltip, L["tooltip_show_full_profession_name"]);
         end)
 
         rootMenu:CreateCheckbox(
-          "Hide in combat",
+          L["menu_hide_in_combat"],
           function() return Data.db.global.checklist.hideInCombat end,
           function()
             Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
@@ -160,7 +161,7 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide in dungeons",
+          L["menu_hide_in_dungeons"],
           function() return Data.db.global.checklist.hideInDungeons end,
           function()
             Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
@@ -168,15 +169,15 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide completed objectives",
+          L["menu_hide_completed_objectives"],
           function() return Data.db.global.checklist.hideCompletedObjectives end,
           function()
             Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
             self:Render()
           end
         )
-        rootMenu:CreateTitle("Window")
-        local windowScale = rootMenu:CreateButton("Scaling")
+        rootMenu:CreateTitle(L["label_window"])
+        local windowScale = rootMenu:CreateButton(L["button_scaling"])
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
@@ -222,7 +223,7 @@ function Checklist:Render()
           hasOpacity = 1,
         }
         rootMenu:CreateColorSwatch(
-          "Background color",
+          L["button_background_color"],
           function()
             ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
           end,
@@ -230,7 +231,7 @@ function Checklist:Render()
         )
 
         rootMenu:CreateCheckbox(
-          "Show the border",
+          L["button_show_border"],
           function() return Data.db.global.checklist.windowBorder end,
           function()
             Data.db.global.checklist.windowBorder = not Data.db.global.checklist.windowBorder
@@ -263,8 +264,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+        GameTooltip:SetText(L["label_expansion"], 1, 1, 1, 1, true)
+        GameTooltip:AddLine(L["tooltip_expansion_filter_checklist"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
         GameTooltip:Show()
       end)
       self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
@@ -301,8 +302,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_columns"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_columns_checklist"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
@@ -342,8 +343,8 @@ function Checklist:Render()
         Utils:SetBackgroundColor(self.window.titlebar.CategoriesButton, 1, 1, 1, 0.05)
         ---@diagnostic disable-next-line: param-type-mismatch
         GameTooltip:SetOwner(self.window.titlebar.CategoriesButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Categories", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle categories.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_categories"], 1, 1, 1, 1, true);
+        GameTooltip:AddLine(L["tooltip_categories"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.CategoriesButton:SetScript("OnLeave", function()
@@ -385,8 +386,8 @@ function Checklist:Render()
         self.window.titlebar.toggleButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
         Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0.05)
         GameTooltip:SetOwner(self.window.titlebar.toggleButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Toggle List", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Expand/Collapse the checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+        GameTooltip:SetText(L["label_toggle_list"], 1, 1, 1, 1, true)
+        GameTooltip:AddLine(L["tooltip_toggle_list"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
         GameTooltip:Show()
       end)
       self.window.titlebar.toggleButton:SetScript("OnLeave", function()
@@ -565,7 +566,7 @@ function Checklist:Render()
     self.window.textbox:Hide()
   else
     if rowCount == 0 then
-      self.window.textbox:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+      self.window.textbox:SetText(L["checklist_empty_state"])
       windowHeight = 200
       self.window.textbox:Show()
       self.window.table:Hide()
@@ -599,11 +600,11 @@ function Checklist:GetColumns(unfiltered)
   ---@type WK_ChecklistColumn[]
   local columns = {
     {
-      name = "Objective",
+      name = L["label_objective"],
       width = 260,
       cell = function(data)
         if data.objective.itemID and data.objective.itemID > 0 then
-          local text = format("Error: ItemID %d not found", data.objective.itemID or "?")
+          local text = format(L["error_item_not_found"], data.objective.itemID or "?")
           local link = ""
           -- Todo: Cache/Re-render item info
           local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(data.objective.itemID)
@@ -624,7 +625,7 @@ function Checklist:GetColumns(unfiltered)
                 GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
                 GameTooltip:SetHyperlink(link)
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine(L["tooltip_link_chat"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 GameTooltip:Show()
               end
             end,
@@ -642,7 +643,7 @@ function Checklist:GetColumns(unfiltered)
             end,
           }
         elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
-          local text = format("Error: RecipeID %d not found", data.objective.spellID or "?")
+          local text = format(L["error_recipe_not_found"], data.objective.spellID or "?")
           local link = ""
           local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[data.objective.spellID]
           if not recipeInfo then
@@ -665,8 +666,8 @@ function Checklist:GetColumns(unfiltered)
                 GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
                 GameTooltip:SetHyperlink(link)
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine(L["tooltip_click_open_recipe"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine(L["tooltip_link_chat"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 GameTooltip:Show()
               end
             end,
@@ -686,7 +687,7 @@ function Checklist:GetColumns(unfiltered)
             end,
           }
         elseif data.objective.quests and Utils:TableCount(data.objective.quests) > 0 then
-          local text = format("Error: QuestID %d not found", data.objective.quests[1] or "?")
+          local text = format(L["error_quest_not_found"], data.objective.quests[1] or "?")
           local link = format("quest:%d:-1", data.objective.quests[1])
           local questTooltipData = C_TooltipInfo.GetHyperlink(link)
           if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
@@ -699,7 +700,7 @@ function Checklist:GetColumns(unfiltered)
                 GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
                 GameTooltip:SetHyperlink(link)
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                GameTooltip:AddLine(L["tooltip_link_chat"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 GameTooltip:Show()
               end
             end,
@@ -717,7 +718,7 @@ function Checklist:GetColumns(unfiltered)
             end,
           }
         else
-          local text = "Unknown"
+          local text = L["label_unknown"]
           return {
             text = text,
           }
@@ -725,7 +726,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Profession",
+      name = L["label_profession"],
       width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
       cell = function(data)
@@ -743,7 +744,7 @@ function Checklist:GetColumns(unfiltered)
           onEnter = function(cellFrame)
             GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
             GameTooltip:SetText(text, 1, 1, 1);
-            GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            GameTooltip:AddLine(L["tooltip_click_open_profession"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
             GameTooltip:Show()
           end,
           onLeave = function()
@@ -756,7 +757,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Expansion",
+      name = L["label_expansion"],
       width = 120,
       toggleHidden = true,
       cell = function(data)
@@ -768,7 +769,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Category",
+      name = L["label_category"],
       width = 80,
       toggleHidden = true,
       cell = function(data)
@@ -793,7 +794,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Location",
+      name = L["label_location"],
       width = 100,
       toggleHidden = true,
       cell = function(data)
@@ -815,7 +816,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Repeat?",
+      name = L["label_repeat"],
       width = 60,
       toggleHidden = true,
       cell = function(data)
@@ -837,7 +838,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Progress",
+      name = L["label_progress"],
       width = 70,
       align = "CENTER",
       toggleHidden = true,
@@ -853,7 +854,7 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Points",
+      name = L["label_points"],
       width = 70,
       align = "CENTER",
       toggleHidden = true,
@@ -890,7 +891,7 @@ function Checklist:GetColumns(unfiltered)
           onEnter = function(columnFrame)
             local showTooltip = function()
               GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
-              GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
+              GameTooltip:SetText(L["tooltip_do_you_know_de_wey"], 1, 1, 1)
 
               if data.objective.loc and data.objective.loc.hint then
                 GameTooltip:AddLine(data.objective.loc.hint, nil, nil, nil, true)
@@ -903,19 +904,19 @@ function Checklist:GetColumns(unfiltered)
 
               if mapInfo then
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_location_colon"], mapInfo.name, nil, nil, nil, 1, 1, 1)
               end
 
               if data.objective.loc and data.objective.loc.x then
                 if not mapInfo then
                   GameTooltip:AddLine(" ")
                 end
-                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", data.objective.loc.x, data.objective.loc.y), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["label_coordinates"], format("%.1f / %.1f", data.objective.loc.x, data.objective.loc.y), nil, nil, nil, 1, 1, 1)
               end
 
-              local requirementsHeading = "Requirements:"
+              local requirementsHeading = L["label_requirements"]
               if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-                requirementsHeading = "Unlock Catch-Up This Week:"
+                requirementsHeading = L["label_unlock_catch_up"]
               end
 
               -- Requirements
@@ -930,12 +931,12 @@ function Checklist:GetColumns(unfiltered)
               -- Item Rewards
               if Utils:TableCount(data.progress.items) > 0 then
                 GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("Rewards:")
+                GameTooltip:AddLine(L["label_rewards"])
                 Utils:TableForEach(data.progress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
-                  local name = itemCached and item:GetItemLink() or "Loading..."
+                  local name = itemCached and item:GetItemLink() or L["label_loading"]
                   if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
                     GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
                   else
@@ -953,11 +954,11 @@ function Checklist:GetColumns(unfiltered)
                   GameTooltip:AddLine(" ")
                 end
                 if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
-                  GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-                  GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine(L["tooltip_click_map_pin"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine(L["tooltip_link_map_pin"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 end
                 if TomTomGlobal then
-                  GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+                  GameTooltip:AddLine(L["tooltip_place_tomtom"], GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 end
               end
               GameTooltip:Show()
@@ -989,7 +990,7 @@ function Checklist:GetColumns(unfiltered)
           onClick = function()
             if mapPoint then
               if IsAltKeyDown() and TomTomGlobal then
-                local text = "Objective"
+                local text = L["label_objective_pin"]
                 TomTomGlobal:AddWaypoint(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100, {title = text, from = addonName})
               elseif C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
                 if IsModifiedClick("CHATLINK") then
