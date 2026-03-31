@@ -39,6 +39,8 @@ Types.lua
 Constants.lua
 Utils.lua
 Interface.lua
+Locales\enUS.lua
+Locales\frFR.lua
 
 Data.lua
 Data\Expansions.lua
