@@ -69,6 +69,10 @@
 ---@field factions table<integer, WK_CharacterFaction> factionID -> WK_CharacterFaction
 ---@field currencies table<integer, WK_CharacterCurrency> currencyID -> WK_CharacterCurrency
 ---@field items table<integer, integer> itemID -> quantity
+---@field shardOfDundunWeeklyObtained integer Shard of Dundun obtained this week
+---@field shardOfDundunWeeklySpent integer Shard of Dundun spent this week
+---@field shardOfDundunLastQuantity integer Last known Shard of Dundun currency quantity
+---@field shardOfDundunQuestPickedUp boolean Whether the Abundant Offerings quest has been picked up this week
 
 ---@class WK_CharacterCurrency
 ---@field id integer Currency ID
@@ -77,6 +81,7 @@
 ---@field quality integer Quality
 ---@field quantity integer Current quantity
 ---@field maxQuantity integer Max quantity
+---@field quantityEarnedThisWeek integer Quantity earned this week
 ---@field rechargingCycleDurationMS integer Recharging cycle duration in milliseconds (e.g. 10000)
 ---@field rechargingAmountPerCycle integer Recharging amount per cycle (e.g. 1)
 ---@field lastUpdated number Last update time
@@ -284,6 +289,7 @@ Enum.WK_ObjectiveCategory = {
   DarkmoonQuest = "DarkmoonQuest",
   CatchUp = "CatchUp",
   WeeklyQuest = "WeeklyQuest",
+  ShardOfDundun = "ShardOfDundun",
 }
 
 ---@enum Enum.WK_Factions
