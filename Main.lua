@@ -902,6 +902,8 @@ function Main:GetTableColumns(unfiltered)
       return
     end
 
+    local dundunSeenCharacters = {}
+
     ---@type WK_DataColumn
     local dataColumn = {
       name = objectiveCategory.name,
@@ -914,7 +916,7 @@ function Main:GetTableColumns(unfiltered)
       onLeave = function()
         GameTooltip:Hide()
       end,
-      width = 90,
+      width = objectiveCategory.id == Enum.WK_ObjectiveCategory.ShardOfDundun and 110 or 90,
       toggleHidden = true,
       align = "CENTER",
       cell = function(character, characterProfession, skillLineVariantID)
@@ -926,7 +928,38 @@ function Main:GetTableColumns(unfiltered)
 
         local text = format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal)
 
-        if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+        if objectiveCategory.id == Enum.WK_ObjectiveCategory.ShardOfDundun then
+          -- Only show once per character since the data is identical across professions
+          if dundunSeenCharacters[character.GUID] then
+            return {text = ""}
+          end
+          dundunSeenCharacters[character.GUID] = true
+
+          local weeklyObtained = categoryProfessionProgress.pointsEarned
+          local weeklySpent = categoryProfessionProgress.objectivesCompleted -- questsCompleted mapped to spent
+          local weeklyMax = categoryProfessionProgress.pointsTotal
+          local hasData = (type(character.shardOfDundunLastQuantity) == "number" and character.shardOfDundunLastQuantity > 0) or weeklyObtained > 0
+          local questPickedUp = character.shardOfDundunQuestPickedUp or false
+          local obtainedThreshold = questPickedUp and 8 or 6
+
+          if not hasData and weeklyObtained == 0 then
+            text = GRAY_FONT_COLOR:WrapTextInColorCode(format("%d / %d / %d", weeklyObtained, weeklySpent, weeklyMax))
+          elseif weeklySpent >= weeklyMax and weeklyObtained >= weeklyMax then
+            -- All done: everything green
+            text = GREEN_FONT_COLOR:WrapTextInColorCode(format("%d / %d / %d", weeklyObtained, weeklySpent, weeklyMax))
+          elseif weeklySpent >= weeklyMax then
+            -- Spent all 8 but obtained < 8: only spent is green
+            local obtainedStr = tostring(weeklyObtained)
+            local spentStr = GREEN_FONT_COLOR:WrapTextInColorCode(tostring(weeklySpent))
+            text = format("%s / %s / %d", obtainedStr, spentStr, weeklyMax)
+          elseif weeklyObtained >= obtainedThreshold then
+            -- Obtained enough but not spent all: obtained is green, rest white
+            local obtainedStr = GREEN_FONT_COLOR:WrapTextInColorCode(tostring(weeklyObtained))
+            text = format("%s / %d / %d", obtainedStr, weeklySpent, weeklyMax)
+          else
+            text = format("%d / %d / %d", weeklyObtained, weeklySpent, weeklyMax)
+          end
+        elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
           text = format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal)
           -- if categoryProfessionProgress.objectivesTotal == 0 then
           --   text = "-"
@@ -935,7 +968,7 @@ function Main:GetTableColumns(unfiltered)
           return {text = ""}
         end
 
-        if categoryProfessionProgress.pointsEarned > 0 and categoryProfessionProgress.pointsEarned >= categoryProfessionProgress.pointsTotal then
+        if objectiveCategory.id ~= Enum.WK_ObjectiveCategory.ShardOfDundun and categoryProfessionProgress.pointsEarned > 0 and categoryProfessionProgress.pointsEarned >= categoryProfessionProgress.pointsTotal then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
         end
 
@@ -948,7 +981,20 @@ function Main:GetTableColumns(unfiltered)
 
               local requirementsHeading = "Requirements:"
 
-              if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+              if objectiveCategory.id == Enum.WK_ObjectiveCategory.ShardOfDundun then
+                local weeklyObtained = categoryProfessionProgress.pointsEarned
+                local weeklySpent = categoryProfessionProgress.objectivesCompleted
+                local weeklyMax = categoryProfessionProgress.pointsTotal
+                GameTooltip:AddDoubleLine("Obtained This Week:", format("%d / %d", weeklyObtained, weeklyMax), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Spent This Week:", format("%d / %d", weeklySpent, weeklyMax), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine("|cff00ff00Note:|r You need to collect 6 shards weekly as 2 are given to you when you pick up the Abundant Offerings quest.", nil, nil, nil, true)
+                local currencyInfo = Data:GetCharacterCurrency(character, Data.SHARD_OF_DUNDUN_CURRENCY_ID)
+                if currencyInfo then
+                  GameTooltip:AddLine(" ")
+                  GameTooltip:AddDoubleLine("Current Total:", format("%d", currencyInfo.quantity), nil, nil, nil, 1, 1, 1)
+                end
+              elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
                 GameTooltip:AddDoubleLine("Points Earned:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Points Available:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
                 GameTooltip:AddDoubleLine("Max Points:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)

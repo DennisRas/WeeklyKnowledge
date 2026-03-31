@@ -50,6 +50,7 @@ Data\Objectives\FirstCraft.lua
 Data\Objectives\Gathering.lua
 Data\Objectives\Treasure.lua
 Data\Objectives\Treatise.lua
+Data\Objectives\ShardOfDundun.lua
 Data\Objectives\Unique.lua
 Data\Objectives\WeeklyQuest.lua
 

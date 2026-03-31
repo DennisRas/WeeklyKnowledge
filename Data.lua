@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 19
+Data.DBVersion = 21
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -89,6 +89,10 @@ Data.defaultCharacter = {
   factions = {},
   currencies = {},
   items = {},
+  shardOfDundunWeeklyObtained = 0,
+  shardOfDundunWeeklySpent = 0,
+  shardOfDundunLastQuantity = 0,
+  shardOfDundunQuestPickedUp = false,
 }
 
 ---@type WK_Objective[]
@@ -356,6 +360,20 @@ function Data:MigrateDB()
         end
       end
     end
+    -- Initialize Shard of Dundun tracking fields
+    if self.db.global.DBVersion == 19 then
+      for _, character in pairs(self.db.global.characters) do
+        if type(character.shardOfDundunWeeklyObtained) ~= "number" then character.shardOfDundunWeeklyObtained = 0 end
+        if type(character.shardOfDundunLastQuantity) ~= "number" then character.shardOfDundunLastQuantity = 0 end
+      end
+    end
+    -- Initialize Shard of Dundun spent tracking and quest pickup fields
+    if self.db.global.DBVersion == 20 then
+      for _, character in pairs(self.db.global.characters) do
+        if type(character.shardOfDundunWeeklySpent) ~= "number" then character.shardOfDundunWeeklySpent = 0 end
+        if type(character.shardOfDundunQuestPickedUp) ~= "boolean" then character.shardOfDundunQuestPickedUp = false end
+      end
+    end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
@@ -383,6 +401,14 @@ function Data:TaskWeeklyReset()
           end
         end
       end
+      -- Reset Shard of Dundun weekly tracking
+      if type(character.shardOfDundunWeeklyObtained) == "number" then
+        character.shardOfDundunWeeklyObtained = 0
+      end
+      if type(character.shardOfDundunWeeklySpent) == "number" then
+        character.shardOfDundunWeeklySpent = 0
+      end
+      character.shardOfDundunQuestPickedUp = false
     end
   end
   self.db.global.weeklyReset = GetServerTime() + C_DateAndTime.GetSecondsUntilWeeklyReset()
@@ -442,6 +468,7 @@ function Data:ScanAll()
   self:ScanQuests()
   self:ScanProfessions()
   self:ScanCalendar()
+  self:ScanShardOfDundun()
 end
 
 --- Scan currencies for a character.
@@ -472,6 +499,9 @@ function Data:ScanCurrencies()
     end
   end)
 
+  -- Track Shard of Dundun currency
+  currencyIDs[self.SHARD_OF_DUNDUN_CURRENCY_ID] = true
+
   -- Track currency IDs from skill line variants
   Utils:TableForEach(skillLineVariants, function(skillLineVariant)
     if skillLineVariant.catchUpCurrencyID and skillLineVariant.catchUpCurrencyID > 0 then
@@ -494,6 +524,7 @@ function Data:ScanCurrencies()
         quality = currencyInfo.quality,
         quantity = currencyInfo.quantity,
         maxQuantity = currencyInfo.maxQuantity,
+        quantityEarnedThisWeek = currencyInfo.quantityEarnedThisWeek,
         rechargingCycleDurationMS = currencyInfo.rechargingCycleDurationMS,
         rechargingAmountPerCycle = currencyInfo.rechargingAmountPerCycle,
         lastUpdated = GetServerTime(),
@@ -898,6 +929,47 @@ function Data:ScanItems()
   Utils:Debug("└ Finshed")
 end
 
+--- Shard of Dundun currency ID: 3376, 8 obtainable per week, only 6 needed (2 given from quest).
+Data.SHARD_OF_DUNDUN_CURRENCY_ID = 3376
+Data.SHARD_OF_DUNDUN_PER_WEEK = 8
+Data.SHARD_OF_DUNDUN_QUEST_ID = 89507 -- Abundant Offerings: awards 2 shards on pickup
+
+--- Scan Shard of Dundun for the current character.
+--- Uses the API's quantityEarnedThisWeek for obtained count; tracks spent via delta detection.
+function Data:ScanShardOfDundun()
+  Utils:Debug("┌ ScanShardOfDundun()")
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
+
+  local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(self.SHARD_OF_DUNDUN_CURRENCY_ID)
+  if not currencyInfo then return end
+
+  local currentQuantity = currencyInfo.quantity or 0
+
+  -- Weekly obtained comes directly from the API
+  character.shardOfDundunWeeklyObtained = currencyInfo.quantityEarnedThisWeek or 0
+
+  -- Track spent via delta detection (API doesn't provide this)
+  if type(character.shardOfDundunWeeklySpent) ~= "number" then character.shardOfDundunWeeklySpent = 0 end
+  if type(character.shardOfDundunLastQuantity) ~= "number" then character.shardOfDundunLastQuantity = 0 end
+
+  local lastQuantity = character.shardOfDundunLastQuantity
+  if currentQuantity < lastQuantity then
+    character.shardOfDundunWeeklySpent = character.shardOfDundunWeeklySpent + (lastQuantity - currentQuantity)
+  end
+
+  -- Check if the Abundant Offerings quest has been picked up or completed
+  character.shardOfDundunQuestPickedUp = C_QuestLog.IsOnQuest(self.SHARD_OF_DUNDUN_QUEST_ID) or C_QuestLog.IsQuestFlaggedCompleted(self.SHARD_OF_DUNDUN_QUEST_ID)
+
+  character.shardOfDundunLastQuantity = currentQuantity
+  character.lastUpdate = GetServerTime()
+
+  Utils:Debug("├ Shard of Dundun: current=" .. currentQuantity .. " weeklyObtained=" .. character.shardOfDundunWeeklyObtained .. " weeklySpent=" .. character.shardOfDundunWeeklySpent .. " questPickedUp=" .. tostring(character.shardOfDundunQuestPickedUp))
+  Utils:Debug("└ Finshed")
+end
+
 ---@return table<WOWGUID, WK_Character>
 function Data:GetCharacters()
   local characters = Utils:TableFilter(self.db.global.characters or {}, function(character)
@@ -1035,6 +1107,18 @@ function Data:GetObjectiveProgress(character, objective)
 
   if objective.itemID and objective.itemID > 0 then
     objectiveProgress.items[objective.itemID] = false
+  end
+
+  -- Shard of Dundun
+  if objective.categoryID == Enum.WK_ObjectiveCategory.ShardOfDundun then
+    local weeklyObtained = character.shardOfDundunWeeklyObtained or 0
+    local weeklySpent = character.shardOfDundunWeeklySpent or 0
+    objectiveProgress.pointsEarned = weeklyObtained
+    objectiveProgress.pointsTotal = self.SHARD_OF_DUNDUN_PER_WEEK
+    objectiveProgress.questsCompleted = weeklySpent
+    objectiveProgress.questsTotal = self.SHARD_OF_DUNDUN_PER_WEEK
+    objectiveProgress.isCompleted = weeklySpent >= self.SHARD_OF_DUNDUN_PER_WEEK
+    return objectiveProgress
   end
 
   -- Catch Up

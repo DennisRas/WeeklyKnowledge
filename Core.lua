@@ -177,6 +177,7 @@ function Core:OnEnable()
     function()
       Data:ClearProgressCache()
       Data:ScanCurrencies()
+      Data:ScanShardOfDundun()
       self:Render()
     end
   )
