@@ -10,6 +10,7 @@ addon.Main = Main
 local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
+local Table = addon.Table
 local Data = addon.Data
 local Checklist = addon.Checklist
 local LibDBIcon = LibStub("LibDBIcon-1.0")
@@ -412,13 +413,13 @@ function Main:Render()
         Utils:TableForEach(self:GetTableColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
-            column.name,
-            function() return not hidden[column.name] end,
-            function(columnName)
-              hidden[columnName] = not hidden[columnName]
+            column.headerText,
+            function() return not hidden[column.id] end,
+            function(id)
+              hidden[id] = not hidden[id]
               self:Render()
             end,
-            column.name
+            column.id
           )
         end)
       end)
@@ -461,7 +462,7 @@ function Main:Render()
       self.window.titlebar.ChecklistButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    self.window.table = UI:CreateTableFrame({
+    self.window.table = Table:CreateFrame({
       header = {
         enabled = true,
         sticky = true,
@@ -471,7 +472,20 @@ function Main:Render()
         height = Constants.TABLE_ROW_HEIGHT,
         highlight = true,
         striped = true
-      }
+      },
+      sorting = {
+        enabled = true,
+        defaultOrder = "desc",
+        defaultColumn = "knowledge",
+        savedState = Data.db.global.main.tableSort,
+        onStateChanged = function(state)
+          if not state.columnId and not state.direction then
+            Data.db.global.main.tableSort = nil
+          else
+            Data.db.global.main.tableSort = {columnId = state.columnId, direction = state.direction}
+          end
+        end,
+      },
     })
     self.window.table:SetParent(self.window)
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
@@ -487,27 +501,22 @@ function Main:Render()
 
   do -- Table columns config
     Utils:TableForEach(columns, function(column)
-      ---@type WK_TableDataColumn
-      local columnConfig = {
-        width = column.width,
-        align = column.align or "LEFT",
-      }
-      table.insert(tableData.columns, columnConfig)
-      tableWidth = tableWidth + columnConfig.width
+      table.insert(tableData.columns, column)
+      tableWidth = tableWidth + column.width
     end)
   end
 
   do -- Table Header row
-    ---@type WK_TableDataRow
-    local row = {columns = {}}
+    ---@type WK_TableRow
+    local row = {cells = {}}
     Utils:TableForEach(columns, function(column)
-      ---@type WK_TableDataCell
+      ---@type WK_TableCell
       local cell = {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.name),
+        text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.headerText),
         onEnter = column.onEnter,
         onLeave = column.onLeave,
       }
-      table.insert(row.columns, cell)
+      table.insert(row.cells, cell)
     end)
     table.insert(tableData.rows, row)
     tableHeight = tableHeight + self.window.table.config.header.height
@@ -526,12 +535,18 @@ function Main:Render()
       end)
 
       Utils:TableForEach(professions, function(characterProfession)
-        ---@type WK_TableDataRow
-        local row = {columns = {}}
+        ---@type WK_TableRow
+        local row = {
+          cells = {},
+          data = {
+            character = character,
+            characterProfession = characterProfession,
+            skillLineVariantID = characterProfession.skillLineVariantID,
+          },
+        }
         Utils:TableForEach(columns, function(column)
-          ---@type WK_TableDataCell
-          local cell = column.cell(character, characterProfession, characterProfession.skillLineVariantID)
-          table.insert(row.columns, cell)
+          local cell = column.renderCell(row.data)
+          table.insert(row.cells, cell)
         end)
         table.insert(tableData.rows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
@@ -566,16 +581,17 @@ end
 
 ---Get columns for the table
 ---@param unfiltered boolean? Show all columns, even if they are hidden
----@return WK_DataColumn[]
+---@return WK_TableColumn[]
 function Main:GetTableColumns(unfiltered)
   local hidden = Data.db.global.main.hiddenColumns
   local objectiveCategories = Data:GetObjectiveCategories()
   local currentCharacter = Data:GetCharacter()
 
-  ---@type WK_DataColumn[]
+  ---@type WK_TableColumn[]
   local columns = {
     {
-      name = "Name",
+      id = "name",
+      headerText = "Name",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Name", 1, 1, 1);
@@ -587,7 +603,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 90,
       toggleHidden = true,
-      cell = function(character)
+      renderCell = function(data)
+        local character = data.character
         local name = character.name
         if character.classID then
           local _, classFile = GetClassInfo(character.classID)
@@ -602,6 +619,8 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
+      id = "realm",
+      headerText = "Realm",
       name = "Realm",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
@@ -614,12 +633,14 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 90,
       toggleHidden = true,
-      cell = function(character)
+      renderCell = function(data)
+        local character = data.character
         return {text = character.realmName}
       end,
     },
     {
-      name = "Profession",
+      id = "profession",
+      headerText = "Profession",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Profession", 1, 1, 1);
@@ -631,7 +652,9 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
-      cell = function(character, characterProfession, skillLineVariantID)
+      renderCell = function(data)
+        local character = data.character
+        local skillLineVariantID = data.skillLineVariantID
         local text = ""
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
@@ -663,7 +686,8 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Expansion",
+      id = "expansion",
+      headerText = "Expansion",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Expansion", 1, 1, 1);
@@ -675,7 +699,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 120,
       toggleHidden = true,
-      cell = function(_, _, skillLineVariantID)
+      renderCell = function(data)
+        local skillLineVariantID = data.skillLineVariantID
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
         local expansion = variant and Data:GetExpansionByID(variant.expansionID)
@@ -684,6 +709,8 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
+      id = "skill",
+      headerText = "Skill",
       name = "Skill",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
@@ -697,7 +724,8 @@ function Main:GetTableColumns(unfiltered)
       width = 80,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(_, characterProfession)
+      renderCell = function(data)
+        local characterProfession = data.characterProfession
         local text = "-"
         local color = WHITE_FONT_COLOR
         if not characterProfession.skillLevel or characterProfession.skillLevel == 0 then
@@ -722,7 +750,8 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Concentration",
+      id = "concentration",
+      headerText = "Concentration",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Concentration", 1, 1, 1);
@@ -735,7 +764,9 @@ function Main:GetTableColumns(unfiltered)
       width = 100,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(character, characterProfession)
+      renderCell = function(data)
+        local character = data.character
+        local characterProfession = data.characterProfession
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return {text = ""} end
         if not skillLineVariant.concentrationCurrencyID or skillLineVariant.concentrationCurrencyID == 0 then return {text = ""} end
@@ -799,7 +830,8 @@ function Main:GetTableColumns(unfiltered)
       end,
     },
     {
-      name = "Knowledge",
+      id = "knowledge",
+      headerText = "Knowledge",
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Knowledge Points", 1, 1, 1);
@@ -812,7 +844,9 @@ function Main:GetTableColumns(unfiltered)
       width = 100,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(_, characterProfession, skillLineVariantID)
+      renderCell = function(data)
+        local characterProfession = data.characterProfession
+        local skillLineVariantID = data.skillLineVariantID
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local text = ""
 
@@ -892,6 +926,12 @@ function Main:GetTableColumns(unfiltered)
           end,
         }
       end,
+      getSortValue = function(data)
+        if not data.characterProfession then
+          return 0
+        end
+        return (data.characterProfession.knowledgeLevel or 0) + (data.characterProfession.knowledgeUnspent or 0)
+      end,
     },
   }
 
@@ -902,9 +942,9 @@ function Main:GetTableColumns(unfiltered)
       return
     end
 
-    ---@type WK_DataColumn
     local dataColumn = {
-      name = objectiveCategory.name,
+      id = "category_" .. tostring(objectiveCategory.id),
+      headerText = objectiveCategory.name,
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
@@ -917,7 +957,10 @@ function Main:GetTableColumns(unfiltered)
       width = 90,
       toggleHidden = true,
       align = "CENTER",
-      cell = function(character, characterProfession, skillLineVariantID)
+      renderCell = function(data)
+        local character = data.character
+        local characterProfession = data.characterProfession
+        local skillLineVariantID = data.skillLineVariantID
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local categoryProfessionProgress = Data:GetCategoryProfessionProgress(character, objectiveCategory, characterProfession)
         if not categoryProfessionProgress then
@@ -1034,7 +1077,7 @@ function Main:GetTableColumns(unfiltered)
   end
 
   local filteredColumns = Utils:TableFilter(columns, function(column)
-    return not hidden[column.name]
+    return not hidden[column.id]
   end)
 
   return filteredColumns

@@ -27,7 +27,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 19
+Data.DBVersion = 21
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -46,6 +46,7 @@ Data.defaultDB = {
       windowBorder = true,
       checklistHelpTipClosed = false,
       hideLowLevelProfessions = false,
+      tableSort = nil,
     },
     checklist = {
       selectedExpansions = {},
@@ -61,6 +62,7 @@ Data.defaultDB = {
       hideInDungeons = true,
       hideTable = false,
       hideTableHeader = false,
+      tableSort = nil,
     },
   }
 }
@@ -354,6 +356,64 @@ function Data:MigrateDB()
             end
           end
         end
+      end
+    end
+    -- Migrate hiddenColumns from legacy keys (old column header / category name) to stable ids.
+    if self.db.global.DBVersion == 19 then
+      local mainHidden = self.db.global.main and self.db.global.main.hiddenColumns
+      if type(mainHidden) ~= "table" then
+        self.db.global.main.hiddenColumns = {}
+        mainHidden = self.db.global.main.hiddenColumns
+      end
+      local checklistHidden = self.db.global.checklist and self.db.global.checklist.hiddenColumns
+      if type(checklistHidden) ~= "table" then
+        self.db.global.checklist.hiddenColumns = {}
+        checklistHidden = self.db.global.checklist.hiddenColumns
+      end
+
+      ---@param hidden table<string, boolean>
+      ---@param legacy string
+      ---@param id string
+      local function migrateHiddenColumnKey(hidden, legacy, id)
+        if hidden[id] == nil and hidden[legacy] ~= nil then
+          hidden[id] = hidden[legacy]
+        end
+      end
+
+      local mainStatic = {
+        {"Name",          "name"},
+        {"Realm",         "realm"},
+        {"Profession",    "profession"},
+        {"Expansion",     "expansion"},
+        {"Skill",         "skill"},
+        {"Concentration", "concentration"},
+        {"Knowledge",     "knowledge"},
+      }
+      for _, pair in ipairs(mainStatic) do
+        migrateHiddenColumnKey(mainHidden, pair[1], pair[2])
+      end
+
+      for _, category in ipairs(self.ObjectiveCategories or {}) do
+        if category and category.id and category.name then
+          migrateHiddenColumnKey(mainHidden, category.name, "category_" .. tostring(category.id))
+        end
+      end
+
+      local checklistStatic = {
+        {"Objective",    "objective"},
+        {"Profession",   "profession"},
+        {"Expansion",    "expansion"},
+        {"Category",     "category"},
+        {"Location",     "location"},
+        {"Repeat?",      "repeatable"},
+        {"Progress",     "progress"},
+        {"Points",       "points"},
+        {"",             "waypoint"},
+        {"__waypoint__", "waypoint"},
+        {"repeat",       "repeatable"},
+      }
+      for _, pair in ipairs(checklistStatic) do
+        migrateHiddenColumnKey(checklistHidden, pair[1], pair[2])
       end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1

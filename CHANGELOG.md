@@ -2,6 +2,7 @@
 
 ## v1.2.6 - 2026-03-30
 
+- Added column sorting to the main window and checklist window.
 - Added missing Weekly Quest "Shimmering Melodies" for Enchanting.
 - Updated the changelog to be more concise and easier to read.
 

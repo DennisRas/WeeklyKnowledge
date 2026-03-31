@@ -10,6 +10,7 @@ addon.Checklist = Checklist
 local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
+local Table = addon.Table
 local Data = addon.Data
 
 function Checklist:ToggleWindow()
@@ -315,13 +316,13 @@ function Checklist:Render()
         Utils:TableForEach(self:GetColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
-            column.name,
-            function() return not hidden[column.name] end,
-            function(columnName)
-              hidden[columnName] = not hidden[columnName]
+            column.headerText,
+            function() return not hidden[column.id] end,
+            function(id)
+              hidden[id] = not hidden[id]
               self:Render()
             end,
-            column.name
+            column.id
           )
         end)
       end)
@@ -402,7 +403,7 @@ function Checklist:Render()
       self.window.titlebar.toggleButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
 
-    self.window.table = UI:CreateTableFrame({
+    self.window.table = Table:CreateFrame({
       header = {
         enabled = true,
         sticky = true,
@@ -416,6 +417,19 @@ function Checklist:Render()
       cells = {
         padding = Constants.TABLE_CELL_PADDING,
         highlight = true
+      },
+      sorting = {
+        enabled = true,
+        defaultOrder = "desc",
+        defaultColumn = "progress",
+        savedState = Data.db.global.checklist.tableSort,
+        onStateChanged = function(state)
+          if not state.columnId and not state.direction then
+            Data.db.global.checklist.tableSort = nil
+          else
+            Data.db.global.checklist.tableSort = {columnId = state.columnId, direction = state.direction}
+          end
+        end,
       },
     })
     self.window.table:SetParent(self.window)
@@ -437,27 +451,22 @@ function Checklist:Render()
 
   do -- Table Column config
     Utils:TableForEach(dataColumns, function(dataColumn)
-      ---@type WK_TableDataColumn
-      local column = {
-        width = dataColumn.width,
-        align = dataColumn.align or "LEFT",
-      }
-      table.insert(tableData.columns, column)
+      table.insert(tableData.columns, dataColumn)
       tableWidth = tableWidth + dataColumn.width
     end)
   end
 
   do -- Table Header row
-    ---@type WK_TableDataRow
-    local row = {columns = {}}
+    ---@type WK_TableRow
+    local row = {cells = {}}
     Utils:TableForEach(dataColumns, function(dataColumn)
-      ---@type WK_TableDataCell
+      ---@type WK_TableCell
       local cell = {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.name),
+        text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.headerText),
         onEnter = dataColumn.onEnter,
         onLeave = dataColumn.onLeave,
       }
-      table.insert(row.columns, cell)
+      table.insert(row.cells, cell)
     end)
     table.insert(tableData.rows, row)
     tableHeight = tableHeight + self.window.table.config.header.height
@@ -532,21 +541,21 @@ function Checklist:Render()
           return
         end
 
-        ---@type WK_TableDataRow
-        local row = {columns = {}}
+        ---@type WK_TableRowData
+        local rowData = {
+          character = character,
+          characterProfession = characterProfession,
+          skillLineVariantID = skillLineVariantID,
+          objective = objective,
+          progress = progress,
+        }
+        ---@type WK_TableRow
+        local row = {
+          cells = {},
+          data = rowData,
+        }
         Utils:TableForEach(dataColumns, function(dataColumn)
-          ---@type WK_ChecklistData
-          local cellData = {
-            character = character,
-            characterProfession = characterProfession,
-            skillLineVariantID = skillLineVariantID,
-            objective = objective,
-            progress = progress,
-            -- item = item
-          }
-          ---@type WK_TableDataCell
-          local cell = dataColumn.cell(cellData)
-          table.insert(row.columns, cell)
+          table.insert(row.cells, dataColumn.renderCell(rowData))
         end)
 
         table.insert(tableData.rows, row)
@@ -593,15 +602,16 @@ end
 
 ---Get column data
 ---@param unfiltered boolean?
----@return table
+---@return WK_TableColumn[]
 function Checklist:GetColumns(unfiltered)
   local hidden = Data.db.global.checklist.hiddenColumns
-  ---@type WK_ChecklistColumn[]
+  ---@type WK_TableColumn[]
   local columns = {
     {
-      name = "Objective",
+      id = "objective",
+      headerText = "Objective",
       width = 260,
-      cell = function(data)
+      renderCell = function(data)
         if data.objective.itemID and data.objective.itemID > 0 then
           local text = format("Error: ItemID %d not found", data.objective.itemID or "?")
           local link = ""
@@ -725,10 +735,11 @@ function Checklist:GetColumns(unfiltered)
       end,
     },
     {
-      name = "Profession",
+      id = "profession",
+      headerText = "Profession",
       width = Data.db.global.showFullProfessionName and 160 or 100,
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local text = ""
         local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
         if not variant then return {text = ""} end
@@ -754,24 +765,37 @@ function Checklist:GetColumns(unfiltered)
           end,
         }
       end,
+      getSortValue = function(data)
+        local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+        local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
+        return skillLine and skillLine.name:lower() or ""
+      end,
     },
     {
-      name = "Expansion",
+      id = "expansion",
+      headerText = "Expansion",
       width = 120,
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
         local expansion = skillLineVariant and Data:GetExpansionByID(skillLineVariant.expansionID)
         return {
           text = expansion and expansion.name or "",
         }
       end,
+      getSortValue = function(data)
+        local v = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+        local expansion = v and Data:GetExpansionByID(v.expansionID)
+        return expansion and expansion.name:lower() or ""
+      end,
     },
     {
+      id = "category",
+      headerText = "Category",
       name = "Category",
       width = 80,
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
         if not objectiveCategory then
           return {
@@ -791,12 +815,17 @@ function Checklist:GetColumns(unfiltered)
           end,
         }
       end,
+      getSortValue = function(data)
+        local oc = Data:GetObjectiveCategoryByID(data.objective.categoryID)
+        return oc and oc.name:lower() or ""
+      end,
     },
     {
-      name = "Location",
+      id = "location",
+      headerText = "Location",
       width = 100,
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local text = " "
         if data.objective and data.objective.loc and data.objective.loc.m then
           if Data.cache.mapInfo[data.objective.loc.m] then
@@ -813,12 +842,17 @@ function Checklist:GetColumns(unfiltered)
           text = text
         }
       end,
+      getSortValue = function(data)
+        return data.objective.loc and data.objective.loc.m or 0
+      end,
     },
     {
+      id = "repeatable",
+      headerText = "Repeat?",
       name = "Repeat?",
       width = 60,
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local objective = data.objective
         if not objective then
           return {
@@ -835,13 +869,18 @@ function Checklist:GetColumns(unfiltered)
           text = objectiveCategory.repeatable or "",
         }
       end,
+      getSortValue = function(data)
+        local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
+        return objectiveCategory and objectiveCategory.repeatable or ""
+      end,
     },
     {
-      name = "Progress",
+      id = "progress",
+      headerText = "Progress",
       width = 70,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local text = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
         if data.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
@@ -851,13 +890,19 @@ function Checklist:GetColumns(unfiltered)
           text = text,
         }
       end,
+      getSortValue = function(data)
+        local p = data.progress
+        return p and (p.questsCompleted or 0) or 0
+      end,
     },
     {
+      id = "points",
+      headerText = "Points",
       name = "Points",
       width = 70,
       align = "CENTER",
       toggleHidden = true,
-      cell = function(data)
+      renderCell = function(data)
         local text = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
         if data.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
@@ -867,12 +912,18 @@ function Checklist:GetColumns(unfiltered)
           text = text,
         }
       end,
+      getSortValue = function(data)
+        local p = data.progress
+        return p and (p.pointsEarned or 0) or 0
+      end,
     },
     {
-      name = "",
+      id = "waypoint",
+      headerText = "",
       width = 50,
       align = "CENTER",
-      cell = function(data)
+      sortable = false,
+      renderCell = function(data)
         local TomTomGlobal = _G["TomTom"]
         local mapInfo = nil
         local mapPoint = nil
@@ -1014,7 +1065,7 @@ function Checklist:GetColumns(unfiltered)
   end
 
   local filteredColumns = Utils:TableFilter(columns, function(column)
-    return not hidden[column.name]
+    return not hidden[column.id]
   end)
 
   return filteredColumns

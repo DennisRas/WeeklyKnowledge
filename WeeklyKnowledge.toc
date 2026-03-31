@@ -38,6 +38,7 @@ Types.lua
 Constants.lua
 Utils.lua
 Interface.lua
+Table.lua
 
 Data.lua
 Data\Expansions.lua

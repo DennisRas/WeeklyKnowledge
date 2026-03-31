@@ -136,10 +136,10 @@ function Utils:TableCopy(tbl, cache)
 end
 
 ---Map each item in a table
----@generic T
+---@generic T, V
 ---@param tbl T[]
----@param callback fun(value: T, index: number): any
----@return T[]
+---@param callback fun(value: T, index: number): V
+---@return V[]
 function Utils:TableMap(tbl, callback)
   local t = {}
   self:TableForEach(tbl, function(v, k)
@@ -236,6 +236,7 @@ end
 ---@param objectiveProgressRequirement WK_ObjectiveProgressRequirement
 ---@param character WK_Character
 ---@param skillLineVariantID number
+---@param objectiveCategoryID Enum.WK_ObjectiveCategory
 function Utils:RenderRequirementTooltip(objectiveProgressRequirement, character, skillLineVariantID, objectiveCategoryID)
   local leftText = "-"
   local rightText = "-"
@@ -266,7 +267,6 @@ function Utils:RenderRequirementTooltip(objectiveProgressRequirement, character,
     local name = "Loading..."
     local quantity = 0
     local icon = 134400
-    ---@type WK_CharacterCurrency|nil
     local characterCurrency = character.currencies and character.currencies[objectiveProgressRequirement.requirement.id] or nil
     if characterCurrency then
       if characterCurrency.name then
