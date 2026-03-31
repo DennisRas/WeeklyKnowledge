@@ -38,7 +38,7 @@ function Core:HandleCommand(message)
   if cmd:lower() == "minimap" then
     Data.db.global.minimap.hide = not Data.db.global.minimap.hide
     LibDBIcon:Refresh(addonName, Data.db.global.minimap)
-    self:Print("Minimap button " .. (Data.db.global.minimap.hide and "hidden" or "shown") .. ".")
+    self:Print(format(L["command_minimap_status"], L[Data.db.global.minimap.hide and "command_hidden" or "command_shown"]))
     self:Render()
     return
   end
@@ -46,12 +46,12 @@ function Core:HandleCommand(message)
     Main:ToggleWindow()
     return
   end
-  self:Print("Usage: /wk [checklist | minimap]")
+  self:Print(L["command_usage"])
 end
 
 function Core:OnInitialize()
-  _G["BINDING_NAME_WEEKLYKNOWLEDGE_MAIN"] = "Toggle WeeklyKnowledge window"
-  _G["BINDING_NAME_WEEKLYKNOWLEDGE_CHECKLIST"] = "Toggle Checklist window"
+  _G["BINDING_NAME_WEEKLYKNOWLEDGE_MAIN"] = L["binding_toggle_main"]
+  _G["BINDING_NAME_WEEKLYKNOWLEDGE_CHECKLIST"] = L["binding_toggle_checklist"]
   _G["WEEKLYKNOWLEDGE_TOGGLE_MAIN"] = function()
     if addon and addon.Main then addon.Main:ToggleWindow() end
   end
@@ -64,7 +64,7 @@ function Core:OnInitialize()
   Data:InitDB()
   Data:MigrateDB()
   if Data:TaskWeeklyReset() then
-    self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
+    self:Print(L["prompt_weekly_reset"])
   end
 
   local WKLDB = LibDataBroker:NewDataObject(addonName, {
@@ -81,11 +81,11 @@ function Core:OnInitialize()
     end,
     OnTooltipShow = function(tooltip)
       tooltip:SetText(addonName, 1, 1, 1)
-      tooltip:AddLine("|cff00ff00Left click|r to open WeeklyKnowledge.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      local dragText = "|cff00ff00Drag|r to move this icon"
+      tooltip:AddLine(GREEN_FONT_COLOR:WrapTextInColorCode(L["command_left_click"]) .. " " .. L["tooltip_left_click_open"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      tooltip:AddLine(GREEN_FONT_COLOR:WrapTextInColorCode(L["command_right_click"]) .. " " .. L["tooltip_right_click_open"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      local dragText = GREEN_FONT_COLOR:WrapTextInColorCode(L["command_drag"]) .. " " .. L["tooltip_drag_minimap"]
       if Data.db.global.minimap.lock then
-        dragText = dragText .. " |cffff0000(locked)|r"
+        dragText = dragText .. " " .. RED_FONT_COLOR:WrapTextInColorCode(L["command_locked"])
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end
