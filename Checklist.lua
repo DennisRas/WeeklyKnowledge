@@ -11,6 +11,7 @@ local Constants = addon.Constants
 local Utils = addon.Utils
 local UI = addon.UI
 local Data = addon.Data
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 function Checklist:ToggleWindow()
   if not self.window then return end

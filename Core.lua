@@ -8,6 +8,7 @@ local Main = addon.Main
 local Checklist = addon.Checklist
 local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibDBIcon = LibStub("LibDBIcon-1.0")
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core

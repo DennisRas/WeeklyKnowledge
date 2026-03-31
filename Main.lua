@@ -13,6 +13,7 @@ local UI = addon.UI
 local Data = addon.Data
 local Checklist = addon.Checklist
 local LibDBIcon = LibStub("LibDBIcon-1.0")
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"

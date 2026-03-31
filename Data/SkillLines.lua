@@ -5,6 +5,7 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
 ---@type WK_SkillLine[]
 Data.SkillLines = {
