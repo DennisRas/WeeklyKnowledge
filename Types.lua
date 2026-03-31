@@ -1,7 +1,5 @@
--- EmmyLua (WK_*)
-
 --------------------------------------------------------------------------------
--- DB
+-- Global DB
 --------------------------------------------------------------------------------
 
 ---@class WK_TableSortState
@@ -46,7 +44,7 @@
 ---@field tableSort WK_TableSortState?
 
 --------------------------------------------------------------------------------
--- Catalog
+-- Game Data References
 --------------------------------------------------------------------------------
 
 ---@class WK_Expansion
@@ -79,7 +77,7 @@
 ---@field concentrationCurrencyID integer
 
 --------------------------------------------------------------------------------
--- Character
+-- Character Data
 --------------------------------------------------------------------------------
 
 ---@class WK_Character
@@ -144,7 +142,7 @@
 ---@field knowledgeMaxLevel integer
 
 --------------------------------------------------------------------------------
--- Objectives
+-- Objectives Data
 --------------------------------------------------------------------------------
 
 ---@class WK_ObjectiveCategory
@@ -184,8 +182,12 @@
 ---@field requires WK_ObjectiveRequirement[]?
 
 --------------------------------------------------------------------------------
--- Progress
+-- Progress State
 --------------------------------------------------------------------------------
+
+---@class WK_ObjectiveProgressRequirement
+---@field requirement WK_ObjectiveRequirement
+---@field isCompleted boolean
 
 ---@class WK_ObjectiveProgress
 ---@field character WK_Character
@@ -199,10 +201,6 @@
 ---@field requirementsTotal number
 ---@field requirements WK_ObjectiveProgressRequirement[]
 ---@field items table<integer, boolean>
-
----@class WK_ObjectiveProgressRequirement
----@field requirement WK_ObjectiveRequirement
----@field isCompleted boolean
 
 ---@class WK_CategoryProgress
 ---@field character WK_Character
@@ -349,20 +347,20 @@ Enum.WK_Currency = {
 
 ---@enum Enum.WK_Maps
 Enum.WK_Map = {
+  AtalAman = 2536,
+  AzjKahet = 2255,
+  CityOfThreads = 2213,
   DarkmoonIsland = 407,
   Dornogal = 2339,
-  CityOfThreads = 2213,
+  EversongWoods = 2395,
   Hallowfall = 2215,
-  AzjKahet = 2255,
-  TheRingingDeeps = 2214,
+  Harandar = 2413,
   IsleOfDorn = 2248,
-  Undermine = 2346,
+  SilvermoonCity = 2393,
+  SlayersRise = 2444,
   Tazavesh = 2472,
+  TheRingingDeeps = 2214,
+  Undermine = 2346,
   Voidstorm = 2405,
   ZulAman = 2437,
-  AtalAman = 2536,
-  Harandar = 2413,
-  EversongWoods = 2395,
-  SlayersRise = 2444,
-  SilvermoonCity = 2393,
 }
