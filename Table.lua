@@ -26,17 +26,14 @@ local function stripFormattingForSort(text)
   return text
 end
 
---- Comparable value from visible cell text (ratio, number, or lowercase string).
+--- Comparable value from visible cell text (progress N/M uses numerator; plain number; else lowercase string).
 ---@param text string?
 ---@return number|string
 function Table:GetCellTextSortValue(text)
   text = stripFormattingForSort(text)
   local num, den = text:match("^%s*(%d+)%s*/%s*(%d+)%s*$")
   if num and den then
-    local d = tonumber(den)
-    if d and d ~= 0 then
-      return tonumber(num) / d
-    end
+    return tonumber(num)
   end
   local numeric = tonumber(text:match("^%s*([%+%-]?[%d%.]+)%s*$"))
   if numeric ~= nil then
