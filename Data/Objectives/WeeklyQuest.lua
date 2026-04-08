@@ -51,7 +51,7 @@ local objectives = {
   -- Midnight: Leatherworking
   {skillLineVariantID = 2915, categoryID = category, quests = {93695},                             itemID = 263459, points = 2, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
   -- Midnight: Mining
-  {skillLineVariantID = 2916, categoryID = category, quests = {93705, 93706, 93708, 93709},        itemID = 263463, points = 3, limit = 1,                                                                                                                      loc = {m = Enum.WK_Map.SilvermoonCity, x = 42.6, y = 52.8, hint = "Complete a quest from |cffffff00Belil|r <Mining Trainer>."}},
+  {skillLineVariantID = 2916, categoryID = category, quests = {93705, 93706, 93707, 93708, 93709}, itemID = 263463, points = 3, limit = 1,                                                                                                                      loc = {m = Enum.WK_Map.SilvermoonCity, x = 42.6, y = 52.8, hint = "Complete a quest from |cffffff00Belil|r <Mining Trainer>."}},
   -- Midnight: Skinning
   {skillLineVariantID = 2917, categoryID = category, quests = {93710, 93711, 93712, 93714},        itemID = 263461, points = 3, limit = 1,                                                                                                                      loc = {m = Enum.WK_Map.SilvermoonCity, x = 43.2, y = 55.6, hint = "Complete a quest from |cffffff00Tyn|r <Skinning Trainer>."}},
   -- Midnight: Tailoring
