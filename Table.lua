@@ -93,7 +93,7 @@ function Table:CreateFrame(config)
   tableFrame.rows = {}
   tableFrame.data = tableFrame.config.data
   ---@type WK_TableSortState
-  tableFrame.sortState = {columnId = nil, direction = nil}
+  tableFrame.sortState = {columnId = nil, direction = nil, isDefault = true}
 
   ---@param columnId string?
   ---@return number|nil
@@ -119,6 +119,7 @@ function Table:CreateFrame(config)
       state.columnId = nil
       state.direction = nil
     end
+    state.isDefault = true
   end
 
   function tableFrame:ValidateSortState()
@@ -190,6 +191,8 @@ function Table:CreateFrame(config)
       dataRows[#dataRows + 1] = rows[i]
     end
 
+	local currentCharacter = addon.Data:GetCharacter()  -- current character
+
     ---@param row WK_TableRow
     ---@param colIndex number
     local function getSortValueFromColumn(row, colIndex)
@@ -209,7 +212,24 @@ function Table:CreateFrame(config)
       return getSortValueFromColumn(row, sortColumnIndex)
     end
 
+	---@param row WK_TableRow
+    local function isCurrentCharacter(row)
+	  local nameValue = row.data.character.name
+      if not nameValue then return false end
+      return tostring(nameValue):lower() == tostring(currentCharacter.name):lower()
+    end
+
     table.sort(dataRows, function(a, b)
+	  if state.isDefault then
+	    local aIsCurrent = isCurrentCharacter(a)
+        local bIsCurrent = isCurrentCharacter(b)
+
+         -- Current character always on top
+        if aIsCurrent and not bIsCurrent then return true end
+        if not aIsCurrent and bIsCurrent then return false end
+        if aIsCurrent and bIsCurrent then return false end
+	  end
+
       local va = getSortValue(a)
       local vb = getSortValue(b)
       if type(va) == "number" and type(vb) == "number" then
@@ -257,6 +277,7 @@ function Table:CreateFrame(config)
       state.columnId = columnId
       state.direction = "desc"
     end
+	state.isDefault = false
     self:ApplySortToData()
     self:RenderTable()
     notifySortStateChanged()
