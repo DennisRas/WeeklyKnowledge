@@ -217,7 +217,6 @@ function Main:Render()
           function() return Data.db.global.currentfirst end,
           function()
             Data.db.global.currentfirst = not Data.db.global.currentfirst
-            LibDBIcon:Refresh(addonName, Data.db.global.currentfirst)
           end
         )
         currentCharacterFirst:SetTooltip(function(tooltip, elementDescription)
