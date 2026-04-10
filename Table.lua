@@ -191,7 +191,7 @@ function Table:CreateFrame(config)
       dataRows[#dataRows + 1] = rows[i]
     end
 
-	local currentCharacter = addon.Data:GetCharacter()  -- current character
+    local currentCharacter = addon.Data:GetCharacter()  -- current character
 
     ---@param row WK_TableRow
     ---@param colIndex number
@@ -212,23 +212,22 @@ function Table:CreateFrame(config)
       return getSortValueFromColumn(row, sortColumnIndex)
     end
 
-	---@param row WK_TableRow
+    ---@param row WK_TableRow
     local function isCurrentCharacter(row)
-	  local nameValue = row.data.character.name
+      local nameValue = row.data.character.name
       if not nameValue then return false end
       return tostring(nameValue):lower() == tostring(currentCharacter.name):lower()
     end
 
     table.sort(dataRows, function(a, b)
-	  if state.isDefault then
-	    local aIsCurrent = isCurrentCharacter(a)
+      if state.isDefault then
+        local aIsCurrent = isCurrentCharacter(a)
         local bIsCurrent = isCurrentCharacter(b)
 
-         -- Current character always on top
         if aIsCurrent and not bIsCurrent then return true end
         if not aIsCurrent and bIsCurrent then return false end
         if aIsCurrent and bIsCurrent then return false end
-	  end
+      end
 
       local va = getSortValue(a)
       local vb = getSortValue(b)
