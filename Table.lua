@@ -93,7 +93,7 @@ function Table:CreateFrame(config)
   tableFrame.rows = {}
   tableFrame.data = tableFrame.config.data
   ---@type WK_TableSortState
-  tableFrame.sortState = {columnId = nil, direction = nil, isDefault = true}
+  tableFrame.sortState = {columnId = nil, direction = nil, isDefault = addon.Data.db.global.currentfirst}
 
   ---@param columnId string?
   ---@return number|nil
@@ -119,7 +119,7 @@ function Table:CreateFrame(config)
       state.columnId = nil
       state.direction = nil
     end
-    state.isDefault = true
+    state.isDefault = addon.Data.db.global.currentfirst
   end
 
   function tableFrame:ValidateSortState()

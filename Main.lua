@@ -212,6 +212,19 @@ function Main:Render()
           GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
         end)
 
+        local currentCharacterFirst = rootMenu:CreateCheckbox(
+          "Show current character first",
+          function() return Data.db.global.currentfirst end,
+          function()
+            Data.db.global.currentfirst = not Data.db.global.currentfirst
+            LibDBIcon:Refresh(addonName, Data.db.global.currentfirst)
+          end
+        )
+        currentCharacterFirst:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+          GameTooltip_AddNormalLine(tooltip, "Default view only. Sorting the table will still behave normally.");
+        end)
+
         rootMenu:CreateTitle("Window")
         local windowScale = rootMenu:CreateButton("Scaling")
         for i = 80, 200, 10 do
