@@ -277,7 +277,7 @@ function Table:CreateFrame(config)
       state.columnId = columnId
       state.direction = "desc"
     end
-	state.isDefault = false
+    state.isDefault = false
     self:ApplySortToData()
     self:RenderTable()
     notifySortStateChanged()
