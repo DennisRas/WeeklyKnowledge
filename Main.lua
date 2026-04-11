@@ -59,7 +59,7 @@ function Main:Render()
   }
 
   if not self.window then
-    local frameName = addonName .. "MainWindow"
+    local frameName = format("%sMainWindow", addonName)
     self.window = CreateFrame("Frame", frameName, UIParent)
     self.window:SetSize(500, 500)
     self.window:SetFrameStrata("MEDIUM")
@@ -476,7 +476,24 @@ function Main:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultColumn = "knowledge",
+        defaultCompare = function(a, b)
+          local rowDataA, rowDataB = a.data, b.data
+          if not rowDataA or not rowDataB then return false end
+          local characterA, characterB = rowDataA.character, rowDataB.character
+          local lastUpdateA, lastUpdateB = characterA.lastUpdate, characterB.lastUpdate
+          if type(lastUpdateA) == "number" and type(lastUpdateB) == "number" then
+            if lastUpdateA ~= lastUpdateB then
+              return lastUpdateA > lastUpdateB
+            end
+          elseif type(lastUpdateA) == "number" then
+            return true
+          elseif type(lastUpdateB) == "number" then
+            return false
+          end
+          local identityCompare = Utils:CompareCharacterNameRealm(characterA, characterB)
+          if identityCompare ~= 0 then return identityCompare < 0 end
+          return (rowDataA.skillLineVariantID or 0) < (rowDataB.skillLineVariantID or 0)
+        end,
         savedState = Data.db.global.main.tableSort,
         onStateChanged = function(state)
           if not state.columnId and not state.direction then
@@ -491,7 +508,7 @@ function Main:Render()
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
 
-    table.insert(UISpecialFrames, self.window:GetName() or (addonName .. "MainWindow"))
+    table.insert(UISpecialFrames, self.window:GetName() or format("%sMainWindow", addonName))
   end
 
   -- Quick hotfix to avoid excessive rendering
@@ -587,6 +604,27 @@ function Main:GetTableColumns(unfiltered)
   local objectiveCategories = Data:GetObjectiveCategories()
   local currentCharacter = Data:GetCharacter()
 
+  --- Estimated concentration (same idea as the cell); used only for sort order.
+  ---@param data WK_TableRowData
+  ---@return number
+  local function concentrationEstimatedForSort(data)
+    local character = data.character
+    local characterProfession = data.characterProfession
+    local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+    if not skillLineVariant or not skillLineVariant.concentrationCurrencyID or skillLineVariant.concentrationCurrencyID == 0 then
+      return -1
+    end
+    local currencyInfo = Data:GetCharacterCurrency(character, skillLineVariant.concentrationCurrencyID)
+    if not currencyInfo then
+      return -1
+    end
+    local currentQuantity = currencyInfo.quantity
+    local maxQuantity = currencyInfo.maxQuantity
+    local timeDifference = GetServerTime() - currencyInfo.lastUpdated
+    local cyclesSinceLastUpdate = timeDifference / (currencyInfo.rechargingCycleDurationMS / 1000)
+    return math.min(currentQuantity + cyclesSinceLastUpdate, maxQuantity)
+  end
+
   ---@type WK_TableColumn[]
   local columns = {
     {
@@ -617,6 +655,12 @@ function Main:GetTableColumns(unfiltered)
         end
         return {text = name}
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "realm",
@@ -637,6 +681,12 @@ function Main:GetTableColumns(unfiltered)
         local character = data.character
         return {text = character.realmName}
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          return strcmputf8i(a.data.character.realmName or "", b.data.character.realmName or "") < 0
+        end,
+      },
     },
     {
       id = "profession",
@@ -684,6 +734,19 @@ function Main:GetTableColumns(unfiltered)
           end,
         }
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function skillLineNameLower(rowData)
+            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+            local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
+            return skillLine and skillLine.name:lower() or ""
+          end
+          local nameA, nameB = skillLineNameLower(a.data), skillLineNameLower(b.data)
+          if nameA ~= nameB then return nameA < nameB end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
     },
     {
       id = "expansion",
@@ -707,6 +770,19 @@ function Main:GetTableColumns(unfiltered)
         if not expansion then return {text = ""} end
         return {text = expansion.name}
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function expansionNameLower(rowData)
+            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+            local expansion = variant and Data:GetExpansionByID(variant.expansionID)
+            return expansion and expansion.name:lower() or ""
+          end
+          local nameA, nameB = expansionNameLower(a.data), expansionNameLower(b.data)
+          if nameA ~= nameB then return nameA < nameB end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
     },
     {
       id = "skill",
@@ -748,6 +824,17 @@ function Main:GetTableColumns(unfiltered)
         text = color:WrapTextInColorCode(format("%d / %d", characterProfession.skillLevel, characterProfession.skillMaxLevel))
         return {text = text}
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local skillLevelA = a.data.characterProfession.skillLevel
+          local skillLevelB = b.data.characterProfession.skillLevel
+          local sortKeyA = (skillLevelA and skillLevelA > 0) and skillLevelA or -1
+          local sortKeyB = (skillLevelB and skillLevelB > 0) and skillLevelB or -1
+          if sortKeyA ~= sortKeyB then return sortKeyA < sortKeyB end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
     },
     {
       id = "concentration",
@@ -828,6 +915,15 @@ function Main:GetTableColumns(unfiltered)
           end,
         }
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local estimatedA = concentrationEstimatedForSort(a.data)
+          local estimatedB = concentrationEstimatedForSort(b.data)
+          if estimatedA ~= estimatedB then return estimatedA < estimatedB end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
     },
     {
       id = "knowledge",
@@ -853,7 +949,11 @@ function Main:GetTableColumns(unfiltered)
         if characterProfession.knowledgeLevel then
           text = format("%d", characterProfession.knowledgeLevel)
           if characterProfession.knowledgeUnspent and characterProfession.knowledgeUnspent > 0 then
-            text = format("%d %s", characterProfession.knowledgeLevel, LIGHTBLUE_FONT_COLOR:WrapTextInColorCode("(" .. characterProfession.knowledgeUnspent .. ")"))
+            text = format(
+              "%d %s",
+              characterProfession.knowledgeLevel,
+              LIGHTBLUE_FONT_COLOR:WrapTextInColorCode(format("(%d)", characterProfession.knowledgeUnspent))
+            )
           end
         end
         if characterProfession.knowledgeMaxLevel then
@@ -903,11 +1003,11 @@ function Main:GetTableColumns(unfiltered)
               Utils:TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
                 local name = characterProfessionSpecialization.name
                 if strlenutf8(name) > 20 then
-                  name = strsub(name, 1, 20) .. "..."
+                  name = format("%s...", strsub(name, 1, 20))
                 end
                 local value = format("%d / %d", characterProfessionSpecialization.knowledgeLevel or 0, characterProfessionSpecialization.knowledgeMaxLevel or 0)
                 if characterProfessionSpecialization.rootIconID then
-                  name = "|T" .. characterProfessionSpecialization.rootIconID .. ":12|t " .. name
+                  name = format("|T%d:12|t %s", characterProfessionSpecialization.rootIconID, name)
                 end
                 if characterProfessionSpecialization.state and characterProfessionSpecialization.state == Enum.ProfessionsSpecTabState.Locked then
                   value = LIGHTGRAY_FONT_COLOR:WrapTextInColorCode("Locked")
@@ -926,12 +1026,18 @@ function Main:GetTableColumns(unfiltered)
           end,
         }
       end,
-      getSortValue = function(data)
-        if not data.characterProfession then
-          return 0
-        end
-        return (data.characterProfession.knowledgeLevel or 0) + (data.characterProfession.knowledgeUnspent or 0)
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function totalKnowledgePoints(rowData)
+            if not rowData.characterProfession then return 0 end
+            return (rowData.characterProfession.knowledgeLevel or 0) + (rowData.characterProfession.knowledgeUnspent or 0)
+          end
+          local totalA, totalB = totalKnowledgePoints(a.data), totalKnowledgePoints(b.data)
+          if totalA ~= totalB then return totalA < totalB end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
     },
   }
 
@@ -943,7 +1049,7 @@ function Main:GetTableColumns(unfiltered)
     end
 
     local dataColumn = {
-      id = "category_" .. tostring(objectiveCategory.id),
+      id = format("category_%s", tostring(objectiveCategory.id)),
       headerText = objectiveCategory.name,
       onEnter = function(cellFrame)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
@@ -957,6 +1063,26 @@ function Main:GetTableColumns(unfiltered)
       width = 90,
       toggleHidden = true,
       align = "CENTER",
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local progressA = Data:GetCategoryProfessionProgress(a.data.character, objectiveCategory, a.data.characterProfession)
+          local progressB = Data:GetCategoryProfessionProgress(b.data.character, objectiveCategory, b.data.characterProfession)
+          if not progressA and not progressB then return false end
+          if not progressA then return true end
+          if not progressB then return false end
+          if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+            local pointsEarnedA = progressA.pointsEarned or 0
+            local pointsEarnedB = progressB.pointsEarned or 0
+            if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end
+          else
+            local objectivesCompletedA = progressA.objectivesCompleted or 0
+            local objectivesCompletedB = progressB.objectivesCompleted or 0
+            if objectivesCompletedA ~= objectivesCompletedB then return objectivesCompletedA < objectivesCompletedB end
+          end
+          return a.data.skillLineVariantID < b.data.skillLineVariantID
+        end,
+      },
       renderCell = function(data)
         local character = data.character
         local characterProfession = data.characterProfession

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.7 - 2026-04-11
+
+- Updated the default sorting for the Main window to sort by last character activity (like before column sorting).
+- Updated the default sorting for the Checklist window to prioritize progress and points.
+- Updated character sorting when several characters share the same name but play on different realms.
+- Updated the objective sorting in the Checklist window to follow the text shown in the list.
+
 ## v1.2.6 - 2026-03-30
 
 - Added column sorting to the main window and checklist window.

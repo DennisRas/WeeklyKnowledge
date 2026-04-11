@@ -13,6 +13,63 @@ local UI = addon.UI
 local Table = addon.Table
 local Data = addon.Data
 
+---@param objectiveA table
+---@param objectiveB table
+---@return boolean
+local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
+  local categoryIdTextA = tostring(objectiveA.categoryID or "")
+  local categoryIdTextB = tostring(objectiveB.categoryID or "")
+  if categoryIdTextA ~= categoryIdTextB then return categoryIdTextA < categoryIdTextB end
+  local questIdA = (objectiveA.quests and objectiveA.quests[1]) or 0
+  local questIdB = (objectiveB.quests and objectiveB.quests[1]) or 0
+  if questIdA ~= questIdB then return questIdA < questIdB end
+  local spellIdA = objectiveA.spellID or 0
+  local spellIdB = objectiveB.spellID or 0
+  if spellIdA ~= spellIdB then return spellIdA < spellIdB end
+  return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
+end
+
+---@param data { objective: table }
+---@return string
+local function checklistObjectiveRowSortText(data)
+  local objective = data.objective
+  if not objective then
+    return ""
+  end
+  if objective.itemID and objective.itemID > 0 then
+    local itemName = C_Item.GetItemInfo(objective.itemID)
+    if itemName then
+      return itemName
+    end
+    return format("Error: ItemID %d not found", objective.itemID or "?")
+  end
+  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+    local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
+    if not recipeInfo then
+      recipeInfo = C_TradeSkillUI.GetRecipeInfo(objective.spellID)
+      if recipeInfo then
+        if not Data.cache.tradeSkillRecipes then
+          Data.cache.tradeSkillRecipes = {}
+        end
+        Data.cache.tradeSkillRecipes[objective.spellID] = recipeInfo
+      end
+    end
+    if recipeInfo and recipeInfo.name then
+      return recipeInfo.name
+    end
+    return format("Error: RecipeID %d not found", objective.spellID or "?")
+  end
+  if objective.quests and Utils:TableCount(objective.quests) > 0 then
+    local link = format("quest:%d:-1", objective.quests[1])
+    local questTooltipData = C_TooltipInfo.GetHyperlink(link)
+    if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
+      return questTooltipData.lines[1].leftText
+    end
+    return format("Error: QuestID %d not found", objective.quests[1] or "?")
+  end
+  return "Unknown"
+end
+
 function Checklist:ToggleWindow()
   if not self.window then return end
   if self.window:IsVisible() then
@@ -39,7 +96,7 @@ function Checklist:Render()
   }
 
   if not self.window then
-    local frameName = addonName .. "ChecklistWindow"
+    local frameName = format("%sChecklistWindow", addonName)
     self.window = CreateFrame("Frame", frameName, UIParent)
     self.window:SetSize(500, 500)
     self.window:SetFrameStrata("MEDIUM")
@@ -421,7 +478,28 @@ function Checklist:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultColumn = "progress",
+        defaultCompare = function(a, b)
+          local rowDataA, rowDataB = a.data, b.data
+          if not rowDataA or not rowDataB then return false end
+          local progressA, progressB = rowDataA.progress, rowDataB.progress
+          local questsCompletedA = progressA and (progressA.questsCompleted or 0) or 0
+          local questsCompletedB = progressB and (progressB.questsCompleted or 0) or 0
+          if questsCompletedA ~= questsCompletedB then
+            return questsCompletedA > questsCompletedB
+          end
+          local pointsEarnedA = progressA and (progressA.pointsEarned or 0) or 0
+          local pointsEarnedB = progressB and (progressB.pointsEarned or 0) or 0
+          if pointsEarnedA ~= pointsEarnedB then
+            return pointsEarnedA > pointsEarnedB
+          end
+          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(rowDataA), checklistObjectiveRowSortText(rowDataB))
+          if labelCompare ~= 0 then
+            return labelCompare < 0
+          end
+          local objectiveA, objectiveB = rowDataA.objective, rowDataB.objective
+          if not objectiveA or not objectiveB then return false end
+          return checklistObjectiveIdentityLess(objectiveA, objectiveB)
+        end,
         savedState = Data.db.global.checklist.tableSort,
         onStateChanged = function(state)
           if not state.columnId and not state.direction then
@@ -435,7 +513,7 @@ function Checklist:Render()
     self.window.table:SetParent(self.window)
     self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
-    table.insert(UISpecialFrames, self.window:GetName() or (addonName .. "ChecklistWindow"))
+    table.insert(UISpecialFrames, self.window:GetName() or format("%sChecklistWindow", addonName))
   end
 
   if not character then
@@ -605,6 +683,7 @@ end
 ---@return WK_TableColumn[]
 function Checklist:GetColumns(unfiltered)
   local hidden = Data.db.global.checklist.hiddenColumns
+
   ---@type WK_TableColumn[]
   local columns = {
     {
@@ -733,6 +812,19 @@ function Checklist:GetColumns(unfiltered)
           }
         end
       end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local skillLineVariantA = a.data.skillLineVariantID or 0
+          local skillLineVariantB = b.data.skillLineVariantID or 0
+          if skillLineVariantA ~= skillLineVariantB then return skillLineVariantA < skillLineVariantB end
+          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(a.data), checklistObjectiveRowSortText(b.data))
+          if labelCompare ~= 0 then return labelCompare < 0 end
+          local objectiveA, objectiveB = a.data.objective, b.data.objective
+          if not objectiveA or not objectiveB then return false end
+          return checklistObjectiveIdentityLess(objectiveA, objectiveB)
+        end,
+      },
     },
     {
       id = "profession",
@@ -765,11 +857,22 @@ function Checklist:GetColumns(unfiltered)
           end,
         }
       end,
-      getSortValue = function(data)
-        local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
-        local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
-        return skillLine and skillLine.name:lower() or ""
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function skillLineNameLower(rowData)
+            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+            local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
+            return skillLine and skillLine.name:lower() or ""
+          end
+          local nameA, nameB = skillLineNameLower(a.data), skillLineNameLower(b.data)
+          if nameA ~= nameB then return nameA < nameB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "expansion",
@@ -783,11 +886,22 @@ function Checklist:GetColumns(unfiltered)
           text = expansion and expansion.name or "",
         }
       end,
-      getSortValue = function(data)
-        local v = Data:GetSkillLineVariantByID(data.skillLineVariantID)
-        local expansion = v and Data:GetExpansionByID(v.expansionID)
-        return expansion and expansion.name:lower() or ""
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function expansionNameLower(rowData)
+            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+            local expansion = variant and Data:GetExpansionByID(variant.expansionID)
+            return expansion and expansion.name:lower() or ""
+          end
+          local nameA, nameB = expansionNameLower(a.data), expansionNameLower(b.data)
+          if nameA ~= nameB then return nameA < nameB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "category",
@@ -815,10 +929,21 @@ function Checklist:GetColumns(unfiltered)
           end,
         }
       end,
-      getSortValue = function(data)
-        local oc = Data:GetObjectiveCategoryByID(data.objective.categoryID)
-        return oc and oc.name:lower() or ""
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function categoryNameLower(rowData)
+            local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
+            return objectiveCategory and objectiveCategory.name:lower() or ""
+          end
+          local nameA, nameB = categoryNameLower(a.data), categoryNameLower(b.data)
+          if nameA ~= nameB then return nameA < nameB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "location",
@@ -842,9 +967,18 @@ function Checklist:GetColumns(unfiltered)
           text = text
         }
       end,
-      getSortValue = function(data)
-        return data.objective.loc and data.objective.loc.m or 0
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local mapIdA = a.data.objective.loc and a.data.objective.loc.m or 0
+          local mapIdB = b.data.objective.loc and b.data.objective.loc.m or 0
+          if mapIdA ~= mapIdB then return mapIdA < mapIdB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "repeatable",
@@ -869,10 +1003,21 @@ function Checklist:GetColumns(unfiltered)
           text = objectiveCategory.repeatable or "",
         }
       end,
-      getSortValue = function(data)
-        local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
-        return objectiveCategory and objectiveCategory.repeatable or ""
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local function repeatableLabel(rowData)
+            local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
+            return objectiveCategory and objectiveCategory.repeatable or ""
+          end
+          local labelA, labelB = repeatableLabel(a.data), repeatableLabel(b.data)
+          if labelA ~= labelB then return labelA < labelB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "progress",
@@ -890,10 +1035,18 @@ function Checklist:GetColumns(unfiltered)
           text = text,
         }
       end,
-      getSortValue = function(data)
-        local p = data.progress
-        return p and (p.questsCompleted or 0) or 0
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local questsCompletedA = a.data.progress and (a.data.progress.questsCompleted or 0) or 0
+          local questsCompletedB = b.data.progress and (b.data.progress.questsCompleted or 0) or 0
+          if questsCompletedA ~= questsCompletedB then return questsCompletedA < questsCompletedB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "points",
@@ -912,17 +1065,27 @@ function Checklist:GetColumns(unfiltered)
           text = text,
         }
       end,
-      getSortValue = function(data)
-        local p = data.progress
-        return p and (p.pointsEarned or 0) or 0
-      end,
+      sorting = {
+        enabled = true,
+        compare = function(a, b)
+          local pointsEarnedA = a.data.progress and (a.data.progress.pointsEarned or 0) or 0
+          local pointsEarnedB = b.data.progress and (b.data.progress.pointsEarned or 0) or 0
+          if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end
+          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
+            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          end
+          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        end,
+      },
     },
     {
       id = "waypoint",
       headerText = "",
       width = 50,
       align = "CENTER",
-      sortable = false,
+      sorting = {
+        enabled = false,
+      },
       renderCell = function(data)
         local TomTomGlobal = _G["TomTom"]
         local mapInfo = nil

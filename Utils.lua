@@ -16,6 +16,15 @@ function Utils:IsSecretValue(value)
   return issecretvalue(value)
 end
 
+---@param characterA table
+---@param characterB table
+---@return number
+function Utils:CompareCharacterNameRealm(characterA, characterB)
+  local nameCompare = strcmputf8i(characterA.name or "", characterB.name or "")
+  if nameCompare ~= 0 then return nameCompare end
+  return strcmputf8i(characterA.realmName or "", characterB.realmName or "")
+end
+
 ---Set the background color for a parent frame
 ---@param parent any
 ---@param r number?
@@ -177,6 +186,30 @@ function Utils:TableMerge(tbl1, tbl2, preserveKeys)
     end
   end)
   return tbl1
+end
+
+--- Recursive merge: `source` keys override `destination`; nested tables merge instead of replacing.
+--- Uses `CopyTable` when adding a new subtree. Mutates `destination`.
+---@param destination table
+---@param source table?
+---@return table
+function Utils:TableMergeDeep(destination, source)
+  if not source then
+    return destination
+  end
+  for key, value in pairs(source) do
+    if type(value) == "table" then
+      local existing = destination[key]
+      if type(existing) == "table" then
+        self:TableMergeDeep(existing, value)
+      else
+        destination[key] = CopyTable(value)
+      end
+    else
+      destination[key] = value
+    end
+  end
+  return destination
 end
 
 ---Check if a table contains a specific value

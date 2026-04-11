@@ -13,80 +13,55 @@ local Utils = addon.Utils
 local Constants = addon.Constants
 local UI = addon.UI
 
---- Strip |c color, |H links, |T textures, etc. for plain-text comparisons (Blizzard API).
----@param text string?
----@return string
-local function stripFormattingForSort(text)
-  text = tostring(text or "")
-  if C_StringUtil and C_StringUtil.StripHyperlinks then
-    return C_StringUtil.StripHyperlinks(text)
-  end
-  text = text:gsub("|c%x%x%x%x%x%x%x%x", "")
-  text = text:gsub("|r", "")
-  return text
-end
-
---- Comparable value from visible cell text (progress N/M uses numerator; plain number; else lowercase string).
----@param text string?
----@return number|string
-function Table:GetCellTextSortValue(text)
-  text = stripFormattingForSort(text)
-  local num, den = text:match("^%s*(%d+)%s*/%s*(%d+)%s*$")
-  if num and den then
-    return tonumber(num)
-  end
-  local numeric = tonumber(text:match("^%s*([%+%-]?[%d%.]+)%s*$"))
-  if numeric ~= nil then
-    return numeric
-  end
-  return text:lower()
-end
-
---- Factory: scroll table with optional header, sorting, striped rows.
----@param config table? Merged into defaults; may include config.data (WK_TableData).
----@return Frame tableFrame Has SetData, RenderTable, scrollFrame, config, data, sortState, rows
+---@param config WK_TableConfig?
+---@return Frame
 function Table:CreateFrame(config)
   local tableCount = Utils:TableCount(self.collection)
   local tableFrame = CreateFrame("Frame", "WeeklyKnowledgeTable" .. (tableCount + 1))
-  tableFrame.config = CreateFromMixins(
-    {
-      header = {
-        enabled = true,
-        sticky = false,
-        height = 30,
-      },
-      rows = {
-        height = 22,
-        highlight = true,
-        striped = true
-      },
-      columns = {
-        width = 100,
-        highlight = false,
-        striped = false
-      },
-      cells = {
-        padding = Constants.TABLE_CELL_PADDING,
-        highlight = false
-      },
-      ---@type WK_TableSortConfig
-      sorting = {
-        enabled = false,
-        defaultOrder = "desc",
-      },
-      ---@type WK_TableData
-      data = {
-        columns = {},
-        rows = {},
-      },
+  ---@type WK_TableConfig
+  local defaultTableConfig = {
+    header = {
+      enabled = true,
+      sticky = false,
+      height = 30,
     },
-    config or {}
-  )
+    rows = {
+      height = 22,
+      highlight = true,
+      striped = true
+    },
+    columns = {
+      width = 100,
+      highlight = false,
+      striped = false
+    },
+    cells = {
+      padding = Constants.TABLE_CELL_PADDING,
+      highlight = false
+    },
+    sorting = {
+      enabled = false,
+      defaultOrder = "desc",
+      defaultCompare = function(_, _)
+        return false
+      end,
+    },
+    data = {
+      columns = {},
+      rows = {},
+    },
+  }
+  local mergedConfig = CopyTable(defaultTableConfig)
+  Utils:TableMergeDeep(mergedConfig, config or {})
+  tableFrame.config = mergedConfig
   do
     local sorting = tableFrame.config.sorting
     if sorting and sorting.enabled then
-      if type(sorting.defaultColumn) ~= "string" or sorting.defaultColumn == "" then
-        error("WeeklyKnowledge Table: sorting.enabled requires sorting.defaultColumn", 2)
+      if type(sorting.defaultCompare) ~= "function" then
+        error("WeeklyKnowledge Table: sorting.enabled requires sorting.defaultCompare", 2)
+      end
+      if sorting.defaultOrder ~= "asc" and sorting.defaultOrder ~= "desc" then
+        error("WeeklyKnowledge Table: sorting.enabled requires sorting.defaultOrder to be \"asc\" or \"desc\"", 2)
       end
     end
   end
@@ -110,15 +85,9 @@ function Table:CreateFrame(config)
   end
 
   function tableFrame:SetSortStateToDefault()
-    local sorting = self.config.sorting
     local state = self.sortState
-    if type(sorting.defaultColumn) == "string" and sorting.defaultColumn ~= "" then
-      state.columnId = sorting.defaultColumn
-      state.direction = (sorting.defaultOrder == "asc") and "asc" or "desc"
-    else
-      state.columnId = nil
-      state.direction = nil
-    end
+    state.columnId = nil
+    state.direction = nil
   end
 
   function tableFrame:ValidateSortState()
@@ -127,24 +96,35 @@ function Table:CreateFrame(config)
       return
     end
     local state = self.sortState
-    if not state or not state.columnId then
+    if not state then
       return
     end
-    if self:ColumnIndexForId(state.columnId) then
+    if state.columnId and not self:ColumnIndexForId(state.columnId) then
+      self:SetSortStateToDefault()
+      if sorting.onStateChanged then
+        sorting.onStateChanged(state)
+      end
       return
     end
-    self:SetSortStateToDefault()
-    if sorting.onStateChanged then
-      sorting.onStateChanged(state)
+    if state.columnId then
+      if state.direction ~= "asc" and state.direction ~= "desc" then
+        state.direction = (sorting.defaultOrder == "asc") and "asc" or "desc"
+      end
+    else
+      state.direction = nil
     end
   end
 
   do
     local sorting = tableFrame.config.sorting
     local saved = sorting and sorting.savedState
-    if saved and (saved.columnId ~= nil or saved.direction ~= nil) then
+    if sorting and sorting.enabled and saved and type(saved.columnId) == "string" and saved.columnId ~= "" then
       tableFrame.sortState.columnId = saved.columnId
-      tableFrame.sortState.direction = saved.direction
+      if saved.direction == "asc" or saved.direction == "desc" then
+        tableFrame.sortState.direction = saved.direction
+      else
+        tableFrame.sortState.direction = (sorting.defaultOrder == "asc") and "asc" or "desc"
+      end
     else
       tableFrame:SetSortStateToDefault()
     end
@@ -178,54 +158,38 @@ function Table:CreateFrame(config)
     if state.columnId and state.direction and not sortColumnIndex then
       return
     end
-    local columnSort = state.columnId and state.direction and sortColumnIndex
-    if not columnSort then
-      return
-    end
-
-    local ascending = state.direction == "asc"
 
     local dataRows = {}
     for i = dataStart, #rows do
       dataRows[#dataRows + 1] = rows[i]
     end
 
-    ---@param row WK_TableRow
-    ---@param colIndex number
-    local function getSortValueFromColumn(row, colIndex)
-      local colCfg = self.data.columns[colIndex]
-      if colCfg and colCfg.getSortValue and row.data then
-        local ok, value = pcall(colCfg.getSortValue, row.data)
-        if ok and value ~= nil then
-          return value
-        end
+    local columnSort = state.columnId and state.direction and sortColumnIndex
+    if not columnSort then
+      table.sort(dataRows, sorting.defaultCompare)
+      for i = 1, #dataRows do
+        rows[dataStart + i - 1] = dataRows[i]
       end
-      local cell = row.cells and row.cells[colIndex]
-      return Table:GetCellTextSortValue(cell and cell.text)
+      return
     end
 
-    ---@param row WK_TableRow
-    local function getSortValue(row)
-      return getSortValueFromColumn(row, sortColumnIndex)
+    local ascending = state.direction == "asc"
+    local colCfg = self.data.columns[sortColumnIndex]
+    if not colCfg or not colCfg.sorting then
+      error(format("WeeklyKnowledge Table: column \"%s\" must define sorting", tostring(colCfg and colCfg.id)), 2)
     end
-
+    local columnSorting = colCfg.sorting
+    if not columnSorting.enabled then
+      error(format("WeeklyKnowledge Table: column \"%s\" is not sortable (sorting.enabled is false)", tostring(colCfg.id)), 2)
+    end
+    if type(columnSorting.compare) ~= "function" then
+      error(format("WeeklyKnowledge Table: column \"%s\" must define sorting.compare when sorting.enabled is true", tostring(colCfg.id)), 2)
+    end
     table.sort(dataRows, function(a, b)
-      local va = getSortValue(a)
-      local vb = getSortValue(b)
-      if type(va) == "number" and type(vb) == "number" then
-        if va == vb then return false end
-        if ascending then
-          return va < vb
-        end
-        return va > vb
-      end
-      va = tostring(va or ""):lower()
-      vb = tostring(vb or ""):lower()
-      if va == vb then return false end
       if ascending then
-        return va < vb
+        return columnSorting.compare(a, b)
       end
-      return va > vb
+      return columnSorting.compare(b, a)
     end)
 
     for i = 1, #dataRows do
@@ -251,11 +215,12 @@ function Table:CreateFrame(config)
       return
     end
 
+    local sortingCfg = self.config.sorting
     if state.columnId == columnId then
       state.direction = (state.direction == "asc") and "desc" or "asc"
     else
       state.columnId = columnId
-      state.direction = "desc"
+      state.direction = (sortingCfg and sortingCfg.defaultOrder == "asc") and "asc" or "desc"
     end
     self:ApplySortToData()
     self:RenderTable()
@@ -264,6 +229,13 @@ function Table:CreateFrame(config)
 
   function tableFrame:SetData(data)
     self.data = data
+    if data and data.columns then
+      for i, col in ipairs(data.columns) do
+        if not col.sorting then
+          error(format('WeeklyKnowledge Table: column #%d ("%s") must define sorting', i, tostring(col.id)), 2)
+        end
+      end
+    end
     self:ValidateSortState()
     self:ApplySortToData()
     self:RenderTable()
@@ -395,7 +367,7 @@ function Table:CreateFrame(config)
         if isHeaderRow and tableFrame.config.sorting and tableFrame.config.sorting.enabled then
           local colCfg = tableFrame.data.columns[columnIndex]
           local state = tableFrame.sortState
-          local show = colCfg and colCfg.sortable ~= false and colCfg.id and state
+          local show = colCfg and colCfg.sorting.enabled and state
             and state.columnId == colCfg.id and state.direction ~= nil
           if show then
             Utils:SetHighlightColor(columnFrame, 1, 1, 1, 0.03)
@@ -411,7 +383,7 @@ function Table:CreateFrame(config)
           end
           if isHeaderRow and tableFrame.config.sorting and tableFrame.config.sorting.enabled then
             local colCfg = tableFrame.data.columns[columnIndex]
-            if colCfg and colCfg.sortable ~= false and colCfg.id then
+            if colCfg and colCfg.sorting.enabled then
               if not column.onEnter then
                 GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
                 GameTooltip:SetText(colCfg.headerText or "", 1, 1, 1)
@@ -432,7 +404,7 @@ function Table:CreateFrame(config)
           end
           if isHeaderRow and tableFrame.config.sorting and tableFrame.config.sorting.enabled then
             local colCfg = tableFrame.data.columns[columnIndex]
-            if colCfg and colCfg.sortable ~= false and colCfg.id and not column.onLeave then
+            if colCfg and colCfg.sorting.enabled and not column.onLeave then
               GameTooltip:Hide()
             end
           end
@@ -441,7 +413,7 @@ function Table:CreateFrame(config)
         function columnFrame:onClickHandler(f, button)
           if isHeaderRow and tableFrame.config.sorting and tableFrame.config.sorting.enabled then
             local colCfg = tableFrame.data.columns[columnIndex]
-            if colCfg and colCfg.sortable ~= false and colCfg.id then
+            if colCfg and colCfg.sorting.enabled then
               tableFrame:OnHeaderColumnClick(colCfg.id, button)
               return
             end

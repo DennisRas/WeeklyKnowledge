@@ -261,6 +261,10 @@
 ---@field columns WK_TableColumn[]?
 ---@field rows WK_TableRow[]
 
+---@class WK_TableColumnSorting
+---@field enabled boolean
+---@field compare? fun(a: WK_TableRow, b: WK_TableRow): boolean
+
 ---@class WK_TableColumn
 ---@field id string
 ---@field headerText string
@@ -270,8 +274,7 @@
 ---@field onLeave function?
 ---@field toggleHidden boolean?
 ---@field renderCell fun(data: WK_TableRowData): WK_TableCell
----@field getSortValue? fun(data: WK_TableRowData): any
----@field sortable boolean?
+---@field sorting WK_TableColumnSorting
 
 ---@class WK_TableRow
 ---@field cells WK_TableCell[]
@@ -297,10 +300,37 @@
 
 ---@class WK_TableSortConfig
 ---@field enabled boolean
----@field defaultOrder? "asc"|"desc"
----@field defaultColumn? string
+---@field defaultOrder "asc"|"desc"
+---@field defaultCompare fun(a: WK_TableRow, b: WK_TableRow): boolean
 ---@field savedState WK_TableSortState?
 ---@field onStateChanged? fun(state: WK_TableSortState)
+
+---@class WK_TableConfigHeader
+---@field enabled boolean
+---@field sticky boolean
+---@field height number
+
+---@class WK_TableConfigRows
+---@field height number
+---@field highlight boolean
+---@field striped boolean
+
+---@class WK_TableConfigColumnDefaults
+---@field width number
+---@field highlight boolean
+---@field striped boolean
+
+---@class WK_TableConfigCells
+---@field padding number
+---@field highlight boolean
+
+---@class WK_TableConfig
+---@field header WK_TableConfigHeader?
+---@field rows WK_TableConfigRows?
+---@field columns WK_TableConfigColumnDefaults?
+---@field cells WK_TableConfigCells?
+---@field sorting WK_TableSortConfig?
+---@field data WK_TableData?
 
 --------------------------------------------------------------------------------
 -- Enums

@@ -14,13 +14,13 @@ local Utils = addon.Utils
 function UI:CreateScrollFrame(config)
   local tableCount = addon.Table and addon.Table.collection and Utils:TableCount(addon.Table.collection) or 0
   local frame = CreateFrame("ScrollFrame", "WeeklyKnowledgeScrollFrame" .. (tableCount + 1))
-  frame.config = CreateFromMixins(
-    {
-      scrollSpeedHorizontal = 20,
-      scrollSpeedVertical = 20,
-    },
-    config or {}
-  )
+  local defaultScrollConfig = {
+    scrollSpeedHorizontal = 20,
+    scrollSpeedVertical = 20,
+  }
+  local mergedScrollConfig = CopyTable(defaultScrollConfig)
+  Utils:TableMergeDeep(mergedScrollConfig, config or {})
+  frame.config = mergedScrollConfig
 
   frame.content = CreateFrame("Frame", "$parentContent", frame)
   frame.scrollbarH = CreateFrame("Slider", "$parentScrollbarH", frame, "UISliderTemplate")
