@@ -494,6 +494,28 @@ function Data:DeleteCharacter(characterOrGUID)
   self:ClearProgressCache(true)
 end
 
+local PROF_GEAR_ILVL_TO_RANK = {
+  [2] = { [180]=1, [186]=2, [192]=3, [199]=4, [206]=5 },  -- Uncommon (green)
+  [3] = { [206]=1, [212]=2, [218]=3, [225]=4, [232]=5 },  -- Rare (blue)
+  [4] = { [232]=1, [238]=2, [244]=3, [251]=4, [258]=5 },  -- Epic (purple)
+}
+
+local PROF_GEAR_TIER_OFFSET = { [2]=0, [3]=5, [4]=10 }
+
+--- Returns score (1-15) and craftingRank (1-5), or 0, 0 if unrecognised.
+local function ComputeSlotScore(itemQuality, itemLevel)
+  local rankTable = PROF_GEAR_ILVL_TO_RANK[itemQuality]
+  if not rankTable then return 0, 0 end
+  local rank = rankTable[itemLevel]
+  if not rank then return 0, 0 end
+  return PROF_GEAR_TIER_OFFSET[itemQuality] + rank, rank
+end
+
+local PROF_SLOT_GROUPS = {
+  { prefix = "PROF0", slots = {"TOOLSLOT", "GEAR0SLOT", "GEAR1SLOT"} },
+  { prefix = "PROF1", slots = {"TOOLSLOT", "GEAR0SLOT", "GEAR1SLOT"} },
+}
+
 ---Update the current character.
 function Data:ScanAll()
   self:ScanCharacterInfo()
@@ -502,6 +524,108 @@ function Data:ScanAll()
   self:ScanQuests()
   self:ScanProfessions()
   self:ScanCalendar()
+  self:ScanProfessionEquipment()
+end
+
+--- Returns true if any profession has unscanned or pending gear slots.
+function Data:NeedsProfessionEquipmentRescan()
+  local character = self:GetCharacter()
+  if not character then return false end
+  for _, cp in ipairs(character.professions or {}) do
+    if cp.equipment == nil then return true end
+    for i = 1, 3 do
+      if cp.equipment[i] and cp.equipment[i].pending then return true end
+    end
+  end
+  return false
+end
+
+--- Scan profession gear slots for the current character and store results in AceDB.
+function Data:ScanProfessionEquipment()
+  if self:IsInChatMessagingLockdown() then return end
+  if InCombatLockdown and InCombatLockdown() then return end
+  local character = self:GetCharacter()
+  if not character then return end
+
+  local professionIndex1, professionIndex2 = GetProfessions()
+  local professionIndexes = { professionIndex1, professionIndex2 }
+
+  for _, group in ipairs(PROF_SLOT_GROUPS) do
+    -- Determine which profession owns this slot group by matching the tool slot item's
+    -- subType (e.g. "Enchanting") against GetProfessionInfo name (position 1).
+    -- GetProfessions() ordering does not reliably map to PROF0/PROF1 slot ordering.
+    local toolSlotID = GetInventorySlotInfo(group.prefix .. "TOOLSLOT")
+    local toolLink = GetInventoryItemLink("player", toolSlotID)
+    local toolSubType = toolLink and select(7, C_Item.GetItemInfo(toolLink))
+
+    local skillLineID
+    for _, professionIndex in ipairs(professionIndexes) do
+      if professionIndex then
+        local profName, _, _, _, _, _, slID = GetProfessionInfo(professionIndex)
+        if profName and toolSubType and profName == toolSubType then
+          skillLineID = slID
+          break
+        end
+      end
+    end
+
+    -- If skillLineID is still nil (no tool equipped or tool data uncached), skip this
+    -- slot group entirely. No fallback to index-based mapping to avoid writing gear
+    -- to the wrong profession row.
+
+    if skillLineID then
+      -- Multiple characterProfessions can share the same skillLineID (one per expansion).
+      -- The same physical gear slots apply to all of them, so write equipment to all matches.
+      local matchingProfessions = Utils:TableFilter(character.professions, function(cp)
+        local variant = self:GetSkillLineVariantByID(cp.skillLineVariantID)
+        return variant and variant.skillLineID == skillLineID
+      end)
+
+      if #matchingProfessions > 0 then
+        local equipment = {}
+        local totalScore = 0
+
+        for slotIndex, slotSuffix in ipairs(group.slots) do
+          local slotName = group.prefix .. slotSuffix
+          local slotID = GetInventorySlotInfo(slotName)
+          local itemLink = GetInventoryItemLink("player", slotID)
+
+          if itemLink then
+            -- C_Item.GetItemInfo return order (confirmed in-game):
+            -- 1=name, 2=link, 3=quality, 4=itemLevel, 5=requiredLevel,
+            -- 6=type, 7=subType, 8=stackCount, 9=equipLoc, 10=icon, ...
+            local name, _, quality, itemLevel, _, _, _, _, _, icon, _, _, _, _, itemExpansionID =
+                C_Item.GetItemInfo(itemLink)
+            if name then
+              local score, rank = ComputeSlotScore(quality, itemLevel)
+              equipment[slotIndex] = {
+                itemLink        = itemLink,
+                itemQuality     = quality,
+                itemLevel       = itemLevel,
+                iconFileID      = icon,
+                score           = score,
+                craftingRank    = rank,
+                itemExpansionID = itemExpansionID,
+              }
+              totalScore = totalScore + score
+            else
+              -- Item data not yet cached; store sentinel so GET_ITEM_INFO_RECEIVED
+              -- can distinguish this from a genuinely empty slot.
+              equipment[slotIndex] = { itemLink = itemLink, pending = true }
+            end
+          end
+          -- nil entry in equipment[slotIndex] = scanned, slot genuinely empty
+        end
+
+        -- Write the same gear data to all expansion rows for this profession
+        Utils:TableForEach(matchingProfessions, function(cp)
+          cp.equipment = equipment
+          cp.profGearScore = totalScore
+        end)
+      end
+      -- if no matches: profession not in DB yet; equipment stays nil (unscanned)
+    end
+  end
 end
 
 --- Scan currencies for a character.
