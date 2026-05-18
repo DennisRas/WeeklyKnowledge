@@ -51,9 +51,9 @@ local objectives = {
   -- Midnight: Leatherworking
   {skillLineVariantID = 2915, categoryID = category, quests = {}, itemID = 246332, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
   -- Midnight: Mining
-  {skillLineVariantID = 2916, categoryID = category, quests = {}, itemID = 237507, points = 0, loc = {hint = "These are randomly looted from mining nodes around the world once the weekly objectives below are completed."}, requires = {{type = "quest", name = "Trainer Quest", quests = {93709, 93708, 93706, 93705}, match = "any"}, {type = "quest", name = "Gathering", quests = {88673, 88674, 88675, 88676, 88677, 88678}, match = "all"}}},
+  {skillLineVariantID = 2916, categoryID = category, quests = {}, itemID = 237507, points = 0, loc = {hint = "These are randomly looted from mining nodes around the world once the weekly objectives below are completed."}, requires = {{type = "quest", name = "Trainer Quest", quests = {93709, 93708, 93707, 93706, 93705}, match = "any"}, {type = "quest", name = "Gathering", quests = {88673, 88674, 88675, 88676, 88677, 88678}, match = "all"}}},
   -- Midnight: Skinning
-  {skillLineVariantID = 2917, categoryID = category, quests = {}, itemID = 238627, points = 0, loc = {hint = "These are randomly looted from skinning around the world once the weekly objectives below are completed."},     requires = {{type = "quest", name = "Trainer Quest", quests = {93714, 93711, 93710}, match = "any"}, {type = "quest", name = "Gathering", quests = {88534, 88549, 88537, 88536, 88530, 88529}, match = "all"}}},
+  {skillLineVariantID = 2917, categoryID = category, quests = {}, itemID = 238627, points = 0, loc = {hint = "These are randomly looted from skinning around the world once the weekly objectives below are completed."},     requires = {{type = "quest", name = "Trainer Quest", quests = {93714, 93713, 93712, 93711, 93710}, match = "any"}, {type = "quest", name = "Gathering", quests = {88534, 88549, 88537, 88536, 88530, 88529}, match = "all"}}},
   -- Midnight: Tailoring
   {skillLineVariantID = 2918, categoryID = category, quests = {}, itemID = 246334, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
 }
