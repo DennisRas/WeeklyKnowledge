@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.8 - 2026-05-18
+
+- Added missing Mining weekly quest "It's Called Silvermoon". Fixes #142.
+- Added missing Skinning weekly quest "Essential Materials". Fixes #150.
+- Updated Star Metal Deposit location in Voidstorm. Fixes #127.
+- Updated Unalloyed Abundance cost for Echo of Abundance purchases from Chel the Chip (400 to 1600). Fixes #127.
+
 ## v1.2.7 - 2026-04-11
 
 - Updated the default sorting for the Main window to sort by last character activity (like before column sorting).
