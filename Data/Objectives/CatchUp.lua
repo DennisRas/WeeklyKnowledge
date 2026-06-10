@@ -5,7 +5,6 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
 local category = Enum.WK_ObjectiveCategory.CatchUp
 
@@ -58,4 +57,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {}, itemID = 246334, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)

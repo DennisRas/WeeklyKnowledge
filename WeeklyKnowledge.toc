@@ -19,6 +19,7 @@
 ## Category-ruRU: Профессии
 ## Category-zhCN: 专业
 ## Category-zhTW: 專業技能
+## OptionalDeps: LiqUI
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
@@ -37,8 +38,6 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 Types.lua
 Constants.lua
 Utils.lua
-Interface.lua
-Table.lua
 
 Data.lua
 Data\Expansions.lua

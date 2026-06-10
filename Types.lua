@@ -6,33 +6,29 @@
 ---@field columnId string?
 ---@field direction ("asc" | "desc")?
 
+---@alias WK_LUI LiqUI_Instance
+
 ---@class WK_DefaultGlobal
 ---@field DBVersion integer?
 ---@field weeklyReset integer?
 ---@field minimap {minimapPos: number, hide: boolean, lock: boolean }
 ---@field showFullProfessionName boolean?
 ---@field characters table<string, WK_Character>
+---@field liqui LiqUI_HostDb
 ---@field main WK_DefaultGlobalMain
 ---@field checklist WK_DefaultGlobalChecklist
 
 ---@class WK_DefaultGlobalMain
 ---@field selectedExpansions Enum.ExpansionLevel[]?
 ---@field hiddenColumns table<string, boolean>
----@field windowScale integer
----@field windowBackgroundColor {r: number, g: number, b: number, a: number}
----@field windowBorder boolean
 ---@field fontSize integer?
 ---@field checklistHelpTipClosed boolean?
 ---@field hideLowLevelProfessions boolean?
----@field tableSort WK_TableSortState?
 
 ---@class WK_DefaultGlobalChecklist
 ---@field selectedExpansions Enum.ExpansionLevel[]?
 ---@field hiddenColumns table<string, boolean>
 ---@field hiddenCategories table<Enum.WK_ObjectiveCategory, boolean>
----@field windowScale integer
----@field windowBackgroundColor {r: number, g: number, b: number, a: number}
----@field windowBorder boolean
 ---@field windowTitlebar boolean
 ---@field fontSize integer?
 ---@field open boolean
@@ -41,7 +37,6 @@
 ---@field hideInDungeons boolean
 ---@field hideTable boolean
 ---@field hideTableHeader boolean
----@field tableSort WK_TableSortState?
 
 --------------------------------------------------------------------------------
 -- Game Data References
@@ -277,7 +272,7 @@
 ---@field sorting WK_TableColumnSorting
 
 ---@class WK_TableRow
----@field cells WK_TableCell[]
+---@field columns WK_TableCell[]
 ---@field backgroundColor {r: number, g: number, b: number, a: number}?
 ---@field onEnter function?
 ---@field onLeave function?

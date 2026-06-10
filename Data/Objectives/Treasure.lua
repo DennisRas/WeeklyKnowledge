@@ -5,7 +5,6 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
 
 ---@type WK_Objective[]
@@ -67,4 +66,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = Enum.WK_ObjectiveCategory.Treasure, quests = {93543}, itemID = 259203, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Finely Woven Lynx Collar
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)

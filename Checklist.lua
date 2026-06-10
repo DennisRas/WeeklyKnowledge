@@ -9,8 +9,6 @@ addon.Checklist = Checklist
 
 local Constants = addon.Constants
 local Utils = addon.Utils
-local UI = addon.UI
-local Table = addon.Table
 local Data = addon.Data
 
 ---@param objectiveA table
@@ -59,7 +57,7 @@ local function checklistObjectiveRowSortText(data)
     end
     return format("Error: RecipeID %d not found", objective.spellID or "?")
   end
-  if objective.quests and Utils:TableCount(objective.quests) > 0 then
+  if objective.quests and addon.LiqUI.Utils:TableCount(objective.quests) > 0 then
     local link = format("quest:%d:-1", objective.quests[1])
     local questTooltipData = C_TooltipInfo.GetHyperlink(link)
     if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
@@ -96,103 +94,23 @@ function Checklist:Render()
   }
 
   if not self.window then
-    local frameName = format("%sChecklistWindow", addonName)
-    self.window = CreateFrame("Frame", frameName, UIParent)
-    self.window:SetSize(500, 500)
-    self.window:SetFrameStrata("MEDIUM")
-    self.window:SetFrameLevel(8100)
-    self.window:SetToplevel(true)
-    self.window:SetClampedToScreen(true)
-    self.window:SetMovable(true)
-    self.window:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 8, -8)
-    self.window:SetUserPlaced(true)
-    self.window:RegisterForDrag("LeftButton")
-    self.window:EnableMouse(true)
-    self.window:SetScript("OnDragStart", function() self.window:StartMoving() end)
-    self.window:SetScript("OnDragStop", function() self.window:StopMovingOrSizing() end)
-    Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
-
-    self.window.border = CreateFrame("Frame", "$parentBorder", self.window, "BackdropTemplate")
-    self.window.border:SetPoint("TOPLEFT", self.window, "TOPLEFT", -3, 3)
-    self.window.border:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 3, -3)
-    self.window.border:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 16, insets = {left = 4, right = 4, top = 4, bottom = 4}})
-    self.window.border:SetBackdropBorderColor(0, 0, 0, .5)
-    self.window.border:Show()
-
-    self.window.titlebar = CreateFrame("Frame", "$parentTitle", self.window)
-    self.window.titlebar:SetPoint("TOPLEFT", self.window, "TOPLEFT")
-    self.window.titlebar:SetPoint("TOPRIGHT", self.window, "TOPRIGHT")
-    self.window.titlebar:SetHeight(Constants.TITLEBAR_HEIGHT)
-    self.window.titlebar:RegisterForDrag("LeftButton")
-    self.window.titlebar:EnableMouse(true)
-    self.window.titlebar:SetScript("OnDragStart", function() self.window:StartMoving() end)
-    self.window.titlebar:SetScript("OnDragStop", function() self.window:StopMovingOrSizing() end)
-    Utils:SetBackgroundColor(self.window.titlebar, 0, 0, 0, 0.5)
-
-    self.window.titlebar.icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-    self.window.titlebar.icon:SetPoint("LEFT", self.window.titlebar, "LEFT", 6, 0)
-    self.window.titlebar.icon:SetSize(20, 20)
-    self.window.titlebar.icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon.blp")
-
-    self.window.titlebar.title = self.window.titlebar:CreateFontString("$parentText", "OVERLAY")
-    self.window.titlebar.title:SetFontObject("SystemFont_Med2")
-    self.window.titlebar.title:SetPoint("LEFT", self.window.titlebar, 28, 0)
-    self.window.titlebar.title:SetJustifyH("LEFT")
-    self.window.titlebar.title:SetJustifyV("MIDDLE")
-    self.window.titlebar.title:SetText("Checklist")
-
-    self.window.textbox = self.window:CreateFontString("$parentTextbox", "ARTWORK")
-    self.window.textbox:SetFontObject("SystemFont_Med1")
-    self.window.textbox:SetPoint("TOPLEFT", self.window, "TOPLEFT", 20, -Constants.TITLEBAR_HEIGHT - 20)
-    self.window.textbox:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", -20, 20)
-    self.window.textbox:SetJustifyH("CENTER")
-    self.window.textbox:SetJustifyV("MIDDLE")
-    self.window.textbox:Hide()
-
-    do -- Close Button
-      self.window.titlebar.closeButton = CreateFrame("Button", "$parentCloseButton", self.window.titlebar)
-      self.window.titlebar.closeButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.closeButton:SetPoint("RIGHT", self.window.titlebar, "RIGHT", 0, 0)
-      self.window.titlebar.closeButton:SetScript("OnClick", function() self:ToggleWindow() end)
-      self.window.titlebar.closeButton:SetScript("OnEnter", function()
-        self.window.titlebar.closeButton.Icon:SetVertexColor(1, 1, 1, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 0, 0, 0.2)
-        GameTooltip:SetOwner(self.window.titlebar.closeButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Close the window", 1, 1, 1, 1, true);
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.closeButton:SetScript("OnLeave", function()
-        self.window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.closeButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-
-      self.window.titlebar.closeButton.Icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-      self.window.titlebar.closeButton.Icon:SetPoint("CENTER", self.window.titlebar.closeButton, "CENTER")
-      self.window.titlebar.closeButton.Icon:SetSize(10, 10)
-      self.window.titlebar.closeButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp")
-      self.window.titlebar.closeButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    do -- Settings Button
-      self.window.titlebar.SettingsButton = CreateFrame("DropdownButton", "$parentSettingsButton", self.window.titlebar)
-      self.window.titlebar.SettingsButton:SetPoint("RIGHT", self.window.titlebar.closeButton, "LEFT", 0, 0)
-      self.window.titlebar.SettingsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.SettingsButton:SetScript("OnEnter", function()
-        self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0.05)
-        ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.window.titlebar.SettingsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Settings", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Let's customize things a bit", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.SettingsButton:SetScript("OnLeave", function()
-        self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.SettingsButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-      self.window.titlebar.SettingsButton:SetupMenu(function(_, rootMenu)
+    local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
+    self.window = addon.LiqUI.Window:New({
+      name = "Checklist",
+      title = "Checklist",
+      icon = mediaPath .. "Icon.blp",
+      point = { "TOPLEFT", UIParent, "TOPLEFT", 8, -8 },
+      border = 4,
+      onClose = function()
+        Data.db.global.checklist.open = false
+      end,
+      titlebarButtons = {
+        {
+          name = "Settings",
+          icon = mediaPath .. "Icon_Settings.blp",
+          tooltipTitle = "Settings",
+          tooltipDescription = "Let's customize things a bit",
+          setupMenu = function(window, rootMenu)
         local showFullProfessionName = rootMenu:CreateCheckbox(
           "Show full profession name",
           function() return Data.db.global.showFullProfessionName end,
@@ -238,43 +156,44 @@ function Checklist:Render()
         for i = 80, 200, 10 do
           windowScale:CreateRadio(
             i .. "%",
-            function() return Data.db.global.checklist.windowScale == i end,
+            function() return (window.db.scale or 100) == i end,
             function(data)
-              Data.db.global.checklist.windowScale = data
+              window.db.scale = data
               self:Render()
             end,
             i
           )
         end
 
+        local windowColor = window.db.windowColor
         local colorInfo = {
-          r = Data.db.global.checklist.windowBackgroundColor.r,
-          g = Data.db.global.checklist.windowBackgroundColor.g,
-          b = Data.db.global.checklist.windowBackgroundColor.b,
-          opacity = Data.db.global.checklist.windowBackgroundColor.a,
+          r = windowColor.r,
+          g = windowColor.g,
+          b = windowColor.b,
+          opacity = windowColor.a,
           swatchFunc = function()
             local r, g, b = ColorPickerFrame:GetColorRGB();
             local a = ColorPickerFrame:GetColorAlpha();
             if r then
-              Data.db.global.checklist.windowBackgroundColor.r = r
-              Data.db.global.checklist.windowBackgroundColor.g = g
-              Data.db.global.checklist.windowBackgroundColor.b = b
+              windowColor.r = r
+              windowColor.g = g
+              windowColor.b = b
               if a then
-                Data.db.global.checklist.windowBackgroundColor.a = a
+                windowColor.a = a
               end
-              Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
+              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           opacityFunc = function() end,
           cancelFunc = function(color)
             if color.r then
-              Data.db.global.checklist.windowBackgroundColor.r = color.r
-              Data.db.global.checklist.windowBackgroundColor.g = color.g
-              Data.db.global.checklist.windowBackgroundColor.b = color.b
+              windowColor.r = color.r
+              windowColor.g = color.g
+              windowColor.b = color.b
               if color.a then
-                Data.db.global.checklist.windowBackgroundColor.a = color.a
+                windowColor.a = color.a
               end
-              Utils:SetBackgroundColor(self.window, Data.db.global.checklist.windowBackgroundColor.r, Data.db.global.checklist.windowBackgroundColor.g, Data.db.global.checklist.windowBackgroundColor.b, Data.db.global.checklist.windowBackgroundColor.a)
+              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           hasOpacity = 1,
@@ -289,9 +208,9 @@ function Checklist:Render()
 
         rootMenu:CreateCheckbox(
           "Show the border",
-          function() return Data.db.global.checklist.windowBorder end,
+          function() return window.db.border ~= false end,
           function()
-            Data.db.global.checklist.windowBorder = not Data.db.global.checklist.windowBorder
+            window.db.border = window.db.border == false
             self:Render()
           end
         )
@@ -303,74 +222,36 @@ function Checklist:Render()
         --     self:Render()
         --   end
         -- )
-      end)
-
-      self.window.titlebar.SettingsButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.SettingsButton:GetName() .. "Icon", "ARTWORK")
-      self.window.titlebar.SettingsButton.Icon:SetPoint("CENTER", self.window.titlebar.SettingsButton, "CENTER")
-      self.window.titlebar.SettingsButton.Icon:SetSize(12, 12)
-      self.window.titlebar.SettingsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp")
-      self.window.titlebar.SettingsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    do -- Expansion Button
-      self.window.titlebar.ExpansionButton = CreateFrame("DropdownButton", "$parentExpansionButton", self.window.titlebar)
-      self.window.titlebar.ExpansionButton:SetPoint("RIGHT", self.window.titlebar.SettingsButton, "LEFT", 0, 0)
-      self.window.titlebar.ExpansionButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.ExpansionButton:SetScript("OnEnter", function()
-        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0.05)
-        ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.window.titlebar.ExpansionButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Expansion", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Filter table by expansion.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.ExpansionButton:SetScript("OnLeave", function()
-        self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ExpansionButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-      self.window.titlebar.ExpansionButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ExpansionButton:GetName() .. "Icon", "ARTWORK")
-      self.window.titlebar.ExpansionButton.Icon:SetPoint("CENTER", self.window.titlebar.ExpansionButton, "CENTER")
-      self.window.titlebar.ExpansionButton.Icon:SetSize(14, 14)
-      self.window.titlebar.ExpansionButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_House.blp")
-      self.window.titlebar.ExpansionButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-      self.window.titlebar.ExpansionButton:SetupMenu(function(_, rootMenu)
-        Utils:TableForEach(expansions, function(expansion)
+          end,
+        },
+        {
+          name = "Expansion",
+          icon = mediaPath .. "Icon_House.blp",
+          iconSize = 14,
+          tooltipTitle = "Expansion",
+          tooltipDescription = "Filter table by expansion.",
+          setupMenu = function(_, rootMenu)
+            addon.LiqUI.Utils:TableForEach(Data:GetExpansions(), function(expansion)
           rootMenu:CreateCheckbox(
             expansion.name,
-            function() return Utils:TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
+            function() return addon.LiqUI.Utils:TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
             function()
-              Data.db.global.checklist.selectedExpansions = Utils:TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
+              Data.db.global.checklist.selectedExpansions = addon.LiqUI.Utils:TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
               self:Render()
             end,
             expansion.id
           )
-        end)
-      end)
-    end
-
-    do -- Columns Button
-      self.window.titlebar.ColumnsButton = CreateFrame("DropdownButton", "$parentColumnsButton", self.window.titlebar)
-      self.window.titlebar.ColumnsButton:SetPoint("RIGHT", self.window.titlebar.ExpansionButton, "LEFT", 0, 0)
-      self.window.titlebar.ColumnsButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.ColumnsButton:SetScript("OnEnter", function()
-        self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0.05)
-        ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.window.titlebar.ColumnsButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Columns", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle columns.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.ColumnsButton:SetScript("OnLeave", function()
-        self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.ColumnsButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-      self.window.titlebar.ColumnsButton:SetupMenu(function(_, rootMenu)
+            end)
+          end,
+        },
+        {
+          name = "Columns",
+          icon = mediaPath .. "Icon_Columns.blp",
+          tooltipTitle = "Columns",
+          tooltipDescription = "Toggle columns.",
+          setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.checklist.hiddenColumns
-        Utils:TableForEach(self:GetColumns(true), function(column)
+        addon.LiqUI.Utils:TableForEach(self:GetColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.headerText,
@@ -381,37 +262,18 @@ function Checklist:Render()
             end,
             column.id
           )
-        end)
-      end)
-
-      self.window.titlebar.ColumnsButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.ColumnsButton:GetName() .. "Icon", "ARTWORK")
-      self.window.titlebar.ColumnsButton.Icon:SetPoint("CENTER", self.window.titlebar.ColumnsButton, "CENTER")
-      self.window.titlebar.ColumnsButton.Icon:SetSize(12, 12)
-      self.window.titlebar.ColumnsButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Columns.blp")
-      self.window.titlebar.ColumnsButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    do -- Categories Button
-      self.window.titlebar.CategoriesButton = CreateFrame("DropdownButton", "$parentCategoriesButton", self.window.titlebar)
-      self.window.titlebar.CategoriesButton:SetPoint("RIGHT", self.window.titlebar.ColumnsButton, "LEFT", 0, 0)
-      self.window.titlebar.CategoriesButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.CategoriesButton:SetScript("OnEnter", function()
-        self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.CategoriesButton, 1, 1, 1, 0.05)
-        ---@diagnostic disable-next-line: param-type-mismatch
-        GameTooltip:SetOwner(self.window.titlebar.CategoriesButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Categories", 1, 1, 1, 1, true);
-        GameTooltip:AddLine("Toggle categories.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.CategoriesButton:SetScript("OnLeave", function()
-        self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.CategoriesButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-      self.window.titlebar.CategoriesButton:SetupMenu(function(_, rootMenu)
+            end)
+          end,
+        },
+        {
+          name = "Categories",
+          icon = mediaPath .. "Icon_Category.blp",
+          iconSize = 11,
+          tooltipTitle = "Categories",
+          tooltipDescription = "Toggle categories.",
+          setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.checklist.hiddenCategories
-        Utils:TableForEach(Data.ObjectiveCategories, function(category)
+        addon.LiqUI.Utils:TableForEach(Data.ObjectiveCategories, function(category)
           rootMenu:CreateCheckbox(
             category.name,
             function() return not hidden[category.id] end,
@@ -421,46 +283,29 @@ function Checklist:Render()
             end,
             category.id
           )
-        end)
-      end)
+            end)
+          end,
+        },
+        {
+          name = "Toggle",
+          icon = mediaPath .. "Icon_Toggle.blp",
+          iconSize = 16,
+          tooltipTitle = "Toggle List",
+          tooltipDescription = "Expand/Collapse the checklist.",
+          onClick = function()
+            Data.db.global.checklist.hideTable = not Data.db.global.checklist.hideTable
+            self:Render()
+          end,
+        },
+      },
+    })
+    self.window:SetFrameLevel(8100)
+    self.window.placeholderText = addon.LiqUI.Window:GetBodyPlaceholderText(self.window.body)
+    self.window.placeholderText:SetFontObject("SystemFont_Med1")
+    self.window.placeholderText:Hide()
 
-      self.window.titlebar.CategoriesButton.Icon = self.window.titlebar:CreateTexture(self.window.titlebar.CategoriesButton:GetName() .. "Icon", "ARTWORK")
-      self.window.titlebar.CategoriesButton.Icon:SetPoint("CENTER", self.window.titlebar.CategoriesButton, "CENTER")
-      self.window.titlebar.CategoriesButton.Icon:SetSize(11, 11)
-      self.window.titlebar.CategoriesButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Category.blp")
-      self.window.titlebar.CategoriesButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    do -- Toggle Button
-      self.window.titlebar.toggleButton = CreateFrame("Button", "$parentToggleButton", self.window.titlebar)
-      self.window.titlebar.toggleButton:SetPoint("RIGHT", self.window.titlebar.CategoriesButton, "LEFT", 0, 0)
-      self.window.titlebar.toggleButton:SetSize(Constants.TITLEBAR_HEIGHT, Constants.TITLEBAR_HEIGHT)
-      self.window.titlebar.toggleButton:SetScript("OnClick", function()
-        Data.db.global.checklist.hideTable = not Data.db.global.checklist.hideTable
-        self:Render()
-      end)
-      self.window.titlebar.toggleButton:SetScript("OnEnter", function()
-        self.window.titlebar.toggleButton.Icon:SetVertexColor(0.9, 0.9, 0.9, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0.05)
-        GameTooltip:SetOwner(self.window.titlebar.toggleButton, "ANCHOR_TOP")
-        GameTooltip:SetText("Toggle List", 1, 1, 1, 1, true)
-        GameTooltip:AddLine("Expand/Collapse the checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-        GameTooltip:Show()
-      end)
-      self.window.titlebar.toggleButton:SetScript("OnLeave", function()
-        self.window.titlebar.toggleButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-        Utils:SetBackgroundColor(self.window.titlebar.toggleButton, 1, 1, 1, 0)
-        GameTooltip:Hide()
-      end)
-
-      self.window.titlebar.toggleButton.Icon = self.window.titlebar:CreateTexture("$parentIcon", "ARTWORK")
-      self.window.titlebar.toggleButton.Icon:SetPoint("CENTER", self.window.titlebar.toggleButton, "CENTER")
-      self.window.titlebar.toggleButton.Icon:SetSize(16, 16)
-      self.window.titlebar.toggleButton.Icon:SetTexture("Interface/AddOns/WeeklyKnowledge/Media/Icon_Toggle.blp")
-      self.window.titlebar.toggleButton.Icon:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    self.window.table = Table:CreateFrame({
+    self.window.table = addon.LiqUI.Table:New({
+      name = "Checklist",
       header = {
         enabled = true,
         sticky = true,
@@ -473,7 +318,7 @@ function Checklist:Render()
       },
       cells = {
         padding = Constants.TABLE_CELL_PADDING,
-        highlight = true
+        fontObject = "GameFontHighlightSmall",
       },
       sorting = {
         enabled = true,
@@ -500,20 +345,11 @@ function Checklist:Render()
           if not objectiveA or not objectiveB then return false end
           return checklistObjectiveIdentityLess(objectiveA, objectiveB)
         end,
-        savedState = Data.db.global.checklist.tableSort,
-        onStateChanged = function(state)
-          if not state.columnId and not state.direction then
-            Data.db.global.checklist.tableSort = nil
-          else
-            Data.db.global.checklist.tableSort = {columnId = state.columnId, direction = state.direction}
-          end
-        end,
       },
     })
-    self.window.table:SetParent(self.window)
-    self.window.table:SetPoint("TOPLEFT", self.window, "TOPLEFT", 0, -Constants.TITLEBAR_HEIGHT)
-    self.window.table:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", 0, 0)
-    table.insert(UISpecialFrames, self.window:GetName() or format("%sChecklistWindow", addonName))
+    self.window.table:SetParent(self.window.body)
+    self.window.table:SetPoint("TOPLEFT", self.window.body, "TOPLEFT", 0, 0)
+    self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
   end
 
   if not character then
@@ -528,7 +364,7 @@ function Checklist:Render()
   end
 
   do -- Table Column config
-    Utils:TableForEach(dataColumns, function(dataColumn)
+    addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
       table.insert(tableData.columns, dataColumn)
       tableWidth = tableWidth + dataColumn.width
     end)
@@ -536,15 +372,15 @@ function Checklist:Render()
 
   do -- Table Header row
     ---@type WK_TableRow
-    local row = {cells = {}}
-    Utils:TableForEach(dataColumns, function(dataColumn)
+    local row = {columns = {}}
+    addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableCell
       local cell = {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.headerText),
         onEnter = dataColumn.onEnter,
         onLeave = dataColumn.onLeave,
       }
-      table.insert(row.cells, cell)
+      table.insert(row.columns, cell)
     end)
     table.insert(tableData.rows, row)
     tableHeight = tableHeight + self.window.table.config.header.height
@@ -557,17 +393,17 @@ function Checklist:Render()
   local selectedExpansions = Data.db.global.checklist.selectedExpansions or {}
 
   do -- Table data
-    Utils:TableForEach(characterProfessions, function(characterProfession)
+    addon.LiqUI.Utils:TableForEach(characterProfessions, function(characterProfession)
       local skillLineVariantID = characterProfession.skillLineVariantID
       local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
       if not skillLineVariant then return end
 
       -- Skip if the skill line variant is not the selected expansion
-      if Utils:TableCount(selectedExpansions) > 0 and not Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then
+      if addon.LiqUI.Utils:TableCount(selectedExpansions) > 0 and not addon.LiqUI.Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then
         -- print("Checklist: Skipping skill line variant", skillLineVariant.name, Data.db.global.checklist.selectedExpansion, skillLineVariant.expansionID)
         return
       end
-      local filteredObjectives = Utils:TableFilter(objectives, function(objective)
+      local filteredObjectives = addon.LiqUI.Utils:TableFilter(objectives, function(objective)
         local debugID = objective.quests[1] or objective.spellID or objective.itemID
 
         -- Hide objective if not the correct profession
@@ -597,7 +433,7 @@ function Checklist:Render()
         end
 
         -- Hide Vendor Uniques if enabled
-        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and Utils:TableCount(objective.requires) > 0 then
+        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and addon.LiqUI.Utils:TableCount(objective.requires) > 0 then
           -- print("Checklist: Skipping Unique Vendor objective", debugID)
           return false
         end
@@ -610,7 +446,7 @@ function Checklist:Render()
 
         return true
       end)
-      Utils:TableForEach(filteredObjectives, function(objective)
+      addon.LiqUI.Utils:TableForEach(filteredObjectives, function(objective)
         local progress = Data:GetObjectiveProgress(character, objective)
 
         -- Skip if the objective is completed and hide completed objectives is enabled
@@ -629,11 +465,11 @@ function Checklist:Render()
         }
         ---@type WK_TableRow
         local row = {
-          cells = {},
+          columns = {},
           data = rowData,
         }
-        Utils:TableForEach(dataColumns, function(dataColumn)
-          table.insert(row.cells, dataColumn.renderCell(rowData))
+        addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
+          table.insert(row.columns, dataColumn.renderCell(rowData))
         end)
 
         table.insert(tableData.rows, row)
@@ -649,16 +485,17 @@ function Checklist:Render()
   local maxWindowHeight = 300
   if Data.db.global.checklist.hideTable then
     self.window.table:Hide()
-    self.window.textbox:Hide()
+    self.window.placeholderText:Hide()
+    windowHeight = Constants.TITLEBAR_HEIGHT
   else
     if rowCount == 0 then
-      self.window.textbox:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+      self.window.placeholderText:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
       windowHeight = 200
-      self.window.textbox:Show()
+      self.window.placeholderText:Show()
       self.window.table:Hide()
     else
       windowHeight = windowHeight + tableHeight
-      self.window.textbox:Hide()
+      self.window.placeholderText:Hide()
       self.window.table:Show()
     end
   end
@@ -666,13 +503,16 @@ function Checklist:Render()
   windowWidth  = math.max(windowWidth, minWindowWidth)
 
   self.window:SetShown(Data.db.global.checklist.open)
-  self.window.border:SetShown(Data.db.global.checklist.windowBorder)
-  self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
+  if self.window.border then
+    self.window.border:SetShown(self.window.db.border ~= false)
+  end
+  if self.window.titlebar then
+    self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
+  end
   self.window.table:SetData(tableData)
-  self.window:SetWidth(windowWidth)
-  self.window:SetHeight(windowHeight + 2)
+  self.window:SetBodySize(windowWidth, windowHeight - Constants.TITLEBAR_HEIGHT + 2)
   self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
-  self.window:SetScale(Data.db.global.checklist.windowScale / 100)
+  self.window:SetScale((self.window.db.scale or 100) / 100)
   if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
     self.window:Hide()
   end
@@ -774,7 +614,7 @@ function Checklist:GetColumns(unfiltered)
               end
             end,
           }
-        elseif data.objective.quests and Utils:TableCount(data.objective.quests) > 0 then
+        elseif data.objective.quests and addon.LiqUI.Utils:TableCount(data.objective.quests) > 0 then
           local text = format("Error: QuestID %d not found", data.objective.quests[1] or "?")
           local link = format("quest:%d:-1", data.objective.quests[1])
           local questTooltipData = C_TooltipInfo.GetHyperlink(link)
@@ -1133,19 +973,19 @@ function Checklist:GetColumns(unfiltered)
               end
 
               -- Requirements
-              if Utils:TableCount(data.progress.requirements) > 0 then
+              if addon.LiqUI.Utils:TableCount(data.progress.requirements) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine(requirementsHeading)
-                Utils:TableForEach(data.progress.requirements, function(requirement)
+                addon.LiqUI.Utils:TableForEach(data.progress.requirements, function(requirement)
                   Utils:RenderRequirementTooltip(requirement, data.character, data.objective.skillLineVariantID, data.objective.categoryID)
                 end)
               end
 
               -- Item Rewards
-              if Utils:TableCount(data.progress.items) > 0 then
+              if addon.LiqUI.Utils:TableCount(data.progress.items) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("Rewards:")
-                Utils:TableForEach(data.progress.items, function(isLooted, itemID)
+                addon.LiqUI.Utils:TableForEach(data.progress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
@@ -1178,16 +1018,16 @@ function Checklist:GetColumns(unfiltered)
             end
 
             -- Continue on item load
-            if Utils:TableCount(data.progress.items) > 0 then
-              Utils:TableForEach(data.progress.items, function(isLooted, itemID)
+            if addon.LiqUI.Utils:TableCount(data.progress.items) > 0 then
+              addon.LiqUI.Utils:TableForEach(data.progress.items, function(isLooted, itemID)
                 Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
                 Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
               end)
             end
 
             -- Continue on item requirement load
-            if Utils:TableCount(data.progress.requirements) > 0 then
-              Utils:TableForEach(data.progress.requirements, function(requirement)
+            if addon.LiqUI.Utils:TableCount(data.progress.requirements) > 0 then
+              addon.LiqUI.Utils:TableForEach(data.progress.requirements, function(requirement)
                 if requirement.requirement.type == "item" then
                   Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
                   Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
@@ -1227,7 +1067,7 @@ function Checklist:GetColumns(unfiltered)
     return columns
   end
 
-  local filteredColumns = Utils:TableFilter(columns, function(column)
+  local filteredColumns = addon.LiqUI.Utils:TableFilter(columns, function(column)
     return not hidden[column.id]
   end)
 

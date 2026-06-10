@@ -5,7 +5,6 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
 local category = Enum.WK_ObjectiveCategory.FirstCraft
 
@@ -1336,4 +1335,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {90057}, spellID = 1228980, points = 1}, -- Sunfire Silk Backpack
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)

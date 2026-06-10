@@ -5,7 +5,6 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local category = Enum.WK_ObjectiveCategory.DarkmoonQuest
 
 ---@type WK_Objective[]
@@ -57,4 +56,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {29520}, itemID = 0, points = 3, loc = {m = Enum.WK_Map.DarkmoonIsland, x = 55.6, y = 55.8, hint = "Talk to |cff00ff00Selina Dourman|r at the Darkmoon Faire and complete the quest |cffffff00Banners, Banners Everywhere!|r"},                                                      requires = {{type = "item", id = 2320, amount = 1}, {type = "item", id = 2604, amount = 1}, {type = "item", id = 6260, amount = 1}}},
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)

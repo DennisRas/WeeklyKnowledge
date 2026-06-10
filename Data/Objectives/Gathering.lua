@@ -5,7 +5,6 @@ local addon = select(2, ...)
 
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
 local category = Enum.WK_ObjectiveCategory.Gathering
 
@@ -52,4 +51,4 @@ local objectives = {
   -- Midnight: Tailoring
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
