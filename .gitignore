@@ -1,2 +1,4 @@
 .vscode
 /docs
+Libs/*
+!Libs/README.md
