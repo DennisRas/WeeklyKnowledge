@@ -57,11 +57,8 @@ function Main:Render()
   local objectiveCategories = Data:GetObjectiveCategories()
   local tableWidth = 0
   local tableHeight = 0
-  ---@type WK_TableData
-  local tableData = {
-    columns = {},
-    rows = {}
-  }
+  ---@type WK_TableRow[]
+  local dataRows = {}
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
@@ -277,7 +274,7 @@ function Main:Render()
           setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.main.hiddenColumns
         TableForEach(self:GetTableColumns(true), function(column)
-          if not column.toggleHidden then return end
+          if not column.hideable then return end
           rootMenu:CreateCheckbox(
             column.headerText,
             function() return not hidden[column.id] end,
@@ -357,26 +354,10 @@ function Main:Render()
     return
   end
 
-  do -- Table columns config
-    TableForEach(columns, function(column)
-      table.insert(tableData.columns, column)
-      tableWidth = tableWidth + column.width
-    end)
+  for _, column in ipairs(columns) do
+    tableWidth = tableWidth + column.width
   end
-
-  do -- Table Header row
-    ---@type WK_TableRow
-    local row = {columns = {}}
-    TableForEach(columns, function(column)
-      ---@type WK_TableCell
-      local cell = {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.headerText),
-        onEnter = column.onEnter,
-        onLeave = column.onLeave,
-      }
-      table.insert(row.columns, cell)
-    end)
-    table.insert(tableData.rows, row)
+  if self.window.table.config.header.enabled then
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
@@ -395,23 +376,20 @@ function Main:Render()
       TableForEach(professions, function(characterProfession)
         ---@type WK_TableRow
         local row = {
-          columns = {},
           data = {
             character = character,
             characterProfession = characterProfession,
             skillLineVariantID = characterProfession.skillLineVariantID,
           },
         }
-        TableForEach(columns, function(column)
-          local cell = column.renderCell(row.data)
-          table.insert(row.columns, cell)
-        end)
-        table.insert(tableData.rows, row)
+        table.insert(dataRows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
         rowCount = rowCount + 1
       end)
     end)
   end
+
+  local tableData = addon.LiqUI.Table.BuildData(columns, dataRows)
 
   local minWindowWidth = 500
   local windowHeight = math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT) + 2
@@ -485,8 +463,8 @@ function Main:GetTableColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local character = data.character
         local name = character.name
         if character.classID then
@@ -521,8 +499,8 @@ function Main:GetTableColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local character = data.character
         return {text = character.realmName}
       end,
@@ -546,8 +524,8 @@ function Main:GetTableColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = Data.db.global.showFullProfessionName and 160 or 100,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local character = data.character
         local skillLineVariantID = data.skillLineVariantID
         local text = ""
@@ -606,8 +584,8 @@ function Main:GetTableColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 120,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local skillLineVariantID = data.skillLineVariantID
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
@@ -644,8 +622,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 80,
       align = "CENTER",
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local characterProfession = data.characterProfession
         local text = "-"
         local color = WHITE_FONT_COLOR
@@ -695,8 +673,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 100,
       align = "CENTER",
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local character = data.character
         local characterProfession = data.characterProfession
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
@@ -784,8 +762,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 100,
       align = "CENTER",
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local characterProfession = data.characterProfession
         local skillLineVariantID = data.skillLineVariantID
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
@@ -906,7 +884,7 @@ function Main:GetTableColumns(unfiltered)
         GameTooltip:Hide()
       end,
       width = 90,
-      toggleHidden = true,
+      hideable = true,
       align = "CENTER",
       sorting = {
         enabled = true,
@@ -928,7 +906,7 @@ function Main:GetTableColumns(unfiltered)
           return a.data.skillLineVariantID < b.data.skillLineVariantID
         end,
       },
-      renderCell = function(data)
+      render = function(data)
         local character = data.character
         local characterProfession = data.characterProfession
         local skillLineVariantID = data.skillLineVariantID

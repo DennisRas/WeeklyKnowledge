@@ -94,11 +94,8 @@ function Checklist:Render()
 
   local tableWidth = 0
   local tableHeight = 0
-  ---@type WK_TableData
-  local tableData = {
-    columns = {},
-    rows = {}
-  }
+  ---@type WK_TableRow[]
+  local dataRows = {}
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
@@ -259,7 +256,7 @@ function Checklist:Render()
           setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.checklist.hiddenColumns
         TableForEach(self:GetColumns(true), function(column)
-          if not column.toggleHidden then return end
+          if not column.hideable then return end
           rootMenu:CreateCheckbox(
             column.headerText,
             function() return not hidden[column.id] end,
@@ -370,26 +367,10 @@ function Checklist:Render()
     return
   end
 
-  do -- Table Column config
-    TableForEach(dataColumns, function(dataColumn)
-      table.insert(tableData.columns, dataColumn)
-      tableWidth = tableWidth + dataColumn.width
-    end)
+  for _, column in ipairs(dataColumns) do
+    tableWidth = tableWidth + column.width
   end
-
-  do -- Table Header row
-    ---@type WK_TableRow
-    local row = {columns = {}}
-    TableForEach(dataColumns, function(dataColumn)
-      ---@type WK_TableCell
-      local cell = {
-        text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.headerText),
-        onEnter = dataColumn.onEnter,
-        onLeave = dataColumn.onLeave,
-      }
-      table.insert(row.columns, cell)
-    end)
-    table.insert(tableData.rows, row)
+  if self.window.table.config.header.enabled then
     tableHeight = tableHeight + self.window.table.config.header.height
   end
 
@@ -462,29 +443,24 @@ function Checklist:Render()
           return
         end
 
-        ---@type WK_TableRowData
-        local rowData = {
-          character = character,
-          characterProfession = characterProfession,
-          skillLineVariantID = skillLineVariantID,
-          objective = objective,
-          progress = progress,
-        }
         ---@type WK_TableRow
         local row = {
-          columns = {},
-          data = rowData,
+          data = {
+            character = character,
+            characterProfession = characterProfession,
+            skillLineVariantID = skillLineVariantID,
+            objective = objective,
+            progress = progress,
+          },
         }
-        TableForEach(dataColumns, function(dataColumn)
-          table.insert(row.columns, dataColumn.renderCell(rowData))
-        end)
-
-        table.insert(tableData.rows, row)
+        table.insert(dataRows, row)
         tableHeight = tableHeight + self.window.table.config.rows.height
         rowCount = rowCount + 1
       end)
     end)
   end
+
+  local tableData = addon.LiqUI.Table.BuildData(dataColumns, dataRows)
 
   local windowWidth     = tableWidth
   local windowHeight    = Constants.TITLEBAR_HEIGHT
@@ -537,7 +513,7 @@ function Checklist:GetColumns(unfiltered)
       id = "objective",
       headerText = "Objective",
       width = 260,
-      renderCell = function(data)
+      render = function(data)
         if data.objective.itemID and data.objective.itemID > 0 then
           local text = format("Error: ItemID %d not found", data.objective.itemID or "?")
           local link = ""
@@ -677,8 +653,8 @@ function Checklist:GetColumns(unfiltered)
       id = "profession",
       headerText = "Profession",
       width = Data.db.global.showFullProfessionName and 160 or 100,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local text = ""
         local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
         if not variant then return {text = ""} end
@@ -725,8 +701,8 @@ function Checklist:GetColumns(unfiltered)
       id = "expansion",
       headerText = "Expansion",
       width = 120,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
         local expansion = skillLineVariant and Data:GetExpansionByID(skillLineVariant.expansionID)
         return {
@@ -755,8 +731,8 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Category",
       name = "Category",
       width = 80,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
         if not objectiveCategory then
           return {
@@ -796,8 +772,8 @@ function Checklist:GetColumns(unfiltered)
       id = "location",
       headerText = "Location",
       width = 100,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local text = " "
         if data.objective and data.objective.loc and data.objective.loc.m then
           if Data.cache.mapInfo[data.objective.loc.m] then
@@ -832,8 +808,8 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Repeat?",
       name = "Repeat?",
       width = 60,
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local objective = data.objective
         if not objective then
           return {
@@ -871,8 +847,8 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Progress",
       width = 70,
       align = "CENTER",
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local text = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
         if data.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
@@ -901,8 +877,8 @@ function Checklist:GetColumns(unfiltered)
       name = "Points",
       width = 70,
       align = "CENTER",
-      toggleHidden = true,
-      renderCell = function(data)
+      hideable = true,
+      render = function(data)
         local text = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
         if data.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
@@ -933,7 +909,7 @@ function Checklist:GetColumns(unfiltered)
       sorting = {
         enabled = false,
       },
-      renderCell = function(data)
+      render = function(data)
         local TomTomGlobal = _G["TomTom"]
         local mapInfo = nil
         local mapPoint = nil

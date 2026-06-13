@@ -2,11 +2,10 @@
 -- Global DB
 --------------------------------------------------------------------------------
 
----@class WK_TableSortState
----@field columnId string?
----@field direction ("asc" | "desc")?
-
 ---@alias WK_LUI LiqUI_Instance
+
+---@class WK_Addon
+---@field LiqUI WK_LUI
 
 ---@class WK_DefaultGlobal
 ---@field DBVersion integer?
@@ -252,32 +251,8 @@
 -- Tables
 --------------------------------------------------------------------------------
 
----@class WK_TableData
----@field columns WK_TableColumn[]?
----@field rows WK_TableRow[]
-
----@class WK_TableColumnSorting
----@field enabled boolean
----@field compare? fun(a: WK_TableRow, b: WK_TableRow): boolean
-
----@class WK_TableColumn
----@field id string
----@field headerText string
----@field width integer
----@field align "LEFT" | "CENTER" | "RIGHT" | nil
----@field onEnter function?
----@field onLeave function?
----@field toggleHidden boolean?
----@field renderCell fun(data: WK_TableRowData): WK_TableCell
----@field sorting WK_TableColumnSorting
-
----@class WK_TableRow
----@field columns WK_TableCell[]
----@field backgroundColor {r: number, g: number, b: number, a: number}?
----@field onEnter function?
----@field onLeave function?
----@field onClick function?
----@field data WK_TableRowData|nil
+---@class WK_TableColumn : LiqUI_TableDataColumn
+---@field render fun(data: WK_TableRowData): LiqUI_TableDataRowColumn
 
 ---@class WK_TableRowData
 ---@field character WK_Character
@@ -286,46 +261,12 @@
 ---@field objective WK_Objective?
 ---@field progress WK_ObjectiveProgress?
 
----@class WK_TableCell
----@field text string?
----@field backgroundColor {r: number, g: number, b: number, a: number}?
----@field onEnter function?
----@field onLeave function?
----@field onClick function?
+---@class WK_TableRow : LiqUI_TableDataRow
+---@field data WK_TableRowData|nil
 
----@class WK_TableSortConfig
----@field enabled boolean
----@field defaultOrder "asc"|"desc"
----@field defaultCompare fun(a: WK_TableRow, b: WK_TableRow): boolean
----@field savedState WK_TableSortState?
----@field onStateChanged? fun(state: WK_TableSortState)
-
----@class WK_TableConfigHeader
----@field enabled boolean
----@field sticky boolean
----@field height number
-
----@class WK_TableConfigRows
----@field height number
----@field highlight boolean
----@field striped boolean
-
----@class WK_TableConfigColumnDefaults
----@field width number
----@field highlight boolean
----@field striped boolean
-
----@class WK_TableConfigCells
----@field padding number
----@field highlight boolean
-
----@class WK_TableConfig
----@field header WK_TableConfigHeader?
----@field rows WK_TableConfigRows?
----@field columns WK_TableConfigColumnDefaults?
----@field cells WK_TableConfigCells?
----@field sorting WK_TableSortConfig?
----@field data WK_TableData?
+---@class WK_TableData : LiqUI_TableData
+---@field columns WK_TableColumn[]?
+---@field rows WK_TableRow[]
 
 --------------------------------------------------------------------------------
 -- Enums
