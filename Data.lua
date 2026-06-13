@@ -452,8 +452,13 @@ function Data:MigrateDB()
         if main.tableSort then
           ---@type LiqUI_TableDb
           local mainTableDb = { sortState = main.tableSort }
+          if main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
+            mainTableDb.hiddenColumns = TableCopy(main.hiddenColumns)
+          end
           self.db.global.liqui.tables.Main = mainTableDb
           main.tableSort = nil
+        elseif main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
+          self.db.global.liqui.tables.Main = { hiddenColumns = TableCopy(main.hiddenColumns) }
         end
       end
 
@@ -477,8 +482,13 @@ function Data:MigrateDB()
         if checklist.tableSort then
           ---@type LiqUI_TableDb
           local checklistTableDb = { sortState = checklist.tableSort }
+          if checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
+            checklistTableDb.hiddenColumns = TableCopy(checklist.hiddenColumns)
+          end
           self.db.global.liqui.tables.Checklist = checklistTableDb
           checklist.tableSort = nil
+        elseif checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
+          self.db.global.liqui.tables.Checklist = { hiddenColumns = TableCopy(checklist.hiddenColumns) }
         end
       end
     end

@@ -15,6 +15,7 @@ local LibLiqUI = addon.libs.LiqUI
 local LibDBIcon = addon.libs.LibDBIcon
 local SetBackgroundColor = LibLiqUI.Utils.SetBackgroundColor
 local TableContains = LibLiqUI.Utils.TableContains
+local TableCopy = LibLiqUI.Utils.TableCopy
 local TableCount = LibLiqUI.Utils.TableCount
 local TableFilter = LibLiqUI.Utils.TableFilter
 local TableForEach = LibLiqUI.Utils.TableForEach
@@ -53,12 +54,9 @@ function Main:Render()
   local selectedExpansions = Data.db.global.main.selectedExpansions or {}
   local expansions = Data:GetExpansions()
   local characters = Data:GetCharacters()
-  local columns = self:GetTableColumns()
   local objectiveCategories = Data:GetObjectiveCategories()
-  local tableWidth = 0
-  local tableHeight = 0
-  ---@type WK_TableRow[]
-  local dataRows = {}
+  ---@type LiqUI_TableDataRow[]
+  local contextRows = {}
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
@@ -272,8 +270,14 @@ function Main:Render()
           tooltipTitle = "Columns",
           tooltipDescription = "Enable/Disable table columns.",
           setupMenu = function(_, rootMenu)
-        local hidden = Data.db.global.main.hiddenColumns
-        TableForEach(self:GetTableColumns(true), function(column)
+        local tableDb = self.window.table.db
+        tableDb.hiddenColumns = tableDb.hiddenColumns or {}
+        local hidden = tableDb.hiddenColumns
+        if TableCount(hidden) == 0 and Data.db.global.main.hiddenColumns then
+          tableDb.hiddenColumns = TableCopy(Data.db.global.main.hiddenColumns)
+          hidden = tableDb.hiddenColumns
+        end
+        TableForEach(self:GetColumnDefinitions(), function(column)
           if not column.hideable then return end
           rootMenu:CreateCheckbox(
             column.headerText,
@@ -324,8 +328,8 @@ function Main:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultCompare = function(a, b)
-          local rowDataA, rowDataB = a.data, b.data
+        defaultCompare = function(args)
+          local rowDataA, rowDataB = args.contextA, args.contextB
           if not rowDataA or not rowDataB then return false end
           local characterA, characterB = rowDataA.character, rowDataB.character
           local lastUpdateA, lastUpdateB = characterA.lastUpdate, characterB.lastUpdate
@@ -354,12 +358,13 @@ function Main:Render()
     return
   end
 
-  for _, column in ipairs(columns) do
-    tableWidth = tableWidth + column.width
+  local allColumns = self:GetColumnDefinitions()
+  local tableDb = self.window.table.db
+  tableDb.hiddenColumns = tableDb.hiddenColumns or {}
+  if TableCount(tableDb.hiddenColumns) == 0 and Data.db.global.main.hiddenColumns then
+    tableDb.hiddenColumns = TableCopy(Data.db.global.main.hiddenColumns)
   end
-  if self.window.table.config.header.enabled then
-    tableHeight = tableHeight + self.window.table.config.header.height
-  end
+  local columns = addon.LiqUI.Table.FilterColumns(allColumns, tableDb.hiddenColumns)
 
   local rowCount = 0
   do -- Table data rows
@@ -374,65 +379,64 @@ function Main:Render()
       end)
 
       TableForEach(professions, function(characterProfession)
-        ---@type WK_TableRow
+        ---@type LiqUI_TableDataRow
         local row = {
-          data = {
+          context = {
             character = character,
             characterProfession = characterProfession,
             skillLineVariantID = characterProfession.skillLineVariantID,
           },
         }
-        table.insert(dataRows, row)
-        tableHeight = tableHeight + self.window.table.config.rows.height
+        table.insert(contextRows, row)
         rowCount = rowCount + 1
       end)
     end)
   end
 
-  local tableData = addon.LiqUI.Table.BuildData(columns, dataRows)
+  self.window.table:Refresh(columns, contextRows)
 
   local minWindowWidth = 500
-  local windowHeight = math.min(tableHeight + Constants.TITLEBAR_HEIGHT, Constants.MAX_WINDOW_HEIGHT) + 2
-  local windowWidth = math.max(tableWidth, minWindowWidth)
+  local maxBodyHeight = Constants.MAX_WINDOW_HEIGHT - Constants.TITLEBAR_HEIGHT
+  local emptyBodyHeight = 250 - Constants.TITLEBAR_HEIGHT
 
   if rowCount == 0 then
-    windowHeight = 250
-    windowWidth = minWindowWidth
-    self.window.placeholderText:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-    self.window.placeholderText:Show()
+    self.window:ShowBodyPlaceholder("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
     self.window.table:Hide()
-    self.window:SetBodySize(minWindowWidth, windowHeight - Constants.TITLEBAR_HEIGHT)
+    self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
+    if self.window.titlebar then
+      self.window.titlebar.title:SetShown(false)
+    end
   else
-    self.window.placeholderText:Hide()
+    self.window:HideBodyPlaceholder()
     self.window.table:Show()
-    self.window:SetBodySize(windowWidth, windowHeight - Constants.TITLEBAR_HEIGHT)
+    local bodyWidth = self.window:FitBodyToTable(self.window.table, {
+      minWidth = minWindowWidth,
+      maxBodyHeight = maxBodyHeight,
+    })
+    if self.window.titlebar then
+      self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
+    end
   end
 
-  if self.window.titlebar then
-    self.window.titlebar.title:SetShown(windowWidth > minWindowWidth)
-  end
   if self.window.border then
     self.window.border:SetShown(self.window.db.border ~= false)
   end
-  self.window.table:SetData(tableData)
   self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
   self.window:SetScale((self.window.db.scale or 100) / 100)
 end
 
----Get columns for the table
----@param unfiltered boolean? Show all columns, even if they are hidden
----@return WK_TableColumn[]
-function Main:GetTableColumns(unfiltered)
-  local hidden = Data.db.global.main.hiddenColumns
+---Column definitions for the main table.
+---@return LiqUI_TableDataColumn[]
+function Main:GetColumnDefinitions()
   local objectiveCategories = Data:GetObjectiveCategories()
   local currentCharacter = Data:GetCharacter()
 
   --- Estimated concentration (same idea as the cell); used only for sort order.
-  ---@param data WK_TableRowData
+  ---@param context WK_TableContext
   ---@return number
-  local function concentrationEstimatedForSort(data)
-    local character = data.character
-    local characterProfession = data.characterProfession
+  local function concentrationEstimatedForSort(context)
+    local character = context.character
+    local characterProfession = context.characterProfession
     local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if not skillLineVariant or not skillLineVariant.concentrationCurrencyID or skillLineVariant.concentrationCurrencyID == 0 then
       return -1
@@ -448,7 +452,7 @@ function Main:GetTableColumns(unfiltered)
     return math.min(currentQuantity + cyclesSinceLastUpdate, maxQuantity)
   end
 
-  ---@type WK_TableColumn[]
+  ---@type LiqUI_TableDataColumn[]
   local columns = {
     {
       id = "name",
@@ -464,8 +468,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 90,
       hideable = true,
-      render = function(data)
-        local character = data.character
+      render = function(args)
+        local character = args.context.character
         local name = character.name
         if character.classID then
           local _, classFile = GetClassInfo(character.classID)
@@ -480,8 +484,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+        compare = function(args)
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -500,14 +504,14 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 90,
       hideable = true,
-      render = function(data)
-        local character = data.character
+      render = function(args)
+        local character = args.context.character
         return {text = character.realmName}
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          return strcmputf8i(a.data.character.realmName or "", b.data.character.realmName or "") < 0
+        compare = function(args)
+          return strcmputf8i(args.contextA.character.realmName or "", args.contextB.character.realmName or "") < 0
         end,
       },
     },
@@ -525,9 +529,9 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = Data.db.global.showFullProfessionName and 160 or 100,
       hideable = true,
-      render = function(data)
-        local character = data.character
-        local skillLineVariantID = data.skillLineVariantID
+      render = function(args)
+        local character = args.context.character
+        local skillLineVariantID = args.context.skillLineVariantID
         local text = ""
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
@@ -559,15 +563,15 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function skillLineNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
             return skillLine and skillLine.name:lower() or ""
           end
-          local nameA, nameB = skillLineNameLower(a.data), skillLineNameLower(b.data)
+          local nameA, nameB = skillLineNameLower(args.contextA), skillLineNameLower(args.contextB)
           if nameA ~= nameB then return nameA < nameB end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
     },
@@ -585,8 +589,8 @@ function Main:GetTableColumns(unfiltered)
       end,
       width = 120,
       hideable = true,
-      render = function(data)
-        local skillLineVariantID = data.skillLineVariantID
+      render = function(args)
+        local skillLineVariantID = args.context.skillLineVariantID
         local variant = Data:GetSkillLineVariantByID(skillLineVariantID)
         if not variant then return {text = ""} end
         local expansion = variant and Data:GetExpansionByID(variant.expansionID)
@@ -595,15 +599,15 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local expansion = variant and Data:GetExpansionByID(variant.expansionID)
             return expansion and expansion.name:lower() or ""
           end
-          local nameA, nameB = expansionNameLower(a.data), expansionNameLower(b.data)
+          local nameA, nameB = expansionNameLower(args.contextA), expansionNameLower(args.contextB)
           if nameA ~= nameB then return nameA < nameB end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
     },
@@ -623,8 +627,8 @@ function Main:GetTableColumns(unfiltered)
       width = 80,
       align = "CENTER",
       hideable = true,
-      render = function(data)
-        local characterProfession = data.characterProfession
+      render = function(args)
+        local characterProfession = args.context.characterProfession
         local text = "-"
         local color = WHITE_FONT_COLOR
         if not characterProfession.skillLevel or characterProfession.skillLevel == 0 then
@@ -649,13 +653,13 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local skillLevelA = a.data.characterProfession.skillLevel
-          local skillLevelB = b.data.characterProfession.skillLevel
+        compare = function(args)
+          local skillLevelA = args.contextA.characterProfession.skillLevel
+          local skillLevelB = args.contextB.characterProfession.skillLevel
           local sortKeyA = (skillLevelA and skillLevelA > 0) and skillLevelA or -1
           local sortKeyB = (skillLevelB and skillLevelB > 0) and skillLevelB or -1
           if sortKeyA ~= sortKeyB then return sortKeyA < sortKeyB end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
     },
@@ -674,9 +678,9 @@ function Main:GetTableColumns(unfiltered)
       width = 100,
       align = "CENTER",
       hideable = true,
-      render = function(data)
-        local character = data.character
-        local characterProfession = data.characterProfession
+      render = function(args)
+        local character = args.context.character
+        local characterProfession = args.context.characterProfession
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return {text = ""} end
         if not skillLineVariant.concentrationCurrencyID or skillLineVariant.concentrationCurrencyID == 0 then return {text = ""} end
@@ -740,11 +744,11 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local estimatedA = concentrationEstimatedForSort(a.data)
-          local estimatedB = concentrationEstimatedForSort(b.data)
+        compare = function(args)
+          local estimatedA = concentrationEstimatedForSort(args.contextA)
+          local estimatedB = concentrationEstimatedForSort(args.contextB)
           if estimatedA ~= estimatedB then return estimatedA < estimatedB end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
     },
@@ -763,9 +767,9 @@ function Main:GetTableColumns(unfiltered)
       width = 100,
       align = "CENTER",
       hideable = true,
-      render = function(data)
-        local characterProfession = data.characterProfession
-        local skillLineVariantID = data.skillLineVariantID
+      render = function(args)
+        local characterProfession = args.context.characterProfession
+        local skillLineVariantID = args.context.skillLineVariantID
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local text = ""
 
@@ -851,14 +855,14 @@ function Main:GetTableColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function totalKnowledgePoints(rowData)
             if not rowData.characterProfession then return 0 end
             return (rowData.characterProfession.knowledgeLevel or 0) + (rowData.characterProfession.knowledgeUnspent or 0)
           end
-          local totalA, totalB = totalKnowledgePoints(a.data), totalKnowledgePoints(b.data)
+          local totalA, totalB = totalKnowledgePoints(args.contextA), totalKnowledgePoints(args.contextB)
           if totalA ~= totalB then return totalA < totalB end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
     },
@@ -888,9 +892,9 @@ function Main:GetTableColumns(unfiltered)
       align = "CENTER",
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local progressA = Data:GetCategoryProfessionProgress(a.data.character, objectiveCategory, a.data.characterProfession)
-          local progressB = Data:GetCategoryProfessionProgress(b.data.character, objectiveCategory, b.data.characterProfession)
+        compare = function(args)
+          local progressA = Data:GetCategoryProfessionProgress(args.contextA.character, objectiveCategory, args.contextA.characterProfession)
+          local progressB = Data:GetCategoryProfessionProgress(args.contextB.character, objectiveCategory, args.contextB.characterProfession)
           if not progressA and not progressB then return false end
           if not progressA then return true end
           if not progressB then return false end
@@ -903,13 +907,13 @@ function Main:GetTableColumns(unfiltered)
             local objectivesCompletedB = progressB.objectivesCompleted or 0
             if objectivesCompletedA ~= objectivesCompletedB then return objectivesCompletedA < objectivesCompletedB end
           end
-          return a.data.skillLineVariantID < b.data.skillLineVariantID
+          return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
         end,
       },
-      render = function(data)
-        local character = data.character
-        local characterProfession = data.characterProfession
-        local skillLineVariantID = data.skillLineVariantID
+      render = function(args)
+        local character = args.context.character
+        local characterProfession = args.context.characterProfession
+        local skillLineVariantID = args.context.skillLineVariantID
         local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
         local categoryProfessionProgress = Data:GetCategoryProfessionProgress(character, objectiveCategory, characterProfession)
         if not categoryProfessionProgress then
@@ -1021,13 +1025,5 @@ function Main:GetTableColumns(unfiltered)
     table.insert(columns, dataColumn)
   end)
 
-  if unfiltered then
-    return columns
-  end
-
-  local filteredColumns = TableFilter(columns, function(column)
-    return not hidden[column.id]
-  end)
-
-  return filteredColumns
+  return columns
 end

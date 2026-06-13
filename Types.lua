@@ -248,25 +248,15 @@
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[]
 
 --------------------------------------------------------------------------------
--- Tables
+-- Table row context (domain payload for LiqUI_TableDataRow.context)
 --------------------------------------------------------------------------------
 
----@class WK_TableColumn : LiqUI_TableDataColumn
----@field render fun(data: WK_TableRowData): LiqUI_TableDataRowColumn
-
----@class WK_TableRowData
+---@class WK_TableContext
 ---@field character WK_Character
 ---@field characterProfession WK_CharacterProfession
 ---@field skillLineVariantID integer
 ---@field objective WK_Objective?
 ---@field progress WK_ObjectiveProgress?
-
----@class WK_TableRow : LiqUI_TableDataRow
----@field data WK_TableRowData|nil
-
----@class WK_TableData : LiqUI_TableData
----@field columns WK_TableColumn[]?
----@field rows WK_TableRow[]
 
 --------------------------------------------------------------------------------
 -- Enums

@@ -13,6 +13,7 @@ local Helpers = addon.Helpers
 local LibLiqUI = addon.libs.LiqUI
 local SetBackgroundColor = LibLiqUI.Utils.SetBackgroundColor
 local TableContains = LibLiqUI.Utils.TableContains
+local TableCopy = LibLiqUI.Utils.TableCopy
 local TableCount = LibLiqUI.Utils.TableCount
 local TableFilter = LibLiqUI.Utils.TableFilter
 local TableForEach = LibLiqUI.Utils.TableForEach
@@ -34,10 +35,10 @@ local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
 end
 
----@param data { objective: table }
+---@param context WK_TableContext
 ---@return string
-local function checklistObjectiveRowSortText(data)
-  local objective = data.objective
+local function checklistObjectiveRowSortText(context)
+  local objective = context.objective
   if not objective then
     return ""
   end
@@ -89,13 +90,9 @@ end
 
 function Checklist:Render()
   local character = Data:GetCharacter()
-  local dataColumns = self:GetColumns()
   local expansions = Data:GetExpansions()
-
-  local tableWidth = 0
-  local tableHeight = 0
-  ---@type WK_TableRow[]
-  local dataRows = {}
+  ---@type LiqUI_TableDataRow[]
+  local contextRows = {}
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
@@ -254,8 +251,14 @@ function Checklist:Render()
           tooltipTitle = "Columns",
           tooltipDescription = "Toggle columns.",
           setupMenu = function(_, rootMenu)
-        local hidden = Data.db.global.checklist.hiddenColumns
-        TableForEach(self:GetColumns(true), function(column)
+        local tableDb = self.window.table.db
+        tableDb.hiddenColumns = tableDb.hiddenColumns or {}
+        local hidden = tableDb.hiddenColumns
+        if TableCount(hidden) == 0 and Data.db.global.checklist.hiddenColumns then
+          tableDb.hiddenColumns = TableCopy(Data.db.global.checklist.hiddenColumns)
+          hidden = tableDb.hiddenColumns
+        end
+        TableForEach(self:GetColumnDefinitions(), function(column)
           if not column.hideable then return end
           rootMenu:CreateCheckbox(
             column.headerText,
@@ -327,8 +330,8 @@ function Checklist:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultCompare = function(a, b)
-          local rowDataA, rowDataB = a.data, b.data
+        defaultCompare = function(args)
+          local rowDataA, rowDataB = args.contextA, args.contextB
           if not rowDataA or not rowDataB then return false end
           local progressA, progressB = rowDataA.progress, rowDataB.progress
           local questsCompletedA = progressA and (progressA.questsCompleted or 0) or 0
@@ -367,12 +370,13 @@ function Checklist:Render()
     return
   end
 
-  for _, column in ipairs(dataColumns) do
-    tableWidth = tableWidth + column.width
+  local allColumns = self:GetColumnDefinitions()
+  local tableDb = self.window.table.db
+  tableDb.hiddenColumns = tableDb.hiddenColumns or {}
+  if TableCount(tableDb.hiddenColumns) == 0 and Data.db.global.checklist.hiddenColumns then
+    tableDb.hiddenColumns = TableCopy(Data.db.global.checklist.hiddenColumns)
   end
-  if self.window.table.config.header.enabled then
-    tableHeight = tableHeight + self.window.table.config.header.height
-  end
+  local columns = addon.LiqUI.Table.FilterColumns(allColumns, tableDb.hiddenColumns)
 
   local characterProfessions = character.professions
 
@@ -386,49 +390,34 @@ function Checklist:Render()
       local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
       if not skillLineVariant then return end
 
-      -- Skip if the skill line variant is not the selected expansion
       if TableCount(selectedExpansions) > 0 and not TableContains(selectedExpansions, skillLineVariant.expansionID) then
-        -- print("Checklist: Skipping skill line variant", skillLineVariant.name, Data.db.global.checklist.selectedExpansion, skillLineVariant.expansionID)
         return
       end
       local filteredObjectives = TableFilter(objectives, function(objective)
         local debugID = objective.quests[1] or objective.spellID or objective.itemID
 
-        -- Hide objective if not the correct profession
         if objective.skillLineVariantID ~= skillLineVariantID then
-          -- print("Checklist: Skipping objective", debugID, "not the correct profession")
           return false
         end
 
-        -- Hide objectives that are not repeatable
-        -- Hide Darkmoon objectives
         if not Data.cache.isDarkmoonOpen and objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-          -- print("Checklist: Skipping Darkmoon objective", debugID)
           return false
         end
 
-        -- Hide if category is hidden
         local hiddenCategories = Data.db.global.checklist.hiddenCategories
         if hiddenCategories and hiddenCategories[objective.categoryID] then
-          -- print("Checklist: Skipping hidden category objective", debugID)
           return false
         end
 
-        -- Hide Uniques if enabled
         if Data.db.global.checklist.hideUniqueObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
-          -- print("Checklist: Skipping Unique objective", debugID)
           return false
         end
 
-        -- Hide Vendor Uniques if enabled
         if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and TableCount(objective.requires) > 0 then
-          -- print("Checklist: Skipping Unique Vendor objective", debugID)
           return false
         end
 
-        -- Hide Catch-Up if enabled
         if Data.db.global.checklist.hideCatchUpObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
-          -- print("Checklist: Skipping Catch-Up objective", debugID)
           return false
         end
 
@@ -437,15 +426,13 @@ function Checklist:Render()
       TableForEach(filteredObjectives, function(objective)
         local progress = Data:GetObjectiveProgress(character, objective)
 
-        -- Skip if the objective is completed and hide completed objectives is enabled
         if Data.db.global.checklist.hideCompletedObjectives and progress.questsCompleted == progress.questsTotal then
-          -- print("Checklist: Skipping completed objective", debugID)
           return
         end
 
-        ---@type WK_TableRow
+        ---@type LiqUI_TableDataRow
         local row = {
-          data = {
+          context = {
             character = character,
             characterProfession = characterProfession,
             skillLineVariantID = skillLineVariantID,
@@ -453,37 +440,34 @@ function Checklist:Render()
             progress = progress,
           },
         }
-        table.insert(dataRows, row)
-        tableHeight = tableHeight + self.window.table.config.rows.height
+        table.insert(contextRows, row)
         rowCount = rowCount + 1
       end)
     end)
   end
 
-  local tableData = addon.LiqUI.Table.BuildData(dataColumns, dataRows)
+  self.window.table:Refresh(columns, contextRows)
 
-  local windowWidth     = tableWidth
-  local windowHeight    = Constants.TITLEBAR_HEIGHT
-  local minWindowWidth  = 200
-  local maxWindowHeight = 300
+  local minWindowWidth = 200
+  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
+  local emptyBodyHeight = 200 - Constants.TITLEBAR_HEIGHT
+
   if Data.db.global.checklist.hideTable then
     self.window.table:Hide()
-    self.window.placeholderText:Hide()
-    windowHeight = Constants.TITLEBAR_HEIGHT
+    self.window:HideBodyPlaceholder()
+    self.window:SetBodySize(minWindowWidth, 0)
+  elseif rowCount == 0 then
+    self.window:ShowBodyPlaceholder("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    self.window.table:Hide()
+    self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
   else
-    if rowCount == 0 then
-      self.window.placeholderText:SetText("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-      windowHeight = 200
-      self.window.placeholderText:Show()
-      self.window.table:Hide()
-    else
-      windowHeight = windowHeight + tableHeight
-      self.window.placeholderText:Hide()
-      self.window.table:Show()
-    end
+    self.window:HideBodyPlaceholder()
+    self.window.table:Show()
+    self.window:FitBodyToTable(self.window.table, {
+      minWidth = minWindowWidth,
+      maxBodyHeight = maxBodyHeight,
+    })
   end
-  windowHeight = math.min(windowHeight, maxWindowHeight)
-  windowWidth  = math.max(windowWidth, minWindowWidth)
 
   self.window:SetShown(Data.db.global.checklist.open)
   if self.window.border then
@@ -492,8 +476,6 @@ function Checklist:Render()
   if self.window.titlebar then
     self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
   end
-  self.window.table:SetData(tableData)
-  self.window:SetBodySize(windowWidth, windowHeight - Constants.TITLEBAR_HEIGHT + 2)
   self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
   self.window:SetScale((self.window.db.scale or 100) / 100)
   if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
@@ -501,24 +483,20 @@ function Checklist:Render()
   end
 end
 
----Get column data
----@param unfiltered boolean?
----@return WK_TableColumn[]
-function Checklist:GetColumns(unfiltered)
-  local hidden = Data.db.global.checklist.hiddenColumns
-
-  ---@type WK_TableColumn[]
+---@return LiqUI_TableDataColumn[]
+function Checklist:GetColumnDefinitions()
+  ---@type LiqUI_TableDataColumn[]
   local columns = {
     {
       id = "objective",
       headerText = "Objective",
       width = 260,
-      render = function(data)
-        if data.objective.itemID and data.objective.itemID > 0 then
-          local text = format("Error: ItemID %d not found", data.objective.itemID or "?")
+      render = function(args)
+        if args.context.objective.itemID and args.context.objective.itemID > 0 then
+          local text = format("Error: ItemID %d not found", args.context.objective.itemID or "?")
           local link = ""
           -- Todo: Cache/Re-render item info
-          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(data.objective.itemID)
+          local itemName, itemLink, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(args.context.objective.itemID)
           if itemName then
             text = itemName
           end
@@ -553,21 +531,21 @@ function Checklist:GetColumns(unfiltered)
               end
             end,
           }
-        elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
-          local text = format("Error: RecipeID %d not found", data.objective.spellID or "?")
+        elseif args.context.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+          local text = format("Error: RecipeID %d not found", args.context.objective.spellID or "?")
           local link = ""
-          local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[data.objective.spellID]
+          local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[args.context.objective.spellID]
           if not recipeInfo then
-            recipeInfo = C_TradeSkillUI.GetRecipeInfo(data.objective.spellID)
+            recipeInfo = C_TradeSkillUI.GetRecipeInfo(args.context.objective.spellID)
             if recipeInfo then
               if not Data.cache.tradeSkillRecipes then
                 Data.cache.tradeSkillRecipes = {}
               end
-              Data.cache.tradeSkillRecipes[data.objective.spellID] = recipeInfo
+              Data.cache.tradeSkillRecipes[args.context.objective.spellID] = recipeInfo
             end
           end
           if recipeInfo then
-            link = C_Spell.GetSpellLink(recipeInfo.recipeID or data.objective.spellID)
+            link = C_Spell.GetSpellLink(recipeInfo.recipeID or args.context.objective.spellID)
             text = format("|T%s:0|t %s", recipeInfo.icon, recipeInfo.name)
           end
           return {
@@ -592,14 +570,14 @@ function Checklist:GetColumns(unfiltered)
                     ChatFrame_OpenChat(link);
                   end
                 else
-                  C_TradeSkillUI.OpenRecipe(data.objective.spellID)
+                  C_TradeSkillUI.OpenRecipe(args.context.objective.spellID)
                 end
               end
             end,
           }
-        elseif data.objective.quests and TableCount(data.objective.quests) > 0 then
-          local text = format("Error: QuestID %d not found", data.objective.quests[1] or "?")
-          local link = format("quest:%d:-1", data.objective.quests[1])
+        elseif args.context.objective.quests and TableCount(args.context.objective.quests) > 0 then
+          local text = format("Error: QuestID %d not found", args.context.objective.quests[1] or "?")
+          local link = format("quest:%d:-1", args.context.objective.quests[1])
           local questTooltipData = C_TooltipInfo.GetHyperlink(link)
           if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
             text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
@@ -637,13 +615,13 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local skillLineVariantA = a.data.skillLineVariantID or 0
-          local skillLineVariantB = b.data.skillLineVariantID or 0
+        compare = function(args)
+          local skillLineVariantA = args.contextA.skillLineVariantID or 0
+          local skillLineVariantB = args.contextB.skillLineVariantID or 0
           if skillLineVariantA ~= skillLineVariantB then return skillLineVariantA < skillLineVariantB end
-          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(a.data), checklistObjectiveRowSortText(b.data))
+          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(args.contextA), checklistObjectiveRowSortText(args.contextB))
           if labelCompare ~= 0 then return labelCompare < 0 end
-          local objectiveA, objectiveB = a.data.objective, b.data.objective
+          local objectiveA, objectiveB = args.contextA.objective, args.contextB.objective
           if not objectiveA or not objectiveB then return false end
           return checklistObjectiveIdentityLess(objectiveA, objectiveB)
         end,
@@ -654,9 +632,9 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Profession",
       width = Data.db.global.showFullProfessionName and 160 or 100,
       hideable = true,
-      render = function(data)
+      render = function(args)
         local text = ""
-        local variant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+        local variant = Data:GetSkillLineVariantByID(args.context.skillLineVariantID)
         if not variant then return {text = ""} end
         local skillLine = Data:GetSkillLineByID(variant and variant.skillLineID or 0)
         if not skillLine then return {text = ""} end
@@ -682,18 +660,18 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function skillLineNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
             return skillLine and skillLine.name:lower() or ""
           end
-          local nameA, nameB = skillLineNameLower(a.data), skillLineNameLower(b.data)
+          local nameA, nameB = skillLineNameLower(args.contextA), skillLineNameLower(args.contextB)
           if nameA ~= nameB then return nameA < nameB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -702,8 +680,8 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Expansion",
       width = 120,
       hideable = true,
-      render = function(data)
-        local skillLineVariant = Data:GetSkillLineVariantByID(data.skillLineVariantID)
+      render = function(args)
+        local skillLineVariant = Data:GetSkillLineVariantByID(args.context.skillLineVariantID)
         local expansion = skillLineVariant and Data:GetExpansionByID(skillLineVariant.expansionID)
         return {
           text = expansion and expansion.name or "",
@@ -711,18 +689,18 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local expansion = variant and Data:GetExpansionByID(variant.expansionID)
             return expansion and expansion.name:lower() or ""
           end
-          local nameA, nameB = expansionNameLower(a.data), expansionNameLower(b.data)
+          local nameA, nameB = expansionNameLower(args.contextA), expansionNameLower(args.contextB)
           if nameA ~= nameB then return nameA < nameB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -732,8 +710,8 @@ function Checklist:GetColumns(unfiltered)
       name = "Category",
       width = 80,
       hideable = true,
-      render = function(data)
-        local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
+      render = function(args)
+        local objectiveCategory = Data:GetObjectiveCategoryByID(args.context.objective.categoryID)
         if not objectiveCategory then
           return {
             text = "?"
@@ -754,17 +732,17 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function categoryNameLower(rowData)
             local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
             return objectiveCategory and objectiveCategory.name:lower() or ""
           end
-          local nameA, nameB = categoryNameLower(a.data), categoryNameLower(b.data)
+          local nameA, nameB = categoryNameLower(args.contextA), categoryNameLower(args.contextB)
           if nameA ~= nameB then return nameA < nameB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -773,15 +751,15 @@ function Checklist:GetColumns(unfiltered)
       headerText = "Location",
       width = 100,
       hideable = true,
-      render = function(data)
+      render = function(args)
         local text = " "
-        if data.objective and data.objective.loc and data.objective.loc.m then
-          if Data.cache.mapInfo[data.objective.loc.m] then
-            text = Data.cache.mapInfo[data.objective.loc.m].name
+        if args.context.objective and args.context.objective.loc and args.context.objective.loc.m then
+          if Data.cache.mapInfo[args.context.objective.loc.m] then
+            text = Data.cache.mapInfo[args.context.objective.loc.m].name
           else
-            local mapInfo = C_Map.GetMapInfo(data.objective.loc.m)
+            local mapInfo = C_Map.GetMapInfo(args.context.objective.loc.m)
             if mapInfo then
-              Data.cache.mapInfo[data.objective.loc.m] = mapInfo
+              Data.cache.mapInfo[args.context.objective.loc.m] = mapInfo
               text = mapInfo.name
             end
           end
@@ -792,14 +770,14 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local mapIdA = a.data.objective.loc and a.data.objective.loc.m or 0
-          local mapIdB = b.data.objective.loc and b.data.objective.loc.m or 0
+        compare = function(args)
+          local mapIdA = args.contextA.objective.loc and args.contextA.objective.loc.m or 0
+          local mapIdB = args.contextB.objective.loc and args.contextB.objective.loc.m or 0
           if mapIdA ~= mapIdB then return mapIdA < mapIdB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -809,8 +787,8 @@ function Checklist:GetColumns(unfiltered)
       name = "Repeat?",
       width = 60,
       hideable = true,
-      render = function(data)
-        local objective = data.objective
+      render = function(args)
+        local objective = args.context.objective
         if not objective then
           return {
             text = " "
@@ -828,17 +806,17 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
+        compare = function(args)
           local function repeatableLabel(rowData)
             local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
             return objectiveCategory and objectiveCategory.repeatable or ""
           end
-          local labelA, labelB = repeatableLabel(a.data), repeatableLabel(b.data)
+          local labelA, labelB = repeatableLabel(args.contextA), repeatableLabel(args.contextB)
           if labelA ~= labelB then return labelA < labelB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -848,9 +826,9 @@ function Checklist:GetColumns(unfiltered)
       width = 70,
       align = "CENTER",
       hideable = true,
-      render = function(data)
-        local text = format("%d / %d", data.progress.questsCompleted, data.progress.questsTotal)
-        if data.progress.isCompleted then
+      render = function(args)
+        local text = format("%d / %d", args.context.progress.questsCompleted, args.context.progress.questsTotal)
+        if args.context.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
         end
 
@@ -860,14 +838,14 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local questsCompletedA = a.data.progress and (a.data.progress.questsCompleted or 0) or 0
-          local questsCompletedB = b.data.progress and (b.data.progress.questsCompleted or 0) or 0
+        compare = function(args)
+          local questsCompletedA = args.contextA.progress and (args.contextA.progress.questsCompleted or 0) or 0
+          local questsCompletedB = args.contextB.progress and (args.contextB.progress.questsCompleted or 0) or 0
           if questsCompletedA ~= questsCompletedB then return questsCompletedA < questsCompletedB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -878,9 +856,9 @@ function Checklist:GetColumns(unfiltered)
       width = 70,
       align = "CENTER",
       hideable = true,
-      render = function(data)
-        local text = format("%d / %d", data.progress.pointsEarned, data.progress.pointsTotal)
-        if data.progress.isCompleted then
+      render = function(args)
+        local text = format("%d / %d", args.context.progress.pointsEarned, args.context.progress.pointsTotal)
+        if args.context.progress.isCompleted then
           text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
         end
 
@@ -890,14 +868,14 @@ function Checklist:GetColumns(unfiltered)
       end,
       sorting = {
         enabled = true,
-        compare = function(a, b)
-          local pointsEarnedA = a.data.progress and (a.data.progress.pointsEarned or 0) or 0
-          local pointsEarnedB = b.data.progress and (b.data.progress.pointsEarned or 0) or 0
+        compare = function(args)
+          local pointsEarnedA = args.contextA.progress and (args.contextA.progress.pointsEarned or 0) or 0
+          local pointsEarnedB = args.contextB.progress and (args.contextB.progress.pointsEarned or 0) or 0
           if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end
-          if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
-            return a.data.skillLineVariantID < b.data.skillLineVariantID
+          if args.contextA.skillLineVariantID ~= args.contextB.skillLineVariantID then
+            return args.contextA.skillLineVariantID < args.contextB.skillLineVariantID
           end
-          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(args.contextA.character, args.contextB.character) < 0
         end,
       },
     },
@@ -909,17 +887,17 @@ function Checklist:GetColumns(unfiltered)
       sorting = {
         enabled = false,
       },
-      render = function(data)
+      render = function(args)
         local TomTomGlobal = _G["TomTom"]
         local mapInfo = nil
         local mapPoint = nil
 
-        if data.objective.loc and data.objective.loc.m then
-          mapInfo = C_Map.GetMapInfo(data.objective.loc.m)
+        if args.context.objective.loc and args.context.objective.loc.m then
+          mapInfo = C_Map.GetMapInfo(args.context.objective.loc.m)
         end
 
         if mapInfo then
-          mapPoint = UiMapPoint.CreateFromCoordinates(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100)
+          mapPoint = UiMapPoint.CreateFromCoordinates(args.context.objective.loc.m, args.context.objective.loc.x / 100, args.context.objective.loc.y / 100)
         end
 
         return {
@@ -929,10 +907,10 @@ function Checklist:GetColumns(unfiltered)
               GameTooltip:SetOwner(columnFrame, "ANCHOR_RIGHT")
               GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
 
-              if data.objective.loc and data.objective.loc.hint then
-                GameTooltip:AddLine(data.objective.loc.hint, nil, nil, nil, true)
-              elseif data.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
-                local objectiveCategory = Data:GetObjectiveCategoryByID(data.objective.categoryID)
+              if args.context.objective.loc and args.context.objective.loc.hint then
+                GameTooltip:AddLine(args.context.objective.loc.hint, nil, nil, nil, true)
+              elseif args.context.objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+                local objectiveCategory = Data:GetObjectiveCategoryByID(args.context.objective.categoryID)
                 if objectiveCategory then
                   GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
                 end
@@ -943,37 +921,37 @@ function Checklist:GetColumns(unfiltered)
                 GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
               end
 
-              if data.objective.loc and data.objective.loc.x then
+              if args.context.objective.loc and args.context.objective.loc.x then
                 if not mapInfo then
                   GameTooltip:AddLine(" ")
                 end
-                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", data.objective.loc.x, data.objective.loc.y), nil, nil, nil, 1, 1, 1)
+                GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", args.context.objective.loc.x, args.context.objective.loc.y), nil, nil, nil, 1, 1, 1)
               end
 
               local requirementsHeading = "Requirements:"
-              if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+              if args.context.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
                 requirementsHeading = "Unlock Catch-Up This Week:"
               end
 
               -- Requirements
-              if TableCount(data.progress.requirements) > 0 then
+              if TableCount(args.context.progress.requirements) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine(requirementsHeading)
-                TableForEach(data.progress.requirements, function(requirement)
-                  Helpers:RenderRequirementTooltip(requirement, data.character, data.objective.skillLineVariantID, data.objective.categoryID)
+                TableForEach(args.context.progress.requirements, function(requirement)
+                  Helpers:RenderRequirementTooltip(requirement, args.context.character, args.context.objective.skillLineVariantID, args.context.objective.categoryID)
                 end)
               end
 
               -- Item Rewards
-              if TableCount(data.progress.items) > 0 then
+              if TableCount(args.context.progress.items) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("Rewards:")
-                TableForEach(data.progress.items, function(isLooted, itemID)
+                TableForEach(args.context.progress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
                   local name = itemCached and item:GetItemLink() or "Loading..."
-                  if data.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+                  if args.context.objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
                     GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
                   else
                     GameTooltip:AddDoubleLine(
@@ -986,10 +964,10 @@ function Checklist:GetColumns(unfiltered)
               end
 
               if mapPoint then
-                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) or TomTomGlobal then
+                if C_Map.CanSetUserWaypointOnMap(args.context.objective.loc.m) or TomTomGlobal then
                   GameTooltip:AddLine(" ")
                 end
-                if C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
+                if C_Map.CanSetUserWaypointOnMap(args.context.objective.loc.m) then
                   GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                   GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
                 end
@@ -1001,16 +979,16 @@ function Checklist:GetColumns(unfiltered)
             end
 
             -- Continue on item load
-            if TableCount(data.progress.items) > 0 then
-              TableForEach(data.progress.items, function(isLooted, itemID)
+            if TableCount(args.context.progress.items) > 0 then
+              TableForEach(args.context.progress.items, function(isLooted, itemID)
                 Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
                 Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
               end)
             end
 
             -- Continue on item requirement load
-            if TableCount(data.progress.requirements) > 0 then
-              TableForEach(data.progress.requirements, function(requirement)
+            if TableCount(args.context.progress.requirements) > 0 then
+              TableForEach(args.context.progress.requirements, function(requirement)
                 if requirement.requirement.type == "item" then
                   Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
                   Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
@@ -1027,10 +1005,10 @@ function Checklist:GetColumns(unfiltered)
             if mapPoint then
               if IsAltKeyDown() and TomTomGlobal then
                 local text = "Objective"
-                TomTomGlobal:AddWaypoint(data.objective.loc.m, data.objective.loc.x / 100, data.objective.loc.y / 100, {title = text, from = addonName})
-              elseif C_Map.CanSetUserWaypointOnMap(data.objective.loc.m) then
+                TomTomGlobal:AddWaypoint(args.context.objective.loc.m, args.context.objective.loc.x / 100, args.context.objective.loc.y / 100, {title = text, from = addonName})
+              elseif C_Map.CanSetUserWaypointOnMap(args.context.objective.loc.m) then
                 if IsModifiedClick("CHATLINK") then
-                  local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", data.objective.loc.m, data.objective.loc.x * 100, data.objective.loc.y * 100, MAP_PIN_HYPERLINK)
+                  local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", args.context.objective.loc.m, args.context.objective.loc.x * 100, args.context.objective.loc.y * 100, MAP_PIN_HYPERLINK)
                   if not ChatEdit_InsertLink(hyperlink) then
                     ChatFrame_OpenChat(hyperlink);
                   end
@@ -1046,13 +1024,5 @@ function Checklist:GetColumns(unfiltered)
     },
   }
 
-  if unfiltered then
-    return columns
-  end
-
-  local filteredColumns = TableFilter(columns, function(column)
-    return not hidden[column.id]
-  end)
-
-  return filteredColumns
+  return columns
 end
