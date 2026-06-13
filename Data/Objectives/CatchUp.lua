@@ -57,4 +57,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {}, itemID = 246334, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

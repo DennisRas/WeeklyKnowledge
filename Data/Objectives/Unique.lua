@@ -303,4 +303,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {93201}, itemID = 257601, points = 10, loc = {m = Enum.WK_Map.EversongWoods, x = 43.4, y = 47.4, hint = "<Renown Quartermaster> Caeris Fairdawn"},                                                                                                                                                                       requires = {{type = "renown", id = Enum.WK_Faction.SilvermoonCity, amount = 6}, {type = "currency", id = Enum.WK_Currency.ArtisanTailorMoxie, amount = 50}, {type = "currency", id = Enum.WK_Currency.VoidlightMarl, amount = 750}}},       -- Skill Issue: Tailoring
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

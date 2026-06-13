@@ -6,14 +6,12 @@ local addon = select(2, ...)
 local Data = addon.Data
 local Main = addon.Main
 local Checklist = addon.Checklist
-local LibDataBroker = LibStub("LibDataBroker-1.1")
-local LibDBIcon = LibStub("LibDBIcon-1.0")
-local LiqUI = LibStub("LiqUI-1.0")
-if not LiqUI then
-  error("LiqUI is not loaded")
-end
+local LibAceAddon = addon.libs.AceAddon
+local LibDataBroker = addon.libs.LibDataBroker
+local LibDBIcon = addon.libs.LibDBIcon
+local LibLiqUI = addon.libs.LiqUI
 
-local Core = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
+local Core = LibAceAddon:NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
 addon.debug = false
 
@@ -67,7 +65,7 @@ function Core:OnInitialize()
   Data:InitDB()
   Data:MigrateDB()
   Data.db.global.liqui = Data.db.global.liqui or {}
-  addon.LiqUI = LiqUI:New({name = addonName, db = Data.db.global.liqui})
+  addon.LiqUI = LibLiqUI:New({ name = addonName, db = Data.db.global.liqui })
   if Data:TaskWeeklyReset() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end

@@ -14,7 +14,7 @@
 ---@field minimap {minimapPos: number, hide: boolean, lock: boolean }
 ---@field showFullProfessionName boolean?
 ---@field characters table<string, WK_Character>
----@field liqui LiqUI_HostDb
+---@field liqui LiqUI_DB
 ---@field main WK_DefaultGlobalMain
 ---@field checklist WK_DefaultGlobalChecklist
 

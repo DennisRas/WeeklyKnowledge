@@ -3,14 +3,17 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
----@class WK_Utils
-local Utils = {}
-addon.Utils = Utils
+---@class WK_Helpers
+local Helpers = {}
+addon.Helpers = Helpers
+
+local LibLiqUI = addon.libs.LiqUI
+local TableFind = LibLiqUI.Utils.TableFind
 
 ---True if the value is a secret (WoW API); use before comparing/using API return values that may be secret.
 ---@param value any
 ---@return boolean
-function Utils:IsSecretValue(value)
+function Helpers:IsSecretValue(value)
   if issecretvalue == nil then return false end
   ---@diagnostic disable-next-line: param-type-mismatch
   return issecretvalue(value)
@@ -19,7 +22,7 @@ end
 ---@param characterA table
 ---@param characterB table
 ---@return number
-function Utils:CompareCharacterNameRealm(characterA, characterB)
+function Helpers:CompareCharacterNameRealm(characterA, characterB)
   local nameCompare = strcmputf8i(characterA.name or "", characterB.name or "")
   if nameCompare ~= 0 then return nameCompare end
   return strcmputf8i(characterA.realmName or "", characterB.realmName or "")
@@ -27,7 +30,7 @@ end
 
 ---Print a debug message
 ---@param ... any
-function Utils:Debug(...)
+function Helpers:Debug(...)
   if addon.debug then
     addon.Core:Print(...)
   end
@@ -38,7 +41,7 @@ end
 ---@param character WK_Character
 ---@param skillLineVariantID number
 ---@param objectiveCategoryID Enum.WK_ObjectiveCategory
-function Utils:RenderRequirementTooltip(objectiveProgressRequirement, character, skillLineVariantID, objectiveCategoryID)
+function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, character, skillLineVariantID, objectiveCategoryID)
   local leftText = "-"
   local rightText = "-"
   local leftColor = WHITE_FONT_COLOR
@@ -118,7 +121,7 @@ function Utils:RenderRequirementTooltip(objectiveProgressRequirement, character,
     leftText = format("SkillID: %d", objectiveProgressRequirement.requirement.id)
     rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
     local skillLevel = 0
-    local characterProfession = addon.LiqUI.Utils:TableFind(character.professions, function(characterProfession)
+    local characterProfession = TableFind(character.professions, function(characterProfession)
       return characterProfession.skillLineVariantID == skillLineVariantID
     end)
     if characterProfession then

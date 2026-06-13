@@ -1335,4 +1335,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {90057}, spellID = 1228980, points = 1}, -- Sunfire Silk Backpack
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

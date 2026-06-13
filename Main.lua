@@ -8,10 +8,17 @@ local Main = {}
 addon.Main = Main
 
 local Constants = addon.Constants
-local Utils = addon.Utils
 local Data = addon.Data
 local Checklist = addon.Checklist
-local LibDBIcon = LibStub("LibDBIcon-1.0")
+local Helpers = addon.Helpers
+local LibLiqUI = addon.libs.LiqUI
+local LibDBIcon = addon.libs.LibDBIcon
+local SetBackgroundColor = LibLiqUI.Utils.SetBackgroundColor
+local TableContains = LibLiqUI.Utils.TableContains
+local TableCount = LibLiqUI.Utils.TableCount
+local TableFilter = LibLiqUI.Utils.TableFilter
+local TableForEach = LibLiqUI.Utils.TableForEach
+local TableToggle = LibLiqUI.Utils.TableToggle
 
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
@@ -156,7 +163,7 @@ function Main:Render()
               if a then
                 windowColor.a = a
               end
-              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
+              SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           opacityFunc = function() end,
@@ -168,7 +175,7 @@ function Main:Render()
               if color.a then
                 windowColor.a = color.a
               end
-              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
+              SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           hasOpacity = 1,
@@ -199,7 +206,7 @@ function Main:Render()
           tooltipDescription = "Enable/Disable your characters.",
           setupMenu = function(_, rootMenu)
             rootMenu:SetScrollMode(GetScreenHeight() - 20)
-            addon.LiqUI.Utils:TableForEach(Data:GetCharacters(), function(character)
+            TableForEach(Data:GetCharacters(), function(character)
           local name = character.name
           if character.realmName then
             name = format("%s - %s", character.name, character.realmName)
@@ -216,8 +223,8 @@ function Main:Render()
 
           local characterButton = rootMenu:CreateButton(name)
 
-          if addon.LiqUI.Utils:TableCount(character.professions) > 0 then
-            addon.LiqUI.Utils:TableForEach(character.professions, function(characterProfession)
+          if TableCount(character.professions) > 0 then
+            TableForEach(character.professions, function(characterProfession)
               local variant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
               local professionName = (variant and variant.name) or "?"
               characterButton:CreateCheckbox(
@@ -249,12 +256,12 @@ function Main:Render()
           tooltipTitle = "Expansion",
           tooltipDescription = "Filter rows by selected expansions.",
           setupMenu = function(_, rootMenu)
-            addon.LiqUI.Utils:TableForEach(Data:GetExpansions(), function(expansion)
+            TableForEach(Data:GetExpansions(), function(expansion)
           rootMenu:CreateCheckbox(
             expansion.name,
-            function() return addon.LiqUI.Utils:TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
+            function() return TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
             function()
-              Data.db.global.main.selectedExpansions = addon.LiqUI.Utils:TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
+              Data.db.global.main.selectedExpansions = TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
               self:Render()
             end,
             expansion.id
@@ -269,7 +276,7 @@ function Main:Render()
           tooltipDescription = "Enable/Disable table columns.",
           setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.main.hiddenColumns
-        addon.LiqUI.Utils:TableForEach(self:GetTableColumns(true), function(column)
+        TableForEach(self:GetTableColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.headerText,
@@ -334,7 +341,7 @@ function Main:Render()
           elseif type(lastUpdateB) == "number" then
             return false
           end
-          local identityCompare = Utils:CompareCharacterNameRealm(characterA, characterB)
+          local identityCompare = Helpers:CompareCharacterNameRealm(characterA, characterB)
           if identityCompare ~= 0 then return identityCompare < 0 end
           return (rowDataA.skillLineVariantID or 0) < (rowDataB.skillLineVariantID or 0)
         end,
@@ -351,7 +358,7 @@ function Main:Render()
   end
 
   do -- Table columns config
-    addon.LiqUI.Utils:TableForEach(columns, function(column)
+    TableForEach(columns, function(column)
       table.insert(tableData.columns, column)
       tableWidth = tableWidth + column.width
     end)
@@ -360,7 +367,7 @@ function Main:Render()
   do -- Table Header row
     ---@type WK_TableRow
     local row = {columns = {}}
-    addon.LiqUI.Utils:TableForEach(columns, function(column)
+    TableForEach(columns, function(column)
       ---@type WK_TableCell
       local cell = {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(column.headerText),
@@ -375,17 +382,17 @@ function Main:Render()
 
   local rowCount = 0
   do -- Table data rows
-    addon.LiqUI.Utils:TableForEach(characters, function(character)
-      local professions = addon.LiqUI.Utils:TableFilter(character.professions or {}, function(characterProfession)
+    TableForEach(characters, function(character)
+      local professions = TableFilter(character.professions or {}, function(characterProfession)
         local skillLineVariant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
         if not skillLineVariant then return false end
-        if addon.LiqUI.Utils:TableCount(selectedExpansions) > 0 and not addon.LiqUI.Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then return false end
+        if TableCount(selectedExpansions) > 0 and not TableContains(selectedExpansions, skillLineVariant.expansionID) then return false end
         if not characterProfession.enabled then return false end
         if Data.db.global.main.hideLowLevelProfessions and (characterProfession.skillLevel and characterProfession.skillLevel > 0 and characterProfession.skillLevel < 25) then return false end
         return true
       end)
 
-      addon.LiqUI.Utils:TableForEach(professions, function(characterProfession)
+      TableForEach(professions, function(characterProfession)
         ---@type WK_TableRow
         local row = {
           columns = {},
@@ -395,7 +402,7 @@ function Main:Render()
             skillLineVariantID = characterProfession.skillLineVariantID,
           },
         }
-        addon.LiqUI.Utils:TableForEach(columns, function(column)
+        TableForEach(columns, function(column)
           local cell = column.renderCell(row.data)
           table.insert(row.columns, cell)
         end)
@@ -496,7 +503,7 @@ function Main:GetTableColumns(unfiltered)
       sorting = {
         enabled = true,
         compare = function(a, b)
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -835,10 +842,10 @@ function Main:GetTableColumns(unfiltered)
             GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
             GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)
 
-            if characterProfession.specializations and addon.LiqUI.Utils:TableCount(characterProfession.specializations) > 0 then
+            if characterProfession.specializations and TableCount(characterProfession.specializations) > 0 then
               GameTooltip:AddLine(" ")
               GameTooltip:AddLine("Specializations:")
-              addon.LiqUI.Utils:TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
+              TableForEach(characterProfession.specializations, function(characterProfessionSpecialization)
                 local name = characterProfessionSpecialization.name
                 if strlenutf8(name) > 20 then
                   name = format("%s...", strsub(name, 1, 20))
@@ -880,7 +887,7 @@ function Main:GetTableColumns(unfiltered)
   }
 
   -- Category Progress
-  addon.LiqUI.Utils:TableForEach(objectiveCategories, function(objectiveCategory)
+  TableForEach(objectiveCategories, function(objectiveCategory)
     -- Skip Darkmoon objectives if the Darkmoon Faire is not open
     if objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest and not Data.cache.isDarkmoonOpen then
       return
@@ -974,20 +981,20 @@ function Main:GetTableColumns(unfiltered)
 
               -- Requirements
               if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp or objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
-                if addon.LiqUI.Utils:TableCount(categoryProfessionProgress.requirements) > 0 then
+                if TableCount(categoryProfessionProgress.requirements) > 0 then
                   GameTooltip:AddLine(" ")
                   GameTooltip:AddLine(requirementsHeading)
-                  addon.LiqUI.Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
-                    Utils:RenderRequirementTooltip(requirement, character, skillLineVariantID, objectiveCategory.id)
+                  TableForEach(categoryProfessionProgress.requirements, function(requirement)
+                    Helpers:RenderRequirementTooltip(requirement, character, skillLineVariantID, objectiveCategory.id)
                   end)
                 end
               end
 
               -- Item Rewards
-              if addon.LiqUI.Utils:TableCount(categoryProfessionProgress.items) > 0 then
+              if TableCount(categoryProfessionProgress.items) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("Rewards:")
-                addon.LiqUI.Utils:TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
+                TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
@@ -1008,16 +1015,16 @@ function Main:GetTableColumns(unfiltered)
             end
 
             -- Continue on item load
-            if addon.LiqUI.Utils:TableCount(categoryProfessionProgress.items) > 0 then
-              addon.LiqUI.Utils:TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
+            if TableCount(categoryProfessionProgress.items) > 0 then
+              TableForEach(categoryProfessionProgress.items, function(isLooted, itemID)
                 Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
                 Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
               end)
             end
 
             -- Continue on item requirement load
-            if addon.LiqUI.Utils:TableCount(categoryProfessionProgress.requirements) > 0 then
-              addon.LiqUI.Utils:TableForEach(categoryProfessionProgress.requirements, function(requirement)
+            if TableCount(categoryProfessionProgress.requirements) > 0 then
+              TableForEach(categoryProfessionProgress.requirements, function(requirement)
                 if requirement.requirement.type == "item" then
                   Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
                   Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
@@ -1040,7 +1047,7 @@ function Main:GetTableColumns(unfiltered)
     return columns
   end
 
-  local filteredColumns = addon.LiqUI.Utils:TableFilter(columns, function(column)
+  local filteredColumns = TableFilter(columns, function(column)
     return not hidden[column.id]
   end)
 

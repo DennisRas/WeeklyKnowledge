@@ -8,8 +8,15 @@ local Checklist = {}
 addon.Checklist = Checklist
 
 local Constants = addon.Constants
-local Utils = addon.Utils
 local Data = addon.Data
+local Helpers = addon.Helpers
+local LibLiqUI = addon.libs.LiqUI
+local SetBackgroundColor = LibLiqUI.Utils.SetBackgroundColor
+local TableContains = LibLiqUI.Utils.TableContains
+local TableCount = LibLiqUI.Utils.TableCount
+local TableFilter = LibLiqUI.Utils.TableFilter
+local TableForEach = LibLiqUI.Utils.TableForEach
+local TableToggle = LibLiqUI.Utils.TableToggle
 
 ---@param objectiveA table
 ---@param objectiveB table
@@ -57,7 +64,7 @@ local function checklistObjectiveRowSortText(data)
     end
     return format("Error: RecipeID %d not found", objective.spellID or "?")
   end
-  if objective.quests and addon.LiqUI.Utils:TableCount(objective.quests) > 0 then
+  if objective.quests and TableCount(objective.quests) > 0 then
     local link = format("quest:%d:-1", objective.quests[1])
     local questTooltipData = C_TooltipInfo.GetHyperlink(link)
     if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
@@ -181,7 +188,7 @@ function Checklist:Render()
               if a then
                 windowColor.a = a
               end
-              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
+              SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           opacityFunc = function() end,
@@ -193,7 +200,7 @@ function Checklist:Render()
               if color.a then
                 windowColor.a = color.a
               end
-              addon.LiqUI.Utils:SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
+              SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
             end
           end,
           hasOpacity = 1,
@@ -231,12 +238,12 @@ function Checklist:Render()
           tooltipTitle = "Expansion",
           tooltipDescription = "Filter table by expansion.",
           setupMenu = function(_, rootMenu)
-            addon.LiqUI.Utils:TableForEach(Data:GetExpansions(), function(expansion)
+            TableForEach(Data:GetExpansions(), function(expansion)
           rootMenu:CreateCheckbox(
             expansion.name,
-            function() return addon.LiqUI.Utils:TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
+            function() return TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
             function()
-              Data.db.global.checklist.selectedExpansions = addon.LiqUI.Utils:TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
+              Data.db.global.checklist.selectedExpansions = TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
               self:Render()
             end,
             expansion.id
@@ -251,7 +258,7 @@ function Checklist:Render()
           tooltipDescription = "Toggle columns.",
           setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.checklist.hiddenColumns
-        addon.LiqUI.Utils:TableForEach(self:GetColumns(true), function(column)
+        TableForEach(self:GetColumns(true), function(column)
           if not column.toggleHidden then return end
           rootMenu:CreateCheckbox(
             column.headerText,
@@ -273,7 +280,7 @@ function Checklist:Render()
           tooltipDescription = "Toggle categories.",
           setupMenu = function(_, rootMenu)
         local hidden = Data.db.global.checklist.hiddenCategories
-        addon.LiqUI.Utils:TableForEach(Data.ObjectiveCategories, function(category)
+        TableForEach(Data.ObjectiveCategories, function(category)
           rootMenu:CreateCheckbox(
             category.name,
             function() return not hidden[category.id] end,
@@ -364,7 +371,7 @@ function Checklist:Render()
   end
 
   do -- Table Column config
-    addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
+    TableForEach(dataColumns, function(dataColumn)
       table.insert(tableData.columns, dataColumn)
       tableWidth = tableWidth + dataColumn.width
     end)
@@ -373,7 +380,7 @@ function Checklist:Render()
   do -- Table Header row
     ---@type WK_TableRow
     local row = {columns = {}}
-    addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
+    TableForEach(dataColumns, function(dataColumn)
       ---@type WK_TableCell
       local cell = {
         text = NORMAL_FONT_COLOR:WrapTextInColorCode(dataColumn.headerText),
@@ -393,17 +400,17 @@ function Checklist:Render()
   local selectedExpansions = Data.db.global.checklist.selectedExpansions or {}
 
   do -- Table data
-    addon.LiqUI.Utils:TableForEach(characterProfessions, function(characterProfession)
+    TableForEach(characterProfessions, function(characterProfession)
       local skillLineVariantID = characterProfession.skillLineVariantID
       local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
       if not skillLineVariant then return end
 
       -- Skip if the skill line variant is not the selected expansion
-      if addon.LiqUI.Utils:TableCount(selectedExpansions) > 0 and not addon.LiqUI.Utils:TableContains(selectedExpansions, skillLineVariant.expansionID) then
+      if TableCount(selectedExpansions) > 0 and not TableContains(selectedExpansions, skillLineVariant.expansionID) then
         -- print("Checklist: Skipping skill line variant", skillLineVariant.name, Data.db.global.checklist.selectedExpansion, skillLineVariant.expansionID)
         return
       end
-      local filteredObjectives = addon.LiqUI.Utils:TableFilter(objectives, function(objective)
+      local filteredObjectives = TableFilter(objectives, function(objective)
         local debugID = objective.quests[1] or objective.spellID or objective.itemID
 
         -- Hide objective if not the correct profession
@@ -433,7 +440,7 @@ function Checklist:Render()
         end
 
         -- Hide Vendor Uniques if enabled
-        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and addon.LiqUI.Utils:TableCount(objective.requires) > 0 then
+        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and TableCount(objective.requires) > 0 then
           -- print("Checklist: Skipping Unique Vendor objective", debugID)
           return false
         end
@@ -446,7 +453,7 @@ function Checklist:Render()
 
         return true
       end)
-      addon.LiqUI.Utils:TableForEach(filteredObjectives, function(objective)
+      TableForEach(filteredObjectives, function(objective)
         local progress = Data:GetObjectiveProgress(character, objective)
 
         -- Skip if the objective is completed and hide completed objectives is enabled
@@ -468,7 +475,7 @@ function Checklist:Render()
           columns = {},
           data = rowData,
         }
-        addon.LiqUI.Utils:TableForEach(dataColumns, function(dataColumn)
+        TableForEach(dataColumns, function(dataColumn)
           table.insert(row.columns, dataColumn.renderCell(rowData))
         end)
 
@@ -614,7 +621,7 @@ function Checklist:GetColumns(unfiltered)
               end
             end,
           }
-        elseif data.objective.quests and addon.LiqUI.Utils:TableCount(data.objective.quests) > 0 then
+        elseif data.objective.quests and TableCount(data.objective.quests) > 0 then
           local text = format("Error: QuestID %d not found", data.objective.quests[1] or "?")
           local link = format("quest:%d:-1", data.objective.quests[1])
           local questTooltipData = C_TooltipInfo.GetHyperlink(link)
@@ -710,7 +717,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -739,7 +746,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -781,7 +788,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -816,7 +823,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -855,7 +862,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -884,7 +891,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -914,7 +921,7 @@ function Checklist:GetColumns(unfiltered)
           if a.data.skillLineVariantID ~= b.data.skillLineVariantID then
             return a.data.skillLineVariantID < b.data.skillLineVariantID
           end
-          return Utils:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
+          return Helpers:CompareCharacterNameRealm(a.data.character, b.data.character) < 0
         end,
       },
     },
@@ -973,19 +980,19 @@ function Checklist:GetColumns(unfiltered)
               end
 
               -- Requirements
-              if addon.LiqUI.Utils:TableCount(data.progress.requirements) > 0 then
+              if TableCount(data.progress.requirements) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine(requirementsHeading)
-                addon.LiqUI.Utils:TableForEach(data.progress.requirements, function(requirement)
-                  Utils:RenderRequirementTooltip(requirement, data.character, data.objective.skillLineVariantID, data.objective.categoryID)
+                TableForEach(data.progress.requirements, function(requirement)
+                  Helpers:RenderRequirementTooltip(requirement, data.character, data.objective.skillLineVariantID, data.objective.categoryID)
                 end)
               end
 
               -- Item Rewards
-              if addon.LiqUI.Utils:TableCount(data.progress.items) > 0 then
+              if TableCount(data.progress.items) > 0 then
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("Rewards:")
-                addon.LiqUI.Utils:TableForEach(data.progress.items, function(isLooted, itemID)
+                TableForEach(data.progress.items, function(isLooted, itemID)
                   local item = Data.cache.items[itemID]
                   local itemCached = item and item:IsItemDataCached()
                   local icon = itemCached and item:GetItemIcon() or 134400
@@ -1018,16 +1025,16 @@ function Checklist:GetColumns(unfiltered)
             end
 
             -- Continue on item load
-            if addon.LiqUI.Utils:TableCount(data.progress.items) > 0 then
-              addon.LiqUI.Utils:TableForEach(data.progress.items, function(isLooted, itemID)
+            if TableCount(data.progress.items) > 0 then
+              TableForEach(data.progress.items, function(isLooted, itemID)
                 Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
                 Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
               end)
             end
 
             -- Continue on item requirement load
-            if addon.LiqUI.Utils:TableCount(data.progress.requirements) > 0 then
-              addon.LiqUI.Utils:TableForEach(data.progress.requirements, function(requirement)
+            if TableCount(data.progress.requirements) > 0 then
+              TableForEach(data.progress.requirements, function(requirement)
                 if requirement.requirement.type == "item" then
                   Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
                   Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
@@ -1067,7 +1074,7 @@ function Checklist:GetColumns(unfiltered)
     return columns
   end
 
-  local filteredColumns = addon.LiqUI.Utils:TableFilter(columns, function(column)
+  local filteredColumns = TableFilter(columns, function(column)
     return not hidden[column.id]
   end)
 

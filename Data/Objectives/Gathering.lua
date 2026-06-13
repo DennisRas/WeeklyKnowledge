@@ -51,4 +51,4 @@ local objectives = {
   -- Midnight: Tailoring
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

@@ -56,4 +56,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {95137}, itemID = 245756, points = 1, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

@@ -57,4 +57,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {93696},                             itemID = 263460, points = 2, loc = {m = Enum.WK_Map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
 }
 
-Data.Objectives = LiqUI.Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)
