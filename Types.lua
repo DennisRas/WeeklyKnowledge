@@ -248,10 +248,11 @@
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[]
 
 --------------------------------------------------------------------------------
--- Table row context (domain payload for LiqUI_TableDataRow.context)
+-- Table row records (SetData input; sort metadata preserved on stored rows)
 --------------------------------------------------------------------------------
 
----@class WK_TableContext
+---@class WK_TableRowData
+---@field data LiqUI_TableDataCellValue[]
 ---@field character WK_Character
 ---@field characterProfession WK_CharacterProfession
 ---@field skillLineVariantID integer
