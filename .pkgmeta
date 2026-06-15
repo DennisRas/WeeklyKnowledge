@@ -39,4 +39,4 @@ externals:
     url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
   Libs/LiqUI:
     url: https://github.com/DennisRas/LiqUI.git
-    commit: f8517ba
+    branch: main
