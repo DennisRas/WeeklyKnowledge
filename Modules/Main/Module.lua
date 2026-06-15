@@ -244,7 +244,7 @@ function Main:Render()
     self.window.placeholderText:SetFontObject("SystemFont_Med1")
     self.window.placeholderText:Hide()
 
-    ---@type LiqUI_TableConfig
+    ---@type LiqUI_TableOptions
     local tableConfig = {
       name = "Main",
       header = {
@@ -347,7 +347,7 @@ function Main:ApplyTableColumns()
 end
 
 ---Column definitions for the main table.
----@return LiqUI_TableConfigColumn[]
+---@return LiqUI_TableOptionsColumn[]
 function Main:GetColumnDefinitions()
   return addon.Main.TableColumns.GetDefinitions()
 end

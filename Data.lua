@@ -49,7 +49,11 @@ Data.defaultDB = {
     },
     characters = {},
     showFullProfessionName = true,
-    liqui = {},
+    liqui = {
+      windows = {},
+      tables = {},
+      loggers = {},
+    },
     main = {
       selectedExpansions = {},
       hiddenColumns = {},
@@ -106,6 +110,7 @@ function Data:RegisterObjectives(objectives)
     self.Objectives[#self.Objectives + 1] = objectives[index]
   end
 end
+
 ---@type WK_ObjectiveCategory[]
 Data.ObjectiveCategories = {}
 ---@type WK_SkillLineVariant[]
@@ -431,10 +436,11 @@ function Data:MigrateDB()
       self.db.global.liqui = self.db.global.liqui or {}
       self.db.global.liqui.windows = self.db.global.liqui.windows or {}
       self.db.global.liqui.tables = self.db.global.liqui.tables or {}
+      self.db.global.liqui.loggers = self.db.global.liqui.loggers or {}
 
       local main = self.db.global.main
       if main then
-        ---@type LiqUI_WindowSettings
+        ---@type LiqUI_WindowDB
         local mainWindowDb = {}
         if main.windowScale then
           mainWindowDb.scale = main.windowScale
@@ -450,21 +456,21 @@ function Data:MigrateDB()
         main.windowBackgroundColor = nil
         main.windowBorder = nil
         if main.tableSort then
-          ---@type LiqUI_TableDb
-          local mainTableDb = { sortState = main.tableSort }
+          ---@type LiqUI_TableDB
+          local mainTableDb = {sortState = main.tableSort}
           if main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
             mainTableDb.hiddenColumns = TableCopy(main.hiddenColumns)
           end
           self.db.global.liqui.tables.Main = mainTableDb
           main.tableSort = nil
         elseif main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
-          self.db.global.liqui.tables.Main = { hiddenColumns = TableCopy(main.hiddenColumns) }
+          self.db.global.liqui.tables.Main = {hiddenColumns = TableCopy(main.hiddenColumns)}
         end
       end
 
       local checklist = self.db.global.checklist
       if checklist then
-        ---@type LiqUI_WindowSettings
+        ---@type LiqUI_WindowDB
         local checklistWindowDb = {}
         if checklist.windowScale then
           checklistWindowDb.scale = checklist.windowScale
@@ -480,15 +486,15 @@ function Data:MigrateDB()
         checklist.windowBackgroundColor = nil
         checklist.windowBorder = nil
         if checklist.tableSort then
-          ---@type LiqUI_TableDb
-          local checklistTableDb = { sortState = checklist.tableSort }
+          ---@type LiqUI_TableDB
+          local checklistTableDb = {sortState = checklist.tableSort}
           if checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
             checklistTableDb.hiddenColumns = TableCopy(checklist.hiddenColumns)
           end
           self.db.global.liqui.tables.Checklist = checklistTableDb
           checklist.tableSort = nil
         elseif checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
-          self.db.global.liqui.tables.Checklist = { hiddenColumns = TableCopy(checklist.hiddenColumns) }
+          self.db.global.liqui.tables.Checklist = {hiddenColumns = TableCopy(checklist.hiddenColumns)}
         end
       end
     end

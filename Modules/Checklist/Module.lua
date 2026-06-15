@@ -236,7 +236,7 @@ function Checklist:Render()
     self.window.placeholderText:SetFontObject("SystemFont_Med1")
     self.window.placeholderText:Hide()
 
-    ---@type LiqUI_TableConfig
+    ---@type LiqUI_TableOptions
     local tableConfig = {
       name = "Checklist",
       header = {
@@ -393,7 +393,7 @@ function Checklist:ApplyTableColumns()
   self.window.table:SetColumns(self:GetColumnDefinitions())
 end
 
----@return LiqUI_TableConfigColumn[]
+---@return LiqUI_TableOptionsColumn[]
 function Checklist:GetColumnDefinitions()
   return addon.Checklist.TableColumns.GetDefinitions()
 end

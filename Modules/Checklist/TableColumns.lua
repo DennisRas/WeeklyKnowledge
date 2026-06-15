@@ -68,9 +68,9 @@ local function checklistObjectiveRowSortText(row)
   return "Unknown"
 end
 
----@return LiqUI_TableConfigColumn[]
+---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
-  ---@type LiqUI_TableConfigColumn[]
+  ---@type LiqUI_TableOptionsColumn[]
   local columns = {
     {
       id = "objective",

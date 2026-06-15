@@ -12,11 +12,11 @@ local Helpers = addon.Helpers
 local TableData = addon.Main.TableData
 local TableForEach = addon.libs.LiqUI.Utils.TableForEach
 
----@return LiqUI_TableConfigColumn[]
+---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
   local objectiveCategories = Data:GetObjectiveCategories()
 
-  ---@type LiqUI_TableConfigColumn[]
+  ---@type LiqUI_TableOptionsColumn[]
   local columns = {
     {
       id = "name",
@@ -203,7 +203,7 @@ function TableColumns.GetDefinitions()
       return
     end
 
-    ---@type LiqUI_TableConfigColumn
+    ---@type LiqUI_TableOptionsColumn
     local dataColumn = {
       id = format("category_%s", tostring(objectiveCategory.id)),
       headerText = objectiveCategory.name,
