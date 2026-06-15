@@ -434,7 +434,7 @@ function Data:MigrateDB()
 
       local main = self.db.global.main
       if main then
-        ---@type LiqUI_WindowDb
+        ---@type LiqUI_WindowSettings
         local mainWindowDb = {}
         if main.windowScale then
           mainWindowDb.scale = main.windowScale
@@ -464,7 +464,7 @@ function Data:MigrateDB()
 
       local checklist = self.db.global.checklist
       if checklist then
-        ---@type LiqUI_WindowDb
+        ---@type LiqUI_WindowSettings
         local checklistWindowDb = {}
         if checklist.windowScale then
           checklistWindowDb.scale = checklist.windowScale

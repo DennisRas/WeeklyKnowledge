@@ -15,7 +15,6 @@ local Checklist = addon.Checklist
 local Helpers = addon.Helpers
 local LibLiqUI = addon.libs.LiqUI
 local LibDBIcon = addon.libs.LibDBIcon
-local SetBackgroundColor = LibLiqUI.Utils.SetBackgroundColor
 local TableContains = LibLiqUI.Utils.TableContains
 local TableCount = LibLiqUI.Utils.TableCount
 local TableFilter = LibLiqUI.Utils.TableFilter
@@ -67,6 +66,9 @@ function Main:Render()
       icon = mediaPath .. "Icon.blp",
       point = {"CENTER"},
       border = 4,
+      onShow = function()
+        Main:Render()
+      end,
       titlebarButtons = {
         {
           name = "Settings",
@@ -129,69 +131,7 @@ function Main:Render()
               GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
             end)
 
-            rootMenu:CreateTitle("Window")
-            local windowScale = rootMenu:CreateButton("Scaling")
-            for i = 80, 200, 10 do
-              windowScale:CreateRadio(
-                i .. "%",
-                function() return (window.db.scale or 100) == i end,
-                function(data)
-                  window.db.scale = data
-                  self:Render()
-                end,
-                i
-              )
-            end
-
-            local windowColor = window.db.windowColor
-            local colorInfo = {
-              r = windowColor.r,
-              g = windowColor.g,
-              b = windowColor.b,
-              opacity = windowColor.a,
-              swatchFunc = function()
-                local r, g, b = ColorPickerFrame:GetColorRGB();
-                local a = ColorPickerFrame:GetColorAlpha();
-                if r then
-                  windowColor.r = r
-                  windowColor.g = g
-                  windowColor.b = b
-                  if a then
-                    windowColor.a = a
-                  end
-                  SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
-                end
-              end,
-              opacityFunc = function() end,
-              cancelFunc = function(color)
-                if color.r then
-                  windowColor.r = color.r
-                  windowColor.g = color.g
-                  windowColor.b = color.b
-                  if color.a then
-                    windowColor.a = color.a
-                  end
-                  SetBackgroundColor(window, windowColor.r, windowColor.g, windowColor.b, windowColor.a)
-                end
-              end,
-              hasOpacity = 1,
-            }
-            rootMenu:CreateColorSwatch(
-              "Background color",
-              function()
-                ColorPickerFrame:SetupColorPickerAndShow(colorInfo)
-              end,
-              colorInfo
-            )
-
-            rootMenu:CreateCheckbox(
-              "Show the border",
-              function() return window.db.border ~= false end,
-              function()
-                window.db.border = window.db.border == false
-                self:Render()
-              end
-            )
+            window:AppendWindowOptionsMenu(rootMenu)
           end,
         },
         {
@@ -397,12 +337,6 @@ function Main:Render()
       self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
     end
   end
-
-  if self.window.border then
-    self.window.border:SetShown(self.window.db.border ~= false)
-  end
-  self.window:SetClampRectInsets(self.window:GetWidth() / 2, self.window:GetWidth() / -2, 0, self.window:GetHeight() / 2)
-  self.window:SetScale((self.window.db.scale or 100) / 100)
 end
 
 function Main:ApplyTableColumns()
