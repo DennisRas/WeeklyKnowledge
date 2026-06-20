@@ -7,6 +7,7 @@ local addon = select(2, ...)
 local Helpers = {}
 addon.Helpers = Helpers
 
+local Constants = addon.Constants
 local LibLiqUI = addon.libs.LiqUI
 local TableFind = LibLiqUI.Utils.TableFind
 
@@ -40,7 +41,7 @@ end
 ---@param objectiveProgressRequirement WK_ObjectiveProgressRequirement
 ---@param character WK_Character
 ---@param skillLineVariantID number
----@param objectiveCategoryID Enum.WK_ObjectiveCategory
+---@param objectiveCategoryID WK_ObjectiveCategoryId
 function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, character, skillLineVariantID, objectiveCategoryID)
   local leftText = "-"
   local rightText = "-"
@@ -94,7 +95,7 @@ function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, characte
     leftText = format("QuestID: %d", objectiveProgressRequirement.requirement.quests[1] or "?")
     rightText = CreateAtlasMarkup("common-icon-redx", 12, 12)
     if objectiveProgressRequirement.requirement.name then
-      leftText = format("%s %s", objectiveProgressRequirement.requirement.name, objectiveCategoryID == Enum.WK_ObjectiveCategory.CatchUp and "" or "(Quest)")
+      leftText = format("%s %s", objectiveProgressRequirement.requirement.name, objectiveCategoryID == Constants.objectiveCategory.CatchUp and "" or "(Quest)")
     end
     if objectiveProgressRequirement.isCompleted then
       rightText = CreateAtlasMarkup("common-icon-checkmark", 12, 12)

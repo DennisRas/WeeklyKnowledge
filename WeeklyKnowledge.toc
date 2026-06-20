@@ -34,13 +34,6 @@ Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
-Types\Addon.lua
-Types\Database.lua
-Types\GameData.lua
-Types\Character.lua
-Types\Objectives.lua
-Types\Progress.lua
-
 Boot.lua
 Constants.lua
 Helpers.lua
@@ -65,3 +58,12 @@ Modules\Checklist\TableColumns.lua
 Modules\Main\Module.lua
 Modules\Main\TableData.lua
 Modules\Main\TableColumns.lua
+
+#@debug@
+Developer\Types\Addon.lua
+Developer\Types\Database.lua
+Developer\Types\GameData.lua
+Developer\Types\Character.lua
+Developer\Types\Objectives.lua
+Developer\Types\Progress.lua
+#@end-debug@

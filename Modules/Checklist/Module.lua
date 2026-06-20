@@ -50,7 +50,7 @@ local function checklistObjectiveRowSortText(row)
     end
     return format("Error: ItemID %d not found", objective.itemID or "?")
   end
-  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+  if objective.categoryID == Constants.objectiveCategory.FirstCraft then
     local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
     if not recipeInfo then
       recipeInfo = C_TradeSkillUI.GetRecipeInfo(objective.spellID)
@@ -312,7 +312,7 @@ function Checklist:Render()
           return false
         end
 
-        if not Data.cache.isDarkmoonOpen and objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+        if not Data.cache.isDarkmoonOpen and objective.categoryID == Constants.objectiveCategory.DarkmoonQuest then
           return false
         end
 
@@ -321,15 +321,15 @@ function Checklist:Render()
           return false
         end
 
-        if Data.db.global.checklist.hideUniqueObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique then
+        if Data.db.global.checklist.hideUniqueObjectives and objective.categoryID == Constants.objectiveCategory.Unique then
           return false
         end
 
-        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.Unique and objective.requires and TableCount(objective.requires) > 0 then
+        if Data.db.global.checklist.hideUniqueVendorObjectives and objective.categoryID == Constants.objectiveCategory.Unique and objective.requires and TableCount(objective.requires) > 0 then
           return false
         end
 
-        if Data.db.global.checklist.hideCatchUpObjectives and objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+        if Data.db.global.checklist.hideCatchUpObjectives and objective.categoryID == Constants.objectiveCategory.CatchUp then
           return false
         end
 

@@ -3,6 +3,8 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Checklist_TableColumns
 local TableColumns = {}
 addon.Checklist.TableColumns = TableColumns
@@ -41,7 +43,7 @@ local function checklistObjectiveRowSortText(row)
     end
     return format("Error: ItemID %d not found", objective.itemID or "?")
   end
-  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+  if objective.categoryID == Constants.objectiveCategory.FirstCraft then
     local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
     if not recipeInfo then
       recipeInfo = C_TradeSkillUI.GetRecipeInfo(objective.spellID)

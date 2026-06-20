@@ -3,6 +3,8 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Main_TableColumns
 local TableColumns = {}
 addon.Main.TableColumns = TableColumns
@@ -199,7 +201,7 @@ function TableColumns.GetDefinitions()
   }
 
   TableForEach(objectiveCategories, function(objectiveCategory)
-    if objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest and not Data.cache.isDarkmoonOpen then
+    if objectiveCategory.id == Constants.objectiveCategory.DarkmoonQuest and not Data.cache.isDarkmoonOpen then
       return
     end
 
@@ -227,7 +229,7 @@ function TableColumns.GetDefinitions()
           if not progressA and not progressB then return false end
           if not progressA then return true end
           if not progressB then return false end
-          if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+          if objectiveCategory.id == Constants.objectiveCategory.CatchUp then
             local pointsEarnedA = progressA.pointsEarned or 0
             local pointsEarnedB = progressB.pointsEarned or 0
             if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end

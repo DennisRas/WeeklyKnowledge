@@ -3,6 +3,8 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Main_TableData
 local TableData = {}
 addon.Main.TableData = TableData
@@ -318,7 +320,7 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
 
   local text = format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal)
 
-  if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+  if objectiveCategory.id == Constants.objectiveCategory.CatchUp then
     text = format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal)
   elseif categoryProfessionProgress.objectivesTotal == 0 then
     ---@type LiqUI_TableDataCellExtended
@@ -342,16 +344,16 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
 
         local requirementsHeading = "Requirements:"
 
-        if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+        if objectiveCategory.id == Constants.objectiveCategory.CatchUp then
           GameTooltip:AddDoubleLine("Points Earned:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
           GameTooltip:AddDoubleLine("Points Available:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
           GameTooltip:AddDoubleLine("Max Points:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
           requirementsHeading = "Unlock Catch-Up This Week:"
-        elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.FirstCraft then
+        elseif objectiveCategory.id == Constants.objectiveCategory.FirstCraft then
           GameTooltip:AddDoubleLine("Completed:", format("%d", categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
           GameTooltip:AddDoubleLine("Remaining:", format("%d", categoryProfessionProgress.pointsTotal - categoryProfessionProgress.pointsEarned), nil, nil, nil, 1, 1, 1)
           GameTooltip:AddDoubleLine("Max:", format("%d", categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
-        elseif objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+        elseif objectiveCategory.id == Constants.objectiveCategory.DarkmoonQuest then
           GameTooltip:AddDoubleLine("Quests:", format("%d / %d", categoryProfessionProgress.objectivesCompleted, categoryProfessionProgress.objectivesTotal), nil, nil, nil, 1, 1, 1)
           GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
         else
@@ -359,7 +361,7 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
           GameTooltip:AddDoubleLine("Knowledge Points:", format("%d / %d", categoryProfessionProgress.pointsEarned, categoryProfessionProgress.pointsTotal), nil, nil, nil, 1, 1, 1)
         end
 
-        if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp or objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+        if objectiveCategory.id == Constants.objectiveCategory.CatchUp or objectiveCategory.id == Constants.objectiveCategory.DarkmoonQuest then
           if TableCount(categoryProfessionProgress.requirements) > 0 then
             GameTooltip:AddLine(" ")
             GameTooltip:AddLine(requirementsHeading)
@@ -377,7 +379,7 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
             local itemCached = item and item:IsItemDataCached()
             local icon = itemCached and item:GetItemIcon() or 134400
             local name = itemCached and item:GetItemLink() or "Loading..."
-            if objectiveCategory.id == Enum.WK_ObjectiveCategory.CatchUp then
+            if objectiveCategory.id == Constants.objectiveCategory.CatchUp then
               GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
             else
               GameTooltip:AddDoubleLine(
@@ -435,7 +437,7 @@ function TableData.BuildRow(character, characterProfession)
 
   local objectiveCategories = Data:GetObjectiveCategories()
   TableForEach(objectiveCategories, function(objectiveCategory)
-    if objectiveCategory.id == Enum.WK_ObjectiveCategory.DarkmoonQuest and not Data.cache.isDarkmoonOpen then
+    if objectiveCategory.id == Constants.objectiveCategory.DarkmoonQuest and not Data.cache.isDarkmoonOpen then
       return
     end
     table.insert(cells, buildCategoryCell(character, characterProfession, skillLineVariantID, objectiveCategory))

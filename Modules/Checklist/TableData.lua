@@ -3,6 +3,8 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Checklist_TableData
 local TableData = {}
 addon.Checklist.TableData = TableData
@@ -56,7 +58,7 @@ local function buildObjectiveCell(objective)
     }
   end
 
-  if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+  if objective.categoryID == Constants.objectiveCategory.FirstCraft then
     local text = format("Error: RecipeID %d not found", objective.spellID or "?")
     local link = ""
     local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
@@ -311,7 +313,7 @@ local function buildWaypointCell(character, objective, progress)
 
         if objective.loc and objective.loc.hint then
           GameTooltip:AddLine(objective.loc.hint, nil, nil, nil, true)
-        elseif objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft then
+        elseif objective.categoryID == Constants.objectiveCategory.FirstCraft then
           local objectiveCategory = Data:GetObjectiveCategoryByID(objective.categoryID)
           if objectiveCategory then
             GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
@@ -331,7 +333,7 @@ local function buildWaypointCell(character, objective, progress)
         end
 
         local requirementsHeading = "Requirements:"
-        if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+        if objective.categoryID == Constants.objectiveCategory.CatchUp then
           requirementsHeading = "Unlock Catch-Up This Week:"
         end
 
@@ -351,7 +353,7 @@ local function buildWaypointCell(character, objective, progress)
             local itemCached = item and item:IsItemDataCached()
             local icon = itemCached and item:GetItemIcon() or 134400
             local name = itemCached and item:GetItemLink() or "Loading..."
-            if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+            if objective.categoryID == Constants.objectiveCategory.CatchUp then
               GameTooltip:AddLine(format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name), 1, 1, 1, true)
             else
               GameTooltip:AddDoubleLine(

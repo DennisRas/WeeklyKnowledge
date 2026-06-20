@@ -1,5 +1,5 @@
 ---@class WK_ObjectiveCategory
----@field id Enum.WK_ObjectiveCategory
+---@field id WK_ObjectiveCategoryId
 ---@field name string
 ---@field description string
 ---@field type "item" | "quest" | "recipe"
@@ -25,7 +25,7 @@
 
 ---@class WK_Objective
 ---@field skillLineVariantID integer
----@field categoryID Enum.WK_ObjectiveCategory
+---@field categoryID WK_ObjectiveCategoryId
 ---@field quests integer[]
 ---@field spellID integer?
 ---@field itemID integer?
@@ -33,17 +33,3 @@
 ---@field limit integer?
 ---@field loc WK_ObjectiveLocation?
 ---@field requires WK_ObjectiveRequirement[]?
-
----@enum Enum.WK_ObjectiveCategory
-Enum.WK_ObjectiveCategory = {
-  Unique = "Unique",
-  FirstCraft = "FirstCraft",
-  Treatise = "Treatise",
-  ArtisanQuest = "ArtisanQuest",
-  Treasure = "Treasure",
-  Gathering = "Gathering",
-  TrainerQuest = "TrainerQuest",
-  DarkmoonQuest = "DarkmoonQuest",
-  CatchUp = "CatchUp",
-  WeeklyQuest = "WeeklyQuest",
-}

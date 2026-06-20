@@ -18,7 +18,7 @@
 ---@class WK_DefaultGlobalChecklist
 ---@field selectedExpansions Enum.ExpansionLevel[]?
 ---@field hiddenColumns table<string, boolean>
----@field hiddenCategories table<Enum.WK_ObjectiveCategory, boolean>
+---@field hiddenCategories table<WK_ObjectiveCategoryId, boolean>
 ---@field windowTitlebar boolean
 ---@field fontSize integer?
 ---@field open boolean

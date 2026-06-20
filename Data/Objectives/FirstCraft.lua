@@ -3,10 +3,12 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Data
 local Data = addon.Data
 local MISSING_INFO = Data.MISSING_INFO
-local category = Enum.WK_ObjectiveCategory.FirstCraft
+local category = Constants.objectiveCategory.FirstCraft
 
 -- {skillLineVariantID = 2918, categoryID = category, quests = {}, spellID =
 

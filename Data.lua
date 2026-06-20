@@ -8,6 +8,7 @@ local Data = {}
 addon.Data = Data
 
 local Helpers = addon.Helpers
+local Constants = addon.Constants
 local LibLiqUI = addon.libs.LiqUI
 local TableContains = LibLiqUI.Utils.TableContains
 local TableCopy = LibLiqUI.Utils.TableCopy
@@ -280,14 +281,14 @@ function Data:MigrateDB()
         self.db.global.checklist.hiddenCategories = {}
       end
       if self.db.global.checklist.hideUniqueObjectives then
-        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.Unique] = true
+        self.db.global.checklist.hiddenCategories[Constants.objectiveCategory.Unique] = true
         self.db.global.checklist.hideUniqueObjectives = nil
       end
       if self.db.global.checklist.hideUniqueVendorObjectives then
         self.db.global.checklist.hideUniqueVendorObjectives = nil
       end
       if self.db.global.checklist.hideCatchUpObjectives then
-        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.CatchUp] = true
+        self.db.global.checklist.hiddenCategories[Constants.objectiveCategory.CatchUp] = true
         self.db.global.checklist.hideCatchUpObjectives = nil
       end
     end
@@ -922,7 +923,7 @@ function Data:ScanQuests()
         end
       end)
       -- First Craft fallback on spellID
-    elseif objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+    elseif objective.categoryID == Constants.objectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
       firstCrafts[objective.spellID] = C_TradeSkillUI.IsRecipeFirstCraft(objective.spellID)
       if firstCrafts[objective.spellID] then
         firstCraftsAvailable = firstCraftsAvailable + 1
@@ -1108,7 +1109,7 @@ function Data:GetObjectiveCategories()
   return self.ObjectiveCategories
 end
 
----@param categoryID Enum.WK_ObjectiveCategory
+---@param categoryID WK_ObjectiveCategoryId
 ---@return WK_ObjectiveCategory?
 function Data:GetObjectiveCategoryByID(categoryID)
   for _, category in ipairs(self.ObjectiveCategories) do
@@ -1171,7 +1172,7 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- Catch Up
-  if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+  if objective.categoryID == Constants.objectiveCategory.CatchUp then
     local characterCurrency = self:GetCharacterCurrency(character, skillLineVariant.catchUpCurrencyID)
     if characterCurrency then
       objectiveProgress.pointsEarned = characterCurrency.quantity or 0
@@ -1212,7 +1213,7 @@ function Data:GetObjectiveProgress(character, objective)
     end
   else
     -- First Craft fallback on spellID
-    if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+    if objective.categoryID == Constants.objectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
       character.firstCrafts = character.firstCrafts or {}
       if character.firstCrafts[objective.spellID] ~= true then
         -- objectiveProgress.isCompleted = true
@@ -1225,7 +1226,7 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- Darkmoon Quest
-  if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+  if objective.categoryID == Constants.objectiveCategory.DarkmoonQuest then
     if not self.cache.isDarkmoonOpen then
       objectiveProgress.pointsEarned = 0
       objectiveProgress.pointsTotal = 0
