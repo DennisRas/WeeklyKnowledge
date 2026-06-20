@@ -13,7 +13,7 @@ local TableCount = addon.libs.LiqUI.Utils.TableCount
 local TableForEach = addon.libs.LiqUI.Utils.TableForEach
 
 --- Estimated concentration (same idea as the cell); used only for sort order.
----@param row WK_TableRowData
+---@param row LiqUI_TableDataRowExtended
 ---@return number
 function TableData.ConcentrationEstimatedForSort(row)
   local character = row.character

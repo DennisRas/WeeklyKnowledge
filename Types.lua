@@ -251,8 +251,7 @@
 -- Table row records (SetData input; sort metadata preserved on stored rows)
 --------------------------------------------------------------------------------
 
----@class WK_TableRowData
----@field data LiqUI_TableDataCellValue[]
+---@class WK_TableRowData : LiqUI_TableDataRowExtended
 ---@field character WK_Character
 ---@field characterProfession WK_CharacterProfession
 ---@field skillLineVariantID integer

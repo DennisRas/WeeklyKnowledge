@@ -11,8 +11,8 @@ local Data = addon.Data
 local Helpers = addon.Helpers
 local TableCount = addon.libs.LiqUI.Utils.TableCount
 
----@param objectiveA table
----@param objectiveB table
+---@param objectiveA WK_Objective
+---@param objectiveB WK_Objective
 ---@return boolean
 local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   local categoryIdTextA = tostring(objectiveA.categoryID or "")
@@ -27,7 +27,7 @@ local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
 end
 
----@param row WK_TableRowData
+---@param row LiqUI_TableDataRowExtended
 ---@return string
 local function checklistObjectiveRowSortText(row)
   local objective = row.objective
