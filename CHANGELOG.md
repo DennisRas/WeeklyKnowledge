@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.0 - TBD
+
+- Added per-window options for scale, background color, and border from the titlebar menu.
+- Updated main and checklist windows to the shared LiqUI window framework.
+- Updated table sorting and window layout persistence across reloads.
+
 ## v1.2.10 - 2026-06-18
 
 - Updated TOC number to support patch 12.0.7.

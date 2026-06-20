@@ -24,7 +24,7 @@ Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\lib.xml
-
+Libs\LiqUI\LiqUI.xml
 Libs\AceAddon-3.0\AceAddon-3.0.xml
 Libs\AceEvent-3.0\AceEvent-3.0.xml
 Libs\AceTimer-3.0\AceTimer-3.0.xml
@@ -34,12 +34,9 @@ Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
-Types.lua
+Boot.lua
 Constants.lua
-Utils.lua
-Interface.lua
-Table.lua
-
+Helpers.lua
 Data.lua
 Data\Expansions.lua
 Data\ObjectiveCategories.lua
@@ -53,7 +50,20 @@ Data\Objectives\Treasure.lua
 Data\Objectives\Treatise.lua
 Data\Objectives\Unique.lua
 Data\Objectives\WeeklyQuest.lua
+WeeklyKnowledge.lua
 
-Checklist.lua
-Main.lua
-Core.lua
+Modules\Checklist\Module.lua
+Modules\Checklist\TableData.lua
+Modules\Checklist\TableColumns.lua
+Modules\Main\Module.lua
+Modules\Main\TableData.lua
+Modules\Main\TableColumns.lua
+
+#@debug@
+Debug\Types\Addon.lua
+Debug\Types\Database.lua
+Debug\Types\GameData.lua
+Debug\Types\Character.lua
+Debug\Types\Objectives.lua
+Debug\Types\Progress.lua
+#@end-debug@

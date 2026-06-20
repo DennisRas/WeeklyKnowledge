@@ -7,8 +7,20 @@ local addon = select(2, ...)
 local Data = {}
 addon.Data = Data
 
-local Utils = addon.Utils
-local AceDB = LibStub("AceDB-3.0")
+local Helpers = addon.Helpers
+local Constants = addon.Constants
+local LibLiqUI = addon.libs.LiqUI
+local TableContains = LibLiqUI.Utils.TableContains
+local TableCopy = LibLiqUI.Utils.TableCopy
+local TableCount = LibLiqUI.Utils.TableCount
+local TableFilter = LibLiqUI.Utils.TableFilter
+local TableFind = LibLiqUI.Utils.TableFind
+local TableForEach = LibLiqUI.Utils.TableForEach
+local TableGet = LibLiqUI.Utils.TableGet
+local TableMap = LibLiqUI.Utils.TableMap
+local TableMerge = LibLiqUI.Utils.TableMerge
+local TableUnique = LibLiqUI.Utils.TableUnique
+local LibAceDB = addon.libs.AceDB
 
 ---True when chat messaging lockdown is active (C_ChatInfo.InChatMessagingLockdown). Calendar/ChatInfo APIs may return secrets; skip scan/update.
 function Data:IsInChatMessagingLockdown()
@@ -27,7 +39,7 @@ Data.cache = {
   tradeSkillRecipes = {},
 }
 
-Data.DBVersion = 21
+Data.DBVersion = 22
 Data.defaultDB = {
   ---@type WK_DefaultGlobal
   global = {
@@ -38,31 +50,28 @@ Data.defaultDB = {
     },
     characters = {},
     showFullProfessionName = true,
+    liqui = {
+      windows = {},
+      tables = {},
+      loggers = {},
+    },
     main = {
       selectedExpansions = {},
       hiddenColumns = {},
-      windowScale = 100,
-      windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
-      windowBorder = true,
       checklistHelpTipClosed = false,
       hideLowLevelProfessions = false,
-      tableSort = nil,
     },
     checklist = {
       selectedExpansions = {},
       open = false,
       hiddenColumns = {},
       hiddenCategories = {},
-      windowScale = 100,
-      windowBackgroundColor = {r = 0.11372549019, g = 0.14117647058, b = 0.16470588235, a = 1},
-      windowBorder = true,
       windowTitlebar = true,
       hideCompletedObjectives = false,
       hideInCombat = false,
       hideInDungeons = true,
       hideTable = false,
       hideTableHeader = false,
-      tableSort = nil,
     },
   }
 }
@@ -95,6 +104,14 @@ Data.defaultCharacter = {
 
 ---@type WK_Objective[]
 Data.Objectives = {}
+
+---@param objectives WK_Objective[]
+function Data:RegisterObjectives(objectives)
+  for index = 1, #objectives do
+    self.Objectives[#self.Objectives + 1] = objectives[index]
+  end
+end
+
 ---@type WK_ObjectiveCategory[]
 Data.ObjectiveCategories = {}
 ---@type WK_SkillLineVariant[]
@@ -107,7 +124,7 @@ Data.Expansions = {}
 function Data:InitDB()
   ---@class AceDBObject-3.0
   ---@field global WK_DefaultGlobal
-  self.db = AceDB:New(
+  self.db = LibAceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
     true
@@ -154,8 +171,8 @@ function Data:MigrateDB()
     -- Move to new window settings
     if self.db.global.DBVersion == 3 then
       self.db.global.characters[""] = nil
-      if self.db.global.hiddenColumns and Utils:TableCount(self.db.global.hiddenColumns) > 0 then
-        self.db.global.main.hiddenColumns = Utils:TableCopy(self.db.global.hiddenColumns)
+      if self.db.global.hiddenColumns and TableCount(self.db.global.hiddenColumns) > 0 then
+        self.db.global.main.hiddenColumns = TableCopy(self.db.global.hiddenColumns)
         ---@diagnostic disable-next-line: inject-field
         self.db.global.hiddenColumns = nil
       end
@@ -264,14 +281,14 @@ function Data:MigrateDB()
         self.db.global.checklist.hiddenCategories = {}
       end
       if self.db.global.checklist.hideUniqueObjectives then
-        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.Unique] = true
+        self.db.global.checklist.hiddenCategories[Constants.objectiveCategory.Unique] = true
         self.db.global.checklist.hideUniqueObjectives = nil
       end
       if self.db.global.checklist.hideUniqueVendorObjectives then
         self.db.global.checklist.hideUniqueVendorObjectives = nil
       end
       if self.db.global.checklist.hideCatchUpObjectives then
-        self.db.global.checklist.hiddenCategories[Enum.WK_ObjectiveCategory.CatchUp] = true
+        self.db.global.checklist.hiddenCategories[Constants.objectiveCategory.CatchUp] = true
         self.db.global.checklist.hideCatchUpObjectives = nil
       end
     end
@@ -338,7 +355,7 @@ function Data:MigrateDB()
       end
       for _, character in pairs(self.db.global.characters) do
         if type(character.professions) == "table" then
-          character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+          character.professions = TableFilter(character.professions, function(characterProfession)
             local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
             if not skillLineVariant then return false end
             return skillLineVariant.expansionID ~= Enum.ExpansionLevel.Dragonflight
@@ -416,6 +433,72 @@ function Data:MigrateDB()
         migrateHiddenColumnKey(checklistHidden, pair[1], pair[2])
       end
     end
+    if self.db.global.DBVersion == 21 then
+      self.db.global.liqui = self.db.global.liqui or {}
+      self.db.global.liqui.windows = self.db.global.liqui.windows or {}
+      self.db.global.liqui.tables = self.db.global.liqui.tables or {}
+      self.db.global.liqui.loggers = self.db.global.liqui.loggers or {}
+
+      local main = self.db.global.main
+      if main then
+        ---@type LiqUI_WindowDB
+        local mainWindowDb = {}
+        if main.windowScale then
+          mainWindowDb.scale = main.windowScale
+        end
+        if main.windowBackgroundColor then
+          mainWindowDb.windowColor = main.windowBackgroundColor
+        end
+        if main.windowBorder ~= nil then
+          mainWindowDb.border = main.windowBorder
+        end
+        self.db.global.liqui.windows.Main = mainWindowDb
+        main.windowScale = nil
+        main.windowBackgroundColor = nil
+        main.windowBorder = nil
+        if main.tableSort then
+          ---@type LiqUI_TableDB
+          local mainTableDb = {sortState = main.tableSort}
+          if main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
+            mainTableDb.hiddenColumns = TableCopy(main.hiddenColumns)
+          end
+          self.db.global.liqui.tables.Main = mainTableDb
+          main.tableSort = nil
+        elseif main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
+          self.db.global.liqui.tables.Main = {hiddenColumns = TableCopy(main.hiddenColumns)}
+        end
+      end
+
+      local checklist = self.db.global.checklist
+      if checklist then
+        ---@type LiqUI_WindowDB
+        local checklistWindowDb = {}
+        if checklist.windowScale then
+          checklistWindowDb.scale = checklist.windowScale
+        end
+        if checklist.windowBackgroundColor then
+          checklistWindowDb.windowColor = checklist.windowBackgroundColor
+        end
+        if checklist.windowBorder ~= nil then
+          checklistWindowDb.border = checklist.windowBorder
+        end
+        self.db.global.liqui.windows.Checklist = checklistWindowDb
+        checklist.windowScale = nil
+        checklist.windowBackgroundColor = nil
+        checklist.windowBorder = nil
+        if checklist.tableSort then
+          ---@type LiqUI_TableDB
+          local checklistTableDb = {sortState = checklist.tableSort}
+          if checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
+            checklistTableDb.hiddenColumns = TableCopy(checklist.hiddenColumns)
+          end
+          self.db.global.liqui.tables.Checklist = checklistTableDb
+          checklist.tableSort = nil
+        elseif checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
+          self.db.global.liqui.tables.Checklist = {hiddenColumns = TableCopy(checklist.hiddenColumns)}
+        end
+      end
+    end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
@@ -427,10 +510,10 @@ function Data:TaskWeeklyReset()
   local hasReset = false
   if type(self.db.global.weeklyReset) == "number" and self.db.global.weeklyReset <= GetServerTime() then
     local questsToReset = {}
-    Utils:TableForEach(self.Objectives, function(objective)
+    TableForEach(self.Objectives, function(objective)
       local objectiveCategory = self:GetObjectiveCategoryByID(objective.categoryID)
       if not objectiveCategory or objectiveCategory.repeatable ~= "Weekly" then return end
-      Utils:TableForEach(objective.quests, function(questID)
+      TableForEach(objective.quests, function(questID)
         questsToReset[questID] = true
       end)
     end)
@@ -477,7 +560,7 @@ function Data:GetCharacter(GUID)
   end
 
   if self.db.global.characters[GUID] == nil then
-    self.db.global.characters[GUID] = Utils:TableCopy(self.defaultCharacter)
+    self.db.global.characters[GUID] = TableCopy(self.defaultCharacter)
   end
 
   self.db.global.characters[GUID].GUID = GUID
@@ -506,7 +589,7 @@ end
 
 --- Scan currencies for a character.
 function Data:ScanCurrencies()
-  Utils:Debug("┌ ScanCurrencies()")
+  Helpers:Debug("┌ ScanCurrencies()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -522,9 +605,9 @@ function Data:ScanCurrencies()
   local currencyIDs = {}
 
   -- Track currency IDs from objectives
-  Utils:TableForEach(objectives, function(objective)
-    if objective.requires and Utils:TableCount(objective.requires) > 0 then
-      Utils:TableForEach(objective.requires, function(requirement)
+  TableForEach(objectives, function(objective)
+    if objective.requires and TableCount(objective.requires) > 0 then
+      TableForEach(objective.requires, function(requirement)
         if requirement.type == "currency" then
           currencyIDs[requirement.id] = true
         end
@@ -533,7 +616,7 @@ function Data:ScanCurrencies()
   end)
 
   -- Track currency IDs from skill line variants
-  Utils:TableForEach(skillLineVariants, function(skillLineVariant)
+  TableForEach(skillLineVariants, function(skillLineVariant)
     if skillLineVariant.catchUpCurrencyID and skillLineVariant.catchUpCurrencyID > 0 then
       currencyIDs[skillLineVariant.catchUpCurrencyID] = true
     end
@@ -543,7 +626,7 @@ function Data:ScanCurrencies()
   end)
 
   -- Get currency info from the game
-  Utils:TableForEach(currencyIDs, function(_, currencyID)
+  TableForEach(currencyIDs, function(_, currencyID)
     local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
     if currencyInfo then
       ---@type WK_CharacterCurrency
@@ -564,14 +647,14 @@ function Data:ScanCurrencies()
 
   character.currencies = currencies
   character.lastUpdate = GetServerTime()
-  Utils:Debug("├ Currencies: ", Utils:TableCount(currencies))
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("├ Currencies: ", TableCount(currencies))
+  Helpers:Debug("└ Finshed")
 end
 
 ---Check to see if the Darkmoon Faire event is live.
 ---Bails early when calendar may return secret values (SecretInChatMessagingLockdown; taint-safe).
 function Data:ScanCalendar()
-  Utils:Debug("┌ ScanCalendar()")
+  Helpers:Debug("┌ ScanCalendar()")
   if self:IsInChatMessagingLockdown() then return end
   if not self.cache.calendarOpened then
     local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
@@ -592,17 +675,17 @@ function Data:ScanCalendar()
   end
   for i = 1, numEvents do
     local event = C_Calendar.GetDayEvent(0, today, i)
-    if event and not Utils:IsSecretValue(event.eventID) and event.eventID == 479 then
+    if event and not Helpers:IsSecretValue(event.eventID) and event.eventID == 479 then
       self.cache.isDarkmoonOpen = true
     end
   end
-  Utils:Debug("├ Darkmoon Faire is open: ", self.cache.isDarkmoonOpen and "Yes" or "No")
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("├ Darkmoon Faire is open: ", self.cache.isDarkmoonOpen and "Yes" or "No")
+  Helpers:Debug("└ Finshed")
 end
 
 --- Scan all professions and recipes
 function Data:ScanProfessions()
-  Utils:Debug("┌ ScanProfessions()")
+  Helpers:Debug("┌ ScanProfessions()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -611,7 +694,7 @@ function Data:ScanProfessions()
   local allSkillLineIDs = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
 
   -- Filter skillLineVariants that we care about
-  local filteredSkillLineIDs = Utils:TableFilter(allSkillLineIDs or {}, function(skillLineVariantID)
+  local filteredSkillLineIDs = TableFilter(allSkillLineIDs or {}, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return false end
     local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
@@ -620,28 +703,19 @@ function Data:ScanProfessions()
   end)
 
   -- Something went wrong and the game doesn't have any profession data available
-  if Utils:TableCount(filteredSkillLineIDs) == 0 then
+  if TableCount(filteredSkillLineIDs) == 0 then
     return
   end
 
-  ---@class WK_LearnedProfession
-  ---@field skillLineID number
-  ---@field skillLineName string
-  ---@field skillLineVariant WK_SkillLineVariant|nil
-  ---@field skillLineVariantName string|nil
-  ---@field skillLevel number
-  ---@field skillMaxLevel number
-
-  -- Let's get the ProfessionsBook professions
   ---@type WK_LearnedProfession[]
   local learnedProfessions = {}
   local professionIndex1, professionIndex2 = GetProfessions()
-  Utils:TableForEach({professionIndex1 or 0, professionIndex2 or 0}, function(professionIndex)
+  TableForEach({professionIndex1 or 0, professionIndex2 or 0}, function(professionIndex)
     local skillLineName, _, skillLevel, skillMaxLevel, _, _, skillLineID, _, _, _, skillLineVariantName = GetProfessionInfo(professionIndex)
     if not skillLineName then return end
     local skillLine = self:GetSkillLineByID(skillLineID)
     if not skillLine then return end
-    local skillLineVariant = Utils:TableGet(skillLineVariants, "name", skillLineVariantName)
+    local skillLineVariant = TableGet(skillLineVariants, "name", skillLineVariantName)
     ---@type WK_LearnedProfession
     local learnedProfession = {
       skillLineID = skillLineID,
@@ -652,17 +726,17 @@ function Data:ScanProfessions()
       skillMaxLevel = skillMaxLevel,
     }
     table.insert(learnedProfessions, learnedProfession)
-    Utils:Debug("├ Found Spellbook Profession: " .. (skillLineVariantName or skillLineName))
+    Helpers:Debug("├ Found Spellbook Profession: " .. (skillLineVariantName or skillLineName))
   end)
 
-  local learnedSkillLineIDs = Utils:TableMap(learnedProfessions, function(spellbookProfession)
+  local learnedSkillLineIDs = TableMap(learnedProfessions, function(spellbookProfession)
     return spellbookProfession.skillLineID
   end)
 
   -- Detect if an old character profession should be removed (not in spellbook)
-  character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+  character.professions = TableFilter(character.professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-    if not skillLineVariant or not Utils:TableContains(learnedSkillLineIDs or {}, skillLineVariant.skillLineID) then
+    if not skillLineVariant or not TableContains(learnedSkillLineIDs or {}, skillLineVariant.skillLineID) then
       addon.Core:Print(format("Removing old profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
       return false
     end
@@ -670,7 +744,7 @@ function Data:ScanProfessions()
   end)
 
   -- Detect if an invalid character profession should be removed (knowledge = 0/0)
-  character.professions = Utils:TableFilter(character.professions, function(characterProfession)
+  character.professions = TableFilter(character.professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
       addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
@@ -680,10 +754,10 @@ function Data:ScanProfessions()
   end)
 
   -- Add/update character professions based on the spellbook professions
-  Utils:TableForEach(learnedProfessions, function(learnedProfession)
+  TableForEach(learnedProfessions, function(learnedProfession)
     local skillLineVariant = learnedProfession.skillLineVariant
     if not skillLineVariant then return end
-    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
+    local characterProfession = TableFind(character.professions, function(characterProfession)
       return characterProfession.skillLineVariantID == skillLineVariant.id
     end)
     if not characterProfession then
@@ -706,13 +780,13 @@ function Data:ScanProfessions()
   end)
 
   -- Let's update all character professions
-  Utils:TableForEach(filteredSkillLineIDs, function(skillLineVariantID)
+  TableForEach(filteredSkillLineIDs, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return end
     local skillLine = self:GetSkillLineByID(skillLineVariant.skillLineID)
     if not skillLine then return end
 
-    local characterProfession = Utils:TableFind(character.professions, function(characterProfession)
+    local characterProfession = TableFind(character.professions, function(characterProfession)
       return characterProfession.skillLineVariantID == skillLineVariantID
     end)
 
@@ -765,7 +839,7 @@ function Data:ScanProfessions()
       if configInfo then
         local treeIDs = configInfo.treeIDs
         if treeIDs then
-          Utils:TableForEach(treeIDs, function(treeID)
+          TableForEach(treeIDs, function(treeID)
             local treeNodes = C_Traits.GetTreeNodes(treeID)
             if not treeNodes then return end
             ---@type WK_CharacterProfessionSpecialization
@@ -794,7 +868,7 @@ function Data:ScanProfessions()
               specialization.knowledgeLevel = 0
               specialization.knowledgeMaxLevel = 0
 
-              Utils:TableForEach(treeNodes, function(treeNode)
+              TableForEach(treeNodes, function(treeNode)
                 local nodeInfo = C_Traits.GetNodeInfo(configID, treeNode)
                 if not nodeInfo then return end
                 if nodeInfo.ranksPurchased > 1 then
@@ -818,13 +892,13 @@ function Data:ScanProfessions()
   end)
 
   character.lastUpdate = GetServerTime()
-  Utils:Debug("├ Professions: ", Utils:TableCount(character.professions))
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("├ Professions: ", TableCount(character.professions))
+  Helpers:Debug("└ Finshed")
 end
 
 --- Scan all quests for a character.
 function Data:ScanQuests()
-  Utils:Debug("┌ ScanQuests()")
+  Helpers:Debug("┌ ScanQuests()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -840,25 +914,25 @@ function Data:ScanQuests()
   local firstCrafts = {}
   local firstCraftsAvailable = 0
 
-  Utils:TableForEach(objectives, function(objective)
+  TableForEach(objectives, function(objective)
     -- Quests
-    if objective.quests and Utils:TableCount(objective.quests) > 0 then
-      Utils:TableForEach(objective.quests or {}, function(questID)
+    if objective.quests and TableCount(objective.quests) > 0 then
+      TableForEach(objective.quests or {}, function(questID)
         if questID and questID > 0 then
           table.insert(quests, questID)
         end
       end)
       -- First Craft fallback on spellID
-    elseif objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+    elseif objective.categoryID == Constants.objectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
       firstCrafts[objective.spellID] = C_TradeSkillUI.IsRecipeFirstCraft(objective.spellID)
       if firstCrafts[objective.spellID] then
         firstCraftsAvailable = firstCraftsAvailable + 1
       end
     end
-    if objective.requires and Utils:TableCount(objective.requires) > 0 then
-      Utils:TableForEach(objective.requires, function(requirement)
+    if objective.requires and TableCount(objective.requires) > 0 then
+      TableForEach(objective.requires, function(requirement)
         if requirement.type == "quest" then
-          Utils:TableForEach(requirement.quests or {}, function(questID)
+          TableForEach(requirement.quests or {}, function(questID)
             if questID and questID > 0 then
               table.insert(quests, questID)
             end
@@ -868,9 +942,9 @@ function Data:ScanQuests()
     end
   end)
 
-  quests = Utils:TableUnique(quests)
-  if Utils:TableCount(quests) > 0 then
-    Utils:TableForEach(quests, function(questID)
+  quests = TableUnique(quests)
+  if TableCount(quests) > 0 then
+    TableForEach(quests, function(questID)
       local isCompleted = C_QuestLog.IsQuestFlaggedCompleted(questID)
       if isCompleted then
         completedQuests[questID] = true
@@ -881,14 +955,14 @@ function Data:ScanQuests()
   character.firstCrafts = firstCrafts
   character.completed = completedQuests
   character.lastUpdate = GetServerTime()
-  Utils:Debug("├ Quests: ", Utils:TableCount(quests), "Completed: ", Utils:TableCount(completedQuests))
-  Utils:Debug("├ SsellIDs: ", Utils:TableCount(firstCrafts), "FirstCrafts: ", firstCraftsAvailable)
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("├ Quests: ", TableCount(quests), "Completed: ", TableCount(completedQuests))
+  Helpers:Debug("├ SsellIDs: ", TableCount(firstCrafts), "FirstCrafts: ", firstCraftsAvailable)
+  Helpers:Debug("└ Finshed")
 end
 
 --- Scan all character information for the current character.
 function Data:ScanCharacterInfo()
-  Utils:Debug("┌ ScanCharacterInfo()")
+  Helpers:Debug("┌ ScanCharacterInfo()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -910,12 +984,12 @@ function Data:ScanCharacterInfo()
   character.classFile = classFile
   character.className = localizedClassName
   character.lastUpdate = GetServerTime()
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("└ Finshed")
 end
 
 --- Scan all character item counts for the current character.
 function Data:ScanItems()
-  Utils:Debug("┌ ScanItems()")
+  Helpers:Debug("┌ ScanItems()")
   if self:IsInChatMessagingLockdown() then return end
   if InCombatLockdown and InCombatLockdown() then return end
   local character = self:GetCharacter()
@@ -928,21 +1002,21 @@ function Data:ScanItems()
   local itemCountTotal = 0
   ---@type number[]
   local itemIDs = {}
-  Utils:TableForEach(objectives, function(objective)
+  TableForEach(objectives, function(objective)
     if objective.itemID and objective.itemID > 0 then
       table.insert(itemIDs, objective.itemID)
     end
-    if objective.requires and Utils:TableCount(objective.requires) > 0 then
-      Utils:TableForEach(objective.requires, function(requirement)
+    if objective.requires and TableCount(objective.requires) > 0 then
+      TableForEach(objective.requires, function(requirement)
         if requirement.type == "item" then
           table.insert(itemIDs, requirement.id)
         end
       end)
     end
   end)
-  itemIDs = Utils:TableUnique(itemIDs)
-  if Utils:TableCount(itemIDs) > 0 then
-    Utils:TableForEach(itemIDs, function(itemID)
+  itemIDs = TableUnique(itemIDs)
+  if TableCount(itemIDs) > 0 then
+    TableForEach(itemIDs, function(itemID)
       if itemID and itemID > 0 then
         local itemCount = C_Item.GetItemCount(itemID)
         if itemCount and itemCount > 0 then
@@ -954,13 +1028,13 @@ function Data:ScanItems()
   end
   character.items = itemCounts
   character.lastUpdate = GetServerTime()
-  Utils:Debug("├ Items: ", Utils:TableCount(itemIDs), "Count: ", itemCountTotal)
-  Utils:Debug("└ Finshed")
+  Helpers:Debug("├ Items: ", TableCount(itemIDs), "Count: ", itemCountTotal)
+  Helpers:Debug("└ Finshed")
 end
 
 ---@return table<WOWGUID, WK_Character>
 function Data:GetCharacters()
-  local characters = Utils:TableFilter(self.db.global.characters or {}, function(character)
+  local characters = TableFilter(self.db.global.characters or {}, function(character)
     return true
   end)
 
@@ -976,7 +1050,7 @@ end
 
 ---@return WK_Expansion[]
 function Data:GetExpansions()
-  local expansions = Utils:TableFilter(self.Expansions, function(expansion)
+  local expansions = TableFilter(self.Expansions, function(expansion)
     return expansion.enabled
   end)
   return expansions
@@ -1035,7 +1109,7 @@ function Data:GetObjectiveCategories()
   return self.ObjectiveCategories
 end
 
----@param categoryID Enum.WK_ObjectiveCategory
+---@param categoryID WK_ObjectiveCategoryId
 ---@return WK_ObjectiveCategory?
 function Data:GetObjectiveCategoryByID(categoryID)
   for _, category in ipairs(self.ObjectiveCategories) do
@@ -1052,7 +1126,7 @@ function Data:GetAllProgress()
   if not character then return end
   local objectives = self:GetObjectives()
   if not objectives then return end
-  Utils:TableForEach(objectives, function(objective)
+  TableForEach(objectives, function(objective)
     self:GetObjectiveProgress(character, objective)
   end)
 end
@@ -1064,7 +1138,7 @@ end
 function Data:GetObjectiveProgress(character, objective)
   local progressCache = self.cache.progressCache[character.GUID]
   if progressCache then
-    local objectiveProgress = Utils:TableFind(progressCache, function(objectiveProgress)
+    local objectiveProgress = TableFind(progressCache, function(objectiveProgress)
       return objectiveProgress.objective == objective
     end)
     if objectiveProgress then
@@ -1098,7 +1172,7 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- Catch Up
-  if objective.categoryID == Enum.WK_ObjectiveCategory.CatchUp then
+  if objective.categoryID == Constants.objectiveCategory.CatchUp then
     local characterCurrency = self:GetCharacterCurrency(character, skillLineVariant.catchUpCurrencyID)
     if characterCurrency then
       objectiveProgress.pointsEarned = characterCurrency.quantity or 0
@@ -1109,12 +1183,12 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- Quests
-  if objective.quests and Utils:TableCount(objective.quests) > 0 then
+  if objective.quests and TableCount(objective.quests) > 0 then
     character.completed = character.completed or {}
     -- Weekly Quests is just one quest id
     if objective.limit and objective.limit > 0 then
       local isCompleted = 0
-      Utils:TableForEach(objective.quests, function(questID)
+      TableForEach(objective.quests, function(questID)
         if character.completed[questID] then
           isCompleted = isCompleted + 1
         end
@@ -1127,7 +1201,7 @@ function Data:GetObjectiveProgress(character, objective)
       objectiveProgress.pointsTotal = objectiveProgress.pointsTotal + (objective.points * objective.limit)
       objectiveProgress.questsTotal = objectiveProgress.questsTotal + objective.limit
     else
-      Utils:TableForEach(objective.quests, function(questID)
+      TableForEach(objective.quests, function(questID)
         if character.completed[questID] then
           objectiveProgress.isCompleted = true
           objectiveProgress.pointsEarned = objectiveProgress.pointsEarned + objective.points
@@ -1139,7 +1213,7 @@ function Data:GetObjectiveProgress(character, objective)
     end
   else
     -- First Craft fallback on spellID
-    if objective.categoryID == Enum.WK_ObjectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
+    if objective.categoryID == Constants.objectiveCategory.FirstCraft and objective.spellID and objective.spellID > 0 then
       character.firstCrafts = character.firstCrafts or {}
       if character.firstCrafts[objective.spellID] ~= true then
         -- objectiveProgress.isCompleted = true
@@ -1152,7 +1226,7 @@ function Data:GetObjectiveProgress(character, objective)
   end
 
   -- Darkmoon Quest
-  if objective.categoryID == Enum.WK_ObjectiveCategory.DarkmoonQuest then
+  if objective.categoryID == Constants.objectiveCategory.DarkmoonQuest then
     if not self.cache.isDarkmoonOpen then
       objectiveProgress.pointsEarned = 0
       objectiveProgress.pointsTotal = 0
@@ -1175,7 +1249,7 @@ function Data:GetObjectiveProgress(character, objective)
         local characterQuests = character.completed or {}
         local isCompleted = 0
         if requirement.match == "all" then
-          Utils:TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests, function(questID)
             objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
             local questCompleted = characterQuests[questID]
             if questCompleted then
@@ -1189,7 +1263,7 @@ function Data:GetObjectiveProgress(character, objective)
         end
         if requirement.match == "any" then
           objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-          Utils:TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests, function(questID)
             if characterQuests[questID] then
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
               objectiveProgressRequirement.isCompleted = true
@@ -1246,7 +1320,7 @@ function Data:GetObjectiveProgress(character, objective)
       if requirement.type == "skill" then
         local characterProfessions = character.professions or {}
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        Utils:TableForEach(characterProfessions, function(characterProfession)
+        TableForEach(characterProfessions, function(characterProfession)
           if characterProfession.skillLineVariantID == requirement.id then
             local skillLevel = characterProfession.skillLevel or 0
             if skillLevel >= requirement.amount then
@@ -1295,13 +1369,13 @@ function Data:GetCategoryProgress(character, objectiveCategory)
     items = {},
   }
 
-  Utils:TableForEach(categories, function(category)
+  TableForEach(categories, function(category)
     -- Skip categories we don't care about
     if category.id ~= objectiveCategory.id then
       return
     end
 
-    Utils:TableForEach(objectives, function(objective)
+    TableForEach(objectives, function(objective)
       -- Skip objectives we don't care about
       if objective.categoryID ~= objectiveCategory.id then
         return
@@ -1317,8 +1391,8 @@ function Data:GetCategoryProgress(character, objectiveCategory)
       categoryProgress.pointsTotal = categoryProgress.pointsTotal + objectiveProgress.pointsTotal
       categoryProgress.requirementsMet = categoryProgress.requirementsMet + objectiveProgress.requirementsMet
       categoryProgress.requirementsTotal = categoryProgress.requirementsTotal + objectiveProgress.requirementsTotal
-      categoryProgress.requirements = Utils:TableMerge(categoryProgress.requirements, objectiveProgress.requirements)
-      categoryProgress.items = Utils:TableMerge(categoryProgress.items, objectiveProgress.items, true)
+      categoryProgress.requirements = TableMerge(categoryProgress.requirements, objectiveProgress.requirements)
+      categoryProgress.items = TableMerge(categoryProgress.items, objectiveProgress.items, true)
     end)
   end)
 
@@ -1345,7 +1419,7 @@ function Data:GetProfessionProgress(character, profession)
   }
 
   local objectives = self:GetObjectives()
-  Utils:TableForEach(objectives, function(objective)
+  TableForEach(objectives, function(objective)
     if objective.skillLineVariantID ~= profession.skillLineVariantID then
       return
     end
@@ -1356,8 +1430,8 @@ function Data:GetProfessionProgress(character, profession)
     professionProgress.pointsTotal = professionProgress.pointsTotal + objectiveProgress.pointsTotal
     professionProgress.requirementsMet = professionProgress.requirementsMet + objectiveProgress.requirementsMet
     professionProgress.requirementsTotal = professionProgress.requirementsTotal + objectiveProgress.requirementsTotal
-    professionProgress.requirements = Utils:TableMerge(professionProgress.requirements, objectiveProgress.requirements)
-    professionProgress.items = Utils:TableMerge(professionProgress.items, objectiveProgress.items, true)
+    professionProgress.requirements = TableMerge(professionProgress.requirements, objectiveProgress.requirements)
+    professionProgress.items = TableMerge(professionProgress.items, objectiveProgress.items, true)
   end)
 
   return professionProgress
@@ -1384,7 +1458,7 @@ function Data:GetCategoryProfessionProgress(character, objectiveCategory, charac
   }
 
   local objectives = self:GetObjectives()
-  Utils:TableForEach(objectives, function(objective)
+  TableForEach(objectives, function(objective)
     -- Skip objectives we don't care about
     if objective.categoryID ~= objectiveCategory.id then
       return
@@ -1401,8 +1475,8 @@ function Data:GetCategoryProfessionProgress(character, objectiveCategory, charac
     categoryProfessionProgress.pointsTotal = categoryProfessionProgress.pointsTotal + objectiveProgress.pointsTotal
     categoryProfessionProgress.requirementsMet = categoryProfessionProgress.requirementsMet + objectiveProgress.requirementsMet
     categoryProfessionProgress.requirementsTotal = categoryProfessionProgress.requirementsTotal + objectiveProgress.requirementsTotal
-    categoryProfessionProgress.requirements = Utils:TableMerge(categoryProfessionProgress.requirements, objectiveProgress.requirements)
-    categoryProfessionProgress.items = Utils:TableMerge(categoryProfessionProgress.items, objectiveProgress.items, true)
+    categoryProfessionProgress.requirements = TableMerge(categoryProfessionProgress.requirements, objectiveProgress.requirements)
+    categoryProfessionProgress.items = TableMerge(categoryProfessionProgress.items, objectiveProgress.items, true)
   end)
 
   return categoryProfessionProgress

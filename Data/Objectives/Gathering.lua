@@ -3,11 +3,12 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
-local category = Enum.WK_ObjectiveCategory.Gathering
+local category = Constants.objectiveCategory.Gathering
 
 ---@type WK_Objective[]
 local objectives = {
@@ -52,4 +53,4 @@ local objectives = {
   -- Midnight: Tailoring
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)

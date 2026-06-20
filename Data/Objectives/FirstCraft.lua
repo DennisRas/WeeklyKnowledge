@@ -3,11 +3,12 @@ local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
+local Constants = addon.Constants
+
 ---@class WK_Data
 local Data = addon.Data
-local Utils = addon.Utils
 local MISSING_INFO = Data.MISSING_INFO
-local category = Enum.WK_ObjectiveCategory.FirstCraft
+local category = Constants.objectiveCategory.FirstCraft
 
 -- {skillLineVariantID = 2918, categoryID = category, quests = {}, spellID =
 
@@ -1336,4 +1337,4 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {90057}, spellID = 1228980, points = 1}, -- Sunfire Silk Backpack
 }
 
-Data.Objectives = Utils:TableMerge(Data.Objectives, objectives)
+Data:RegisterObjectives(objectives)
