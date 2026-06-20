@@ -52,10 +52,10 @@ function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_MAIN"] = "Toggle WeeklyKnowledge window"
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_CHECKLIST"] = "Toggle Checklist window"
   _G["WEEKLYKNOWLEDGE_TOGGLE_MAIN"] = function()
-    if addon and addon.Main then addon.addon.Main:ToggleWindow() end
+    if addon and addon.Main then addon.Main:ToggleWindow() end
   end
   _G["WEEKLYKNOWLEDGE_TOGGLE_CHECKLIST"] = function()
-    if addon and addon.Checklist then addon.addon.Checklist:ToggleWindow() end
+    if addon and addon.Checklist then addon.Checklist:ToggleWindow() end
   end
   self:RegisterChatCommand("wk", "HandleCommand")
   self:RegisterChatCommand("weeklyknowledge", "HandleCommand")
