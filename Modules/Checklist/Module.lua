@@ -106,13 +106,7 @@ function Checklist:Render()
       onClose = function()
         Data.db.global.checklist.open = false
       end,
-      titlebarButtons = {
-        {
-          name = "Settings",
-          icon = mediaPath .. "Icon_Settings.blp",
-          tooltipTitle = "Settings",
-          tooltipDescription = "Let's customize things a bit",
-          onMenu = function(window, rootMenu)
+      onSettingsMenu = function(window, rootMenu)
             local showFullProfessionName = rootMenu:CreateCheckbox(
               "Show full profession name",
               function() return Data.db.global.showFullProfessionName end,
@@ -153,9 +147,9 @@ function Checklist:Render()
                 self:Render()
               end
             )
-            window:AppendWindowOptionsMenu(rootMenu)
+
           end,
-        },
+      titlebarButtons = {
         {
           name = "Expansion",
           icon = mediaPath .. "Icon_House.blp",

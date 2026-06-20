@@ -69,13 +69,7 @@ function Main:Render()
       onShow = function()
         Main:Render()
       end,
-      titlebarButtons = {
-        {
-          name = "Settings",
-          icon = mediaPath .. "Icon_Settings.blp",
-          tooltipTitle = "Settings",
-          tooltipDescription = "Let's customize things a bit",
-          onMenu = function(window, rootMenu)
+      onSettingsMenu = function(window, rootMenu)
             local showFullProfessionName = rootMenu:CreateCheckbox(
               "Show full profession name",
               function() return Data.db.global.showFullProfessionName end,
@@ -131,9 +125,8 @@ function Main:Render()
               GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
             end)
 
-            window:AppendWindowOptionsMenu(rootMenu)
           end,
-        },
+      titlebarButtons = {
         {
           name = "Characters",
           icon = mediaPath .. "Icon_Characters.blp",
