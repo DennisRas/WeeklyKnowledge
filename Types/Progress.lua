@@ -1,0 +1,60 @@
+---@class WK_ObjectiveProgressRequirement
+---@field requirement WK_ObjectiveRequirement
+---@field isCompleted boolean
+
+---@class WK_ObjectiveProgress
+---@field character WK_Character
+---@field objective WK_Objective
+---@field isCompleted boolean
+---@field questsCompleted number
+---@field questsTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field requirementsMet number
+---@field requirementsTotal number
+---@field requirements WK_ObjectiveProgressRequirement[]
+---@field items table<integer, boolean>
+
+---@class WK_CategoryProgress
+---@field character WK_Character
+---@field objectiveCategory WK_ObjectiveCategory
+---@field objectivesCompleted number
+---@field objectivesTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field requirementsMet number
+---@field requirementsTotal number
+---@field requirements WK_ObjectiveProgressRequirement[]
+---@field items table<integer, boolean>
+
+---@class WK_ProfessionProgress
+---@field character WK_Character
+---@field profession WK_CharacterProfession
+---@field objectivesCompleted number
+---@field objectivesTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field requirementsMet number
+---@field requirementsTotal number
+---@field requirements WK_ObjectiveProgressRequirement[]
+---@field items table<integer, boolean>
+
+---@class WK_CategoryProfessionProgress
+---@field character WK_Character
+---@field category WK_ObjectiveCategory
+---@field profession WK_CharacterProfession
+---@field objectivesCompleted number
+---@field objectivesTotal number
+---@field pointsEarned number
+---@field pointsTotal number
+---@field requirementsMet number
+---@field requirementsTotal number
+---@field requirements WK_ObjectiveProgressRequirement[]
+---@field items table<integer, boolean>
+
+---@class WK_TableRowData : LiqUI_TableDataRowExtended
+---@field character WK_Character
+---@field characterProfession WK_CharacterProfession
+---@field skillLineVariantID integer
+---@field objective WK_Objective?
+---@field progress WK_ObjectiveProgress?

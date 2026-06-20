@@ -706,15 +706,6 @@ function Data:ScanProfessions()
     return
   end
 
-  ---@class WK_LearnedProfession
-  ---@field skillLineID number
-  ---@field skillLineName string
-  ---@field skillLineVariant WK_SkillLineVariant|nil
-  ---@field skillLineVariantName string|nil
-  ---@field skillLevel number
-  ---@field skillMaxLevel number
-
-  -- Let's get the ProfessionsBook professions
   ---@type WK_LearnedProfession[]
   local learnedProfessions = {}
   local professionIndex1, professionIndex2 = GetProfessions()

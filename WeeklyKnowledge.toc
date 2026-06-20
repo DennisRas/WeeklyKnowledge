@@ -34,7 +34,12 @@ Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
-Types.lua
+Types\Addon.lua
+Types\Database.lua
+Types\GameData.lua
+Types\Character.lua
+Types\Objectives.lua
+Types\Progress.lua
 
 Boot.lua
 Constants.lua

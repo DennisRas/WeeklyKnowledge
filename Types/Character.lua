@@ -1,0 +1,68 @@
+---@class WK_Character
+---@field GUID string|WOWGUID
+---@field name string
+---@field realmName string
+---@field level integer
+---@field factionEnglish string
+---@field factionName string
+---@field raceID integer
+---@field raceEnglish string
+---@field raceName string
+---@field classID integer
+---@field classFile ClassFile?
+---@field className string
+---@field lastUpdate number
+---@field professions WK_CharacterProfession[]
+---@field completed table<integer, boolean>
+---@field firstCrafts table<integer, WK_CharacterFirstCraft>
+---@field factions table<integer, WK_CharacterFaction>
+---@field currencies table<integer, WK_CharacterCurrency>
+---@field items table<integer, integer>
+
+---@class WK_CharacterCurrency
+---@field id integer
+---@field name string
+---@field iconFileID integer
+---@field quality integer
+---@field quantity integer
+---@field maxQuantity integer
+---@field rechargingCycleDurationMS integer
+---@field rechargingAmountPerCycle integer
+---@field lastUpdated number
+
+---@class WK_CharacterFaction
+---@field id integer
+---@field level integer
+
+---@class WK_CharacterFirstCraft
+---@field id integer
+---@field completed boolean
+
+---@class WK_CharacterProfession
+---@field enabled boolean
+---@field skillLineVariantID integer
+---@field skillLevel integer
+---@field skillMaxLevel integer
+---@field knowledgeLevel integer
+---@field knowledgeMaxLevel integer
+---@field knowledgeUnspent integer
+---@field specializations WK_CharacterProfessionSpecialization[]
+
+---@class WK_CharacterProfessionSpecialization
+---@field rootNodeID integer
+---@field rootIconID integer
+---@field name string
+---@field description string
+---@field state Enum.ProfessionsSpecTabState
+---@field treeID integer
+---@field configID integer
+---@field knowledgeLevel integer
+---@field knowledgeMaxLevel integer
+
+---@class WK_LearnedProfession
+---@field skillLineID number
+---@field skillLineName string
+---@field skillLineVariant WK_SkillLineVariant|nil
+---@field skillLineVariantName string|nil
+---@field skillLevel number
+---@field skillMaxLevel number
