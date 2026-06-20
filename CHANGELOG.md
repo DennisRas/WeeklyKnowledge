@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.0 - TBD
+
+- Updated main and checklist windows to the shared LiqUI window framework.
+- Added per-window options for scale, background color, and border from the titlebar menu.
+- Updated table sorting and window layout persistence across reloads.
+
 ## v1.2.9 - 2026-05-18
 
 - Updated Catch-Up trainer quest requirements for Midnight Mining and Skinning to include the same weekly quest IDs as v1.2.8 (including "It's Called Silvermoon" and "Essential Materials").
