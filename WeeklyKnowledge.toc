@@ -60,10 +60,10 @@ Modules\Main\TableData.lua
 Modules\Main\TableColumns.lua
 
 #@debug@
-Developer\Types\Addon.lua
-Developer\Types\Database.lua
-Developer\Types\GameData.lua
-Developer\Types\Character.lua
-Developer\Types\Objectives.lua
-Developer\Types\Progress.lua
+Debug\Types\Addon.lua
+Debug\Types\Database.lua
+Debug\Types\GameData.lua
+Debug\Types\Character.lua
+Debug\Types\Objectives.lua
+Debug\Types\Progress.lua
 #@end-debug@
