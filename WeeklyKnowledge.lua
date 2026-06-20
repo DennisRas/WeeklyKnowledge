@@ -4,8 +4,6 @@ local addonName = select(1, ...)
 local addon = select(2, ...)
 
 local Data = addon.Data
-local Main = addon.Main
-local Checklist = addon.Checklist
 local LibAceAddon = addon.libs.AceAddon
 local LibDataBroker = addon.libs.LibDataBroker
 local LibDBIcon = addon.libs.LibDBIcon
@@ -22,18 +20,18 @@ addon.debug = false
 --@end-debug@
 
 function Core:Render()
-  Main:Render()
-  Checklist:Render()
+  addon.Main:Render()
+  addon.Checklist:Render()
 end
 
 function Core:HandleCommand(message)
   local cmd = self:GetArgs(message, 1)
   if not cmd then
-    Main:ToggleWindow()
+    addon.Main:ToggleWindow()
     return
   end
   if cmd:lower() == "checklist" then
-    Checklist:ToggleWindow()
+    addon.Checklist:ToggleWindow()
     return
   end
   if cmd:lower() == "minimap" then
@@ -44,7 +42,7 @@ function Core:HandleCommand(message)
     return
   end
   if cmd:lower() == "toggle" then
-    Main:ToggleWindow()
+    addon.Main:ToggleWindow()
     return
   end
   self:Print("Usage: /wk [checklist | minimap]")
@@ -54,17 +52,17 @@ function Core:OnInitialize()
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_MAIN"] = "Toggle WeeklyKnowledge window"
   _G["BINDING_NAME_WEEKLYKNOWLEDGE_CHECKLIST"] = "Toggle Checklist window"
   _G["WEEKLYKNOWLEDGE_TOGGLE_MAIN"] = function()
-    if addon and addon.Main then addon.Main:ToggleWindow() end
+    if addon and addon.Main then addon.addon.Main:ToggleWindow() end
   end
   _G["WEEKLYKNOWLEDGE_TOGGLE_CHECKLIST"] = function()
-    if addon and addon.Checklist then addon.Checklist:ToggleWindow() end
+    if addon and addon.Checklist then addon.addon.Checklist:ToggleWindow() end
   end
   self:RegisterChatCommand("wk", "HandleCommand")
   self:RegisterChatCommand("weeklyknowledge", "HandleCommand")
 
   Data:InitDB()
   Data:MigrateDB()
-  addon.LiqUI = LibLiqUI:New({ name = addonName, db = Data.db.global.liqui })
+  addon.LiqUI = LibLiqUI:New({name = addonName, db = Data.db.global.liqui})
   if Data:TaskWeeklyReset() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end
@@ -76,9 +74,9 @@ function Core:OnInitialize()
     OnClick = function(...)
       local _, b = ...
       if b and b == "RightButton" then
-        Checklist:ToggleWindow()
+        addon.Checklist:ToggleWindow()
       else
-        Main:ToggleWindow()
+        addon.Main:ToggleWindow()
       end
     end,
     OnTooltipShow = function(tooltip)
@@ -90,7 +88,7 @@ function Core:OnInitialize()
         dragText = dragText .. " |cffff0000(locked)|r"
       end
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-    end
+    end,
   })
   LibDBIcon:Register(addonName, WKLDB, Data.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addonName)
@@ -109,7 +107,7 @@ function Core:OnEnable()
   end)
   self:RegisterBucketEvent(
     {
-      "PLAYER_LEVEL_CHANGED"
+      "PLAYER_LEVEL_CHANGED",
     },
     3,
     function()
