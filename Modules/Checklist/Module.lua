@@ -103,6 +103,7 @@ function Checklist:Render()
       icon = mediaPath .. "Icon.blp",
       point = {"TOPLEFT", UIParent, "TOPLEFT", 8, -8},
       border = 4,
+      overlayFontObject = "SystemFont_Med1",
       onClose = function()
         Data.db.global.checklist.open = false
       end,
@@ -226,9 +227,6 @@ function Checklist:Render()
       },
     })
     self.window:SetFrameLevel(8100)
-    self.window.placeholderText = addon.LiqUI.Window:GetBodyPlaceholderText(self.window.body)
-    self.window.placeholderText:SetFontObject("SystemFont_Med1")
-    self.window.placeholderText:Hide()
 
     ---@type LiqUI_TableOptions
     local tableConfig = {
@@ -356,14 +354,14 @@ function Checklist:Render()
 
   if Data.db.global.checklist.hideTable then
     self.window.table:Hide()
-    self.window:HideBodyPlaceholder()
+    self.window:HideOverlay()
     self.window:SetBodySize(minWindowWidth, 0)
   elseif rowCount == 0 then
-    self.window:ShowBodyPlaceholder("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    self.window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
     self.window.table:Hide()
     self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
   else
-    self.window:HideBodyPlaceholder()
+    self.window:HideOverlay()
     self.window.table:Show()
     local bodyWidth, bodyHeight = self.window.table:GetSize()
     bodyWidth = math.max(bodyWidth, minWindowWidth)

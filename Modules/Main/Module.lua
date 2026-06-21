@@ -66,6 +66,7 @@ function Main:Render()
       icon = mediaPath .. "Icon.blp",
       point = {"CENTER"},
       border = 4,
+      overlayFontObject = "SystemFont_Med1",
       onShow = function()
         Main:Render()
       end,
@@ -233,9 +234,6 @@ function Main:Render()
       },
     })
     self.window:SetFrameLevel(8000)
-    self.window.placeholderText = addon.LiqUI.Window:GetBodyPlaceholderText(self.window.body)
-    self.window.placeholderText:SetFontObject("SystemFont_Med1")
-    self.window.placeholderText:Hide()
 
     ---@type LiqUI_TableOptions
     local tableConfig = {
@@ -313,14 +311,14 @@ function Main:Render()
   local emptyBodyHeight = 250 - Constants.TITLEBAR_HEIGHT
 
   if rowCount == 0 then
-    self.window:ShowBodyPlaceholder("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    self.window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
     self.window.table:Hide()
     self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
     if self.window.titlebar then
       self.window.titlebar.title:SetShown(false)
     end
   else
-    self.window:HideBodyPlaceholder()
+    self.window:HideOverlay()
     self.window.table:Show()
     local bodyWidth, bodyHeight = self.window.table:GetSize()
     bodyWidth = math.max(bodyWidth, minWindowWidth)
