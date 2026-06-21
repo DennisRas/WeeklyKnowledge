@@ -57,14 +57,12 @@ Data.defaultDB = {
     },
     main = {
       selectedExpansions = {},
-      hiddenColumns = {},
       checklistHelpTipClosed = false,
       hideLowLevelProfessions = false,
     },
     checklist = {
       selectedExpansions = {},
       open = false,
-      hiddenColumns = {},
       hiddenCategories = {},
       windowTitlebar = true,
       hideCompletedObjectives = false,
@@ -458,7 +456,7 @@ function Data:MigrateDB()
         main.windowBorder = nil
         if main.tableSort then
           ---@type LiqUI_TableDB
-          local mainTableDb = {sortState = main.tableSort}
+          local mainTableDb = {sortState = main.tableSort, hiddenColumns = {}}
           if main.hiddenColumns and TableCount(main.hiddenColumns) > 0 then
             mainTableDb.hiddenColumns = TableCopy(main.hiddenColumns)
           end
@@ -488,7 +486,7 @@ function Data:MigrateDB()
         checklist.windowBorder = nil
         if checklist.tableSort then
           ---@type LiqUI_TableDB
-          local checklistTableDb = {sortState = checklist.tableSort}
+          local checklistTableDb = {sortState = checklist.tableSort, hiddenColumns = {}}
           if checklist.hiddenColumns and TableCount(checklist.hiddenColumns) > 0 then
             checklistTableDb.hiddenColumns = TableCopy(checklist.hiddenColumns)
           end

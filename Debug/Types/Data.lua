@@ -10,14 +10,12 @@
 
 ---@class WK_DefaultGlobalMain
 ---@field selectedExpansions Enum.ExpansionLevel[]?
----@field hiddenColumns table<string, boolean>
 ---@field fontSize integer?
 ---@field checklistHelpTipClosed boolean?
 ---@field hideLowLevelProfessions boolean?
 
 ---@class WK_DefaultGlobalChecklist
 ---@field selectedExpansions Enum.ExpansionLevel[]?
----@field hiddenColumns table<string, boolean>
 ---@field hiddenCategories table<WK_ObjectiveCategoryId, boolean>
 ---@field windowTitlebar boolean
 ---@field fontSize integer?

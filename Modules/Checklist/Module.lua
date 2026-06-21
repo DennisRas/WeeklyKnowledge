@@ -101,7 +101,6 @@ function Checklist:Render()
       name = "Checklist",
       title = "Checklist",
       icon = mediaPath .. "Icon.blp",
-      point = {"TOPLEFT", UIParent, "TOPLEFT", 8, -8},
       border = 4,
       overlayFontObject = "SystemFont_Med1",
       onClose = function()

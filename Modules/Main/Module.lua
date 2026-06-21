@@ -64,69 +64,67 @@ function Main:Render()
       name = "Main",
       title = addonName,
       icon = mediaPath .. "Icon.blp",
-      point = {"CENTER"},
       border = 4,
       overlayFontObject = "SystemFont_Med1",
       onShow = function()
         Main:Render()
       end,
       onSettingsMenu = function(window, rootMenu)
-            local showFullProfessionName = rootMenu:CreateCheckbox(
-              "Show full profession name",
-              function() return Data.db.global.showFullProfessionName end,
-              function()
-                Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
-                self:ApplyTableColumns()
-                self:Render()
-                Checklist:ApplyTableColumns()
-                Checklist:Render()
-              end
-            )
-            showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
-              GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-              GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
-            end)
+        local showFullProfessionName = rootMenu:CreateCheckbox(
+          "Show full profession name",
+          function() return Data.db.global.showFullProfessionName end,
+          function()
+            Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
+            self:ApplyTableColumns()
+            self:Render()
+            Checklist:ApplyTableColumns()
+            Checklist:Render()
+          end
+        )
+        showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
+        end)
 
-            local hideLowLevelProfessions = rootMenu:CreateCheckbox(
-              "Hide low level professions",
-              function() return Data.db.global.main.hideLowLevelProfessions end,
-              function()
-                Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
-                self:Render()
-              end
-            )
-            hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
-              GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-              GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.");
-            end)
+        local hideLowLevelProfessions = rootMenu:CreateCheckbox(
+          "Hide low level professions",
+          function() return Data.db.global.main.hideLowLevelProfessions end,
+          function()
+            Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
+            self:Render()
+          end
+        )
+        hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+          GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.")
+        end)
 
-            local showMinimapIcon = rootMenu:CreateCheckbox(
-              "Show the minimap button",
-              function() return not Data.db.global.minimap.hide end,
-              function()
-                Data.db.global.minimap.hide = not Data.db.global.minimap.hide
-                LibDBIcon:Refresh(addonName, Data.db.global.minimap)
-              end
-            )
-            showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
-              GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-              GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.");
-            end)
+        local showMinimapIcon = rootMenu:CreateCheckbox(
+          "Show the minimap button",
+          function() return not Data.db.global.minimap.hide end,
+          function()
+            Data.db.global.minimap.hide = not Data.db.global.minimap.hide
+            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+          end
+        )
+        showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+          GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.")
+        end)
 
-            local lockMinimapIcon = rootMenu:CreateCheckbox(
-              "Lock the minimap button",
-              function() return Data.db.global.minimap.lock end,
-              function()
-                Data.db.global.minimap.lock = not Data.db.global.minimap.lock
-                LibDBIcon:Refresh(addonName, Data.db.global.minimap)
-              end
-            )
-            lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
-              GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-              GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!");
-            end)
-
-          end,
+        local lockMinimapIcon = rootMenu:CreateCheckbox(
+          "Lock the minimap button",
+          function() return Data.db.global.minimap.lock end,
+          function()
+            Data.db.global.minimap.lock = not Data.db.global.minimap.lock
+            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+          end
+        )
+        lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+          GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!")
+        end)
+      end,
       titlebarButtons = {
         {
           name = "Characters",
@@ -246,7 +244,7 @@ function Main:Render()
       rowStyle = {
         height = Constants.TABLE_ROW_HEIGHT,
         highlight = true,
-        striped = true
+        striped = true,
       },
       cellStyle = {
         padding = Constants.TABLE_CELL_PADDING,

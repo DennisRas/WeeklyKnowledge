@@ -61,7 +61,7 @@ Modules\Main\TableColumns.lua
 
 #@debug@
 Debug\Types\Addon.lua
-Debug\Types\Database.lua
+Debug\Types\Data.lua
 Debug\Types\GameData.lua
 Debug\Types\Character.lua
 Debug\Types\Objectives.lua
