@@ -1,5 +1,3 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
@@ -7,6 +5,10 @@ local addon = select(2, ...)
 local Constants = {}
 addon.Constants = Constants
 
+Constants.prefix = format("<%s> ", addon.name)
+Constants.commands = {
+  "wk",
+}
 Constants.TITLEBAR_HEIGHT = 30
 Constants.TABLE_ROW_HEIGHT = 24
 Constants.TABLE_HEADER_HEIGHT = 32

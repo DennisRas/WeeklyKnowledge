@@ -1,5 +1,3 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
@@ -46,7 +44,7 @@ Data.defaultDB = {
     minimap = {
       minimapPos = 235,
       hide = false,
-      lock = false
+      lock = false,
     },
     characters = {},
     showFullProfessionName = true,
@@ -71,7 +69,7 @@ Data.defaultDB = {
       hideTable = false,
       hideTableHeader = false,
     },
-  }
+  },
 }
 
 local MISSING_INFO = 999999999

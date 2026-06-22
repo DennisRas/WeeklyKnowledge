@@ -1,19 +1,17 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
 local Data = addon.Data
+local Constants = addon.Constants
 local LibAceAddon = addon.libs.AceAddon
 local LibDataBroker = addon.libs.LibDataBroker
 local LibDBIcon = addon.libs.LibDBIcon
 local LibLiqUI = addon.libs.LiqUI
+local TableForEach = LibLiqUI.Utils.TableForEach
 
-local Core = LibAceAddon:NewAddon(addonName, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
+local Core = LibAceAddon:NewAddon(addon.name, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
 addon.debug = false
-
-_G[addonName] = addon
 
 --@debug@
 addon.debug = false
@@ -36,7 +34,7 @@ function Core:HandleCommand(message)
   end
   if cmd:lower() == "minimap" then
     Data.db.global.minimap.hide = not Data.db.global.minimap.hide
-    LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+    LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
     self:Print("Minimap button " .. (Data.db.global.minimap.hide and "hidden" or "shown") .. ".")
     self:Render()
     return
@@ -45,7 +43,7 @@ function Core:HandleCommand(message)
     addon.Main:ToggleWindow()
     return
   end
-  self:Print("Usage: /wk [checklist | minimap]")
+  self:Print(format("Usage: /%s [checklist | minimap]", addon.name:lower()))
 end
 
 function Core:OnInitialize()
@@ -57,18 +55,20 @@ function Core:OnInitialize()
   _G["WEEKLYKNOWLEDGE_TOGGLE_CHECKLIST"] = function()
     if addon and addon.Checklist then addon.Checklist:ToggleWindow() end
   end
-  self:RegisterChatCommand("wk", "HandleCommand")
-  self:RegisterChatCommand("weeklyknowledge", "HandleCommand")
+  self:RegisterChatCommand(addon.name:lower(), "HandleCommand")
+  TableForEach(Constants.commands, function(command)
+    self:RegisterChatCommand(command, "HandleCommand")
+  end)
 
   Data:InitDB()
   Data:MigrateDB()
-  addon.LiqUI = LibLiqUI:New({name = addonName, db = Data.db.global.liqui})
+  addon.LiqUI = LibLiqUI:New({name = addon.name, db = Data.db.global.liqui})
   if Data:TaskWeeklyReset() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end
 
-  local WKLDB = LibDataBroker:NewDataObject(addonName, {
-    label = addonName,
+  local WKLDB = LibDataBroker:NewDataObject(addon.name, {
+    label = addon.title,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
     OnClick = function(...)
@@ -80,8 +80,8 @@ function Core:OnInitialize()
       end
     end,
     OnTooltipShow = function(tooltip)
-      tooltip:SetText(addonName, 1, 1, 1)
-      tooltip:AddLine("|cff00ff00Left click|r to open WeeklyKnowledge.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      tooltip:SetText(addon.title, 1, 1, 1)
+      tooltip:AddLine("|cff00ff00Left click|r to open " .. addon.title .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
       tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
       local dragText = "|cff00ff00Drag|r to move this icon"
       if Data.db.global.minimap.lock then
@@ -90,8 +90,8 @@ function Core:OnInitialize()
       tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
     end,
   })
-  LibDBIcon:Register(addonName, WKLDB, Data.db.global.minimap)
-  LibDBIcon:AddButtonToCompartment(addonName)
+  LibDBIcon:Register(addon.name, WKLDB, Data.db.global.minimap)
+  LibDBIcon:AddButtonToCompartment(addon.name)
 
   self:Render()
 end

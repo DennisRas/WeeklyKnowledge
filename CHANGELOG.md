@@ -5,6 +5,7 @@
 - Added per-window options for scale, background color, and border from the titlebar menu.
 - Updated main and checklist windows to the shared LiqUI window framework.
 - Updated table sorting and window layout persistence across reloads.
+- Updated primary chat command to `/weeklyknowledge` with `/wk` as an alias.
 
 ## v1.2.10 - 2026-06-18
 

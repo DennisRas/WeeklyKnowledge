@@ -1,5 +1,3 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
@@ -405,7 +403,7 @@ local function buildWaypointCell(character, objective, progress)
       if mapPoint then
         if IsAltKeyDown() and TomTomGlobal then
           local text = "Objective"
-          TomTomGlobal:AddWaypoint(objective.loc.m, objective.loc.x / 100, objective.loc.y / 100, {title = text, from = addonName})
+          TomTomGlobal:AddWaypoint(objective.loc.m, objective.loc.x / 100, objective.loc.y / 100, {title = text, from = addon.name})
         elseif C_Map.CanSetUserWaypointOnMap(objective.loc.m) then
           if IsModifiedClick("CHATLINK") then
             local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", objective.loc.m, objective.loc.x * 100, objective.loc.y * 100, MAP_PIN_HYPERLINK)

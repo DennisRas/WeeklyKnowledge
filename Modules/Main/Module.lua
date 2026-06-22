@@ -1,11 +1,7 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
 ---@class WK_Main
----@field TableData WK_Main_TableData
----@field TableColumns WK_Main_TableColumns
 local Main = {}
 addon.Main = Main
 
@@ -62,7 +58,7 @@ function Main:Render()
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
     self.window = addon.LiqUI.Window:New({
       name = "Main",
-      title = addonName,
+      title = addon.name,
       icon = mediaPath .. "Icon.blp",
       border = 4,
       overlayFontObject = "SystemFont_Med1",
@@ -104,7 +100,7 @@ function Main:Render()
           function() return not Data.db.global.minimap.hide end,
           function()
             Data.db.global.minimap.hide = not Data.db.global.minimap.hide
-            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+            LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
           end
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
@@ -117,7 +113,7 @@ function Main:Render()
           function() return Data.db.global.minimap.lock end,
           function()
             Data.db.global.minimap.lock = not Data.db.global.minimap.lock
-            LibDBIcon:Refresh(addonName, Data.db.global.minimap)
+            LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
           end
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)

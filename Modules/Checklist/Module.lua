@@ -1,18 +1,13 @@
----@type string
-local addonName = select(1, ...)
 ---@class WK_Addon
 local addon = select(2, ...)
 
 ---@class WK_Checklist
----@field TableData WK_Checklist_TableData
----@field TableColumns WK_Checklist_TableColumns
 local Checklist = {}
 addon.Checklist = Checklist
 
 local Main = addon.Main
 local Constants = addon.Constants
 local Data = addon.Data
-local Helpers = addon.Helpers
 local LibLiqUI = addon.libs.LiqUI
 local TableContains = LibLiqUI.Utils.TableContains
 local TableCount = LibLiqUI.Utils.TableCount
@@ -36,7 +31,7 @@ local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
 end
 
----@param row WK_TableRowData
+---@param row LiqUI_TableDataRowExtended
 ---@return string
 local function checklistObjectiveRowSortText(row)
   local objective = row.objective
@@ -107,48 +102,47 @@ function Checklist:Render()
         Data.db.global.checklist.open = false
       end,
       onSettingsMenu = function(window, rootMenu)
-            local showFullProfessionName = rootMenu:CreateCheckbox(
-              "Show full profession name",
-              function() return Data.db.global.showFullProfessionName end,
-              function()
-                Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
-                self:ApplyTableColumns()
-                self:Render()
-                Main:ApplyTableColumns()
-                Main:Render()
-              end
-            )
-            showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
-              GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
-              GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.");
-            end)
+        local showFullProfessionName = rootMenu:CreateCheckbox(
+          "Show full profession name",
+          function() return Data.db.global.showFullProfessionName end,
+          function()
+            Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
+            self:ApplyTableColumns()
+            self:Render()
+            Main:ApplyTableColumns()
+            Main:Render()
+          end
+        )
+        showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
+          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
+        end)
 
-            rootMenu:CreateCheckbox(
-              "Hide in combat",
-              function() return Data.db.global.checklist.hideInCombat end,
-              function()
-                Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
-                self:Render()
-              end
-            )
-            rootMenu:CreateCheckbox(
-              "Hide in dungeons",
-              function() return Data.db.global.checklist.hideInDungeons end,
-              function()
-                Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
-                self:Render()
-              end
-            )
-            rootMenu:CreateCheckbox(
-              "Hide completed objectives",
-              function() return Data.db.global.checklist.hideCompletedObjectives end,
-              function()
-                Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
-                self:Render()
-              end
-            )
-
-          end,
+        rootMenu:CreateCheckbox(
+          "Hide in combat",
+          function() return Data.db.global.checklist.hideInCombat end,
+          function()
+            Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
+            self:Render()
+          end
+        )
+        rootMenu:CreateCheckbox(
+          "Hide in dungeons",
+          function() return Data.db.global.checklist.hideInDungeons end,
+          function()
+            Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
+            self:Render()
+          end
+        )
+        rootMenu:CreateCheckbox(
+          "Hide completed objectives",
+          function() return Data.db.global.checklist.hideCompletedObjectives end,
+          function()
+            Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
+            self:Render()
+          end
+        )
+      end,
       titlebarButtons = {
         {
           name = "Expansion",
@@ -238,7 +232,7 @@ function Checklist:Render()
       rowStyle = {
         height = Constants.TABLE_ROW_HEIGHT,
         highlight = true,
-        striped = true
+        striped = true,
       },
       cellStyle = {
         padding = Constants.TABLE_CELL_PADDING,
