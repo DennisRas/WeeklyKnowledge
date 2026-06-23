@@ -180,6 +180,26 @@ function Core:OnEnable()
       self:Render()
     end
   )
+  self:RegisterBucketEvent(
+    { "PROFESSION_EQUIPMENT_CHANGED" },
+    2,
+    function()
+      -- Note: ClearProgressCache() is intentionally omitted -- profGearScore
+      -- is not stored in progressCache, so clearing it would be a no-op here.
+      Data:ScanProfessionEquipment()
+      self:Render()
+    end
+  )
+  self:RegisterBucketEvent(
+    { "GET_ITEM_INFO_RECEIVED" },
+    1,
+    function()
+      if Data:NeedsProfessionEquipmentRescan() then
+        Data:ScanProfessionEquipment()
+        self:Render()
+      end
+    end
+  )
 
   Data:ScanAll()
   self:Render()

@@ -120,6 +120,16 @@
 ---@field id integer
 ---@field completed boolean
 
+---@class WK_ProfessionGearSlot
+---@field itemLink string          -- Full WoW item link
+---@field itemQuality integer      -- 2=Uncommon, 3=Rare, 4=Epic
+---@field itemLevel integer        -- Item level
+---@field iconFileID integer       -- Texture fileID for the item icon
+---@field score integer            -- 0-15 computed score for this slot
+---@field craftingRank integer     -- 1-5 rank within tier (stored to avoid recalculation at render)
+---@field itemExpansionID integer? -- Expansion that owns this item (position 15 from C_Item.GetItemInfo)
+---@field pending boolean?         -- true = item data not yet in cache; slot will be rescanned on GET_ITEM_INFO_RECEIVED
+
 ---@class WK_CharacterProfession
 ---@field enabled boolean
 ---@field skillLineVariantID integer
@@ -129,6 +139,8 @@
 ---@field knowledgeMaxLevel integer
 ---@field knowledgeUnspent integer
 ---@field specializations WK_CharacterProfessionSpecialization[]
+---@field equipment WK_ProfessionGearSlot[]?  -- nil=never scanned; index 1=tool, 2=acc1, 3=acc2; nil entry=slot empty
+---@field profGearScore integer?              -- 0-45 sum of slot scores; nil if never scanned
 
 ---@class WK_CharacterProfessionSpecialization
 ---@field rootNodeID integer
@@ -291,12 +303,22 @@
 ---@field objective WK_Objective?
 ---@field progress WK_ObjectiveProgress?
 
+---@class WK_TableDataCellIcon
+---@field iconFileID integer      -- Main icon texture fileID
+---@field overlayAtlas string?    -- Atlas name for top-left corner overlay (e.g. quality star)
+---@field borderColor {r: number, g: number, b: number}? -- Border color (e.g. item quality color)
+---@field unscanned boolean?      -- true = never scanned; dims the icon to distinguish from scanned-empty
+---@field size integer?           -- Icon size in pixels (default 18)
+---@field onEnter function?       -- Called on MouseEnter; use to show a tooltip
+---@field onLeave function?       -- Called on MouseLeave; use to hide the tooltip
+
 ---@class WK_TableCell
 ---@field text string?
 ---@field backgroundColor {r: number, g: number, b: number, a: number}?
 ---@field onEnter function?
 ---@field onLeave function?
 ---@field onClick function?
+---@field icons WK_TableDataCellIcon[]?  -- If present, renders icon frames instead of text
 
 ---@class WK_TableSortConfig
 ---@field enabled boolean

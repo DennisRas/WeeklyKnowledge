@@ -353,11 +353,84 @@ function Table:CreateFrame(config)
         if isHeaderRow and tableFrame.config.sorting and tableFrame.config.sorting.enabled then
           columnFrame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         end
-        columnFrame.text:SetWordWrap(false)
-        columnFrame.text:SetJustifyH(columnTextAlign)
-        columnFrame.text:SetPoint("TOPLEFT", columnFrame, "TOPLEFT", tableFrame.config.cells.padding, -tableFrame.config.cells.padding)
-        columnFrame.text:SetPoint("BOTTOMRIGHT", columnFrame, "BOTTOMRIGHT", -tableFrame.config.cells.padding, tableFrame.config.cells.padding)
-        columnFrame.text:SetText(column.text)
+        if column.icons then
+          -- Icon cell: hide the FontString, show/create icon child frames
+          columnFrame.text:Hide()
+          columnFrame.iconFrames = columnFrame.iconFrames or {}
+
+          for i, iconData in ipairs(column.icons) do
+            local iconFrame = columnFrame.iconFrames[i]
+            if not iconFrame then
+              iconFrame = CreateFrame("Frame", nil, columnFrame)
+              iconFrame.texture = iconFrame:CreateTexture(nil, "ARTWORK")
+              iconFrame.texture:SetPoint("TOPLEFT", iconFrame, "TOPLEFT", 1, -1)
+              iconFrame.texture:SetPoint("BOTTOMRIGHT", iconFrame, "BOTTOMRIGHT", -1, 1)
+              iconFrame.border = iconFrame:CreateTexture(nil, "BACKGROUND")
+              iconFrame.border:SetAllPoints()
+              iconFrame.overlay = iconFrame:CreateTexture(nil, "OVERLAY")
+              columnFrame.iconFrames[i] = iconFrame
+            end
+
+            local iconSize = iconData.size or 18
+            iconFrame:SetSize(iconSize, iconSize)
+            iconFrame.texture:SetTexture(iconData.iconFileID)
+            if iconData.unscanned then
+              iconFrame.texture:SetVertexColor(0.4, 0.4, 0.4, 1)
+            else
+              iconFrame.texture:SetVertexColor(1, 1, 1, 1)
+            end
+
+            if iconData.borderColor then
+              local bc = iconData.borderColor
+              iconFrame.border:SetColorTexture(bc.r, bc.g, bc.b, 1)
+              iconFrame.border:Show()
+            else
+              iconFrame.border:Hide()
+            end
+
+            iconFrame.overlay:SetSize(10, 10)
+            iconFrame.overlay:ClearAllPoints()
+            iconFrame.overlay:SetPoint("TOPLEFT", iconFrame, "TOPLEFT", -2, 2)
+            if iconData.overlayAtlas then
+              iconFrame.overlay:SetAtlas(iconData.overlayAtlas)
+              iconFrame.overlay:Show()
+            else
+              iconFrame.overlay:Hide()
+            end
+
+            iconFrame:ClearAllPoints()
+            iconFrame:SetPoint("LEFT", columnFrame, "LEFT",
+              tableFrame.config.cells.padding + (i - 1) * (iconSize + 2), 0)
+            if iconData.onEnter or iconData.onLeave then
+              iconFrame:EnableMouse(true)
+              iconFrame:SetScript("OnEnter", iconData.onEnter or nil)
+              iconFrame:SetScript("OnLeave", iconData.onLeave or nil)
+              iconFrame:SetScript("OnMouseUp", function() columnFrame:onClickHandler(columnFrame) end)
+            else
+              iconFrame:EnableMouse(false)
+              iconFrame:SetScript("OnEnter", nil)
+              iconFrame:SetScript("OnLeave", nil)
+              iconFrame:SetScript("OnMouseUp", nil)
+            end
+            iconFrame:Show()
+          end
+
+          -- Hide leftover icon frames from a previous wider render
+          for i = #column.icons + 1, #columnFrame.iconFrames do
+            columnFrame.iconFrames[i]:Hide()
+          end
+        else
+          -- Text cell: show the FontString, hide any icon child frames
+          columnFrame.text:Show()
+          columnFrame.text:SetWordWrap(false)
+          columnFrame.text:SetJustifyH(columnTextAlign)
+          columnFrame.text:SetPoint("TOPLEFT", columnFrame, "TOPLEFT", tableFrame.config.cells.padding, -tableFrame.config.cells.padding)
+          columnFrame.text:SetPoint("BOTTOMRIGHT", columnFrame, "BOTTOMRIGHT", -tableFrame.config.cells.padding, tableFrame.config.cells.padding)
+          columnFrame.text:SetText(column.text)
+          if columnFrame.iconFrames then
+            for _, f in ipairs(columnFrame.iconFrames) do f:Hide() end
+          end
+        end
         columnFrame:Show()
 
         if column.backgroundColor then
