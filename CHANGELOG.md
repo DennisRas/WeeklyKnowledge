@@ -6,6 +6,7 @@
 - Updated main and checklist windows to the shared LiqUI window framework.
 - Updated table sorting and window layout persistence across reloads.
 - Updated primary chat command to `/weeklyknowledge` with `/wk` as an alias.
+- Fixed Midnight Herbalism trainer weekly tracking for "Brittle and Brilliant". Fixes #153.
 
 ## v1.2.10 - 2026-06-18
 

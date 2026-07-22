@@ -41,7 +41,7 @@ local objectives = {
   -- Midnight: Engineering
   {skillLineVariantID = 2910, categoryID = category, quests = {}, itemID = 246326, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
   -- Midnight: Herbalism
-  {skillLineVariantID = 2912, categoryID = category, quests = {}, itemID = 238467, points = 0, loc = {hint = "These are randomly looted from herbs around the world once the weekly objectives below are completed."},        requires = {{type = "quest", name = "Trainer Quest", quests = {93704, 93703, 93702, 93700}, match = "any"}, {type = "quest", name = "Gathering", quests = {81425, 81426, 81427, 81428, 81429, 81430}, match = "all"}}},
+  {skillLineVariantID = 2912, categoryID = category, quests = {}, itemID = 238467, points = 0, loc = {hint = "These are randomly looted from herbs around the world once the weekly objectives below are completed."},        requires = {{type = "quest", name = "Trainer Quest", quests = {93704, 93703, 93702, 93701, 93700}, match = "any"}, {type = "quest", name = "Gathering", quests = {81425, 81426, 81427, 81428, 81429, 81430}, match = "all"}}},
   -- Midnight: Inscription
   {skillLineVariantID = 2913, categoryID = category, quests = {}, itemID = 246328, points = 0, loc = {hint = "Awarded from Patron Orders at your crafting station."}},
   -- Midnight: Jewelcrafting

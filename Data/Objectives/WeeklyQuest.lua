@@ -41,7 +41,7 @@ local objectives = {
   -- Midnight: Engineering
   {skillLineVariantID = 2910, categoryID = category, quests = {93692},                             itemID = 263456, points = 1, loc = {m = Constants.map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
   -- Midnight: Herbalism
-  {skillLineVariantID = 2912, categoryID = category, quests = {93700, 93702, 93703, 93704},        itemID = 263462, points = 3, limit = 1,                                                                                                                      loc = {m = Constants.map.SilvermoonCity, x = 48.2, y = 51.6, hint = "Complete a quest from |cffffff00Botanist Nathera|r <Herbalism Trainer>."}},
+  {skillLineVariantID = 2912, categoryID = category, quests = {93700, 93701, 93702, 93703, 93704}, itemID = 263462, points = 3, limit = 1,                                                                                                                      loc = {m = Constants.map.SilvermoonCity, x = 48.2, y = 51.6, hint = "Complete a quest from |cffffff00Botanist Nathera|r <Herbalism Trainer>."}},
   -- Midnight: Inscription
   {skillLineVariantID = 2913, categoryID = category, quests = {93693},                             itemID = 263457, points = 4, loc = {m = Constants.map.SilvermoonCity, x = 45.0, y = 55.2, hint = "Complete a quest from the Artisan's Consortium."}},
   -- Midnight: Jewelcrafting
