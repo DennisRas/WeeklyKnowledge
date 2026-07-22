@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.3.0 - TBD
+## v1.3.0 - 2026-07-22
 
 - Added per-window options for scale, background color, and border from the titlebar menu.
 - Added an online status icon after the logged-in character's name in the main table.
