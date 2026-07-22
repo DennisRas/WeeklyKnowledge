@@ -53,8 +53,8 @@ local objectives = {
   {skillLineVariantID = 2913, categoryID = Constants.objectiveCategory.Treasure, quests = {93536}, itemID = 259196, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Brilliant Phoenix Ink
   {skillLineVariantID = 2913, categoryID = Constants.objectiveCategory.Treasure, quests = {93537}, itemID = 259197, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Loa-Blessed Rune
   -- Midnight: Jewelcrafting
-  {skillLineVariantID = 2914, categoryID = Constants.objectiveCategory.Treasure, quests = {93539}, itemID = 259198, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Void-Touched Eversong Diamond Fragments
-  {skillLineVariantID = 2914, categoryID = Constants.objectiveCategory.Treasure, quests = {93538}, itemID = 259199, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Harandar Stone Sample
+  {skillLineVariantID = 2914, categoryID = Constants.objectiveCategory.Treasure, quests = {93538}, itemID = 259198, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Void-Touched Eversong Diamond Fragments
+  {skillLineVariantID = 2914, categoryID = Constants.objectiveCategory.Treasure, quests = {93539}, itemID = 259199, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Harandar Stone Sample
   -- Midnight: Leatherworking
   {skillLineVariantID = 2915, categoryID = Constants.objectiveCategory.Treasure, quests = {93540}, itemID = 259200, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Amani Tanning Oil
   {skillLineVariantID = 2915, categoryID = Constants.objectiveCategory.Treasure, quests = {93541}, itemID = 259201, points = 2, loc = {hint = "These are randomly looted from treasures around the world."}}, -- Thalassian Mana Oil
