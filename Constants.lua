@@ -14,6 +14,7 @@ Constants.TABLE_ROW_HEIGHT = 24
 Constants.TABLE_HEADER_HEIGHT = 32
 Constants.TABLE_CELL_PADDING = 8
 Constants.MAX_WINDOW_HEIGHT = 500
+Constants.currentCharacterNameMarker = "|TInterface\\FriendsFrame\\StatusIcon-Online:12:12:2:-2|t"
 
 ---@enum WK_ObjectiveCategoryId
 Constants.objectiveCategory = {

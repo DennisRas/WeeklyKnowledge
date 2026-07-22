@@ -3,11 +3,12 @@
 ## v1.3.0 - TBD
 
 - Added per-window options for scale, background color, and border from the titlebar menu.
+- Added an online status icon after the logged-in character's name in the main table.
+- Added Midnight Herbalism trainer weekly quest "Brittle and Brilliant".
 - Updated main and checklist windows to the shared LiqUI window framework.
 - Updated table sorting and window layout persistence across reloads.
 - Updated primary chat command to `/weeklyknowledge` with `/wk` as an alias.
-- Fixed Midnight Herbalism trainer weekly tracking for "Brittle and Brilliant". Fixes #153.
-- Fixed Midnight Jewelcrafting treasure quest IDs so Harandar Stone Sample and Void-Touched Eversong Diamond Fragments mark the correct checklist rows. Fixes #151.
+- Fixed Midnight Jewelcrafting treasure checklist rows for Harandar Stone Sample and Void-Touched Eversong Diamond Fragments. Fixes #151.
 
 ## v1.2.10 - 2026-06-18
 

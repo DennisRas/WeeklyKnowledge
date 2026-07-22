@@ -20,6 +20,7 @@
 ---@class WK_Constants
 ---@field prefix string
 ---@field commands string[]
+---@field currentCharacterNameMarker string
 
 ---@class WK_Addon
 ---@field name string

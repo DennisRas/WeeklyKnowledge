@@ -46,6 +46,9 @@ local function buildNameCell(character)
       end
     end
   end
+  if character == Data:GetCharacter() then
+    name = format("%s %s", name, Constants.currentCharacterNameMarker)
+  end
   ---@type LiqUI_TableDataCellExtended
   return { data = name }
 end
