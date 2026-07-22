@@ -48,9 +48,7 @@ end
 
 function Main:Render()
   local selectedExpansions = Data.db.global.main.selectedExpansions or {}
-  local expansions = Data:GetExpansions()
   local characters = Data:GetCharacters()
-  local objectiveCategories = Data:GetObjectiveCategories()
   ---@type WK_TableRowData[]
   local rows = {}
 

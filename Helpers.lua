@@ -120,8 +120,8 @@ function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, characte
     leftText = format("SkillID: %d", objectiveProgressRequirement.requirement.id)
     rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
     local skillLevel = 0
-    local characterProfession = TableFind(character.professions, function(characterProfession)
-      return characterProfession.skillLineVariantID == skillLineVariantID
+    local characterProfession = TableFind(character.professions, function(profession)
+      return profession.skillLineVariantID == skillLineVariantID
     end)
     if characterProfession then
       skillLevel = characterProfession.skillLevel or 0

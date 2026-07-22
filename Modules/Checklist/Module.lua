@@ -86,7 +86,6 @@ end
 
 function Checklist:Render()
   local character = Data:GetCharacter()
-  local expansions = Data:GetExpansions()
   ---@type WK_TableRowData[]
   local rows = {}
 
@@ -297,8 +296,6 @@ function Checklist:Render()
         return
       end
       local filteredObjectives = TableFilter(objectives, function(objective)
-        local debugID = objective.quests[1] or objective.spellID or objective.itemID
-
         if objective.skillLineVariantID ~= skillLineVariantID then
           return false
         end

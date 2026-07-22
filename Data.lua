@@ -118,8 +118,6 @@ Data.SkillLines = {}
 Data.Expansions = {}
 
 function Data:InitDB()
-  ---@class AceDBObject-3.0
-  ---@field global WK_DefaultGlobal
   self.db = LibAceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
@@ -530,7 +528,7 @@ end
 
 ---Clear the progress cache.
 ---@param clearAll boolean? Clear progress for all characters if true
----@return table<string, WK_ObjectiveProgress>
+---@return table<string, WK_ObjectiveProgress[]>
 function Data:ClearProgressCache(clearAll)
   if clearAll then
     self.cache.progressCache = wipe(self.cache.progressCache or {})
@@ -753,8 +751,8 @@ function Data:ScanProfessions()
   TableForEach(learnedProfessions, function(learnedProfession)
     local skillLineVariant = learnedProfession.skillLineVariant
     if not skillLineVariant then return end
-    local characterProfession = TableFind(character.professions, function(characterProfession)
-      return characterProfession.skillLineVariantID == skillLineVariant.id
+    local characterProfession = TableFind(character.professions, function(profession)
+      return profession.skillLineVariantID == skillLineVariant.id
     end)
     if not characterProfession then
       ---@type WK_CharacterProfession
@@ -782,8 +780,8 @@ function Data:ScanProfessions()
     local skillLine = self:GetSkillLineByID(skillLineVariant.skillLineID)
     if not skillLine then return end
 
-    local characterProfession = TableFind(character.professions, function(characterProfession)
-      return characterProfession.skillLineVariantID == skillLineVariantID
+    local characterProfession = TableFind(character.professions, function(profession)
+      return profession.skillLineVariantID == skillLineVariantID
     end)
 
     -- Only update if the opened profession window is our own
@@ -1028,7 +1026,7 @@ function Data:ScanItems()
   Helpers:Debug("└ Finshed")
 end
 
----@return table<WOWGUID, WK_Character>
+---@return WK_Character[]
 function Data:GetCharacters()
   local characters = TableFilter(self.db.global.characters or {}, function(character)
     return true
@@ -1134,8 +1132,8 @@ end
 function Data:GetObjectiveProgress(character, objective)
   local progressCache = self.cache.progressCache[character.GUID]
   if progressCache then
-    local objectiveProgress = TableFind(progressCache, function(objectiveProgress)
-      return objectiveProgress.objective == objective
+    local objectiveProgress = TableFind(progressCache, function(cachedProgress)
+      return cachedProgress.objective == objective
     end)
     if objectiveProgress then
       return objectiveProgress

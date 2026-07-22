@@ -5,7 +5,6 @@ local Constants = addon.Constants
 
 ---@class WK_Data
 local Data = addon.Data
-local MISSING_INFO = Data.MISSING_INFO
 local category = Constants.objectiveCategory.FirstCraft
 
 -- {skillLineVariantID = 2918, categoryID = category, quests = {}, spellID =
