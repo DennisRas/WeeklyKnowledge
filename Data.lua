@@ -50,7 +50,13 @@ Data.defaultDB = {
     showFullProfessionName = true,
     liqui = {
       windows = {},
-      tables = {},
+      tables = {
+        Main = {
+          hiddenColumns = {
+            lastUpdate = true,
+          },
+        },
+      },
       loggers = {},
     },
     main = {
@@ -511,6 +517,14 @@ function Data:MigrateDB()
           realm = "",
         }
       end)
+
+      local mainTable = self.db.global.liqui.tables.Main
+      if not mainTable then
+        self.db.global.liqui.tables.Main = { hiddenColumns = { lastUpdate = true } }
+      else
+        mainTable.hiddenColumns = mainTable.hiddenColumns or {}
+        mainTable.hiddenColumns.lastUpdate = true
+      end
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()

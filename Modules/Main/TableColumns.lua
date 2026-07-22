@@ -61,6 +61,29 @@ function TableColumns.GetDefinitions()
       },
     },
     {
+      id = "lastUpdate",
+      headerText = "Last Update",
+      onEnter = function(cellFrame, columnIndex, columnId, column)
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Last Update", 1, 1, 1)
+        GameTooltip:AddLine("The last time data was saved for this character.", nil, nil, nil, true)
+        GameTooltip:Show()
+      end,
+      onLeave = function(cellFrame, columnIndex, columnId, column)
+        GameTooltip:Hide()
+      end,
+      width = 110,
+      hideable = true,
+      sorting = {
+        enabled = true,
+        compare = function(rowA, rowB)
+          local lastUpdateA = rowA.character.lastUpdate or 0
+          local lastUpdateB = rowB.character.lastUpdate or 0
+          return lastUpdateA < lastUpdateB
+        end,
+      },
+    },
+    {
       id = "profession",
       headerText = "Profession",
       onEnter = function(cellFrame, columnIndex, columnId, column)

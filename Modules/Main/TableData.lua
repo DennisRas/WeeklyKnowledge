@@ -97,6 +97,13 @@ local function buildRealmCell(character)
 end
 
 ---@param character WK_Character
+---@return LiqUI_TableDataCellExtended
+local function buildLastUpdateCell(character)
+  ---@type LiqUI_TableDataCellExtended
+  return { data = Helpers:FormatTimestamp(character.lastUpdate) }
+end
+
+---@param character WK_Character
 ---@param skillLineVariantID integer
 ---@return LiqUI_TableDataCellExtended
 local function buildProfessionCell(character, skillLineVariantID)
@@ -465,6 +472,7 @@ function TableData.BuildRow(character, characterProfession)
   local cells = {
     buildNameCell(character),
     buildRealmCell(character),
+    buildLastUpdateCell(character),
     buildProfessionCell(character, skillLineVariantID),
     buildExpansionCell(skillLineVariantID),
     buildSkillCell(characterProfession),

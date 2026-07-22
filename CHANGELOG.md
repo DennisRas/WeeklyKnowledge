@@ -5,6 +5,7 @@
 - Added per-window options for scale, background color, and border from the titlebar menu.
 - Added an online status icon after the logged-in character's name in the main table.
 - Added a character name tooltip with realm, guild, level, race, faction, money, and last update.
+- Added a Last Update column on the main table (hidden by default). Fixes #116.
 - Added Midnight Herbalism trainer weekly quest "Brittle and Brilliant".
 - Updated main and checklist windows to the shared LiqUI window framework.
 - Updated table sorting and window layout persistence across reloads.

@@ -27,6 +27,18 @@ function Helpers:CompareCharacterNameRealm(characterA, characterB)
   return strcmputf8i(characterA.realmName or "", characterB.realmName or "")
 end
 
+---Format a timestamp for table cells (e.g. "Jul 24 - 5:55 PM").
+---@param timestamp number
+---@return string
+function Helpers:FormatTimestamp(timestamp)
+  if not timestamp or timestamp <= 0 then
+    return "-"
+  end
+  local dateTable = date("*t", timestamp)
+  local timeText = GameTime_GetFormattedTime(dateTable.hour, dateTable.min, true)
+  return format("%s %d - %s", date("%b", timestamp), dateTable.day, timeText)
+end
+
 ---Print a debug message
 ---@param ... any
 function Helpers:Debug(...)
