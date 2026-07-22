@@ -1,3 +1,10 @@
+---@class WK_CharacterGuild
+---@field isInGuild boolean
+---@field name string
+---@field rankName string
+---@field rankIndex integer
+---@field realm string
+
 ---@class WK_Character
 ---@field GUID string|WOWGUID
 ---@field name string
@@ -11,6 +18,8 @@
 ---@field classID integer
 ---@field classFile ClassFile?
 ---@field className string
+---@field guild WK_CharacterGuild
+---@field money number
 ---@field lastUpdate number
 ---@field professions WK_CharacterProfession[]
 ---@field completed table<integer, boolean>

@@ -90,6 +90,14 @@ Data.defaultCharacter = {
   classID = 0,
   classFile = nil,
   className = "",
+  guild = {
+    isInGuild = false,
+    name = "",
+    rankName = "",
+    rankIndex = 0,
+    realm = "",
+  },
+  money = 0,
   professions = {},
   completed = {},
   firstCrafts = {},
@@ -492,6 +500,17 @@ function Data:MigrateDB()
           self.db.global.liqui.tables.Checklist = {hiddenColumns = TableCopy(checklist.hiddenColumns)}
         end
       end
+
+      TableForEach(self.db.global.characters, function(character)
+        character.money = 0
+        character.guild = {
+          isInGuild = false,
+          name = "",
+          rankName = "",
+          rankIndex = 0,
+          realm = "",
+        }
+      end)
     end
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
@@ -977,6 +996,15 @@ function Data:ScanCharacterInfo()
   character.classID = classID
   character.classFile = classFile
   character.className = localizedClassName
+  local guildName, guildRankName, guildRankIndex, guildRealm = GetGuildInfo("player")
+  character.guild = {
+    isInGuild = IsInGuild(),
+    name = guildName or "",
+    rankName = guildRankName or "",
+    rankIndex = guildRankIndex or 0,
+    realm = guildRealm or "",
+  }
+  character.money = GetMoney() or 0
   character.lastUpdate = GetServerTime()
   Helpers:Debug("└ Finshed")
 end

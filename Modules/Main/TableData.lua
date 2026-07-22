@@ -50,7 +50,43 @@ local function buildNameCell(character)
     name = format("%s %s", name, Constants.currentCharacterNameMarker)
   end
   ---@type LiqUI_TableDataCellExtended
-  return { data = name }
+  return {
+    data = name,
+    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
+      local nameColor = WHITE_FONT_COLOR
+      if character.classID then
+        local _, classFile = GetClassInfo(character.classID)
+        if classFile then
+          local classColor = C_ClassColor.GetClassColor(classFile)
+          if classColor then
+            nameColor = CreateColor(classColor.r, classColor.g, classColor.b, 1)
+          end
+        end
+      end
+      local title = format("%s (%s)", nameColor:WrapTextInColorCode(character.name), character.realmName)
+      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+      GameTooltip:AddLine(title, 1, 1, 1)
+      if character.guild and character.guild.isInGuild and character.guild.name ~= "" then
+        GameTooltip:AddLine(format("<%s>", character.guild.name), NECROLORD_GREEN_COLOR.r, NECROLORD_GREEN_COLOR.g, NECROLORD_GREEN_COLOR.b)
+      end
+      GameTooltip:AddLine(format("Level %d %s", character.level, character.raceName ~= "" and character.raceName or ""), 1, 1, 1)
+      if character.factionName ~= "" then
+        GameTooltip:AddLine(character.factionName, 1, 1, 1)
+      end
+      if character.money ~= nil then
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine(GetMoneyString(character.money, true), 1, 1, 1)
+      end
+      if character.lastUpdate and character.lastUpdate > 0 then
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine(format("Last update:\n|cffffffff%s|r", date("%c", character.lastUpdate)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+      end
+      GameTooltip:Show()
+    end,
+    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
+      GameTooltip:Hide()
+    end,
+  }
 end
 
 ---@param character WK_Character
