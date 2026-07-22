@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.0 - 2026-07-22
+
+- Added per-window options for scale, background color, and border from the titlebar menu.
+- Added an online status icon after the logged-in character's name in the main table.
+- Added a character name tooltip with realm, guild, level, race, faction, money, and last update.
+- Added a Last Update column on the main table (hidden by default). Fixes #116.
+- Added Midnight Herbalism trainer weekly quest "Brittle and Brilliant".
+- Updated main and checklist windows to the shared LiqUI window framework.
+- Updated table sorting and window layout persistence across reloads.
+- Updated primary chat command to `/weeklyknowledge` with `/wk` as an alias.
+- Fixed Midnight Jewelcrafting treasure checklist rows for Harandar Stone Sample and Void-Touched Eversong Diamond Fragments. Fixes #151.
+
 ## v1.2.10 - 2026-06-18
 
 - Updated TOC number to support patch 12.0.7.

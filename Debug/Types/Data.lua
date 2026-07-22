@@ -1,0 +1,50 @@
+---@class WK_DefaultGlobal
+---@field DBVersion integer?
+---@field weeklyReset integer?
+---@field minimap { minimapPos: number, hide: boolean, lock: boolean }
+---@field showFullProfessionName boolean?
+---@field characters table<string, WK_Character>
+---@field liqui LiqUI_DB
+---@field main WK_DefaultGlobalMain
+---@field checklist WK_DefaultGlobalChecklist
+
+---@class WK_DefaultGlobalMain
+---@field selectedExpansions Enum.ExpansionLevel[]?
+---@field fontSize integer?
+---@field checklistHelpTipClosed boolean?
+---@field hideLowLevelProfessions boolean?
+
+---@class WK_DefaultGlobalChecklist
+---@field selectedExpansions Enum.ExpansionLevel[]?
+---@field hiddenCategories table<WK_ObjectiveCategoryId, boolean>
+---@field windowTitlebar boolean
+---@field fontSize integer?
+---@field open boolean
+---@field hideCompletedObjectives boolean
+---@field hideInCombat boolean
+---@field hideInDungeons boolean
+---@field hideTable boolean
+---@field hideTableHeader boolean
+
+---@class WK_DataCache
+---@field calendarOpened boolean
+---@field isDarkmoonOpen boolean
+---@field inCombat boolean
+---@field items table<integer, ItemMixin>
+---@field mapInfo table<integer, UiMapDetails>
+---@field progressCache table<string, WK_ObjectiveProgress[]>
+---@field completedQuests table<integer, boolean>
+---@field tradeSkillRecipes TradeSkillRecipeInfo[]
+
+---@class WK_Data
+---@field db { global: WK_DefaultGlobal }|nil
+---@field DBVersion number
+---@field defaultDB table
+---@field defaultCharacter WK_Character
+---@field MISSING_INFO number
+---@field cache WK_DataCache
+---@field Objectives WK_Objective[]
+---@field ObjectiveCategories WK_ObjectiveCategory[]
+---@field SkillLineVariants WK_SkillLineVariant[]
+---@field SkillLines WK_SkillLine[]
+---@field Expansions WK_Expansion[]
