@@ -73,4 +73,11 @@ Constants.map = {
   Undermine = 2346,
   Voidstorm = 2405,
   ZulAman = 2437,
+  WakingShore = 2022,
+  OhnAhranPlains = 2023,
+  AzureSpan = 2024,
+  Thaldraszus = 2025,
+  Valdrakken = 2112,
+  ZaralekCavern = 2133,
+  EmeraldDream = 2200,
 }

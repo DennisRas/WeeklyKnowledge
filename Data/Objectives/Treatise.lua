@@ -54,6 +54,29 @@ local objectives = {
   {skillLineVariantID = 2917, categoryID = category, quests = {95136}, itemID = 245828, points = 1, loc = {m = Constants.map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
   -- Midnight: Tailoring
   {skillLineVariantID = 2918, categoryID = category, quests = {95137}, itemID = 245756, points = 1, loc = {m = Constants.map.SilvermoonCity, x = 45.0, y = 55.6, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+
+  -- Dragonflight: Alchemy
+  {skillLineVariantID = 2823, categoryID = category, quests = {74108}, itemID = 194702, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Blacksmithing
+  {skillLineVariantID = 2822, categoryID = category, quests = {74109}, itemID = 198454, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Enchanting
+  {skillLineVariantID = 2825, categoryID = category, quests = {74110}, itemID = 194702, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Engineering
+  {skillLineVariantID = 2827, categoryID = category, quests = {74111}, itemID = 198510, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Herbalism
+  {skillLineVariantID = 2832, categoryID = category, quests = {74107}, itemID = 194704, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Inscription
+  {skillLineVariantID = 2828, categoryID = category, quests = {74105}, itemID = 194699, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Jewelcrafting
+  {skillLineVariantID = 2829, categoryID = category, quests = {74112}, itemID = 194703, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Leatherworking
+  {skillLineVariantID = 2830, categoryID = category, quests = {74113}, itemID = 194700, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Mining
+  {skillLineVariantID = 2833, categoryID = category, quests = {74106}, itemID = 194708, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Skinning
+  {skillLineVariantID = 2834, categoryID = category, quests = {74114}, itemID = 201023, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
+  -- Dragonflight: Tailoring
+  {skillLineVariantID = 2831, categoryID = category, quests = {74115}, itemID = 194698, points = 1, loc = {m = Constants.map.Valdrakken, x = 35.0, y = 61.7, hint = "Place a crafting order if you can't craft this yourself with Inscription."}},
 }
 
 Data:RegisterObjectives(objectives)
