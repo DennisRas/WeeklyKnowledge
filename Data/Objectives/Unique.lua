@@ -300,6 +300,208 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {89084}, itemID = 238618, points = 3,  loc = {m = Constants.map.SilvermoonCity, x = 31.79, y = 68.27, hint = "Tablecloth on the left table inside the tower."}},                                                                                                                                                                                                                                                                                                                                                                                                       -- Particularly Enchanting Tablecloth
   {skillLineVariantID = 2918, categoryID = category, quests = {89085}, itemID = 238619, points = 3,  loc = {m = Constants.map.ZulAman, x = 40.53, y = 49.36, hint = "Comb on the floor inside the cave."}},                                                                                                                                                                                                                                                                                                                                                                                                                          -- Artisan's Cover Comb
   {skillLineVariantID = 2918, categoryID = category, quests = {93201}, itemID = 257601, points = 10, loc = {m = Constants.map.EversongWoods, x = 43.4, y = 47.4, hint = "<Renown Quartermaster> Caeris Fairdawn"},                                                                                                                                                                       requires = {{type = "renown", id = Constants.faction.SilvermoonCity, amount = 6}, {type = "currency", id = Constants.currency.ArtisanTailorMoxie, amount = 50}, {type = "currency", id = Constants.currency.VoidlightMarl, amount = 750}}},       -- Skill Issue: Tailoring
+
+  -- Dragonflight: Alchemy
+  {skillLineVariantID = 2823, categoryID = category, quests = {70289}, itemID = 198685, points = 3, loc = {m = Constants.map.WakingShore, x = 25.1, y = 73.3, hint = "Well Insulated Mug"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70274}, itemID = 198663, points = 3, loc = {m = Constants.map.WakingShore, x = 55.0, y = 81.0, hint = "Frostforged Potion"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70305}, itemID = 198710, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 79.22, y = 83.71, hint = "Canteen of Suspicious Water"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70208}, itemID = 198599, points = 3, loc = {m = Constants.map.AzureSpan, x = 16.4, y = 38.5, hint = "Experimental Decay Sample"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70309}, itemID = 198712, points = 3, loc = {m = Constants.map.AzureSpan, x = 67.0, y = 13.2, hint = "Firewater Powder Sample"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70278}, itemID = 203471, points = 3, loc = {m = Constants.map.Thaldraszus, x = 55.2, y = 30.5, hint = "Tasty Candy"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {75649}, itemID = 205212, points = 3, loc = {m = Constants.map.Thaldraszus, x = 59.5, y = 38.4, hint = "Contraband Concoction"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70301}, itemID = 205212, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 62.1, y = 41.12, hint = "Marrow-Ripened Slime"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {75646}, itemID = 205211, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 52.68, y = 18.30, hint = "Nutrient Diluted Protofluid"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {75651}, itemID = 205213, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 40.48, y = 59.18, hint = "Suspicious Mold"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {78269}, itemID = 210185, points = 3, loc = {m = Constants.map.EmeraldDream, x = 50.91, y = 49.43, hint = "Splash Potion of Narcolepsy"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {78264}, itemID = 210184, points = 3, loc = {m = Constants.map.EmeraldDream, x = 54.05, y = 32.64, hint = "Half-Filled Dreamless Sleep Potion"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {78275}, itemID = 210190, points = 3, loc = {m = Constants.map.EmeraldDream, x = 36.21, y = 46.63, hint = "Blazeroot"}},
+  {skillLineVariantID = 2823, categoryID = category, quests = {70247}, itemID = 190456, points = 5, loc = {m = Constants.map.WakingShore, x = 60.92, y = 75.84, hint = "Talk to Grigori Vialtry"}},
+  -- Dragonflight: Blacksmithing
+  {skillLineVariantID = 2822, categoryID = category, quests = {70230}, itemID = 198791, points = 3, loc = {m = Constants.map.WakingShore, x = 56.4, y = 19.5, hint = "Glimmer of Blacksmithing Wisdom (Take crafting mats for a primal alloy)"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70246}, itemID = 201007, points = 3, loc = {m = Constants.map.WakingShore, x = 22.0, y = 87.0, hint = "Ancient Monument"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70312}, itemID = 201005, points = 3, loc = {m = Constants.map.WakingShore, x = 65.5, y = 25.7, hint = "Curious Ingots"}}, 
+  {skillLineVariantID = 2822, categoryID = category, quests = {70296}, itemID = 201008, points = 3, loc = {m = Constants.map.WakingShore, x = 35.5, y = 64.3, hint = "Molten Ingot"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70310}, itemID = 201010, points = 3, loc = {m = Constants.map.WakingShore, x = 34.5, y = 67.1, hint = "Qalashi Weapon Diagram"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70313}, itemID = 201004, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 81.1, y = 37.9, hint = "Ancient Spear Shards"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70353}, itemID = 201009, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 50.9, y = 66.5, hint = "Falconer Gauntlet Drawings"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70314}, itemID = 201011, points = 3, loc = {m = Constants.map.AzureSpan, x = 53.1, y = 65.3, hint = "Spelltouched Tongs"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70311}, itemID = 201006, points = 3, loc = {m = Constants.map.Thaldraszus, x = 52.2, y = 80.5, hint = "Draconic Flux"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {76079}, itemID = 205987, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 48.30, y = 21.95, hint = "Brimstone Rescue Ring"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {76078}, itemID = 205986, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 57.15, y = 54.64, hint = "Well-Worn Kiln"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {76080}, itemID = 205988, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 27.53, y = 42.87, hint = "Zaqali Elder Spear"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {78418}, itemID = 210465, points = 3, loc = {m = Constants.map.EmeraldDream, x = 36.34, y = 46.79, hint = "Deathstalker Chassis"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {78419}, itemID = 210466, points = 3, loc = {m = Constants.map.EmeraldDream, x = 37.29, y = 22.94, hint = "Flamesworn Render"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {78417}, itemID = 210464, points = 3, loc = {m = Constants.map.EmeraldDream, x = 49.83, y = 62.99, hint = "Amirdrassil Defender's Shield"}},
+  {skillLineVariantID = 2822, categoryID = category, quests = {70250}, itemID = 190456, points = 5, loc = {m = Constants.map.WakingShore, x = 43.32, y = 66.60, hint = "Talk to Grekka Anvilsmash"}},
+  -- Dragonflight: Enchanting
+  {skillLineVariantID = 2825, categoryID = category, quests = {70320}, itemID = 198798, points = 3, loc = {m = Constants.map.WakingShore, x = 57.5, y = 83.6, hint = "Flashfrozen Scroll"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70283}, itemID = 198675, points = 3, loc = {m = Constants.map.WakingShore, x = 68.0, y = 26.8, hint = "Lava-Infused Seed"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70272}, itemID = 201012, points = 3, loc = {m = Constants.map.WakingShore, x = 57.5, y = 58.5, hint = "Enchanted Debris (Interact with disenchanted broom)"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70291}, itemID = 198689, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 61.4, y = 67.6, hint = "Stormbound Horn"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70336}, itemID = 198799, points = 3, loc = {m = Constants.map.AzureSpan, x = 38.5, y = 59.2, hint = "Forgotten Arcane Tome"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70290}, itemID = 201013, points = 3, loc = {m = Constants.map.AzureSpan, x = 45.1, y = 61.2, hint = "Faintly Enchanted Remains"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70298}, itemID = 198694, points = 3, loc = {m = Constants.map.AzureSpan, x = 21.55, y = 45.5, hint = "Enriched Earthen Shard"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70342}, itemID = 198800, points = 3, loc = {m = Constants.map.Thaldraszus, x = 59.9, y = 70.4, hint = "Fractured Titanic Sphere"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {75508}, itemID = 204990, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 48.00, y = 17.00, hint = "Lava-Drenched Shadow Crystal"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {75510}, itemID = 205001, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 36.66, y = 69.33, hint = "Resonating Arcane Crystal"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {75509}, itemID = 204999, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 62.39, y = 53.80, hint = "Shimmering Aqueous Orb"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {78309}, itemID = 210231, points = 3, loc = {m = Constants.map.EmeraldDream, x = 46.16, y = 20.51, hint = "Everburning Core"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {78308}, itemID = 210228, points = 3, loc = {m = Constants.map.EmeraldDream, x = 38.37, y = 30.20, hint = "Pure Dream Water"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {78310}, itemID = 210234, points = 3, loc = {m = Constants.map.EmeraldDream, x = 66.36, y = 74.20, hint = "Essence of Dreams"}},
+  {skillLineVariantID = 2825, categoryID = category, quests = {70251}, itemID = 190456, points = 5, loc = {m = Constants.map.OhnAhranPlains, x = 62.42, y = 18.70, hint = "Talk to Shalasar Glimmerdusk"}},
+  -- Dragonflight: Engineering
+  {skillLineVariantID = 2827, categoryID = category, quests = {70270}, itemID = 201014, points = 3, loc = {m = Constants.map.WakingShore, x = 56.0, y = 44.9, hint = "Boomthyr Rocket"}}, -- Boomthyr Rocket
+  {skillLineVariantID = 2827, categoryID = category, quests = {70275}, itemID = 198789, points = 3, loc = {m = Constants.map.WakingShore, x = 49.09, y = 77.54, hint = "Intact Coil Capacitor"}}, -- Intact Coil Capacitor
+  {skillLineVariantID = 2827, categoryID = category, quests = {75186}, itemID = 204475, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 37.82, y = 58.83, hint = "Busted Wyrmhole Generator"}}, -- Busted Wyrmhole Generator
+  {skillLineVariantID = 2827, categoryID = category, quests = {75184}, itemID = 204471, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 50.51, y = 47.85, hint = "Defective Survival Pack"}}, -- Defective Survival Pack
+  {skillLineVariantID = 2827, categoryID = category, quests = {75431}, itemID = 204853, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 49.44, y = 78.99, hint = "Discarded Dracothyst Drill"}}, -- Discarded Dracothyst Drill
+  {skillLineVariantID = 2827, categoryID = category, quests = {75430}, itemID = 204850, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 57.65, y = 73.94, hint = "Handful of Khaz'gorite Bolts"}}, -- Handful of Khaz'gorite Bolts
+  {skillLineVariantID = 2827, categoryID = category, quests = {75183}, itemID = 204470, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 48.15, y = 27.99, hint = "Haphazardly Discarded Bomb"}}, -- Haphazardly Discarded Bomb
+  {skillLineVariantID = 2827, categoryID = category, quests = {75188}, itemID = 204480, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 49.87, y = 59.25, hint = "Inconspicuous Data Miner"}}, -- Inconspicuous Data Miner
+  {skillLineVariantID = 2827, categoryID = category, quests = {75180}, itemID = 204469, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 48.47, y = 48.61, hint = "Misplaced Aberrus Outflow Blueprints"}}, -- Misplaced Aberrus Outflow Blueprints
+  {skillLineVariantID = 2827, categoryID = category, quests = {75433}, itemID = 204855, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 48.10, y = 16.59, hint = "Overclocked Determination Core"}}, -- Overclocked Determination Core
+  {skillLineVariantID = 2827, categoryID = category, quests = {78279}, itemID = 210194, points = 3, loc = {m = Constants.map.EmeraldDream, x = 62.50, y = 74.6, hint = "Insomniotron"}}, -- Insomniotron
+  {skillLineVariantID = 2827, categoryID = category, quests = {78278}, itemID = 210193, points = 3, loc = {m = Constants.map.EmeraldDream, x = 39.55, y = 52.28, hint = "Experimental Dreamcatcher"}}, -- Experimental Dreamcatcher
+  {skillLineVariantID = 2827, categoryID = category, quests = {78281}, itemID = 210197, points = 3, loc = {m = Constants.map.EmeraldDream, x = 62.66, y = 36.27, hint = "Unhatched Battery"}}, -- Unhatched Battery
+  {skillLineVariantID = 2827, categoryID = category, quests = {70252}, itemID = 190456, points = 5, loc = {m = Constants.map.AzureSpan, x = 17.80, y = 21.70, hint = "Talk to Frizz Buzzcrank"}},
+  -- Dragonflight: Herbalism
+  {skillLineVariantID = 2832, categoryID = category, quests = {70253}, itemID = 190456, points = 10, loc = {m = Constants.map.OhnAhranPlains, x = 58.42, y = 50.04, hint = "Talk to Hua Greenpaw"}},
+  -- Dragonflight: Inscription
+  {skillLineVariantID = 2828, categoryID = category, quests = {70306}, itemID = 198704, points = 3, loc = {m = Constants.map.WakingShore, x = 67.87, y = 57.96, hint = "Pulsing Earth Rune"}}, -- Pulsing Earth Rune
+  {skillLineVariantID = 2828, categoryID = category, quests = {70307}, itemID = 198703, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 85.7, y = 25.2, hint = "Sign Language Reference Sheet"}}, -- Sign Language Reference Sheet
+  {skillLineVariantID = 2828, categoryID = category, quests = {70297}, itemID = 198693, points = 3, loc = {m = Constants.map.AzureSpan, x = 46.2, y = 23.9, hint = "Dusty Darkmoon Card (Please verify hidden quest id)"}}, -- Dusty Darkmoon Card
+  {skillLineVariantID = 2828, categoryID = category, quests = {70293}, itemID = 198686, points = 3, loc = {m = Constants.map.AzureSpan, x = 43.7, y = 30.9, hint = "Frosted Parchment"}}, -- Frosted Parchment
+  {skillLineVariantID = 2828, categoryID = category, quests = {70281}, itemID = 198669, points = 3, loc = {m = Constants.map.Valdrakken, x = 13.2, y = 63.68, hint = "How to Train Your Whelpling (bugged; use bronze timelock, zone, return)"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {70264}, itemID = 198659, points = 3, loc = {m = Constants.map.Thaldraszus, x = 56.29, y = 41.17, hint = "Forgetful Apprentice's Tome (2)"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {70248}, itemID = 198659, points = 3, loc = {m = Constants.map.Thaldraszus, x = 47.24, y = 40.1, hint = "Forgetful Apprentice's Tome (1)"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {70287}, itemID = 201015, points = 3, loc = {m = Constants.map.Thaldraszus, x = 56.1, y = 40.9, hint = "Counterfeit Darkmoon Deck"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {76120}, itemID = 206034, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 53.01, y = 74.27, hint = "Hissing Rune Draft"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {76121}, itemID = 206035, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 54.57, y = 20.21, hint = "Ancient Research"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {76117}, itemID = 206031, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 36.73, y = 46.32, hint = "Intricate Zaqali Runes"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {78411}, itemID = 210458, points = 3, loc = {m = Constants.map.EmeraldDream, x = 55.64, y = 27.49, hint = "Winnie's Notes on Flora and Fauna"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {78413}, itemID = 210460, points = 3, loc = {m = Constants.map.EmeraldDream, x = 36.04, y = 46.64, hint = "Primalist Shadowbinding Rune"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {78412}, itemID = 210459, points = 3, loc = {m = Constants.map.EmeraldDream, x = 63.50, y = 71.52, hint = "Grove Keeper's Pillar"}},
+  {skillLineVariantID = 2828, categoryID = category, quests = {70254}, itemID = 190456, points = 5, loc = {m = Constants.map.AzureSpan, x = 40.24, y = 64.30, hint = "Talk to Lydiara Whisperfeather"}},
+  -- Dragonflight: Jewelcrafting
+  {skillLineVariantID = 2829, categoryID = category, quests = {70292}, itemID = 198687, points = 3, loc = {m = Constants.map.WakingShore, x = 50.4, y = 45.1, hint = "Closely Guarded Shiny"}}, -- Closely Guarded Shiny
+  {skillLineVariantID = 2829, categoryID = category, quests = {70273}, itemID = 201017, points = 3, loc = {m = Constants.map.WakingShore, x = 33.9, y = 63.7, hint = "Igneous Gem"}}, -- Igneous Gem
+  {skillLineVariantID = 2829, categoryID = category, quests = {70282}, itemID = 198670, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 25.2, y = 35.4, hint = "Lofty Malygite"}}, -- Lofty Malygite
+  {skillLineVariantID = 2829, categoryID = category, quests = {70263}, itemID = 198660, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 61.8, y = 13.0, hint = "Fragmented Key"}}, -- Fragmented Key
+  {skillLineVariantID = 2829, categoryID = category, quests = {70277}, itemID = 198664, points = 3, loc = {m = Constants.map.AzureSpan, x = 45.0, y = 61.3, hint = "Crystalline Overgrowth"}}, -- Crystalline Overgrowth
+  {skillLineVariantID = 2829, categoryID = category, quests = {70271}, itemID = 201016, points = 3, loc = {m = Constants.map.AzureSpan, x = 44.6, y = 61.2, hint = "Harmonic Crystal Harmonizer"}}, -- Harmonic Crystal Harmonizer
+  {skillLineVariantID = 2829, categoryID = category, quests = {70285}, itemID = 198682, points = 3, loc = {m = Constants.map.Thaldraszus, x = 59.8, y = 65.2, hint = "Alexstraszite Cluster"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {70261}, itemID = 198656, points = 3, loc = {m = Constants.map.Thaldraszus, x = 56.91, y = 43.72, hint = "Painter's Pretty Jewel"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {75654}, itemID = 205219, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 54.41, y = 32.47, hint = "Broken Barter Boulder"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {75653}, itemID = 205216, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 34.47, y = 45.43, hint = "Gently Jostled Jewels"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {75652}, itemID = 205214, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 40.37, y = 80.66, hint = "Snubbed Snail Shells"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {78282}, itemID = 210200, points = 3, loc = {m = Constants.map.EmeraldDream, x = 33.23, y = 46.57, hint = "Petrified Hope"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {78283}, itemID = 210201, points = 3, loc = {m = Constants.map.EmeraldDream, x = 43.51, y = 33.36, hint = "Handful of Pebbles"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {78285}, itemID = 210202, points = 3, loc = {m = Constants.map.EmeraldDream, x = 58.95, y = 53.89, hint = "Coalesced Dreamstone"}},
+  {skillLineVariantID = 2829, categoryID = category, quests = {70255}, itemID = 190456, points = 5, loc = {m = Constants.map.AzureSpan, x = 46.23, y = 40.84, hint = "Talk to Pluutar"}},
+  -- Dragonflight: Leatherworking
+  {skillLineVariantID = 2830, categoryID = category, quests = {70308}, itemID = 198711, points = 3, loc = {m = Constants.map.WakingShore, x = 39.0, y = 86.0, hint = "Poacher's Pack"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70280}, itemID = 198667, points = 3, loc = {m = Constants.map.WakingShore, x = 64.3, y = 25.4, hint = "Spare Djaradin Tools"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70300}, itemID = 198696, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 86.4, y = 53.7, hint = "Wind-Blessed Hide"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70269}, itemID = 201018, points = 3, loc = {m = Constants.map.AzureSpan, x = 12.5, y = 49.4, hint = "Well-Danced Drum"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70266}, itemID = 198658, points = 3, loc = {m = Constants.map.AzureSpan, x = 16.7, y = 38.8, hint = "Decay-Infused Tanning Oil"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70286}, itemID = 198683, points = 3, loc = {m = Constants.map.AzureSpan, x = 57.5, y = 41.3, hint = "Treated Hides"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70294}, itemID = 198690, points = 3, loc = {m = Constants.map.Thaldraszus, x = 56.8, y = 30.5, hint = "Decayed Scales"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {75495}, itemID = 204986, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 41.16, y = 48.81, hint = "Flame-Infused Scale Oil"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {75496}, itemID = 204987, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 45.25, y = 21.12, hint = "Lava-Forged Leatherworker's Knife"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {75502}, itemID = 204988, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 49.56, y = 54.80, hint = "Sulfur-Soaked Skins"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {78305}, itemID = 210215, points = 3, loc = {m = Constants.map.EmeraldDream, x = 34.04, y = 29.65, hint = "Dreamtalon Claw"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {78298}, itemID = 210208, points = 3, loc = {m = Constants.map.EmeraldDream, x = 41.75, y = 66.49, hint = "Tuft of Dreamsaber Fur"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {78299}, itemID = 210211, points = 3, loc = {m = Constants.map.EmeraldDream, x = 37.45, y = 71.02, hint = "Molted Faerie Dragon Scales"}},
+  {skillLineVariantID = 2830, categoryID = category, quests = {70256}, itemID = 190456, points = 5, loc = {m = Constants.map.OhnAhranPlains, x = 82.42, y = 50.63, hint = "Talk to Erden"}},
+  -- Dragonflight: Mining
+  {skillLineVariantID = 2833, categoryID = category, quests = {70258}, itemID = 190456, points = 10, loc = {m = Constants.map.Thaldraszus, x = 61.42, y = 76.95, hint = "Talk to Bridgette Holdug"}},
+  -- Dragonflight: Skinning
+  {skillLineVariantID = 2834, categoryID = category, quests = {70259}, itemID = 190456, points = 10, loc = {m = Constants.map.WakingShore, x = 73.34, y = 69.72, hint = "Talk to Zenzi"}},
+  -- Dragonflight: Tailoring
+  {skillLineVariantID = 2831, categoryID = category, quests = {70302}, itemID = 198699, points = 3, loc = {m = Constants.map.WakingShore, x = 74.7, y = 37.9, hint = "Mysterious Banner"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70304}, itemID = 198702, points = 3, loc = {m = Constants.map.WakingShore, x = 24.9, y = 69.7, hint = "Itinerant Singed Fabric"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70295}, itemID = 198692, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 35.34, y = 40.12, hint = "Noteworthy Scrap of Carpet"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70303}, itemID = 201020, points = 3, loc = {m = Constants.map.OhnAhranPlains, x = 66.1, y = 52.9, hint = "Silky Surprise"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70284}, itemID = 198680, points = 3, loc = {m = Constants.map.AzureSpan, x = 16.2, y = 38.8, hint = "Decaying Brackenhide Blanket (Please verify hidden quest id)"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70267}, itemID = 198662, points = 3, loc = {m = Constants.map.AzureSpan, x = 40.7, y = 54.5, hint = "Intriguing Bolt of Blue Cloth"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70288}, itemID = 198684, points = 3, loc = {m = Constants.map.Thaldraszus, x = 60.4, y = 79.7, hint = "Miniature Bronze Dragonflight Banner"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70372}, itemID = 201019, points = 3, loc = {m = Constants.map.Thaldraszus, x = 58.6, y = 45.8, hint = "Ancient Dragonweave Bolt"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {76102}, itemID = 206019, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 47.21, y = 48.55, hint = "Abandoned Reserve Chute"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {76116}, itemID = 206030, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 44.52, y = 15.65, hint = "Exquisitely Embroidered Banner"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {76110}, itemID = 206025, points = 3, loc = {m = Constants.map.ZaralekCavern, x = 59.11, y = 73.14, hint = "Used Medical Wrap Kit"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {78414}, itemID = 210461, points = 3, loc = {m = Constants.map.EmeraldDream, x = 53.27, y = 27.92, hint = "Exceedingly Soft Wildercloth"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {78416}, itemID = 210463, points = 3, loc = {m = Constants.map.EmeraldDream, x = 40.70, y = 86.16, hint = "Snuggle Buddy"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {78415}, itemID = 210462, points = 3, loc = {m = Constants.map.EmeraldDream, x = 49.83, y = 61.48, hint = "Plush Pillow"}},
+  {skillLineVariantID = 2831, categoryID = category, quests = {70260}, itemID = 190456, points = 5, loc = {m = Constants.map.Valdrakken, x = 27.96, y = 45.79, hint = "Talk to Elysa Raywinder"}},
+  -- Dragonflight: Harlowe Marl
+  {skillLineVariantID = 2823, categoryID = category, quests = {75756}, itemID = 205353, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Alchemy
+  {skillLineVariantID = 2822, categoryID = category, quests = {75755}, itemID = 205352, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Blacksmithing
+  {skillLineVariantID = 2825, categoryID = category, quests = {75752}, itemID = 205351, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Enchanting
+  {skillLineVariantID = 2827, categoryID = category, quests = {75759}, itemID = 205349, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Engineering
+  {skillLineVariantID = 2832, categoryID = category, quests = {75753}, itemID = 205358, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Herbalism
+  {skillLineVariantID = 2828, categoryID = category, quests = {75761}, itemID = 205354, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Inscription
+  {skillLineVariantID = 2829, categoryID = category, quests = {75754}, itemID = 205348, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Jewelcrafting
+  {skillLineVariantID = 2830, categoryID = category, quests = {75751}, itemID = 205350, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Leatherworking
+  {skillLineVariantID = 2833, categoryID = category, quests = {75758}, itemID = 205356, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Mining
+  {skillLineVariantID = 2834, categoryID = category, quests = {75760}, itemID = 205357, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Skinning
+  {skillLineVariantID = 2831, categoryID = category, quests = {75757}, itemID = 205355, points = 10, loc = {m = Constants.map.ZaralekCavern, x = 56.4, y = 55.6, hint = "Buy from Harlowe Marl"}}, -- Tailoring
+  -- Dragonflight: Ponzo
+  {skillLineVariantID = 2823, categoryID = category, quests = {75847}, itemID = 205429, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Alchemy
+  {skillLineVariantID = 2823, categoryID = category, quests = {75848}, itemID = 205440, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Alchemy
+  {skillLineVariantID = 2822, categoryID = category, quests = {75849}, itemID = 205439, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Blacksmithing
+  {skillLineVariantID = 2822, categoryID = category, quests = {75846}, itemID = 205428, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Blacksmithing
+  {skillLineVariantID = 2825, categoryID = category, quests = {75850}, itemID = 205438, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Enchanting
+  {skillLineVariantID = 2825, categoryID = category, quests = {75845}, itemID = 205427, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Enchanting
+  {skillLineVariantID = 2827, categoryID = category, quests = {75844}, itemID = 205425, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Engineering
+  {skillLineVariantID = 2827, categoryID = category, quests = {75851}, itemID = 205436, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Engineering
+  {skillLineVariantID = 2832, categoryID = category, quests = {75843}, itemID = 205434, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Herbalism
+  {skillLineVariantID = 2832, categoryID = category, quests = {75852}, itemID = 205445, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Herbalism
+  {skillLineVariantID = 2828, categoryID = category, quests = {75853}, itemID = 205441, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Inscription
+  {skillLineVariantID = 2828, categoryID = category, quests = {75842}, itemID = 205430, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Inscription
+  {skillLineVariantID = 2829, categoryID = category, quests = {75841}, itemID = 205424, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Jewelcrafting
+  {skillLineVariantID = 2829, categoryID = category, quests = {75854}, itemID = 205435, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Jewelcrafting
+  {skillLineVariantID = 2830, categoryID = category, quests = {75840}, itemID = 205426, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Leatherworking
+  {skillLineVariantID = 2830, categoryID = category, quests = {75855}, itemID = 205437, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Leatherworking
+  {skillLineVariantID = 2833, categoryID = category, quests = {75856}, itemID = 205443, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Mining
+  {skillLineVariantID = 2833, categoryID = category, quests = {75839}, itemID = 205432, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Mining
+  {skillLineVariantID = 2834, categoryID = category, quests = {75838}, itemID = 205433, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Skinning
+  {skillLineVariantID = 2834, categoryID = category, quests = {75857}, itemID = 205444, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Skinning
+  {skillLineVariantID = 2831, categoryID = category, quests = {75837}, itemID = 205431, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Tailoring
+  {skillLineVariantID = 2831, categoryID = category, quests = {75858}, itemID = 205442, points = 5, loc = {m = Constants.map.ZaralekCavern, x = 58.0, y = 53.8, hint = "Buy from Ponzo"}}, -- Tailoring
+  -- Dragonflight: Rabul
+  {skillLineVariantID = 2823, categoryID = category, quests = {71915}, itemID = 201281, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Alchemy
+  {skillLineVariantID = 2823, categoryID = category, quests = {71893}, itemID = 200974, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Alchemy
+  {skillLineVariantID = 2823, categoryID = category, quests = {71904}, itemID = 201270, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Alchemy
+  {skillLineVariantID = 2822, categoryID = category, quests = {71916}, itemID = 201279, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Blacksmithing
+  {skillLineVariantID = 2822, categoryID = category, quests = {71894}, itemID = 200972, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Blacksmithing
+  {skillLineVariantID = 2822, categoryID = category, quests = {71905}, itemID = 201268, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Blacksmithing
+  {skillLineVariantID = 2825, categoryID = category, quests = {71917}, itemID = 201283, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Enchanting
+  {skillLineVariantID = 2825, categoryID = category, quests = {71895}, itemID = 200976, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Enchanting
+  {skillLineVariantID = 2825, categoryID = category, quests = {71906}, itemID = 201272, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Enchanting
+  {skillLineVariantID = 2827, categoryID = category, quests = {71918}, itemID = 201284, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Engineering
+  {skillLineVariantID = 2827, categoryID = category, quests = {71896}, itemID = 200977, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Engineering
+  {skillLineVariantID = 2827, categoryID = category, quests = {71907}, itemID = 201273, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Engineering
+  {skillLineVariantID = 2832, categoryID = category, quests = {71919}, itemID = 201287, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Herbalism
+  {skillLineVariantID = 2832, categoryID = category, quests = {71897}, itemID = 200980, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Herbalism
+  {skillLineVariantID = 2832, categoryID = category, quests = {71908}, itemID = 201276, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Herbalism
+  {skillLineVariantID = 2828, categoryID = category, quests = {71920}, itemID = 201280, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Inscription
+  {skillLineVariantID = 2828, categoryID = category, quests = {71898}, itemID = 200973, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Inscription
+  {skillLineVariantID = 2828, categoryID = category, quests = {71909}, itemID = 201269, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Inscription
+  {skillLineVariantID = 2829, categoryID = category, quests = {71921}, itemID = 201285, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Jewelcrafting
+  {skillLineVariantID = 2829, categoryID = category, quests = {71899}, itemID = 200978, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Jewelcrafting
+  {skillLineVariantID = 2829, categoryID = category, quests = {71910}, itemID = 201274, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Jewelcrafting
+  {skillLineVariantID = 2830, categoryID = category, quests = {71922}, itemID = 201286, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Leatherworking
+  {skillLineVariantID = 2830, categoryID = category, quests = {71900}, itemID = 200979, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Leatherworking
+  {skillLineVariantID = 2830, categoryID = category, quests = {71911}, itemID = 201275, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Leatherworking
+  {skillLineVariantID = 2833, categoryID = category, quests = {71923}, itemID = 201288, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Mining
+  {skillLineVariantID = 2833, categoryID = category, quests = {71901}, itemID = 200981, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Mining
+  {skillLineVariantID = 2833, categoryID = category, quests = {71912}, itemID = 201277, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Mining
+  {skillLineVariantID = 2834, categoryID = category, quests = {71924}, itemID = 201289, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Skinning
+  {skillLineVariantID = 2834, categoryID = category, quests = {71902}, itemID = 200982, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Skinning
+  {skillLineVariantID = 2834, categoryID = category, quests = {71913}, itemID = 201278, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Skinning
+  {skillLineVariantID = 2831, categoryID = category, quests = {71925}, itemID = 201282, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Tailoring
+  {skillLineVariantID = 2831, categoryID = category, quests = {71903}, itemID = 200975, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Tailoring
+  {skillLineVariantID = 2831, categoryID = category, quests = {71914}, itemID = 201271, points = 10, loc = {m = Constants.map.Valdrakken, x = 35.6, y = 59.6, hint = "Buy from Rabul"}}, -- Tailoring
 }
 
 Data:RegisterObjectives(objectives)

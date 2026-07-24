@@ -7,17 +7,17 @@ local Data = addon.Data
 ---@type WK_SkillLineVariant[]
 Data.SkillLineVariants = {
   -- Dragonflight (Dragon Isles)
-  {id = 2823, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 171, name = "Dragon Isles Alchemy",        catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3054
-  {id = 2822, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 164, name = "Dragon Isles Blacksmithing",  catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3050
-  {id = 2825, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 333, name = "Dragon Isles Enchanting",     catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3051
-  {id = 2827, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 202, name = "Dragon Isles Engineering",    catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3052
+  {id = 2823, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 171, name = "Dragon Isles Alchemy",        catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3054}, -- 3054
+  {id = 2822, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 164, name = "Dragon Isles Blacksmithing",  catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3050}, -- 3050
+  {id = 2825, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 333, name = "Dragon Isles Enchanting",     catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3051}, -- 3051
+  {id = 2827, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 202, name = "Dragon Isles Engineering",    catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3052}, -- 3052
   {id = 2832, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 182, name = "Dragon Isles Herbalism",      catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0},
-  {id = 2828, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 773, name = "Dragon Isles Inscription",    catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3053
-  {id = 2829, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 755, name = "Dragon Isles Jewelcrafting",  catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3047
-  {id = 2830, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 165, name = "Dragon Isles Leatherworking", catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3049
+  {id = 2828, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 773, name = "Dragon Isles Inscription",    catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3053}, -- 3053
+  {id = 2829, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 755, name = "Dragon Isles Jewelcrafting",  catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3047}, -- 3047
+  {id = 2830, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 165, name = "Dragon Isles Leatherworking", catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3049}, -- 3049
   {id = 2833, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 186, name = "Dragon Isles Mining",         catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0},
   {id = 2834, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 393, name = "Dragon Isles Skinning",       catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0},
-  {id = 2831, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 197, name = "Dragon Isles Tailoring",      catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 0}, -- 3048
+  {id = 2831, expansionID = Enum.ExpansionLevel.Dragonflight, skillLineID = 197, name = "Dragon Isles Tailoring",      catchUpCurrencyID = 0,    catchUpItemID = 0,      concentrationCurrencyID = 3048}, -- 3048
   -- The War Within (Khaz Algar)
   {id = 2871, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 171, name = "Khaz Algar Alchemy",          catchUpCurrencyID = 3057, catchUpItemID = 228724, concentrationCurrencyID = 3045},
   {id = 2872, expansionID = Enum.ExpansionLevel.WarWithin,    skillLineID = 164, name = "Khaz Algar Blacksmithing",    catchUpCurrencyID = 3058, catchUpItemID = 228726, concentrationCurrencyID = 3040},
