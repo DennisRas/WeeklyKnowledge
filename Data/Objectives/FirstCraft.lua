@@ -709,6 +709,9 @@ local objectives = {
   {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1230883, points = 1}, -- Vicious Thalassian Flask of Honor
   {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1230857, points = 1}, -- Voidlight Potion Cauldron
   {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1230874, points = 1}, -- Cauldron of Sin'dorei Flasks
+  {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1289744, points = 1}, -- Concentrated Silvermoon Health Potion
+  {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1289745, points = 1}, -- Liquid Luster
+  {skillLineVariantID = 2906, categoryID = category, quests = {},      spellID = 1289746, points = 1}, -- Alluring Nostrum
   -- Midnight: Blacksmithing
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230769, points = 1}, -- Sunforged Blacksmith's Hammer
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1262899, points = 1}, -- Sunforged Leatherworker's Knife
@@ -800,6 +803,9 @@ local objectives = {
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230763, points = 1}, -- Sterling Alloy
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230764, points = 1}, -- Refulgent Repair Hammer
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1265906, points = 1}, -- Thalassian Skeleton Key
+  {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230765, points = 1}, -- Thalassian Master Repair Hammer
+  {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1291682, points = 1}, -- Odious Alloy
+  {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1291683, points = 1}, -- Hunter's Ritual Stone
   -- Midnight: Enchanting
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236069, points = 1}, -- Enchant Chest - Mark of the Worldsoul
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236054, points = 1}, -- Enchant Chest - Mark of Nalorakk
@@ -880,6 +886,7 @@ local objectives = {
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236491, points = 1}, -- Thalassian Phoenix Oil
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236492, points = 1}, -- Oil of Dawn
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236493, points = 1}, -- Smuggler's Enchanted Edge
+  {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1291694, points = 1}, -- Enchant Weapon - Rite of the Hash'ey
   -- Midnight: Engineering
   {skillLineVariantID = 2910, categoryID = category, quests = {90138}, spellID = 1229755, points = 1}, -- Song Gear
   {skillLineVariantID = 2910, categoryID = category, quests = {90229}, spellID = 1229853, points = 1}, -- Soul Sprocket
@@ -974,6 +981,9 @@ local objectives = {
   {skillLineVariantID = 2910, categoryID = category, quests = {93230}, spellID = 1261893, points = 1}, -- Smuggler's Lynxeye
   {skillLineVariantID = 2910, categoryID = category, quests = {93231}, spellID = 1261895, points = 1}, -- Laced Zoomshots
   {skillLineVariantID = 2910, categoryID = category, quests = {93231}, spellID = 1261913, points = 1}, -- Weighted Boomshots
+  {skillLineVariantID = 2910, categoryID = category, quests = {}, spellID = 1305148, points = 1}, -- R0CKY-To-Go
+  {skillLineVariantID = 2910, categoryID = category, quests = {}, spellID = 1297647, points = 1}, -- G-00
+  {skillLineVariantID = 2910, categoryID = category, quests = {}, spellID = 1291687, points = 1}, -- Coiled Snake-Eye
   -- Midnight: Herbalism
   {skillLineVariantID = 2912, categoryID = category, quests = {87729}, spellID = 1223099, points = 1}, -- Tranquility Bloom
   {skillLineVariantID = 2912, categoryID = category, quests = {87730}, spellID = 1223148, points = 1}, -- Lush Tranquility Bloom
@@ -1005,6 +1015,11 @@ local objectives = {
   {skillLineVariantID = 2912, categoryID = category, quests = {87758}, spellID = 1224899, points = 1}, -- Voidbound Mana Lily
   {skillLineVariantID = 2912, categoryID = category, quests = {87757}, spellID = 1224889, points = 1}, -- Primal Mana Lily
   {skillLineVariantID = 2912, categoryID = category, quests = {87756}, spellID = 1224894, points = 1}, -- Wild Mana Lily
+  {skillLineVariantID = 2912, categoryID = category, quests = {97229}, spellID = 1301655, points = 1}, -- Cursed Tranquility Bloom
+  {skillLineVariantID = 2912, categoryID = category, quests = {97231}, spellID = 1301654, points = 1}, -- Cursed Sanguithorn
+  {skillLineVariantID = 2912, categoryID = category, quests = {97232}, spellID = 1301649, points = 1}, -- Cursed Azeroot
+  {skillLineVariantID = 2912, categoryID = category, quests = {97233}, spellID = 1301647, points = 1}, -- Cursed Argentleaf
+  {skillLineVariantID = 2912, categoryID = category, quests = {97230}, spellID = 1301651, points = 1}, -- Cursed Mana Lily
   -- Midnight: Inscription
   {skillLineVariantID = 2913, categoryID = category, quests = {90389}, spellID = 1230016, points = 1}, -- Sienna Ink
   {skillLineVariantID = 2913, categoryID = category, quests = {90390}, spellID = 1230017, points = 1}, -- Munsell Ink
@@ -1071,6 +1086,8 @@ local objectives = {
   {skillLineVariantID = 2913, categoryID = category, quests = {90448}, spellID = 1230075, points = 1}, -- Darkmoon Sigil: Rot
   {skillLineVariantID = 2913, categoryID = category, quests = {90449}, spellID = 1230076, points = 1}, -- Darkmoon Sigil: Hunt
   {skillLineVariantID = 2913, categoryID = category, quests = {90450}, spellID = 1230077, points = 1}, -- Darkmoon Sigil: Void
+  {skillLineVariantID = 2913, categoryID = category, quests = {}, spellID = 1290561, points = 1}, -- Vantus Rune: Tides
+  {skillLineVariantID = 2913, categoryID = category, quests = {}, spellID = 1303151, points = 1}, -- Contract: Zul'jarra's Forces
   -- Midnight: Jewelcrafting
   {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1230474, points = 1}, -- Kaleidoscopic Prism
   {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1230475, points = 1}, -- Sin'dorei Lens
@@ -1143,6 +1160,7 @@ local objectives = {
   {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1230502, points = 1}, -- Enduring Heliotrope
   {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1230503, points = 1}, -- Thalassian Competitor's Signet
   {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1230504, points = 1}, -- Thalassian Competitor's Amulet
+  {skillLineVariantID = 2914, categoryID = category, quests = {},      spellID = 1291690, points = 1}, -- Polished Ammolite
   -- Midnight: Leatherworking
   {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1237490, points = 1}, -- Thalassian Competitor's Leather Boots
   {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1237491, points = 1}, -- Thalassian Competitor's Leather Chestpiece
@@ -1237,6 +1255,8 @@ local objectives = {
   {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1237577, points = 1}, -- Blessed Pango Charm
   {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1237578, points = 1}, -- Primal Spore Binding
   {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1237579, points = 1}, -- Devouring Banding
+  {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1291046, points = 1}, -- Rope Lynx Harness
+  {skillLineVariantID = 2915, categoryID = category, quests = {},      spellID = 1291691, points = 1}, -- Adorned Fang
   -- Midnight: Mining
   {skillLineVariantID = 2916, categoryID = category, quests = {88475}, spellID = 1225343, points = 1}, -- Refulgent Copper
   {skillLineVariantID = 2916, categoryID = category, quests = {88476}, spellID = 1225349, points = 1}, -- Rich Refulgent Copper
@@ -1259,6 +1279,9 @@ local objectives = {
   {skillLineVariantID = 2916, categoryID = category, quests = {88484}, spellID = 1225359, points = 1}, -- Lightfused Brilliant Silver
   {skillLineVariantID = 2916, categoryID = category, quests = {88472}, spellID = 1225363, points = 1}, -- Wild Brilliant Silver
   {skillLineVariantID = 2916, categoryID = category, quests = {88465}, spellID = 1225362, points = 1}, -- Voidbound Brilliant Silver
+  {skillLineVariantID = 2916, categoryID = category, quests = {97226}, spellID = 1301492, points = 1}, -- Cursed Refulgent Copper
+  {skillLineVariantID = 2916, categoryID = category, quests = {97227}, spellID = 1301494, points = 1}, -- Cursed Umbral Tin
+  {skillLineVariantID = 2916, categoryID = category, quests = {97228}, spellID = 1301486, points = 1}, -- Cursed Brilliant Silver
   -- Midnight: Tailoring
   {skillLineVariantID = 2918, categoryID = category, quests = {90082}, spellID = 1227926, points = 1}, -- Arcanoweave Bolt
   {skillLineVariantID = 2918, categoryID = category, quests = {90083}, spellID = 1228060, points = 1}, -- Sunfire Silk Bolt
@@ -1332,6 +1355,7 @@ local objectives = {
   {skillLineVariantID = 2918, categoryID = category, quests = {90055}, spellID = 1228978, points = 1}, -- Bright Linen Reagent Satchel
   {skillLineVariantID = 2918, categoryID = category, quests = {90056}, spellID = 1228979, points = 1}, -- Arcanoweave Reagent Rucksack
   {skillLineVariantID = 2918, categoryID = category, quests = {90057}, spellID = 1228980, points = 1}, -- Sunfire Silk Backpack
+  {skillLineVariantID = 2918, categoryID = category, quests = {}, spellID = 1288335, points = 1}, -- Snakeskin Lining
 }
 
 Data:RegisterObjectives(objectives)
