@@ -732,6 +732,7 @@ function Data:ScanCalendar()
   if not numEvents then
     return
   end
+  self.cache.isDarkmoonOpen = false
   for eventIndex = 1, numEvents do
     local event = C_Calendar.GetDayEvent(0, today, eventIndex)
     if event then
