@@ -242,6 +242,8 @@ function Main:Render()
         enabled = true,
         sticky = true,
         height = Constants.TABLE_HEADER_HEIGHT,
+        resizable = true,
+        defaultMinColumnWidth = 40,
       },
       rowStyle = {
         height = Constants.TABLE_ROW_HEIGHT,
@@ -271,6 +273,9 @@ function Main:Render()
           if identityCompare ~= 0 then return identityCompare < 0 end
           return (rowA.skillLineVariantID or 0) < (rowB.skillLineVariantID or 0)
         end,
+      },
+      scroll = {
+        horizontal = true,
       },
       columns = self:GetColumnDefinitions(),
     }
@@ -321,9 +326,15 @@ function Main:Render()
   else
     self.window:HideOverlay()
     self.window.table:Show()
-    local bodyWidth, bodyHeight = self.window.table:GetSize()
-    bodyWidth = math.max(bodyWidth, minWindowWidth)
-    bodyHeight = math.min(bodyHeight, maxBodyHeight)
+    local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
+    local contentWidth, contentHeight = getTableContentSize(self.window.table)
+    local maxBodyWidth = addon.LiqUI.Window:GetMaxWindowWidth()
+    local scrollbarThickness = LibLiqUI.Constants.layout.sizes.scrollbar.thickness or 10
+    local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
+    local bodyHeight = math.min(contentHeight, maxBodyHeight)
+    if contentWidth > bodyWidth then
+      bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
+    end
     self.window:SetBodySize(bodyWidth, bodyHeight)
     if self.window.titlebar then
       self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
