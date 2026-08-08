@@ -705,6 +705,7 @@ function Data:ScanCalendar()
   if not numEvents then
     return
   end
+  self.cache.isDarkmoonOpen = false
   for i = 1, numEvents do
     local event = C_Calendar.GetDayEvent(0, today, i)
     if event and not Helpers:IsSecretValue(event.eventID) and event.eventID == 479 then
