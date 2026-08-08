@@ -101,6 +101,34 @@ function Main:ToggleWindow()
   self:Render()
 end
 
+function Main:ApplyWindowTableSize()
+  if not self.window or not self.window.table then
+    return
+  end
+
+  local minWindowWidth = 500
+  local maxBodyHeight = Constants.MAX_WINDOW_HEIGHT - Constants.TITLEBAR_HEIGHT
+  local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
+  local contentWidth, contentHeight = getTableContentSize(self.window.table)
+  local maxBodyWidth = UIParent:GetWidth() - LiqUI.Constants.layout.sizes.maxWindowWidthMargin
+  local scrollbarThickness = LiqUI.Constants.layout.sizes.scrollbar.thickness or 10
+  local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
+  local bodyHeight = math.min(contentHeight, maxBodyHeight)
+  if contentWidth > bodyWidth then
+    bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
+  end
+
+  local currentBodyWidth = self.window.body and self.window.body:GetWidth() or 0
+  local currentBodyHeight = self.window.body and self.window.body:GetHeight() or 0
+  if math.abs(currentBodyWidth - bodyWidth) > 0.5 or math.abs(currentBodyHeight - bodyHeight) > 0.5 then
+    self.window:SetBodySize(bodyWidth, bodyHeight)
+  end
+
+  if self.window.titlebar then
+    self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
+  end
+end
+
 function Main:Render()
   local selectedExpansions = Data.db.global.main.selectedExpansions or {}
   local characters = Data:GetCharacters()
@@ -340,9 +368,10 @@ function Main:Render()
         defaultOrder = "desc",
         defaultCompare = compareMainDefault,
       },
-      scroll = {
-        horizontal = true,
-      },
+      scroll = { horizontal = true },
+      onLayoutChanged = function()
+        self:ApplyWindowTableSize()
+      end,
       columns = self:GetColumnDefinitions(),
     }
     self.window.table = LiqUI:NewElement("Table", tableConfig)
@@ -351,8 +380,17 @@ function Main:Render()
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
   end
 
+  local window = self.window
+  if not window then
+    return
+  end
+  local tableFrame = window.table
+  if not tableFrame then
+    return
+  end
+
   -- Quick hotfix to avoid excessive rendering
-  if not self.window:IsVisible() then
+  if not window:IsVisible() then
     return
   end
 
@@ -376,35 +414,20 @@ function Main:Render()
   end
 
   self:ApplyTableColumns()
-  self.window.table:SetData(rows)
+  tableFrame:SetData(rows)
 
   local minWindowWidth = 500
-  local maxBodyHeight = Constants.MAX_WINDOW_HEIGHT - Constants.TITLEBAR_HEIGHT
   local emptyBodyHeight = 250 - Constants.TITLEBAR_HEIGHT
 
   if rowCount == 0 then
-    self.window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-    self.window.table:Hide()
-    self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
-    if self.window.titlebar then
-      self.window.titlebar.title:SetShown(false)
-    end
+    window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    tableFrame:Hide()
+    window:SetBodySize(minWindowWidth, emptyBodyHeight)
+    window.titlebar.title:SetShown(false)
   else
-    self.window:HideOverlay()
-    self.window.table:Show()
-    local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
-    local contentWidth, contentHeight = getTableContentSize(self.window.table)
-    local maxBodyWidth = addon.LiqUI.Window:GetMaxWindowWidth()
-    local scrollbarThickness = LiqUI.Constants.layout.sizes.scrollbar.thickness or 10
-    local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
-    local bodyHeight = math.min(contentHeight, maxBodyHeight)
-    if contentWidth > bodyWidth then
-      bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
-    end
-    self.window:SetBodySize(bodyWidth, bodyHeight)
-    if self.window.titlebar then
-      self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
-    end
+    window:HideOverlay()
+    tableFrame:Show()
+    self:ApplyWindowTableSize()
   end
 end
 

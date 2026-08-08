@@ -39,7 +39,7 @@ local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
 end
 
----@param row LiqUI_TableDataRowExtended
+---@param row WK_TableRowData
 ---@return string
 local function checklistObjectiveRowSortText(row)
   local objective = row.objective
@@ -84,6 +84,31 @@ local function checklistObjectiveRowSortText(row)
   return "Unknown"
 end
 
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareChecklistDefault(rowA, rowB)
+  if not rowA or not rowB then return false end
+  local progressA, progressB = rowA.progress, rowB.progress
+  local questsCompletedA = progressA and (progressA.questsCompleted or 0) or 0
+  local questsCompletedB = progressB and (progressB.questsCompleted or 0) or 0
+  if questsCompletedA ~= questsCompletedB then
+    return questsCompletedA > questsCompletedB
+  end
+  local pointsEarnedA = progressA and (progressA.pointsEarned or 0) or 0
+  local pointsEarnedB = progressB and (progressB.pointsEarned or 0) or 0
+  if pointsEarnedA ~= pointsEarnedB then
+    return pointsEarnedA > pointsEarnedB
+  end
+  local labelCompare = strcmputf8i(checklistObjectiveRowSortText(rowA), checklistObjectiveRowSortText(rowB))
+  if labelCompare ~= 0 then
+    return labelCompare < 0
+  end
+  local objectiveA, objectiveB = rowA.objective, rowB.objective
+  if not objectiveA or not objectiveB then return false end
+  return checklistObjectiveIdentityLess(objectiveA, objectiveB)
+end
+
 function Checklist:ToggleWindow()
   if not self.window then return end
   if self.window:IsVisible() then
@@ -94,6 +119,30 @@ function Checklist:ToggleWindow()
   end
   Data.db.global.checklist.open = self.window:IsVisible()
   self:Render()
+end
+
+function Checklist:ApplyWindowTableSize()
+  if not self.window or not self.window.table then
+    return
+  end
+
+  local minWindowWidth = 200
+  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
+  local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
+  local contentWidth, contentHeight = getTableContentSize(self.window.table)
+  local maxBodyWidth = UIParent:GetWidth() - LiqUI.Constants.layout.sizes.maxWindowWidthMargin
+  local scrollbarThickness = LiqUI.Constants.layout.sizes.scrollbar.thickness or 10
+  local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
+  local bodyHeight = math.min(contentHeight, maxBodyHeight)
+  if contentWidth > bodyWidth then
+    bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
+  end
+
+  local currentBodyWidth = self.window.body and self.window.body:GetWidth() or 0
+  local currentBodyHeight = self.window.body and self.window.body:GetHeight() or 0
+  if math.abs(currentBodyWidth - bodyWidth) > 0.5 or math.abs(currentBodyHeight - bodyHeight) > 0.5 then
+    self.window:SetBodySize(bodyWidth, bodyHeight)
+  end
 end
 
 function Checklist:Render()
@@ -294,31 +343,12 @@ function Checklist:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultCompare = function(rowA, rowB)
-          if not rowA or not rowB then return false end
-          local progressA, progressB = rowA.progress, rowB.progress
-          local questsCompletedA = progressA and (progressA.questsCompleted or 0) or 0
-          local questsCompletedB = progressB and (progressB.questsCompleted or 0) or 0
-          if questsCompletedA ~= questsCompletedB then
-            return questsCompletedA > questsCompletedB
-          end
-          local pointsEarnedA = progressA and (progressA.pointsEarned or 0) or 0
-          local pointsEarnedB = progressB and (progressB.pointsEarned or 0) or 0
-          if pointsEarnedA ~= pointsEarnedB then
-            return pointsEarnedA > pointsEarnedB
-          end
-          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(rowA), checklistObjectiveRowSortText(rowB))
-          if labelCompare ~= 0 then
-            return labelCompare < 0
-          end
-          local objectiveA, objectiveB = rowA.objective, rowB.objective
-          if not objectiveA or not objectiveB then return false end
-          return checklistObjectiveIdentityLess(objectiveA, objectiveB)
-        end,
+        defaultCompare = compareChecklistDefault,
       },
-      scroll = {
-        horizontal = true,
-      },
+      scroll = { horizontal = true },
+      onLayoutChanged = function()
+        self:ApplyWindowTableSize()
+      end,
       columns = self:GetColumnDefinitions(),
     }
     self.window.table = LiqUI:NewElement("Table", tableConfig)
@@ -327,14 +357,23 @@ function Checklist:Render()
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
   end
 
+  local window = self.window
+  if not window then
+    return
+  end
+  local tableFrame = window.table
+  if not tableFrame then
+    return
+  end
+
   if not character then
-    self.window:Hide()
+    window:Hide()
     return
   end
 
   -- Quick hotfix to avoid excessive rendering
-  if (not self.window:IsVisible() and not Data.db.global.checklist.open) or (Data.cache.inCombat and Data.db.global.checklist.hideInCombat) then
-    self.window:Hide()
+  if (not window:IsVisible() and not Data.db.global.checklist.open) or (Data.cache.inCombat and Data.db.global.checklist.hideInCombat) then
+    window:Hide()
     return
   end
 
@@ -394,41 +433,29 @@ function Checklist:Render()
     end)
   end
 
-  self.window.table:SetData(rows)
+  tableFrame:SetData(rows)
 
   local minWindowWidth = 200
-  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
   local emptyBodyHeight = 200 - Constants.TITLEBAR_HEIGHT
 
   if Data.db.global.checklist.hideTable then
-    self.window.table:Hide()
-    self.window:HideOverlay()
-    self.window:SetBodySize(minWindowWidth, 0)
+    tableFrame:Hide()
+    window:HideOverlay()
+    window:SetBodySize(minWindowWidth, 0)
   elseif rowCount == 0 then
-    self.window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-    self.window.table:Hide()
-    self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
+    window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or category above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    tableFrame:Hide()
+    window:SetBodySize(minWindowWidth, emptyBodyHeight)
   else
-    self.window:HideOverlay()
-    self.window.table:Show()
-    local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
-    local contentWidth, contentHeight = getTableContentSize(self.window.table)
-    local maxBodyWidth = addon.LiqUI.Window:GetMaxWindowWidth()
-    local scrollbarThickness = LiqUI.Constants.layout.sizes.scrollbar.thickness or 10
-    local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
-    local bodyHeight = math.min(contentHeight, maxBodyHeight)
-    if contentWidth > bodyWidth then
-      bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
-    end
-    self.window:SetBodySize(bodyWidth, bodyHeight)
+    window:HideOverlay()
+    tableFrame:Show()
+    self:ApplyWindowTableSize()
   end
 
-  self.window:SetShown(Data.db.global.checklist.open)
-  if self.window.titlebar then
-    self.window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
-  end
+  window:SetShown(Data.db.global.checklist.open)
+  window.titlebar:SetShown(Data.db.global.checklist.windowTitlebar)
   if Data.cache.inCombat and Data.db.global.checklist.hideInCombat then
-    self.window:Hide()
+    window:Hide()
   end
 end
 
