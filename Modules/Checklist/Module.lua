@@ -85,6 +85,30 @@ function Checklist:ToggleWindow()
   self:Render()
 end
 
+function Checklist:ApplyWindowTableSize()
+  if not self.window or not self.window.table then
+    return
+  end
+
+  local minWindowWidth = 200
+  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
+  local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
+  local contentWidth, contentHeight = getTableContentSize(self.window.table)
+  local maxBodyWidth = UIParent:GetWidth() - LibLiqUI.Constants.layout.sizes.maxWindowWidthMargin
+  local scrollbarThickness = LibLiqUI.Constants.layout.sizes.scrollbar.thickness or 10
+  local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
+  local bodyHeight = math.min(contentHeight, maxBodyHeight)
+  if contentWidth > bodyWidth then
+    bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
+  end
+
+  local currentBodyWidth = self.window.body and self.window.body:GetWidth() or 0
+  local currentBodyHeight = self.window.body and self.window.body:GetHeight() or 0
+  if math.abs(currentBodyWidth - bodyWidth) > 0.5 or math.abs(currentBodyHeight - bodyHeight) > 0.5 then
+    self.window:SetBodySize(bodyWidth, bodyHeight)
+  end
+end
+
 function Checklist:Render()
   local character = Data:GetCharacter()
   ---@type WK_TableRowData[]
@@ -271,6 +295,9 @@ function Checklist:Render()
       scroll = {
         horizontal = true,
       },
+      onLayoutChanged = function()
+        self:ApplyWindowTableSize()
+      end,
       columns = self:GetColumnDefinitions(),
     }
     self.window.table = LibLiqUI:NewElement("Table", tableConfig)
@@ -349,7 +376,6 @@ function Checklist:Render()
   self.window.table:SetData(rows)
 
   local minWindowWidth = 200
-  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
   local emptyBodyHeight = 200 - Constants.TITLEBAR_HEIGHT
 
   if Data.db.global.checklist.hideTable then
@@ -363,16 +389,7 @@ function Checklist:Render()
   else
     self.window:HideOverlay()
     self.window.table:Show()
-    local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
-    local contentWidth, contentHeight = getTableContentSize(self.window.table)
-    local maxBodyWidth = addon.LiqUI.Window:GetMaxWindowWidth()
-    local scrollbarThickness = LibLiqUI.Constants.layout.sizes.scrollbar.thickness or 10
-    local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
-    local bodyHeight = math.min(contentHeight, maxBodyHeight)
-    if contentWidth > bodyWidth then
-      bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
-    end
-    self.window:SetBodySize(bodyWidth, bodyHeight)
+    self:ApplyWindowTableSize()
   end
 
   self.window:SetShown(Data.db.global.checklist.open)
