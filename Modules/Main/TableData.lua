@@ -117,9 +117,9 @@ local function buildProfessionCell(character, skillLineVariantID)
     ---@type LiqUI_TableDataCellExtended
     return { data = "" }
   end
-  local text = skillLine.name
+  local text = Data:GetSkillLineDisplayName(skillLine)
   if Data.db.global.showFullProfessionName then
-    text = variant.name
+    text = Data:GetSkillLineVariantDisplayName(variant)
   end
   ---@type LiqUI_TableDataCellExtended
   return {
@@ -157,7 +157,7 @@ local function buildExpansionCell(skillLineVariantID)
     return { data = "" }
   end
   ---@type LiqUI_TableDataCellExtended
-  return { data = expansion.name }
+  return { data = Data:GetExpansionDisplayName(expansion) }
 end
 
 ---@param characterProfession WK_CharacterProfession
@@ -315,7 +315,7 @@ local function buildKnowledgeCell(characterProfession, skillLineVariantID)
       end
 
       GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText(skillLineVariant and skillLineVariant.name or "", 1, 1, 1)
+      GameTooltip:SetText(Data:GetSkillLineVariantDisplayName(skillLineVariant), 1, 1, 1)
       GameTooltip:AddDoubleLine("Points Spent:", pointsSpentValue, nil, nil, nil, pointsSpentColor.r, pointsSpentColor.g, pointsSpentColor.b)
       GameTooltip:AddDoubleLine("Points Unspent:", pointsUnspentValue, nil, nil, nil, pointsUnspentColor.r, pointsUnspentColor.g, pointsUnspentColor.b)
       GameTooltip:AddDoubleLine("Max:", pointsMaxValue, nil, nil, nil, pointsMaxColor.r, pointsMaxColor.g, pointsMaxColor.b)

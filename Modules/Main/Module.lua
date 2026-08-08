@@ -6,6 +6,7 @@ local Main = {}
 addon.Main = Main
 
 local Constants = addon.Constants
+local L = addon.L
 local Data = addon.Data
 local Checklist = addon.Checklist
 local Helpers = addon.Helpers
@@ -68,7 +69,7 @@ function Main:Render()
       end,
       onSettingsMenu = function(window, rootMenu)
         local showFullProfessionName = rootMenu:CreateCheckbox(
-          "Show full profession name",
+          L["SETTING_SHOW_FULL_PROFESSION_NAME"],
           function() return Data.db.global.showFullProfessionName end,
           function()
             Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
@@ -80,11 +81,11 @@ function Main:Render()
         )
         showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
+          GameTooltip_AddNormalLine(tooltip, L["SETTING_SHOW_FULL_PROFESSION_NAME_TOOLTIP"])
         end)
 
         local hideLowLevelProfessions = rootMenu:CreateCheckbox(
-          "Hide low level professions",
+          L["SETTING_HIDE_LOW_LEVEL_PROFESSIONS"],
           function() return Data.db.global.main.hideLowLevelProfessions end,
           function()
             Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
@@ -93,11 +94,11 @@ function Main:Render()
         )
         hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.")
+          GameTooltip_AddNormalLine(tooltip, L["SETTING_HIDE_LOW_LEVEL_PROFESSIONS_TOOLTIP"])
         end)
 
         local showMinimapIcon = rootMenu:CreateCheckbox(
-          "Show the minimap button",
+          L["SETTING_SHOW_MINIMAP_BUTTON"],
           function() return not Data.db.global.minimap.hide end,
           function()
             Data.db.global.minimap.hide = not Data.db.global.minimap.hide
@@ -106,11 +107,11 @@ function Main:Render()
         )
         showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.")
+          GameTooltip_AddNormalLine(tooltip, L["SETTING_SHOW_MINIMAP_BUTTON_TOOLTIP"])
         end)
 
         local lockMinimapIcon = rootMenu:CreateCheckbox(
-          "Lock the minimap button",
+          L["SETTING_LOCK_MINIMAP_BUTTON"],
           function() return Data.db.global.minimap.lock end,
           function()
             Data.db.global.minimap.lock = not Data.db.global.minimap.lock
@@ -119,7 +120,7 @@ function Main:Render()
         )
         lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!")
+          GameTooltip_AddNormalLine(tooltip, L["SETTING_LOCK_MINIMAP_BUTTON_TOOLTIP"])
         end)
       end,
       titlebarButtons = {
@@ -127,8 +128,8 @@ function Main:Render()
           name = "Characters",
           icon = mediaPath .. "Icon_Characters.blp",
           iconSize = 14,
-          tooltipTitle = "Characters",
-          tooltipDescription = "Enable/Disable your characters.",
+          tooltipTitle = L["TITLEBAR_CHARACTERS"],
+          tooltipDescription = L["TITLEBAR_CHARACTERS_TOOLTIP"],
           onMenu = function(_, rootMenu)
             rootMenu:SetScrollMode(GetScreenHeight() - 20)
             TableForEach(Data:GetCharacters(), function(character)
@@ -151,7 +152,10 @@ function Main:Render()
               if TableCount(character.professions) > 0 then
                 TableForEach(character.professions, function(characterProfession)
                   local variant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-                  local professionName = (variant and variant.name) or "?"
+                  local professionName = Data:GetSkillLineVariantDisplayName(variant)
+                  if professionName == "" then
+                    professionName = "?"
+                  end
                   characterButton:CreateCheckbox(
                     professionName,
                     function() return characterProfession.enabled or false end,
@@ -178,12 +182,12 @@ function Main:Render()
           name = "Expansion",
           icon = mediaPath .. "Icon_House.blp",
           iconSize = 14,
-          tooltipTitle = "Expansion",
-          tooltipDescription = "Filter rows by selected expansions.",
+          tooltipTitle = L["TITLEBAR_EXPANSION"],
+          tooltipDescription = L["TITLEBAR_EXPANSION_MAIN_TOOLTIP"],
           onMenu = function(_, rootMenu)
             TableForEach(Data:GetExpansions(), function(expansion)
               rootMenu:CreateCheckbox(
-                expansion.name,
+                Data:GetExpansionDisplayName(expansion),
                 function() return TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
                 function()
                   Data.db.global.main.selectedExpansions = TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
@@ -197,8 +201,8 @@ function Main:Render()
         {
           name = "Columns",
           icon = mediaPath .. "Icon_Columns.blp",
-          tooltipTitle = "Columns",
-          tooltipDescription = "Enable/Disable table columns.",
+          tooltipTitle = L["TITLEBAR_COLUMNS"],
+          tooltipDescription = L["TITLEBAR_COLUMNS_MAIN_TOOLTIP"],
           onMenu = function(_, rootMenu)
             local hidden = self.window.table.db.hiddenColumns
             TableForEach(self:GetColumnDefinitions(), function(column)
@@ -219,8 +223,8 @@ function Main:Render()
           name = "Checklist",
           icon = mediaPath .. "Icon_Checklist.blp",
           iconSize = 16,
-          tooltipTitle = "Checklist",
-          tooltipDescription = "Toggle the Checklist window",
+          tooltipTitle = L["TITLEBAR_CHECKLIST"],
+          tooltipDescription = L["TITLEBAR_CHECKLIST_TOOLTIP"],
           onClick = function()
             Checklist:ToggleWindow()
             self:Render()

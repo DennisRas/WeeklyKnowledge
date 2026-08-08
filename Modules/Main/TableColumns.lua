@@ -2,6 +2,7 @@
 local addon = select(2, ...)
 
 local Constants = addon.Constants
+local L = addon.L
 
 ---@class WK_Main_TableColumns
 local TableColumns = {}
@@ -20,11 +21,11 @@ function TableColumns.GetDefinitions()
   local columns = {
     {
       id = "name",
-      headerText = "Name",
+      headerText = L["TABLE_HEADER_NAME"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Name", 1, 1, 1)
-        GameTooltip:AddLine("Your characters.")
+        GameTooltip:SetText(L["TABLE_HEADER_NAME"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_NAME"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -41,11 +42,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "realm",
-      headerText = "Realm",
+      headerText = L["TABLE_HEADER_REALM"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Realm", 1, 1, 1)
-        GameTooltip:AddLine("Realm names.")
+        GameTooltip:SetText(L["TABLE_HEADER_REALM"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_REALM"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -62,11 +63,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "lastUpdate",
-      headerText = "Last Update",
+      headerText = L["TABLE_HEADER_LAST_UPDATE"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Last Update", 1, 1, 1)
-        GameTooltip:AddLine("The last time data was saved for this character.", nil, nil, nil, true)
+        GameTooltip:SetText(L["TABLE_HEADER_LAST_UPDATE"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_LAST_UPDATE"], nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -85,11 +86,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "profession",
-      headerText = "Profession",
+      headerText = L["TABLE_HEADER_PROFESSION"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Profession", 1, 1, 1)
-        GameTooltip:AddLine("Your professions.")
+        GameTooltip:SetText(L["TABLE_HEADER_PROFESSION"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_PROFESSION"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -103,7 +104,7 @@ function TableColumns.GetDefinitions()
           local function skillLineNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
-            return skillLine and skillLine.name:lower() or ""
+            return Data:GetSkillLineDisplayName(skillLine):lower()
           end
           local nameA, nameB = skillLineNameLower(rowA), skillLineNameLower(rowB)
           if nameA ~= nameB then return nameA < nameB end
@@ -113,11 +114,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "expansion",
-      headerText = "Expansion",
+      headerText = L["TABLE_HEADER_EXPANSION"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Expansion", 1, 1, 1)
-        GameTooltip:AddLine("Expansion for this profession row.")
+        GameTooltip:SetText(L["TABLE_HEADER_EXPANSION"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_EXPANSION"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -131,7 +132,7 @@ function TableColumns.GetDefinitions()
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local expansion = variant and Data:GetExpansionByID(variant.expansionID)
-            return expansion and expansion.name:lower() or ""
+            return Data:GetExpansionDisplayName(expansion):lower()
           end
           local nameA, nameB = expansionNameLower(rowA), expansionNameLower(rowB)
           if nameA ~= nameB then return nameA < nameB end
@@ -141,11 +142,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "skill",
-      headerText = "Skill",
+      headerText = L["TABLE_HEADER_SKILL"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Skill", 1, 1, 1)
-        GameTooltip:AddLine("Current skill levels.\n\nNote: This is only updated when you open the profession window or craft a recipe.", nil, nil, nil, true)
+        GameTooltip:SetText(L["TABLE_HEADER_SKILL"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_SKILL"], nil, nil, nil, true)
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -168,11 +169,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "concentration",
-      headerText = "Concentration",
+      headerText = L["TABLE_HEADER_CONCENTRATION"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Concentration", 1, 1, 1)
-        GameTooltip:AddLine("Current concentration.")
+        GameTooltip:SetText(L["TABLE_HEADER_CONCENTRATION"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_CONCENTRATION"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
@@ -193,11 +194,11 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "knowledge",
-      headerText = "Knowledge",
+      headerText = L["TABLE_HEADER_KNOWLEDGE"],
       onEnter = function(cellFrame, columnIndex, columnId, column)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Knowledge Points", 1, 1, 1)
-        GameTooltip:AddLine("Current knowledge gained.")
+        GameTooltip:SetText(L["TOOLTIP_KNOWLEDGE_TITLE"], 1, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_KNOWLEDGE"])
         GameTooltip:Show()
       end,
       onLeave = function(cellFrame, columnIndex, columnId, column)
