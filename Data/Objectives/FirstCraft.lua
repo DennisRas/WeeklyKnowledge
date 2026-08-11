@@ -804,7 +804,7 @@ local objectives = {
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230764, points = 1}, -- Refulgent Repair Hammer
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1265906, points = 1}, -- Thalassian Skeleton Key
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1230765, points = 1}, -- Thalassian Master Repair Hammer
-  {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1291682, points = 1}, -- Odious Alloy
+  -- {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1291682, points = 1}, -- Odious Alloy (SCRAPPED)
   {skillLineVariantID = 2907, categoryID = category, quests = {},      spellID = 1291683, points = 1}, -- Hunter's Ritual Stone
   -- Midnight: Enchanting
   {skillLineVariantID = 2909, categoryID = category, quests = {},      spellID = 1236069, points = 1}, -- Enchant Chest - Mark of the Worldsoul
