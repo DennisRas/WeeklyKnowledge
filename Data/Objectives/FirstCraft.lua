@@ -575,7 +575,7 @@ local objectives = {
   {skillLineVariantID = 2881, categoryID = category, quests = {80359}, spellID = 439715,  points = 1}, -- Crystallized Bismuth
   {skillLineVariantID = 2881, categoryID = category, quests = {80362}, spellID = 439718,  points = 1}, -- Weeping Bismuth
   {skillLineVariantID = 2881, categoryID = category, quests = {80371}, spellID = 439727,  points = 1}, -- Webbed Bismuth
-  -- {skillLineVariantID = 2881, categoryID = category, quests = {}, spellID = 439707,  points = 1},  -- Aqirite (bug - provides no points)
+  {skillLineVariantID = 2881, categoryID = category, quests = {80352}, spellID = 439707,  points = 1},  -- Aqirite (share id with Ironclaw)
   {skillLineVariantID = 2881, categoryID = category, quests = {80357}, spellID = 439713,  points = 1}, -- Aqirite Seam
   {skillLineVariantID = 2881, categoryID = category, quests = {80354}, spellID = 439710,  points = 1}, -- Rich Aqirite
   {skillLineVariantID = 2881, categoryID = category, quests = {80369}, spellID = 439725,  points = 1}, -- Camouflaged Aqirite
@@ -583,7 +583,7 @@ local objectives = {
   {skillLineVariantID = 2881, categoryID = category, quests = {80360}, spellID = 439716,  points = 1}, -- Crystallized Aqirite
   {skillLineVariantID = 2881, categoryID = category, quests = {80363}, spellID = 439719,  points = 1}, -- Weeping Aqirite
   {skillLineVariantID = 2881, categoryID = category, quests = {80372}, spellID = 439728,  points = 1}, -- Webbed Aqirite
-  {skillLineVariantID = 2881, categoryID = category, quests = {80352}, spellID = 439708,  points = 1}, -- Ironclaw
+  {skillLineVariantID = 2881, categoryID = category, quests = {80352}, spellID = 439708,  points = 1}, -- Ironclaw (share id with Aqirite)
   {skillLineVariantID = 2881, categoryID = category, quests = {80358}, spellID = 439714,  points = 1}, -- Ironclaw Seam
   {skillLineVariantID = 2881, categoryID = category, quests = {80355}, spellID = 439711,  points = 1}, -- Rich Ironclaw
   {skillLineVariantID = 2881, categoryID = category, quests = {80370}, spellID = 439726,  points = 1}, -- Camouflaged Ironclaw
