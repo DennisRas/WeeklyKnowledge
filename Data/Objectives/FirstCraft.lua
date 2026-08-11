@@ -938,13 +938,13 @@ local objectives = {
   {skillLineVariantID = 2910, categoryID = category, quests = {90253}, spellID = 1229910, points = 1}, -- Thalassian Competitor's Mail Visor
   {skillLineVariantID = 2910, categoryID = category, quests = {90254}, spellID = 1229911, points = 1}, -- Thalassian Competitor's Plate Guard
   {skillLineVariantID = 2910, categoryID = category, quests = {90255}, spellID = 1229912, points = 1}, -- Thalassian Competitor's Cloth Cuffs
-  {skillLineVariantID = 2910, categoryID = category, quests = {90256}, spellID = 1229913, points = 1}, -- Thalassian Competitor's Leather Bands
+  {skillLineVariantID = 2910, categoryID = category, quests = {95579}, spellID = 1229913, points = 1}, -- Thalassian Competitor's Leather Bands
   {skillLineVariantID = 2910, categoryID = category, quests = {90257}, spellID = 1229914, points = 1}, -- Thalassian Competitor's Mail Links
-  {skillLineVariantID = 2910, categoryID = category, quests = {90258}, spellID = 1229915, points = 1}, -- Thalassian Competitor's Plate Bindings
+  {skillLineVariantID = 2910, categoryID = category, quests = {95578}, spellID = 1229915, points = 1}, -- Thalassian Competitor's Plate Bindings
   {skillLineVariantID = 2910, categoryID = category, quests = {90258}, spellID = 1261490, points = 1}, -- Thalassian Competitor's Cloth Tip-Toes
   {skillLineVariantID = 2910, categoryID = category, quests = {90258}, spellID = 1261491, points = 1}, -- Thalassian Competitor's Leather Sliders
-  {skillLineVariantID = 2910, categoryID = category, quests = {90258}, spellID = 1261492, points = 1}, -- Thalassian Competitor's Mail Footlinks
-  {skillLineVariantID = 2910, categoryID = category, quests = {90258}, spellID = 1261493, points = 1}, -- Thalassian Competitor's Plate Dunkers
+  {skillLineVariantID = 2910, categoryID = category, quests = {95581}, spellID = 1261492, points = 1}, -- Thalassian Competitor's Mail Footlinks
+  {skillLineVariantID = 2910, categoryID = category, quests = {95582}, spellID = 1261493, points = 1}, -- Thalassian Competitor's Plate Dunkers
   {skillLineVariantID = 2910, categoryID = category, quests = {},      spellID = 1264523, points = 1}, -- Head-Mounted Beam Bummer
   {skillLineVariantID = 2910, categoryID = category, quests = {},      spellID = 1264524, points = 1}, -- Rock Bonkin' Hardhat
   {skillLineVariantID = 2910, categoryID = category, quests = {},      spellID = 1264525, points = 1}, -- Heavy-Duty Rock Assister
