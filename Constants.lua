@@ -36,6 +36,7 @@ Constants.faction = {
   TheSingularity = 2699,
   Harati = 2704,
   SilvermoonCity = 2710,
+  ZuljarrasForces = 2772,
 }
 
 ---@enum WK_CurrencyId
@@ -73,4 +74,5 @@ Constants.map = {
   Undermine = 2346,
   Voidstorm = 2405,
   ZulAman = 2437,
+  TheCoiledIsle = 2512,
 }

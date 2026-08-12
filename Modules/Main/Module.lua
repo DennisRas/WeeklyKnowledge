@@ -300,6 +300,7 @@ function Main:Render()
     end)
   end
 
+  self:ApplyTableColumns()
   self.window.table:SetData(rows)
 
   local minWindowWidth = 500
