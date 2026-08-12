@@ -62,7 +62,6 @@ function Core:OnInitialize()
 
   Data:InitDB()
   Data:MigrateDB()
-  addon.LiqUI = LibLiqUI:New({name = addon.name, db = Data.db.global.liqui})
   if Data:TaskWeeklyReset() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end

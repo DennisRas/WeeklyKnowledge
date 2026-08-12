@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 - 2026-08-12
+
+- Updated TOC number to support patch 12.1.
+- Fixed close and settings titlebar icons. Fixes #156. Thank you @benhilty and @ynazar1.
+
 ## v1.3.0 - 2026-07-22
 
 - Added per-window options for scale, background color, and border from the titlebar menu.
