@@ -49,15 +49,20 @@ Data.defaultDB = {
     characters = {},
     showFullProfessionName = true,
     liqui = {
-      windows = {},
+      windows = {
+        Main = {},
+        Checklist = {},
+      },
       tables = {
         Main = {
           hiddenColumns = {
             lastUpdate = true,
           },
         },
+        Checklist = {
+          hiddenColumns = {},
+        },
       },
-      loggers = {},
     },
     main = {
       selectedExpansions = {},

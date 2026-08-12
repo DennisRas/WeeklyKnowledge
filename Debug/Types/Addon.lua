@@ -29,7 +29,6 @@
 ---@field notes string
 ---@field Core WK_Core
 ---@field libs WK_Libs
----@field LiqUI LiqUI_Instance
 ---@field Constants WK_Constants
 ---@field Helpers WK_Helpers
 ---@field Data WK_Data

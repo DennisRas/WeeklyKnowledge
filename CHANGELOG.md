@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.4.0 - 2026-08-12
+
+- Added 12.1 First Craft and Unique profession objectives. Thank you @pepedressingroom.
+- Updated TOC number to support patch 12.1.
+- Fixed Engineering First Craft quest IDs. Fixes #160. Thank you @Fishdumpster and @pepedressingroom.
+- Fixed main table column layout applying before data refresh. Fixes #155. Thank you @FireAllianceNX, @christhemorse, @ynazar1, and @pepedressingroom.
+- Fixed close and settings titlebar icons. Fixes #156. Thank you @benhilty and @ynazar1.
+
 ## v1.3.0 - 2026-07-22
 
 - Added per-window options for scale, background color, and border from the titlebar menu.

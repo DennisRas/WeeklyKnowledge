@@ -54,8 +54,11 @@ function Main:Render()
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
-    self.window = addon.LiqUI.Window:New({
-      name = "Main",
+    local windows = Data.db.global.liqui.windows
+    local tables = Data.db.global.liqui.tables
+    self.window = LibLiqUI:NewElement("Window", {
+      name = addon.name .. "Main",
+      storage = windows.Main,
       title = addon.name,
       icon = mediaPath .. "Icon.blp",
       border = 4,
@@ -229,7 +232,8 @@ function Main:Render()
 
     ---@type LiqUI_TableOptions
     local tableConfig = {
-      name = "Main",
+      name = addon.name .. "Main",
+      storage = tables.Main,
       header = {
         enabled = true,
         sticky = true,
@@ -266,7 +270,7 @@ function Main:Render()
       },
       columns = self:GetColumnDefinitions(),
     }
-    self.window.table = addon.LiqUI.Table:New(tableConfig)
+    self.window.table = LibLiqUI:NewElement("Table", tableConfig)
     self.window.table:SetParent(self.window.body)
     self.window.table:SetPoint("TOPLEFT", self.window.body, "TOPLEFT", 0, 0)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
@@ -296,6 +300,7 @@ function Main:Render()
     end)
   end
 
+  self:ApplyTableColumns()
   self.window.table:SetData(rows)
 
   local minWindowWidth = 500

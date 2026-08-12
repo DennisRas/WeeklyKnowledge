@@ -91,8 +91,11 @@ function Checklist:Render()
 
   if not self.window then
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
-    self.window = addon.LiqUI.Window:New({
-      name = "Checklist",
+    local windows = Data.db.global.liqui.windows
+    local tables = Data.db.global.liqui.tables
+    self.window = LibLiqUI:NewElement("Window", {
+      name = addon.name .. "Checklist",
+      storage = windows.Checklist,
       title = "Checklist",
       icon = mediaPath .. "Icon.blp",
       border = 4,
@@ -222,7 +225,8 @@ function Checklist:Render()
 
     ---@type LiqUI_TableOptions
     local tableConfig = {
-      name = "Checklist",
+      name = addon.name .. "Checklist",
+      storage = tables.Checklist,
       header = {
         enabled = true,
         sticky = true,
@@ -263,7 +267,7 @@ function Checklist:Render()
       },
       columns = self:GetColumnDefinitions(),
     }
-    self.window.table = addon.LiqUI.Table:New(tableConfig)
+    self.window.table = LibLiqUI:NewElement("Table", tableConfig)
     self.window.table:SetParent(self.window.body)
     self.window.table:SetPoint("TOPLEFT", self.window.body, "TOPLEFT", 0, 0)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
