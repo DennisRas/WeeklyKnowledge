@@ -1137,7 +1137,7 @@ function Data:GetExpansions()
   end)
 end
 
----@param expansion WK_Expansion?
+---@param expansion LiqUI_Expansion?
 ---@return string
 function Data:GetExpansionDisplayName(expansion)
   if not expansion then return "" end

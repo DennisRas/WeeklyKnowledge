@@ -85,8 +85,6 @@ function Core:OnInitialize()
 
   Data:InitDB()
   Data:MigrateDB()
-  LibLiqUI.Constants.layout.media.iconSettings = "Interface/AddOns/WeeklyKnowledge/Media/Icon_Settings.blp"
-  LibLiqUI.Constants.layout.media.iconClose = "Interface/AddOns/WeeklyKnowledge/Media/Icon_Close.blp"
   if Data:TaskWeeklyReset() then
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end
