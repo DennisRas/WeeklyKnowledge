@@ -2,18 +2,26 @@
 local addon = select(2, ...)
 
 local Constants = addon.Constants
+local L = addon.L
 
 ---@class WK_Data
 local Data = addon.Data
 
+---@param text string
+---@param repeatable string
+---@return string
+local function categoryDescription(text, repeatable)
+  return text .. "\n\n" .. L["CATEGORY_REPEATABLE_LINE"]:format(WHITE_FONT_COLOR:WrapTextInColorCode(repeatable))
+end
+
 ---@type WK_ObjectiveCategory[]
 Data.ObjectiveCategories = {
-  {id = Constants.objectiveCategory.Unique,        name = "Uniques",      description = "These are one-time items found in treasures around the world and sold by vendors.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("No"),                                                 type = "item",   repeatable = "No",},
-  {id = Constants.objectiveCategory.FirstCraft,    name = "First Craft",  description = "These are your first craft or first gathering bonuses.\n\nNote: Not every profession or expansion is updated yet.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("No"),                 type = "recipe", repeatable = "No",},
-  {id = Constants.objectiveCategory.Treatise,      name = "Treatise",     description = "These can be crafted with Inscription. Send a Crafting Order if you don't have the profession.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),                                type = "item",   repeatable = "Weekly",  hint = true,},
-  {id = Constants.objectiveCategory.WeeklyQuest,   name = "Weekly Quest", description = "Complete a quest from your profession trainer or from the Artisan's Consortium.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),                                               type = "quest",  repeatable = "Weekly",},
-  {id = Constants.objectiveCategory.Treasure,      name = "Treasure",     description = "These are randomly looted from treasures around the world.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),                                                                    type = "item",   repeatable = "Weekly",  hint = true,},
-  {id = Constants.objectiveCategory.Gathering,     name = "Gathering",    description = "These are randomly looted from gathering nodes around the world.\n\nFor Enchanting these are looted from Disenchanting.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Weekly"),       type = "item",   repeatable = "Weekly",},
-  {id = Constants.objectiveCategory.DarkmoonQuest, name = "Darkmoon",     description = "Complete a quest at the Darkmoon Faire.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Monthly"),                                                                                      type = "quest",  repeatable = "Monthly",},
-  {id = Constants.objectiveCategory.CatchUp,       name = "Catch-Up",     description = "Keep track of your catch-up points.\n\nYou will be able to gain these points once you've completed some of the other objectives.\n\nRepeatable: " .. WHITE_FONT_COLOR:WrapTextInColorCode("Yes"), type = "item",   repeatable = "Yes",},
+  {id = Constants.objectiveCategory.Unique,        name = L["CATEGORY_UNIQUE"],        legacyName = "Uniques",      description = categoryDescription(L["CATEGORY_UNIQUE_DESC"],        L["REPEATABLE_NO"]),      type = "item",   repeatable = "No",},
+  {id = Constants.objectiveCategory.FirstCraft,    name = L["CATEGORY_FIRST_CRAFT"],   legacyName = "First Craft",  description = categoryDescription(L["CATEGORY_FIRST_CRAFT_DESC"],   L["REPEATABLE_NO"]),      type = "recipe", repeatable = "No",},
+  {id = Constants.objectiveCategory.Treatise,      name = L["CATEGORY_TREATISE"],      legacyName = "Treatise",     description = categoryDescription(L["CATEGORY_TREATISE_DESC"],      L["REPEATABLE_WEEKLY"]),  type = "item",   repeatable = "Weekly",  hint = true,},
+  {id = Constants.objectiveCategory.WeeklyQuest,   name = L["CATEGORY_WEEKLY_QUEST"],  legacyName = "Weekly Quest", description = categoryDescription(L["CATEGORY_WEEKLY_QUEST_DESC"],  L["REPEATABLE_WEEKLY"]),  type = "quest",  repeatable = "Weekly",},
+  {id = Constants.objectiveCategory.Treasure,      name = L["CATEGORY_TREASURE"],      legacyName = "Treasure",     description = categoryDescription(L["CATEGORY_TREASURE_DESC"],      L["REPEATABLE_WEEKLY"]),  type = "item",   repeatable = "Weekly",  hint = true,},
+  {id = Constants.objectiveCategory.Gathering,     name = L["CATEGORY_GATHERING"],     legacyName = "Gathering",    description = categoryDescription(L["CATEGORY_GATHERING_DESC"],     L["REPEATABLE_WEEKLY"]),  type = "item",   repeatable = "Weekly",},
+  {id = Constants.objectiveCategory.DarkmoonQuest, name = L["CATEGORY_DARKMOON"],      legacyName = "Darkmoon",     description = categoryDescription(L["CATEGORY_DARKMOON_DESC"],      L["REPEATABLE_MONTHLY"]), type = "quest",  repeatable = "Monthly",},
+  {id = Constants.objectiveCategory.CatchUp,       name = L["CATEGORY_CATCH_UP"],      legacyName = "Catch-Up",     description = categoryDescription(L["CATEGORY_CATCH_UP_DESC"],      L["REPEATABLE_YES"]),     type = "item",   repeatable = "Yes",},
 }

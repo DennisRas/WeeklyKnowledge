@@ -2,6 +2,7 @@
 local addon = select(2, ...)
 
 local Constants = addon.Constants
+local L = addon.L
 
 ---@class WK_Checklist_TableColumns
 local TableColumns = {}
@@ -74,7 +75,7 @@ function TableColumns.GetDefinitions()
   local columns = {
     {
       id = "objective",
-      headerText = "Objective",
+      headerText = L["TABLE_HEADER_OBJECTIVE"],
       width = 260,
       sorting = {
         enabled = true,
@@ -92,7 +93,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "profession",
-      headerText = "Profession",
+      headerText = L["TABLE_HEADER_PROFESSION"],
       width = Data.db.global.showFullProfessionName and 160 or 100,
       hideable = true,
       sorting = {
@@ -101,7 +102,7 @@ function TableColumns.GetDefinitions()
           local function skillLineNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
-            return skillLine and skillLine.name:lower() or ""
+            return Data:GetSkillLineDisplayName(skillLine):lower()
           end
           local nameA, nameB = skillLineNameLower(rowA), skillLineNameLower(rowB)
           if nameA ~= nameB then return nameA < nameB end
@@ -114,7 +115,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "expansion",
-      headerText = "Expansion",
+      headerText = L["TABLE_HEADER_EXPANSION"],
       width = 120,
       hideable = true,
       sorting = {
@@ -123,7 +124,7 @@ function TableColumns.GetDefinitions()
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
             local expansion = variant and Data:GetExpansionByID(variant.expansionID)
-            return expansion and expansion.name:lower() or ""
+            return Data:GetExpansionDisplayName(expansion):lower()
           end
           local nameA, nameB = expansionNameLower(rowA), expansionNameLower(rowB)
           if nameA ~= nameB then return nameA < nameB end
@@ -136,7 +137,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "category",
-      headerText = "Category",
+      headerText = L["TABLE_HEADER_CATEGORY"],
       width = 80,
       hideable = true,
       sorting = {
@@ -157,7 +158,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "location",
-      headerText = "Location",
+      headerText = L["TABLE_HEADER_LOCATION"],
       width = 100,
       hideable = true,
       sorting = {
@@ -175,7 +176,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "repeatable",
-      headerText = "Repeat?",
+      headerText = L["TABLE_HEADER_REPEATABLE"],
       width = 60,
       hideable = true,
       sorting = {
@@ -183,7 +184,7 @@ function TableColumns.GetDefinitions()
         compare = function(rowA, rowB)
           local function repeatableLabel(rowData)
             local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
-            return objectiveCategory and objectiveCategory.repeatable or ""
+            return Data:GetRepeatableDisplayName(objectiveCategory and objectiveCategory.repeatable):lower()
           end
           local labelA, labelB = repeatableLabel(rowA), repeatableLabel(rowB)
           if labelA ~= labelB then return labelA < labelB end
@@ -196,7 +197,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "progress",
-      headerText = "Progress",
+      headerText = L["TABLE_HEADER_PROGRESS"],
       width = 70,
       align = "CENTER",
       hideable = true,
@@ -215,7 +216,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "points",
-      headerText = "Points",
+      headerText = L["TABLE_HEADER_POINTS"],
       width = 70,
       align = "CENTER",
       hideable = true,
@@ -236,6 +237,8 @@ function TableColumns.GetDefinitions()
       id = "waypoint",
       headerText = "",
       width = 50,
+      minWidth = 40,
+      maxWidth = 60,
       align = "CENTER",
       sorting = {
         enabled = false,

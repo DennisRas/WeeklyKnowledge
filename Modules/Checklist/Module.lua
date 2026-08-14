@@ -7,6 +7,7 @@ addon.Checklist = Checklist
 
 local Main = addon.Main
 local Constants = addon.Constants
+local L = addon.L
 local Data = addon.Data
 local LibLiqUI = addon.libs.LiqUI
 local TableContains = LibLiqUI.Utils.TableContains
@@ -84,6 +85,30 @@ function Checklist:ToggleWindow()
   self:Render()
 end
 
+function Checklist:ApplyWindowTableSize()
+  if not self.window or not self.window.table then
+    return
+  end
+
+  local minWindowWidth = 200
+  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
+  local getTableContentSize = self.window.table.GetContentSize or self.window.table.GetSize
+  local contentWidth, contentHeight = getTableContentSize(self.window.table)
+  local maxBodyWidth = UIParent:GetWidth() - LibLiqUI.Constants.layout.sizes.maxWindowWidthMargin
+  local scrollbarThickness = LibLiqUI.Constants.layout.sizes.scrollbar.thickness or 10
+  local bodyWidth = math.min(math.max(contentWidth, minWindowWidth), maxBodyWidth)
+  local bodyHeight = math.min(contentHeight, maxBodyHeight)
+  if contentWidth > bodyWidth then
+    bodyHeight = math.min(bodyHeight + scrollbarThickness, maxBodyHeight)
+  end
+
+  local currentBodyWidth = self.window.body and self.window.body:GetWidth() or 0
+  local currentBodyHeight = self.window.body and self.window.body:GetHeight() or 0
+  if math.abs(currentBodyWidth - bodyWidth) > 0.5 or math.abs(currentBodyHeight - bodyHeight) > 0.5 then
+    self.window:SetBodySize(bodyWidth, bodyHeight)
+  end
+end
+
 function Checklist:Render()
   local character = Data:GetCharacter()
   ---@type WK_TableRowData[]
@@ -96,7 +121,7 @@ function Checklist:Render()
     self.window = LibLiqUI:NewElement("Window", {
       name = addon.name .. "Checklist",
       storage = windows.Checklist,
-      title = "Checklist",
+      title = L["TITLE_CHECKLIST"],
       icon = mediaPath .. "Icon.blp",
       border = 4,
       overlayFontObject = "SystemFont_Med1",
@@ -105,7 +130,7 @@ function Checklist:Render()
       end,
       onSettingsMenu = function(window, rootMenu)
         local showFullProfessionName = rootMenu:CreateCheckbox(
-          "Show full profession name",
+          L["SETTING_SHOW_FULL_PROFESSION_NAME"],
           function() return Data.db.global.showFullProfessionName end,
           function()
             Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
@@ -117,11 +142,11 @@ function Checklist:Render()
         )
         showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
           GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
+          GameTooltip_AddNormalLine(tooltip, L["SETTING_SHOW_FULL_PROFESSION_NAME_TOOLTIP"])
         end)
 
         rootMenu:CreateCheckbox(
-          "Hide in combat",
+          L["SETTING_HIDE_IN_COMBAT"],
           function() return Data.db.global.checklist.hideInCombat end,
           function()
             Data.db.global.checklist.hideInCombat = not Data.db.global.checklist.hideInCombat
@@ -129,7 +154,7 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide in dungeons",
+          L["SETTING_HIDE_IN_DUNGEONS"],
           function() return Data.db.global.checklist.hideInDungeons end,
           function()
             Data.db.global.checklist.hideInDungeons = not Data.db.global.checklist.hideInDungeons
@@ -137,7 +162,7 @@ function Checklist:Render()
           end
         )
         rootMenu:CreateCheckbox(
-          "Hide completed objectives",
+          L["SETTING_HIDE_COMPLETED_OBJECTIVES"],
           function() return Data.db.global.checklist.hideCompletedObjectives end,
           function()
             Data.db.global.checklist.hideCompletedObjectives = not Data.db.global.checklist.hideCompletedObjectives
@@ -150,12 +175,12 @@ function Checklist:Render()
           name = "Expansion",
           icon = mediaPath .. "Icon_House.blp",
           iconSize = 14,
-          tooltipTitle = "Expansion",
-          tooltipDescription = "Filter table by expansion.",
+          tooltipTitle = L["TITLEBAR_EXPANSION"],
+          tooltipDescription = L["TITLEBAR_EXPANSION_CHECKLIST_TOOLTIP"],
           onMenu = function(_, rootMenu)
             TableForEach(Data:GetExpansions(), function(expansion)
               rootMenu:CreateCheckbox(
-                expansion.name,
+                Data:GetExpansionDisplayName(expansion),
                 function() return TableContains(Data.db.global.checklist.selectedExpansions, expansion.id) end,
                 function()
                   Data.db.global.checklist.selectedExpansions = TableToggle(Data.db.global.checklist.selectedExpansions, expansion.id)
@@ -169,8 +194,8 @@ function Checklist:Render()
         {
           name = "Columns",
           icon = mediaPath .. "Icon_Columns.blp",
-          tooltipTitle = "Columns",
-          tooltipDescription = "Toggle columns.",
+          tooltipTitle = L["TITLEBAR_COLUMNS"],
+          tooltipDescription = L["TITLEBAR_COLUMNS_CHECKLIST_TOOLTIP"],
           onMenu = function(_, rootMenu)
             local hidden = self.window.table.db.hiddenColumns
             TableForEach(self:GetColumnDefinitions(), function(column)
@@ -191,8 +216,8 @@ function Checklist:Render()
           name = "Categories",
           icon = mediaPath .. "Icon_Category.blp",
           iconSize = 11,
-          tooltipTitle = "Categories",
-          tooltipDescription = "Toggle categories.",
+          tooltipTitle = L["TITLEBAR_CATEGORIES"],
+          tooltipDescription = L["TITLEBAR_CATEGORIES_TOOLTIP"],
           onMenu = function(_, rootMenu)
             local hidden = Data.db.global.checklist.hiddenCategories
             TableForEach(Data.ObjectiveCategories, function(category)
@@ -212,8 +237,8 @@ function Checklist:Render()
           name = "Toggle",
           icon = mediaPath .. "Icon_Toggle.blp",
           iconSize = 16,
-          tooltipTitle = "Toggle List",
-          tooltipDescription = "Expand/Collapse the checklist.",
+          tooltipTitle = L["TITLEBAR_TOGGLE"],
+          tooltipDescription = L["TITLEBAR_TOGGLE_TOOLTIP"],
           onClick = function()
             Data.db.global.checklist.hideTable = not Data.db.global.checklist.hideTable
             self:Render()
@@ -231,6 +256,8 @@ function Checklist:Render()
         enabled = true,
         sticky = true,
         height = Constants.TABLE_HEADER_HEIGHT,
+        resizable = true,
+        defaultMinColumnWidth = 40,
       },
       rowStyle = {
         height = Constants.TABLE_ROW_HEIGHT,
@@ -265,6 +292,12 @@ function Checklist:Render()
           return checklistObjectiveIdentityLess(objectiveA, objectiveB)
         end,
       },
+      scroll = {
+        horizontal = true,
+      },
+      onLayoutChanged = function()
+        self:ApplyWindowTableSize()
+      end,
       columns = self:GetColumnDefinitions(),
     }
     self.window.table = LibLiqUI:NewElement("Table", tableConfig)
@@ -343,7 +376,6 @@ function Checklist:Render()
   self.window.table:SetData(rows)
 
   local minWindowWidth = 200
-  local maxBodyHeight = 300 - Constants.TITLEBAR_HEIGHT
   local emptyBodyHeight = 200 - Constants.TITLEBAR_HEIGHT
 
   if Data.db.global.checklist.hideTable then
@@ -357,10 +389,7 @@ function Checklist:Render()
   else
     self.window:HideOverlay()
     self.window.table:Show()
-    local bodyWidth, bodyHeight = self.window.table:GetSize()
-    bodyWidth = math.max(bodyWidth, minWindowWidth)
-    bodyHeight = math.min(bodyHeight, maxBodyHeight)
-    self.window:SetBodySize(bodyWidth, bodyHeight)
+    self:ApplyWindowTableSize()
   end
 
   self.window:SetShown(Data.db.global.checklist.open)

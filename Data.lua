@@ -5,6 +5,7 @@ local addon = select(2, ...)
 local Data = {}
 addon.Data = Data
 
+local L = addon.L
 local Helpers = addon.Helpers
 local Constants = addon.Constants
 local LibLiqUI = addon.libs.LiqUI
@@ -426,6 +427,9 @@ function Data:MigrateDB()
       for _, category in ipairs(self.ObjectiveCategories or {}) do
         if category and category.id and category.name then
           migrateHiddenColumnKey(mainHidden, category.name, "category_" .. tostring(category.id))
+          if category.legacyName then
+            migrateHiddenColumnKey(mainHidden, category.legacyName, "category_" .. tostring(category.id))
+          end
         end
       end
 
@@ -705,6 +709,7 @@ function Data:ScanCalendar()
   if not numEvents then
     return
   end
+  self.cache.isDarkmoonOpen = false
   for i = 1, numEvents do
     local event = C_Calendar.GetDayEvent(0, today, i)
     if event and not Helpers:IsSecretValue(event.eventID) and event.eventID == 479 then
@@ -1108,6 +1113,22 @@ function Data:GetExpansionByID(expansionID)
   return nil
 end
 
+---@param expansion WK_Expansion?
+---@return string
+function Data:GetExpansionDisplayName(expansion)
+  if not expansion then return "" end
+  if expansion.id == Enum.ExpansionLevel.Dragonflight then
+    return L["EXPANSION_DRAGONFLIGHT"]
+  end
+  if expansion.id == Enum.ExpansionLevel.WarWithin then
+    return L["EXPANSION_WAR_WITHIN"]
+  end
+  if expansion.id == Enum.ExpansionLevel.Midnight then
+    return L["EXPANSION_MIDNIGHT"]
+  end
+  return expansion.name or ""
+end
+
 ---@return WK_SkillLine[]
 function Data:GetSkillLines()
   return self.SkillLines
@@ -1124,6 +1145,19 @@ function Data:GetSkillLineByID(skillLineID)
   return nil
 end
 
+---@param skillLine WK_SkillLine?
+---@return string
+function Data:GetSkillLineDisplayName(skillLine)
+  if not skillLine then return "" end
+  if C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
+    local displayName = C_TradeSkillUI.GetTradeSkillDisplayName(skillLine.id)
+    if displayName and displayName ~= "" then
+      return displayName
+    end
+  end
+  return skillLine.name or ""
+end
+
 ---@return WK_SkillLineVariant[]
 function Data:GetSkillLineVariants()
   return self.SkillLineVariants
@@ -1138,6 +1172,19 @@ function Data:GetSkillLineVariantByID(skillLineVariantID)
     end
   end
   return nil
+end
+
+---@param skillLineVariant WK_SkillLineVariant?
+---@return string
+function Data:GetSkillLineVariantDisplayName(skillLineVariant)
+  if not skillLineVariant then return "" end
+  if C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
+    local displayName = C_TradeSkillUI.GetTradeSkillDisplayName(skillLineVariant.id)
+    if displayName and displayName ~= "" then
+      return displayName
+    end
+  end
+  return skillLineVariant.name or ""
 end
 
 ---@return WK_Objective[]
@@ -1159,6 +1206,16 @@ function Data:GetObjectiveCategoryByID(categoryID)
     end
   end
   return nil
+end
+
+---@param repeatable string?
+---@return string
+function Data:GetRepeatableDisplayName(repeatable)
+  if repeatable == "No" then return L["REPEATABLE_NO"] end
+  if repeatable == "Weekly" then return L["REPEATABLE_WEEKLY"] end
+  if repeatable == "Monthly" then return L["REPEATABLE_MONTHLY"] end
+  if repeatable == "Yes" then return L["REPEATABLE_YES"] end
+  return repeatable or ""
 end
 
 -- Get the progress for all objectives for the current character.
