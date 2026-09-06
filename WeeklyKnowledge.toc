@@ -38,7 +38,6 @@ Boot.lua
 Constants.lua
 Helpers.lua
 Data.lua
-Data\Expansions.lua
 Data\ObjectiveCategories.lua
 Data\SkillLines.lua
 Data\SkillLineVariants.lua

@@ -9,8 +9,9 @@ addon.Checklist.TableData = TableData
 
 local Data = addon.Data
 local Helpers = addon.Helpers
-local TableCount = addon.libs.LiqUI.Utils.TableCount
-local TableForEach = addon.libs.LiqUI.Utils.TableForEach
+local LiqUI = addon.libs.LiqUI
+local TableCount = LiqUI.Utils.TableCount
+local TableForEach = LiqUI.Utils.TableForEach
 
 ---@param objective WK_Objective
 ---@return LiqUI_TableDataCellExtended
@@ -183,7 +184,7 @@ end
 ---@return LiqUI_TableDataCellExtended
 local function buildExpansionCell(skillLineVariantID)
   local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
-  local expansion = skillLineVariant and Data:GetExpansionByID(skillLineVariant.expansionID)
+  local expansion = skillLineVariant and LiqUI.Data:GetExpansionByID(skillLineVariant.expansionID)
   ---@type LiqUI_TableDataCellExtended
   return {
     data = expansion and expansion.name or "",

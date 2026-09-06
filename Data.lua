@@ -7,17 +7,17 @@ addon.Data = Data
 
 local Helpers = addon.Helpers
 local Constants = addon.Constants
-local LibLiqUI = addon.libs.LiqUI
-local TableContains = LibLiqUI.Utils.TableContains
-local TableCopy = LibLiqUI.Utils.TableCopy
-local TableCount = LibLiqUI.Utils.TableCount
-local TableFilter = LibLiqUI.Utils.TableFilter
-local TableFind = LibLiqUI.Utils.TableFind
-local TableForEach = LibLiqUI.Utils.TableForEach
-local TableGet = LibLiqUI.Utils.TableGet
-local TableMap = LibLiqUI.Utils.TableMap
-local TableMerge = LibLiqUI.Utils.TableMerge
-local TableUnique = LibLiqUI.Utils.TableUnique
+local LiqUI = addon.libs.LiqUI
+local TableContains = LiqUI.Utils.TableContains
+local TableCopy = LiqUI.Utils.TableCopy
+local TableCount = LiqUI.Utils.TableCount
+local TableFilter = LiqUI.Utils.TableFilter
+local TableFind = LiqUI.Utils.TableFind
+local TableForEach = LiqUI.Utils.TableForEach
+local TableGet = LiqUI.Utils.TableGet
+local TableMap = LiqUI.Utils.TableMap
+local TableMerge = LiqUI.Utils.TableMerge
+local TableUnique = LiqUI.Utils.TableUnique
 local LibAceDB = addon.libs.AceDB
 
 ---True when chat messaging lockdown is active (C_ChatInfo.InChatMessagingLockdown). Calendar/ChatInfo APIs may return secrets; skip scan/update.
@@ -133,8 +133,13 @@ Data.ObjectiveCategories = {}
 Data.SkillLineVariants = {}
 ---@type WK_SkillLine[]
 Data.SkillLines = {}
----@type WK_Expansion[]
-Data.Expansions = {}
+
+---@type table<Enum.ExpansionLevel, boolean>
+Data.expansionEnabled = {
+  [Enum.ExpansionLevel.Dragonflight] = false,
+  [Enum.ExpansionLevel.WarWithin] = true,
+  [Enum.ExpansionLevel.Midnight] = true,
+}
 
 function Data:InitDB()
   self.db = LibAceDB:New(
@@ -729,8 +734,7 @@ function Data:ScanProfessions()
   local filteredSkillLineIDs = TableFilter(allSkillLineIDs or {}, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return false end
-    local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
-    if not expansion or not expansion.enabled then return false end
+    if not self.expansionEnabled[skillLineVariant.expansionID] then return false end
     return true
   end)
 
@@ -1089,23 +1093,11 @@ function Data:GetCharacters()
   return characters
 end
 
----@return WK_Expansion[]
+---@return LiqUI_Expansion[]
 function Data:GetExpansions()
-  local expansions = TableFilter(self.Expansions, function(expansion)
-    return expansion.enabled
+  return TableFilter(LiqUI.Data:GetExpansions(), function(expansion)
+    return self.expansionEnabled[expansion.id]
   end)
-  return expansions
-end
-
----@param expansionID Enum.ExpansionLevel
----@return WK_Expansion?
-function Data:GetExpansionByID(expansionID)
-  for _, expansion in ipairs(self.Expansions) do
-    if expansion.id == expansionID then
-      return expansion
-    end
-  end
-  return nil
 end
 
 ---@return WK_SkillLine[]

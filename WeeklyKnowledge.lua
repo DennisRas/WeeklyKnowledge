@@ -6,8 +6,8 @@ local Constants = addon.Constants
 local LibAceAddon = addon.libs.AceAddon
 local LibDataBroker = addon.libs.LibDataBroker
 local LibDBIcon = addon.libs.LibDBIcon
-local LibLiqUI = addon.libs.LiqUI
-local TableForEach = LibLiqUI.Utils.TableForEach
+local LiqUI = addon.libs.LiqUI
+local TableForEach = LiqUI.Utils.TableForEach
 
 local Core = LibAceAddon:NewAddon(addon.name, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core

@@ -47,4 +47,4 @@
 ---@field ObjectiveCategories WK_ObjectiveCategory[]
 ---@field SkillLineVariants WK_SkillLineVariant[]
 ---@field SkillLines WK_SkillLine[]
----@field Expansions WK_Expansion[]
+---@field expansionEnabled table<Enum.ExpansionLevel, boolean>

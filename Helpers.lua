@@ -6,8 +6,8 @@ local Helpers = {}
 addon.Helpers = Helpers
 
 local Constants = addon.Constants
-local LibLiqUI = addon.libs.LiqUI
-local TableFind = LibLiqUI.Utils.TableFind
+local LiqUI = addon.libs.LiqUI
+local TableFind = LiqUI.Utils.TableFind
 
 ---True if the value is a secret (WoW API); use before comparing/using API return values that may be secret.
 ---@param value any

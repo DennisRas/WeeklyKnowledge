@@ -9,7 +9,8 @@ addon.Checklist.TableColumns = TableColumns
 
 local Data = addon.Data
 local Helpers = addon.Helpers
-local TableCount = addon.libs.LiqUI.Utils.TableCount
+local LiqUI = addon.libs.LiqUI
+local TableCount = LiqUI.Utils.TableCount
 
 ---@param objectiveA WK_Objective
 ---@param objectiveB WK_Objective
@@ -122,7 +123,7 @@ function TableColumns.GetDefinitions()
         compare = function(rowA, rowB)
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
-            local expansion = variant and Data:GetExpansionByID(variant.expansionID)
+            local expansion = variant and LiqUI.Data:GetExpansionByID(variant.expansionID)
             return expansion and expansion.name:lower() or ""
           end
           local nameA, nameB = expansionNameLower(rowA), expansionNameLower(rowB)

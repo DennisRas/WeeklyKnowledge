@@ -9,13 +9,13 @@ local Constants = addon.Constants
 local Data = addon.Data
 local Checklist = addon.Checklist
 local Helpers = addon.Helpers
-local LibLiqUI = addon.libs.LiqUI
+local LiqUI = addon.libs.LiqUI
 local LibDBIcon = addon.libs.LibDBIcon
-local TableContains = LibLiqUI.Utils.TableContains
-local TableCount = LibLiqUI.Utils.TableCount
-local TableFilter = LibLiqUI.Utils.TableFilter
-local TableForEach = LibLiqUI.Utils.TableForEach
-local TableToggle = LibLiqUI.Utils.TableToggle
+local TableContains = LiqUI.Utils.TableContains
+local TableCount = LiqUI.Utils.TableCount
+local TableFilter = LiqUI.Utils.TableFilter
+local TableForEach = LiqUI.Utils.TableForEach
+local TableToggle = LiqUI.Utils.TableToggle
 
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
@@ -56,7 +56,7 @@ function Main:Render()
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
     local windows = Data.db.global.liqui.windows
     local tables = Data.db.global.liqui.tables
-    self.window = LibLiqUI:NewElement("Window", {
+    self.window = LiqUI:NewElement("Window", {
       name = addon.name .. "Main",
       storage = windows.Main,
       title = addon.name,
@@ -270,7 +270,7 @@ function Main:Render()
       },
       columns = self:GetColumnDefinitions(),
     }
-    self.window.table = LibLiqUI:NewElement("Table", tableConfig)
+    self.window.table = LiqUI:NewElement("Table", tableConfig)
     self.window.table:SetParent(self.window.body)
     self.window.table:SetPoint("TOPLEFT", self.window.body, "TOPLEFT", 0, 0)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)

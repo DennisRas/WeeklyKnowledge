@@ -1,9 +1,3 @@
----@class WK_Expansion
----@field id Enum.ExpansionLevel
----@field enabled boolean
----@field abbr string
----@field name string
-
 ---@class WK_Faction
 ---@field id integer
 ---@field expansionID Enum.ExpansionLevel
