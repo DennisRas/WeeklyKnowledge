@@ -58,20 +58,27 @@ local function buildObjectiveCell(objective)
   end
 
   if objective.categoryID == Constants.objectiveCategory.FirstCraft then
-    local text = format("Error: RecipeID %d not found", objective.spellID or "?")
+    local spellID = objective.spellID
+    if not spellID then
+      ---@type LiqUI_TableDataCellExtended
+      return {
+        data = "Error: RecipeID not found",
+      }
+    end
+    local text = format("Error: RecipeID %d not found", spellID)
     local link = ""
-    local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
+    local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[spellID]
     if not recipeInfo then
-      recipeInfo = C_TradeSkillUI.GetRecipeInfo(objective.spellID)
+      recipeInfo = C_TradeSkillUI.GetRecipeInfo(spellID)
       if recipeInfo then
         if not Data.cache.tradeSkillRecipes then
           Data.cache.tradeSkillRecipes = {}
         end
-        Data.cache.tradeSkillRecipes[objective.spellID] = recipeInfo
+        Data.cache.tradeSkillRecipes[spellID] = recipeInfo
       end
     end
     if recipeInfo then
-      link = C_Spell.GetSpellLink(recipeInfo.recipeID or objective.spellID)
+      link = C_Spell.GetSpellLink(recipeInfo.recipeID or spellID)
       text = format("|T%s:0|t %s", recipeInfo.icon, recipeInfo.name)
     end
     ---@type LiqUI_TableDataCellExtended
@@ -97,7 +104,7 @@ local function buildObjectiveCell(objective)
               ChatFrame_OpenChat(link);
             end
           else
-            C_TradeSkillUI.OpenRecipe(objective.spellID)
+            C_TradeSkillUI.OpenRecipe(spellID)
           end
         end
       end,
@@ -220,13 +227,15 @@ end
 ---@return LiqUI_TableDataCellExtended
 local function buildLocationCell(objective)
   local text = " "
-  if objective and objective.loc and objective.loc.m then
-    if Data.cache.mapInfo[objective.loc.m] then
-      text = Data.cache.mapInfo[objective.loc.m].name
+  local loc = objective.loc
+  local mapID = loc and loc.m
+  if mapID then
+    if Data.cache.mapInfo[mapID] then
+      text = Data.cache.mapInfo[mapID].name
     else
-      local mapInfo = C_Map.GetMapInfo(objective.loc.m)
+      local mapInfo = C_Map.GetMapInfo(mapID)
       if mapInfo then
-        Data.cache.mapInfo[objective.loc.m] = mapInfo
+        Data.cache.mapInfo[mapID] = mapInfo
         text = mapInfo.name
       end
     end
@@ -291,15 +300,20 @@ end
 ---@return LiqUI_TableDataCellExtended
 local function buildWaypointCell(character, objective, progress)
   local TomTomGlobal = _G["TomTom"]
+  local loc = objective.loc
+  local mapID = loc and loc.m
+  local mapX = loc and loc.x
+  local mapY = loc and loc.y
   local mapInfo = nil
   local mapPoint = nil
-
-  if objective.loc and objective.loc.m then
-    mapInfo = C_Map.GetMapInfo(objective.loc.m)
-  end
-
-  if mapInfo then
-    mapPoint = UiMapPoint.CreateFromCoordinates(objective.loc.m, objective.loc.x / 100, objective.loc.y / 100)
+  if mapID then
+    mapInfo = C_Map.GetMapInfo(mapID)
+    if mapInfo and mapX and mapY then
+      local uiMapID = mapID
+      local coordX = mapX
+      local coordY = mapY
+      mapPoint = UiMapPoint.CreateFromCoordinates(uiMapID, coordX / 100, coordY / 100)
+    end
   end
 
   ---@type LiqUI_TableDataCellExtended
@@ -310,8 +324,8 @@ local function buildWaypointCell(character, objective, progress)
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
 
-        if objective.loc and objective.loc.hint then
-          GameTooltip:AddLine(objective.loc.hint, nil, nil, nil, true)
+        if loc and loc.hint then
+          GameTooltip:AddLine(loc.hint, nil, nil, nil, true)
         elseif objective.categoryID == Constants.objectiveCategory.FirstCraft then
           local objectiveCategory = Data:GetObjectiveCategoryByID(objective.categoryID)
           if objectiveCategory then
@@ -324,11 +338,11 @@ local function buildWaypointCell(character, objective, progress)
           GameTooltip:AddDoubleLine("Location:", mapInfo.name, nil, nil, nil, 1, 1, 1)
         end
 
-        if objective.loc and objective.loc.x then
+        if mapX and mapY then
           if not mapInfo then
             GameTooltip:AddLine(" ")
           end
-          GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", objective.loc.x, objective.loc.y), nil, nil, nil, 1, 1, 1)
+          GameTooltip:AddDoubleLine("Coordinates:", format("%.1f / %.1f", mapX, mapY), nil, nil, nil, 1, 1, 1)
         end
 
         local requirementsHeading = "Requirements:"
@@ -365,12 +379,15 @@ local function buildWaypointCell(character, objective, progress)
         end
 
         if mapPoint then
-          if C_Map.CanSetUserWaypointOnMap(objective.loc.m) or TomTomGlobal then
-            GameTooltip:AddLine(" ")
-          end
-          if C_Map.CanSetUserWaypointOnMap(objective.loc.m) then
-            GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-            GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+          local tooltipMapID = mapID
+          if tooltipMapID then
+            if C_Map.CanSetUserWaypointOnMap(tooltipMapID) or TomTomGlobal then
+              GameTooltip:AddLine(" ")
+            end
+            if C_Map.CanSetUserWaypointOnMap(tooltipMapID) then
+              GameTooltip:AddLine("<Click to place a pin on the map>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+              GameTooltip:AddLine("<Shift click to share pin in chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+            end
           end
           if TomTomGlobal then
             GameTooltip:AddLine("<Alt click to place a TomTom waypoint>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
@@ -388,9 +405,10 @@ local function buildWaypointCell(character, objective, progress)
 
       if TableCount(progress.requirements) > 0 then
         TableForEach(progress.requirements, function(requirement)
-          if requirement.requirement.type == "item" then
-            Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
-            Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
+          local itemID = requirement.requirement.id
+          if requirement.requirement.type == "item" and itemID then
+            Data.cache.items[itemID] = Item:CreateFromItemID(itemID)
+            Data.cache.items[itemID]:ContinueOnItemLoad(showTooltip)
           end
         end)
       end
@@ -401,20 +419,33 @@ local function buildWaypointCell(character, objective, progress)
       GameTooltip:Hide()
     end,
     onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-      if mapPoint then
-        if IsAltKeyDown() and TomTomGlobal then
-          local text = "Objective"
-          TomTomGlobal:AddWaypoint(objective.loc.m, objective.loc.x / 100, objective.loc.y / 100, {title = text, from = addon.name})
-        elseif C_Map.CanSetUserWaypointOnMap(objective.loc.m) then
-          if IsModifiedClick("CHATLINK") then
-            local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", objective.loc.m, objective.loc.x * 100, objective.loc.y * 100, MAP_PIN_HYPERLINK)
-            if not ChatEdit_InsertLink(hyperlink) then
-              ChatFrame_OpenChat(hyperlink);
-            end
-          else
-            C_Map.SetUserWaypoint(mapPoint)
-            C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+      local pinMapID = mapID
+      if not mapPoint then
+        return
+      end
+      if not pinMapID then
+        return
+      end
+      local pinX = mapX
+      if not pinX then
+        return
+      end
+      local pinY = mapY
+      if not pinY then
+        return
+      end
+      if IsAltKeyDown() and TomTomGlobal then
+        local text = "Objective"
+        TomTomGlobal:AddWaypoint(pinMapID, pinX / 100, pinY / 100, {title = text, from = addon.name})
+      elseif C_Map.CanSetUserWaypointOnMap(pinMapID) then
+        if IsModifiedClick("CHATLINK") then
+          local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", pinMapID, pinX * 100, pinY * 100, MAP_PIN_HYPERLINK)
+          if not ChatEdit_InsertLink(hyperlink) then
+            ChatFrame_OpenChat(hyperlink);
           end
+        else
+          C_Map.SetUserWaypoint(mapPoint)
+          C_SuperTrack.SetSuperTrackedUserWaypoint(true)
         end
       end
     end,

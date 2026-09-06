@@ -9,13 +9,15 @@ local LibDBIcon = addon.libs.LibDBIcon
 local LiqUI = addon.libs.LiqUI
 local TableForEach = LiqUI.Utils.TableForEach
 
+---@class WK_Core
 local Core = LibAceAddon:NewAddon(addon.name, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
-addon.debug = false
 
+local debugEnabled = false
 --@debug@
-addon.debug = false
+debugEnabled = true
 --@end-debug@
+addon.debug = debugEnabled
 
 function Core:Render()
   addon.Main:Render()

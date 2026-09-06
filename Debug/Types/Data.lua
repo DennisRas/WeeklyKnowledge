@@ -37,7 +37,7 @@
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[]
 
 ---@class WK_Data
----@field db { global: WK_DefaultGlobal }|nil
+---@field db { global: WK_DefaultGlobal }
 ---@field DBVersion number
 ---@field defaultDB table
 ---@field defaultCharacter WK_Character

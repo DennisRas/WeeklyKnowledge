@@ -53,36 +53,42 @@ end
 ---@param skillLineVariantID number
 ---@param objectiveCategoryID WK_ObjectiveCategoryId
 function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, character, skillLineVariantID, objectiveCategoryID)
+  local requirement = objectiveProgressRequirement.requirement
+  local requirementID = requirement.id
+  local amount = requirement.amount or 0
   local leftText = "-"
   local rightText = "-"
   local leftColor = WHITE_FONT_COLOR
   local rightColor = WHITE_FONT_COLOR
-  if objectiveProgressRequirement.requirement.type == "item" then
-    leftText = format("ItemID: %d", objectiveProgressRequirement.requirement.id)
-    rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
-    local quantity = character.items and character.items[objectiveProgressRequirement.requirement.id] or 0
-    local item = addon.Data.cache.items[objectiveProgressRequirement.requirement.id]
-    local itemCached = item and item:IsItemDataCached()
-    local name = "Loading..."
-    local icon = 134400
-    if itemCached then
-      icon = item:GetItemIcon() or 134400
-      name = item:GetItemLink() or "Loading..."
+  if requirement.type == "item" then
+    leftText = format("ItemID: %d", requirementID or 0)
+    rightText = format("%d / %d", 0, amount)
+    local quantity = 0
+    if requirementID then
+      quantity = character.items and character.items[requirementID] or 0
+      local item = addon.Data.cache.items[requirementID]
+      local itemCached = item and item:IsItemDataCached()
+      local name = "Loading..."
+      local icon = 134400
+      if itemCached then
+        icon = item:GetItemIcon() or 134400
+        name = item:GetItemLink() or "Loading..."
+      end
+      leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
+      rightText = format("%d / %d", quantity, amount)
     end
-    leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
-    rightText = format("%d / %d", quantity, objectiveProgressRequirement.requirement.amount or 0)
-    if quantity >= objectiveProgressRequirement.requirement.amount then
+    if quantity >= amount then
       rightColor = GREEN_FONT_COLOR
     else
       rightColor = RED_FONT_COLOR
     end
-  elseif objectiveProgressRequirement.requirement.type == "currency" then
-    leftText = format("CurrencyID: %d", objectiveProgressRequirement.requirement.id)
-    rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
+  elseif requirement.type == "currency" then
+    leftText = format("CurrencyID: %d", requirementID or 0)
+    rightText = format("%d / %d", 0, amount)
     local name = "Loading..."
     local quantity = 0
     local icon = 134400
-    local characterCurrency = character.currencies and character.currencies[objectiveProgressRequirement.requirement.id] or nil
+    local characterCurrency = requirementID and character.currencies and character.currencies[requirementID] or nil
     if characterCurrency then
       if characterCurrency.name then
         name = characterCurrency.name
@@ -94,43 +100,47 @@ function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, characte
         icon = characterCurrency.iconFileID
       end
       leftText = format("%s %s", CreateSimpleTextureMarkup(icon, 13, 13), name)
-      rightText = format("%d / %d", quantity, objectiveProgressRequirement.requirement.amount or 0)
+      rightText = format("%d / %d", quantity, amount)
     end
-    if quantity >= objectiveProgressRequirement.requirement.amount then
+    if quantity >= amount then
       rightColor = GREEN_FONT_COLOR
     else
       rightColor = RED_FONT_COLOR
     end
-  elseif objectiveProgressRequirement.requirement.type == "quest" then
-    leftText = format("QuestID: %d", objectiveProgressRequirement.requirement.quests[1] or "?")
+  elseif requirement.type == "quest" then
+    local quests = requirement.quests
+    local questID = quests and quests[1]
+    leftText = format("QuestID: %d", questID or 0)
     rightText = CreateAtlasMarkup("common-icon-redx", 12, 12)
-    if objectiveProgressRequirement.requirement.name then
-      leftText = format("%s %s", objectiveProgressRequirement.requirement.name, objectiveCategoryID == Constants.objectiveCategory.CatchUp and "" or "(Quest)")
+    if requirement.name then
+      leftText = format("%s %s", requirement.name, objectiveCategoryID == Constants.objectiveCategory.CatchUp and "" or "(Quest)")
     end
     if objectiveProgressRequirement.isCompleted then
       rightText = CreateAtlasMarkup("common-icon-checkmark", 12, 12)
     end
-  elseif objectiveProgressRequirement.requirement.type == "renown" then
-    leftText = format("FactionID: %d", objectiveProgressRequirement.requirement.id)
-    rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
+  elseif requirement.type == "renown" then
+    leftText = format("FactionID: %d", requirementID or 0)
+    rightText = format("%d / %d", 0, amount)
     local level = 0
-    local factionInfo = C_MajorFactions.GetMajorFactionData(objectiveProgressRequirement.requirement.id)
-    if factionInfo then
-      leftText = format("%s (Renown)", factionInfo.name)
-      rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
+    if requirementID then
+      local factionInfo = C_MajorFactions.GetMajorFactionData(requirementID)
+      if factionInfo then
+        leftText = format("%s (Renown)", factionInfo.name)
+        rightText = format("%d / %d", 0, amount)
+      end
+      if character.factions and character.factions[requirementID] then
+        level = character.factions[requirementID].level or 0
+        rightText = format("%d / %d", level, amount)
+      end
     end
-    if character.factions and character.factions[objectiveProgressRequirement.requirement.id] then
-      level = character.factions[objectiveProgressRequirement.requirement.id].level or 0
-      rightText = format("%d / %d", level, objectiveProgressRequirement.requirement.amount or 0)
-    end
-    if level >= objectiveProgressRequirement.requirement.amount then
+    if level >= amount then
       rightColor = GREEN_FONT_COLOR
     else
       rightColor = RED_FONT_COLOR
     end
-  elseif objectiveProgressRequirement.requirement.type == "skill" then
-    leftText = format("SkillID: %d", objectiveProgressRequirement.requirement.id)
-    rightText = format("%d / %d", 0, objectiveProgressRequirement.requirement.amount or 0)
+  elseif requirement.type == "skill" then
+    leftText = format("SkillID: %d", requirementID or 0)
+    rightText = format("%d / %d", 0, amount)
     local skillLevel = 0
     local characterProfession = TableFind(character.professions, function(profession)
       return profession.skillLineVariantID == skillLineVariantID
@@ -138,8 +148,8 @@ function Helpers:RenderRequirementTooltip(objectiveProgressRequirement, characte
     if characterProfession then
       skillLevel = characterProfession.skillLevel or 0
     end
-    rightText = format("%d / %d", skillLevel, objectiveProgressRequirement.requirement.amount or 0)
-    if skillLevel >= objectiveProgressRequirement.requirement.amount then
+    rightText = format("%d / %d", skillLevel, amount)
+    if skillLevel >= amount then
       rightColor = GREEN_FONT_COLOR
     else
       rightColor = RED_FONT_COLOR

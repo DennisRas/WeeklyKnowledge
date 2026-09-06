@@ -150,6 +150,7 @@ function Data:InitDB()
 end
 
 function Data:MigrateDB()
+  ---@diagnostic disable: undefined-field, inject-field
   if type(self.db.global.DBVersion) ~= "number" then
     self.db.global.DBVersion = self.DBVersion
   end
@@ -160,16 +161,12 @@ function Data:MigrateDB()
         character.GUID = characterGUID
         character.lastUpdate = 0
         character.enabled = true
-        ---@diagnostic disable-next-line: undefined-field
         character.classID = character.class
-        ---@diagnostic disable-next-line: undefined-field
         character.realmName = character.realm
-        ---@diagnostic disable-next-line: inject-field
         character.color = nil
 
         local remove = true
         for _, characterProfession in pairs(character.professions) do
-          ---@diagnostic disable-next-line: undefined-field
           if characterProfession.latestExpansion then
             remove = false
           end
@@ -191,19 +188,16 @@ function Data:MigrateDB()
       self.db.global.characters[""] = nil
       if self.db.global.hiddenColumns and TableCount(self.db.global.hiddenColumns) > 0 then
         self.db.global.main.hiddenColumns = TableCopy(self.db.global.hiddenColumns)
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.hiddenColumns = nil
       end
       if self.db.global.windowScale then
         self.db.global.main.windowScale = self.db.global.windowScale
         self.db.global.checklist.windowScale = self.db.global.windowScale
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.windowScale = nil
       end
       if self.db.global.windowBackgroundColor then
         self.db.global.main.windowBackgroundColor = self.db.global.windowBackgroundColor
         self.db.global.checklist.windowBackgroundColor = self.db.global.windowBackgroundColor
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.windowBackgroundColor = nil
       end
     end
@@ -539,6 +533,7 @@ function Data:MigrateDB()
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
+  ---@diagnostic enable: undefined-field, inject-field
 end
 
 ---Clear quest progress after a weekly reset
@@ -770,7 +765,7 @@ function Data:ScanProfessions()
   end)
 
   -- Detect if an old character profession should be removed (not in spellbook)
-  character.professions = TableFilter(character.professions, function(characterProfession)
+  local professions = TableFilter(character.professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if not skillLineVariant or not TableContains(learnedSkillLineIDs or {}, skillLineVariant.skillLineID) then
       addon.Core:Print(format("Removing old profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
@@ -780,7 +775,7 @@ function Data:ScanProfessions()
   end)
 
   -- Detect if an invalid character profession should be removed (knowledge = 0/0)
-  character.professions = TableFilter(character.professions, function(characterProfession)
+  character.professions = TableFilter(professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
       addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
@@ -1282,7 +1277,7 @@ function Data:GetObjectiveProgress(character, objective)
         local characterQuests = character.completed or {}
         local isCompleted = 0
         if requirement.match == "all" then
-          TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests or {}, function(questID)
             objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
             local questCompleted = characterQuests[questID]
             if questCompleted then
@@ -1296,7 +1291,7 @@ function Data:GetObjectiveProgress(character, objective)
         end
         if requirement.match == "any" then
           objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-          TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests or {}, function(questID)
             if characterQuests[questID] then
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
               objectiveProgressRequirement.isCompleted = true
@@ -1333,20 +1328,23 @@ function Data:GetObjectiveProgress(character, objective)
       end
       if requirement.type == "renown" then
         local characterFactions = character.factions or {}
-        local renownInfo = C_MajorFactions.GetMajorFactionData(requirement.id)
+        local factionID = requirement.id
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        if renownInfo then
-          local renownLevel = 0
-          if character == currentCharacter then
-            renownLevel = C_MajorFactions.GetCurrentRenownLevel(requirement.id) or 0
-            characterFactions[requirement.id] = characterFactions[requirement.id] or {id = requirement.id, level = 0}
-            characterFactions[requirement.id].level = renownLevel
-          elseif characterFactions[requirement.id] then
-            renownLevel = characterFactions[requirement.id].level
-          end
-          if renownLevel >= requirement.amount then
-            objectiveProgressRequirement.isCompleted = true
-            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+        if factionID then
+          local renownInfo = C_MajorFactions.GetMajorFactionData(factionID)
+          if renownInfo then
+            local renownLevel = 0
+            if character == currentCharacter then
+              renownLevel = C_MajorFactions.GetCurrentRenownLevel(factionID) or 0
+              characterFactions[factionID] = characterFactions[factionID] or {id = factionID, level = 0}
+              characterFactions[factionID].level = renownLevel
+            elseif characterFactions[factionID] then
+              renownLevel = characterFactions[factionID].level
+            end
+            if renownLevel >= requirement.amount then
+              objectiveProgressRequirement.isCompleted = true
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+            end
           end
         end
       end

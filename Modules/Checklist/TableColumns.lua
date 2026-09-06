@@ -28,7 +28,7 @@ local function checklistObjectiveIdentityLess(objectiveA, objectiveB)
   return (objectiveA.itemID or 0) < (objectiveB.itemID or 0)
 end
 
----@param row LiqUI_TableDataRowExtended
+---@param row WK_TableRowData
 ---@return string
 local function checklistObjectiveRowSortText(row)
   local objective = row.objective
@@ -43,20 +43,24 @@ local function checklistObjectiveRowSortText(row)
     return format("Error: ItemID %d not found", objective.itemID or "?")
   end
   if objective.categoryID == Constants.objectiveCategory.FirstCraft then
-    local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[objective.spellID]
+    local spellID = objective.spellID
+    if not spellID then
+      return "Error: RecipeID not found"
+    end
+    local recipeInfo = Data.cache.tradeSkillRecipes and Data.cache.tradeSkillRecipes[spellID]
     if not recipeInfo then
-      recipeInfo = C_TradeSkillUI.GetRecipeInfo(objective.spellID)
+      recipeInfo = C_TradeSkillUI.GetRecipeInfo(spellID)
       if recipeInfo then
         if not Data.cache.tradeSkillRecipes then
           Data.cache.tradeSkillRecipes = {}
         end
-        Data.cache.tradeSkillRecipes[objective.spellID] = recipeInfo
+        Data.cache.tradeSkillRecipes[spellID] = recipeInfo
       end
     end
     if recipeInfo and recipeInfo.name then
       return recipeInfo.name
     end
-    return format("Error: RecipeID %d not found", objective.spellID or "?")
+    return format("Error: RecipeID %d not found", spellID)
   end
   if objective.quests and TableCount(objective.quests) > 0 then
     local link = format("quest:%d:-1", objective.quests[1])
@@ -69,6 +73,20 @@ local function checklistObjectiveRowSortText(row)
   return "Unknown"
 end
 
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareChecklistObjective(rowA, rowB)
+  local skillLineVariantA = rowA.skillLineVariantID or 0
+  local skillLineVariantB = rowB.skillLineVariantID or 0
+  if skillLineVariantA ~= skillLineVariantB then return skillLineVariantA < skillLineVariantB end
+  local labelCompare = strcmputf8i(checklistObjectiveRowSortText(rowA), checklistObjectiveRowSortText(rowB))
+  if labelCompare ~= 0 then return labelCompare < 0 end
+  local objectiveA, objectiveB = rowA.objective, rowB.objective
+  if not objectiveA or not objectiveB then return false end
+  return checklistObjectiveIdentityLess(objectiveA, objectiveB)
+end
+
 ---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
   ---@type LiqUI_TableOptionsColumn[]
@@ -79,16 +97,7 @@ function TableColumns.GetDefinitions()
       width = 260,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local skillLineVariantA = rowA.skillLineVariantID or 0
-          local skillLineVariantB = rowB.skillLineVariantID or 0
-          if skillLineVariantA ~= skillLineVariantB then return skillLineVariantA < skillLineVariantB end
-          local labelCompare = strcmputf8i(checklistObjectiveRowSortText(rowA), checklistObjectiveRowSortText(rowB))
-          if labelCompare ~= 0 then return labelCompare < 0 end
-          local objectiveA, objectiveB = rowA.objective, rowB.objective
-          if not objectiveA or not objectiveB then return false end
-          return checklistObjectiveIdentityLess(objectiveA, objectiveB)
-        end,
+        compare = compareChecklistObjective,
       },
     },
     {

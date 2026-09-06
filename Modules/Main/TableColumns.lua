@@ -13,6 +13,16 @@ local TableData = addon.Main.TableData
 local LiqUI = addon.libs.LiqUI
 local TableForEach = LiqUI.Utils.TableForEach
 
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareMainConcentration(rowA, rowB)
+  local estimatedA = TableData.ConcentrationEstimatedForSort(rowA)
+  local estimatedB = TableData.ConcentrationEstimatedForSort(rowB)
+  if estimatedA ~= estimatedB then return estimatedA < estimatedB end
+  return rowA.skillLineVariantID < rowB.skillLineVariantID
+end
+
 ---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
   local objectiveCategories = Data:GetObjectiveCategories()
@@ -184,12 +194,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local estimatedA = TableData.ConcentrationEstimatedForSort(rowA)
-          local estimatedB = TableData.ConcentrationEstimatedForSort(rowB)
-          if estimatedA ~= estimatedB then return estimatedA < estimatedB end
-          return rowA.skillLineVariantID < rowB.skillLineVariantID
-        end,
+        compare = compareMainConcentration,
       },
     },
     {

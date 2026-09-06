@@ -14,7 +14,7 @@ local TableCount = LiqUI.Utils.TableCount
 local TableForEach = LiqUI.Utils.TableForEach
 
 --- Estimated concentration (same idea as the cell); used only for sort order.
----@param row LiqUI_TableDataRowExtended
+---@param row WK_TableRowData
 ---@return number
 function TableData.ConcentrationEstimatedForSort(row)
   local character = row.character
