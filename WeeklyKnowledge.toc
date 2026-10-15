@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120105
 ## Title: WeeklyKnowledge
 ## Notes: Track your profession knowledge across your characters
 ## Version: @project-version@

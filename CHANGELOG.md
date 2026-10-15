@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.1 - TBD
+
+- Updated TOC number to support patch 12.1.5.
+
 ## v1.4.0 - 2026-08-12
 
 - Added 12.1 First Craft and Unique profession objectives. Thank you @pepedressingroom.
