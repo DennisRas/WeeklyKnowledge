@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.4.1 - TBD
+## v1.4.1 - 2026-10-15
 
 - Updated TOC number to support patch 12.1.5.
 
