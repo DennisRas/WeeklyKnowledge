@@ -9,11 +9,12 @@ addon.Main.TableData = TableData
 
 local Data = addon.Data
 local Helpers = addon.Helpers
-local TableCount = addon.libs.LiqUI.Utils.TableCount
-local TableForEach = addon.libs.LiqUI.Utils.TableForEach
+local LiqUI = addon.libs.LiqUI
+local TableCount = LiqUI.Utils.TableCount
+local TableForEach = LiqUI.Utils.TableForEach
 
 --- Estimated concentration (same idea as the cell); used only for sort order.
----@param row LiqUI_TableDataRowExtended
+---@param row WK_TableRowData
 ---@return number
 function TableData.ConcentrationEstimatedForSort(row)
   local character = row.character
@@ -151,7 +152,7 @@ local function buildExpansionCell(skillLineVariantID)
     ---@type LiqUI_TableDataCellExtended
     return { data = "" }
   end
-  local expansion = Data:GetExpansionByID(variant.expansionID)
+  local expansion = LiqUI.Data:GetExpansionByID(variant.expansionID)
   if not expansion then
     ---@type LiqUI_TableDataCellExtended
     return { data = "" }

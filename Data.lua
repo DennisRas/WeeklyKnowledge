@@ -7,17 +7,17 @@ addon.Data = Data
 
 local Helpers = addon.Helpers
 local Constants = addon.Constants
-local LibLiqUI = addon.libs.LiqUI
-local TableContains = LibLiqUI.Utils.TableContains
-local TableCopy = LibLiqUI.Utils.TableCopy
-local TableCount = LibLiqUI.Utils.TableCount
-local TableFilter = LibLiqUI.Utils.TableFilter
-local TableFind = LibLiqUI.Utils.TableFind
-local TableForEach = LibLiqUI.Utils.TableForEach
-local TableGet = LibLiqUI.Utils.TableGet
-local TableMap = LibLiqUI.Utils.TableMap
-local TableMerge = LibLiqUI.Utils.TableMerge
-local TableUnique = LibLiqUI.Utils.TableUnique
+local LiqUI = addon.libs.LiqUI
+local TableContains = LiqUI.Utils.TableContains
+local TableCopy = LiqUI.Utils.TableCopy
+local TableCount = LiqUI.Utils.TableCount
+local TableFilter = LiqUI.Utils.TableFilter
+local TableFind = LiqUI.Utils.TableFind
+local TableForEach = LiqUI.Utils.TableForEach
+local TableGet = LiqUI.Utils.TableGet
+local TableMap = LiqUI.Utils.TableMap
+local TableMerge = LiqUI.Utils.TableMerge
+local TableUnique = LiqUI.Utils.TableUnique
 local LibAceDB = addon.libs.AceDB
 
 ---True when chat messaging lockdown is active (C_ChatInfo.InChatMessagingLockdown). Calendar/ChatInfo APIs may return secrets; skip scan/update.
@@ -133,8 +133,13 @@ Data.ObjectiveCategories = {}
 Data.SkillLineVariants = {}
 ---@type WK_SkillLine[]
 Data.SkillLines = {}
----@type WK_Expansion[]
-Data.Expansions = {}
+
+---@type table<Enum.ExpansionLevel, boolean>
+Data.expansionEnabled = {
+  [Enum.ExpansionLevel.Dragonflight] = false,
+  [Enum.ExpansionLevel.WarWithin] = true,
+  [Enum.ExpansionLevel.Midnight] = true,
+}
 
 function Data:InitDB()
   self.db = LibAceDB:New(
@@ -145,6 +150,7 @@ function Data:InitDB()
 end
 
 function Data:MigrateDB()
+  ---@diagnostic disable: undefined-field, inject-field
   if type(self.db.global.DBVersion) ~= "number" then
     self.db.global.DBVersion = self.DBVersion
   end
@@ -155,16 +161,12 @@ function Data:MigrateDB()
         character.GUID = characterGUID
         character.lastUpdate = 0
         character.enabled = true
-        ---@diagnostic disable-next-line: undefined-field
         character.classID = character.class
-        ---@diagnostic disable-next-line: undefined-field
         character.realmName = character.realm
-        ---@diagnostic disable-next-line: inject-field
         character.color = nil
 
         local remove = true
         for _, characterProfession in pairs(character.professions) do
-          ---@diagnostic disable-next-line: undefined-field
           if characterProfession.latestExpansion then
             remove = false
           end
@@ -186,19 +188,16 @@ function Data:MigrateDB()
       self.db.global.characters[""] = nil
       if self.db.global.hiddenColumns and TableCount(self.db.global.hiddenColumns) > 0 then
         self.db.global.main.hiddenColumns = TableCopy(self.db.global.hiddenColumns)
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.hiddenColumns = nil
       end
       if self.db.global.windowScale then
         self.db.global.main.windowScale = self.db.global.windowScale
         self.db.global.checklist.windowScale = self.db.global.windowScale
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.windowScale = nil
       end
       if self.db.global.windowBackgroundColor then
         self.db.global.main.windowBackgroundColor = self.db.global.windowBackgroundColor
         self.db.global.checklist.windowBackgroundColor = self.db.global.windowBackgroundColor
-        ---@diagnostic disable-next-line: inject-field
         self.db.global.windowBackgroundColor = nil
       end
     end
@@ -534,6 +533,7 @@ function Data:MigrateDB()
     self.db.global.DBVersion = self.db.global.DBVersion + 1
     self:MigrateDB()
   end
+  ---@diagnostic enable: undefined-field, inject-field
 end
 
 ---Clear quest progress after a weekly reset
@@ -729,8 +729,7 @@ function Data:ScanProfessions()
   local filteredSkillLineIDs = TableFilter(allSkillLineIDs or {}, function(skillLineVariantID)
     local skillLineVariant = self:GetSkillLineVariantByID(skillLineVariantID)
     if not skillLineVariant then return false end
-    local expansion = self:GetExpansionByID(skillLineVariant.expansionID)
-    if not expansion or not expansion.enabled then return false end
+    if not self.expansionEnabled[skillLineVariant.expansionID] then return false end
     return true
   end)
 
@@ -766,7 +765,7 @@ function Data:ScanProfessions()
   end)
 
   -- Detect if an old character profession should be removed (not in spellbook)
-  character.professions = TableFilter(character.professions, function(characterProfession)
+  local professions = TableFilter(character.professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if not skillLineVariant or not TableContains(learnedSkillLineIDs or {}, skillLineVariant.skillLineID) then
       addon.Core:Print(format("Removing old profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
@@ -776,7 +775,7 @@ function Data:ScanProfessions()
   end)
 
   -- Detect if an invalid character profession should be removed (knowledge = 0/0)
-  character.professions = TableFilter(character.professions, function(characterProfession)
+  character.professions = TableFilter(professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
     if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
       addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
@@ -1089,23 +1088,11 @@ function Data:GetCharacters()
   return characters
 end
 
----@return WK_Expansion[]
+---@return LiqUI_Expansion[]
 function Data:GetExpansions()
-  local expansions = TableFilter(self.Expansions, function(expansion)
-    return expansion.enabled
+  return TableFilter(LiqUI.Data:GetExpansions(), function(expansion)
+    return self.expansionEnabled[expansion.id]
   end)
-  return expansions
-end
-
----@param expansionID Enum.ExpansionLevel
----@return WK_Expansion?
-function Data:GetExpansionByID(expansionID)
-  for _, expansion in ipairs(self.Expansions) do
-    if expansion.id == expansionID then
-      return expansion
-    end
-  end
-  return nil
 end
 
 ---@return WK_SkillLine[]
@@ -1290,7 +1277,7 @@ function Data:GetObjectiveProgress(character, objective)
         local characterQuests = character.completed or {}
         local isCompleted = 0
         if requirement.match == "all" then
-          TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests or {}, function(questID)
             objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
             local questCompleted = characterQuests[questID]
             if questCompleted then
@@ -1304,7 +1291,7 @@ function Data:GetObjectiveProgress(character, objective)
         end
         if requirement.match == "any" then
           objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-          TableForEach(requirement.quests, function(questID)
+          TableForEach(requirement.quests or {}, function(questID)
             if characterQuests[questID] then
               objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
               objectiveProgressRequirement.isCompleted = true
@@ -1341,20 +1328,23 @@ function Data:GetObjectiveProgress(character, objective)
       end
       if requirement.type == "renown" then
         local characterFactions = character.factions or {}
-        local renownInfo = C_MajorFactions.GetMajorFactionData(requirement.id)
+        local factionID = requirement.id
         objectiveProgress.requirementsTotal = objectiveProgress.requirementsTotal + 1
-        if renownInfo then
-          local renownLevel = 0
-          if character == currentCharacter then
-            renownLevel = C_MajorFactions.GetCurrentRenownLevel(requirement.id) or 0
-            characterFactions[requirement.id] = characterFactions[requirement.id] or {id = requirement.id, level = 0}
-            characterFactions[requirement.id].level = renownLevel
-          elseif characterFactions[requirement.id] then
-            renownLevel = characterFactions[requirement.id].level
-          end
-          if renownLevel >= requirement.amount then
-            objectiveProgressRequirement.isCompleted = true
-            objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+        if factionID then
+          local renownInfo = C_MajorFactions.GetMajorFactionData(factionID)
+          if renownInfo then
+            local renownLevel = 0
+            if character == currentCharacter then
+              renownLevel = C_MajorFactions.GetCurrentRenownLevel(factionID) or 0
+              characterFactions[factionID] = characterFactions[factionID] or {id = factionID, level = 0}
+              characterFactions[factionID].level = renownLevel
+            elseif characterFactions[factionID] then
+              renownLevel = characterFactions[factionID].level
+            end
+            if renownLevel >= requirement.amount then
+              objectiveProgressRequirement.isCompleted = true
+              objectiveProgress.requirementsMet = objectiveProgress.requirementsMet + 1
+            end
           end
         end
       end

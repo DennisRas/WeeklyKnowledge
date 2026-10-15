@@ -9,13 +9,13 @@ local Constants = addon.Constants
 local Data = addon.Data
 local Checklist = addon.Checklist
 local Helpers = addon.Helpers
-local LibLiqUI = addon.libs.LiqUI
+local LiqUI = addon.libs.LiqUI
 local LibDBIcon = addon.libs.LibDBIcon
-local TableContains = LibLiqUI.Utils.TableContains
-local TableCount = LibLiqUI.Utils.TableCount
-local TableFilter = LibLiqUI.Utils.TableFilter
-local TableForEach = LibLiqUI.Utils.TableForEach
-local TableToggle = LibLiqUI.Utils.TableToggle
+local TableContains = LiqUI.Utils.TableContains
+local TableCount = LiqUI.Utils.TableCount
+local TableFilter = LiqUI.Utils.TableFilter
+local TableForEach = LiqUI.Utils.TableForEach
+local TableToggle = LiqUI.Utils.TableToggle
 
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
@@ -56,7 +56,7 @@ function Main:Render()
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
     local windows = Data.db.global.liqui.windows
     local tables = Data.db.global.liqui.tables
-    self.window = LibLiqUI:NewElement("Window", {
+    self.window = LiqUI:NewElement("Window", {
       name = addon.name .. "Main",
       storage = windows.Main,
       title = addon.name,
@@ -200,7 +200,15 @@ function Main:Render()
           tooltipTitle = "Columns",
           tooltipDescription = "Enable/Disable table columns.",
           onMenu = function(_, rootMenu)
-            local hidden = self.window.table.db.hiddenColumns
+            local window = self.window
+            if not window then
+              return
+            end
+            local tableFrame = window.table
+            if not tableFrame then
+              return
+            end
+            local hidden = tableFrame.db.hiddenColumns
             TableForEach(self:GetColumnDefinitions(), function(column)
               if not column.hideable then return end
               rootMenu:CreateCheckbox(
@@ -270,14 +278,23 @@ function Main:Render()
       },
       columns = self:GetColumnDefinitions(),
     }
-    self.window.table = LibLiqUI:NewElement("Table", tableConfig)
+    self.window.table = LiqUI:NewElement("Table", tableConfig)
     self.window.table:SetParent(self.window.body)
     self.window.table:SetPoint("TOPLEFT", self.window.body, "TOPLEFT", 0, 0)
     self.window.table:SetPoint("BOTTOMRIGHT", self.window.body, "BOTTOMRIGHT", 0, 0)
   end
 
+  local window = self.window
+  if not window then
+    return
+  end
+  local tableFrame = window.table
+  if not tableFrame then
+    return
+  end
+
   -- Quick hotfix to avoid excessive rendering
-  if not self.window:IsVisible() then
+  if not window:IsVisible() then
     return
   end
 
@@ -301,29 +318,25 @@ function Main:Render()
   end
 
   self:ApplyTableColumns()
-  self.window.table:SetData(rows)
+  tableFrame:SetData(rows)
 
   local minWindowWidth = 500
   local maxBodyHeight = Constants.MAX_WINDOW_HEIGHT - Constants.TITLEBAR_HEIGHT
   local emptyBodyHeight = 250 - Constants.TITLEBAR_HEIGHT
 
   if rowCount == 0 then
-    self.window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
-    self.window.table:Hide()
-    self.window:SetBodySize(minWindowWidth, emptyBodyHeight)
-    if self.window.titlebar then
-      self.window.titlebar.title:SetShown(false)
-    end
+    window:ShowOverlay("It does not look like you have any active professions.\nDid you maybe filter out the wrong expansion or character above?\n\nIf this is your first time using this addon then make sure to open your professions at least once.")
+    tableFrame:Hide()
+    window:SetBodySize(minWindowWidth, emptyBodyHeight)
+    window.titlebar.title:SetShown(false)
   else
-    self.window:HideOverlay()
-    self.window.table:Show()
-    local bodyWidth, bodyHeight = self.window.table:GetSize()
+    window:HideOverlay()
+    tableFrame:Show()
+    local bodyWidth, bodyHeight = tableFrame:GetSize()
     bodyWidth = math.max(bodyWidth, minWindowWidth)
     bodyHeight = math.min(bodyHeight, maxBodyHeight)
-    self.window:SetBodySize(bodyWidth, bodyHeight)
-    if self.window.titlebar then
-      self.window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
-    end
+    window:SetBodySize(bodyWidth, bodyHeight)
+    window.titlebar.title:SetShown(bodyWidth > minWindowWidth)
   end
 end
 

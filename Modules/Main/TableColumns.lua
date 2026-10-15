@@ -10,7 +10,18 @@ addon.Main.TableColumns = TableColumns
 local Data = addon.Data
 local Helpers = addon.Helpers
 local TableData = addon.Main.TableData
-local TableForEach = addon.libs.LiqUI.Utils.TableForEach
+local LiqUI = addon.libs.LiqUI
+local TableForEach = LiqUI.Utils.TableForEach
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareMainConcentration(rowA, rowB)
+  local estimatedA = TableData.ConcentrationEstimatedForSort(rowA)
+  local estimatedB = TableData.ConcentrationEstimatedForSort(rowB)
+  if estimatedA ~= estimatedB then return estimatedA < estimatedB end
+  return rowA.skillLineVariantID < rowB.skillLineVariantID
+end
 
 ---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
@@ -130,7 +141,7 @@ function TableColumns.GetDefinitions()
         compare = function(rowA, rowB)
           local function expansionNameLower(rowData)
             local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
-            local expansion = variant and Data:GetExpansionByID(variant.expansionID)
+            local expansion = variant and LiqUI.Data:GetExpansionByID(variant.expansionID)
             return expansion and expansion.name:lower() or ""
           end
           local nameA, nameB = expansionNameLower(rowA), expansionNameLower(rowB)
@@ -183,12 +194,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local estimatedA = TableData.ConcentrationEstimatedForSort(rowA)
-          local estimatedB = TableData.ConcentrationEstimatedForSort(rowB)
-          if estimatedA ~= estimatedB then return estimatedA < estimatedB end
-          return rowA.skillLineVariantID < rowB.skillLineVariantID
-        end,
+        compare = compareMainConcentration,
       },
     },
     {

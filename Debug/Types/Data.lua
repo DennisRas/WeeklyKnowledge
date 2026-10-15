@@ -37,7 +37,7 @@
 ---@field tradeSkillRecipes TradeSkillRecipeInfo[]
 
 ---@class WK_Data
----@field db { global: WK_DefaultGlobal }|nil
+---@field db { global: WK_DefaultGlobal }
 ---@field DBVersion number
 ---@field defaultDB table
 ---@field defaultCharacter WK_Character
@@ -47,4 +47,4 @@
 ---@field ObjectiveCategories WK_ObjectiveCategory[]
 ---@field SkillLineVariants WK_SkillLineVariant[]
 ---@field SkillLines WK_SkillLine[]
----@field Expansions WK_Expansion[]
+---@field expansionEnabled table<Enum.ExpansionLevel, boolean>

@@ -2,16 +2,23 @@
 ---@field LibDataBroker unknown
 ---@field LibDBIcon unknown
 ---@field AceDB AceDB-3.0
----@field AceAddon AceAddon
+---@field AceAddon AceAddon-3.0
 ---@field LiqUI LiqUI
 
----@class WK_Core : AceAddon
+---@class WK_Core : AceAddon, AceConsole-3.0, AceTimer-3.0, AceEvent-3.0, AceBucket-3.0
+
+---@class WK_Window : LiqUI_WindowInstance
+---@field table LiqUI_TableInstance|nil
 
 ---@class WK_Main
+---@field window WK_Window|nil
+---@field table LiqUI_TableInstance|nil
 ---@field TableData WK_Main_TableData
 ---@field TableColumns WK_Main_TableColumns
 
 ---@class WK_Checklist
+---@field window WK_Window|nil
+---@field table LiqUI_TableInstance|nil
 ---@field TableData WK_Checklist_TableData
 ---@field TableColumns WK_Checklist_TableColumns
 
@@ -27,6 +34,7 @@
 ---@field title string
 ---@field version string
 ---@field notes string
+---@field debug boolean
 ---@field Core WK_Core
 ---@field libs WK_Libs
 ---@field Constants WK_Constants
