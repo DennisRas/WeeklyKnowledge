@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.2 - 2026-10-24
+
+- Updated performance.
+- Fixed repeated errors after login that also stopped updates in the addon AlterEgo.
+
 ## v1.4.1 - 2026-10-15
 
 - Updated TOC number to support patch 12.1.5.

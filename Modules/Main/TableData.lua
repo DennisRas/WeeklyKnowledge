@@ -50,43 +50,50 @@ local function buildNameCell(character)
   if character == Data:GetCharacter() then
     name = format("%s %s", name, Constants.currentCharacterNameMarker)
   end
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showNameCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    local nameColor = WHITE_FONT_COLOR
+    if character.classID then
+      local _, classFile = GetClassInfo(character.classID)
+      if classFile then
+        local classColor = C_ClassColor.GetClassColor(classFile)
+        if classColor then
+          nameColor = CreateColor(classColor.r, classColor.g, classColor.b, 1)
+        end
+      end
+    end
+    local title = format("%s (%s)", nameColor:WrapTextInColorCode(character.name), character.realmName)
+    GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(title, 1, 1, 1)
+    if character.guild and character.guild.isInGuild and character.guild.name ~= "" then
+      GameTooltip:AddLine(format("<%s>", character.guild.name), NECROLORD_GREEN_COLOR.r, NECROLORD_GREEN_COLOR.g, NECROLORD_GREEN_COLOR.b)
+    end
+    GameTooltip:AddLine(format("Level %d %s", character.level, character.raceName ~= "" and character.raceName or ""), 1, 1, 1)
+    if character.factionName ~= "" then
+      GameTooltip:AddLine(character.factionName, 1, 1, 1)
+    end
+    if character.money ~= nil then
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine(GetMoneyString(character.money, true), 1, 1, 1)
+    end
+    if character.lastUpdate and character.lastUpdate > 0 then
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine(format("Last update:\n|cffffffff%s|r", date("%c", character.lastUpdate)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+    end
+    GameTooltip:Show()
+  end
+
   ---@type LiqUI_TableDataCellExtended
   return {
     data = name,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      local nameColor = WHITE_FONT_COLOR
-      if character.classID then
-        local _, classFile = GetClassInfo(character.classID)
-        if classFile then
-          local classColor = C_ClassColor.GetClassColor(classFile)
-          if classColor then
-            nameColor = CreateColor(classColor.r, classColor.g, classColor.b, 1)
-          end
-        end
-      end
-      local title = format("%s (%s)", nameColor:WrapTextInColorCode(character.name), character.realmName)
-      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:AddLine(title, 1, 1, 1)
-      if character.guild and character.guild.isInGuild and character.guild.name ~= "" then
-        GameTooltip:AddLine(format("<%s>", character.guild.name), NECROLORD_GREEN_COLOR.r, NECROLORD_GREEN_COLOR.g, NECROLORD_GREEN_COLOR.b)
-      end
-      GameTooltip:AddLine(format("Level %d %s", character.level, character.raceName ~= "" and character.raceName or ""), 1, 1, 1)
-      if character.factionName ~= "" then
-        GameTooltip:AddLine(character.factionName, 1, 1, 1)
-      end
-      if character.money ~= nil then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(GetMoneyString(character.money, true), 1, 1, 1)
-      end
-      if character.lastUpdate and character.lastUpdate > 0 then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(format("Last update:\n|cffffffff%s|r", date("%c", character.lastUpdate)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      end
-      GameTooltip:Show()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
+    onEnter = showNameCellTooltip,
+    onLeave = GameTooltip_Hide,
   }
 end
 
@@ -122,25 +129,42 @@ local function buildProfessionCell(character, skillLineVariantID)
   if Data.db.global.showFullProfessionName then
     text = variant.name
   end
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showProfessionCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    if character == Data:GetCharacter() then
+      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+      GameTooltip:SetText(text, 1, 1, 1);
+      GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+      GameTooltip:Show()
+    end
+  end
+
+  ---@param _cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  ---@param _button string
+  local function openProfessionFromCell(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+    if character == Data:GetCharacter() then
+      C_TradeSkillUI.OpenTradeSkill(skillLine.id)
+    end
+  end
+
   ---@type LiqUI_TableDataCellExtended
   return {
     data = text,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      if character == Data:GetCharacter() then
-        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText(text, 1, 1, 1);
-        GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-        GameTooltip:Show()
-      end
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
-    onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-      if character == Data:GetCharacter() then
-        C_TradeSkillUI.OpenTradeSkill(skillLine.id)
-      end
-    end,
+    onEnter = showProfessionCellTooltip,
+    onLeave = GameTooltip_Hide,
+    onClick = openProfessionFromCell,
   }
 end
 
@@ -167,18 +191,25 @@ local function buildSkillCell(characterProfession)
   local text = "-"
   local color = WHITE_FONT_COLOR
   if not characterProfession.skillLevel or characterProfession.skillLevel == 0 then
+    ---@param cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    local function showMissingSkillTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+      GameTooltip:SetText("No data", 1, 1, 1);
+      GameTooltip:AddLine("Log in on this character and open the profession window one time to fetch skill level data.", nil, nil, nil, true);
+      GameTooltip:Show()
+    end
+
     ---@type LiqUI_TableDataCellExtended
     return {
       data = color:WrapTextInColorCode(text),
-      onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("No data", 1, 1, 1);
-        GameTooltip:AddLine("Log in on this character and open the profession window one time to fetch skill level data.", nil, nil, nil, true);
-        GameTooltip:Show()
-      end,
-      onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:Hide()
-      end,
+      onEnter = showMissingSkillTooltip,
+      onLeave = GameTooltip_Hide,
     }
   end
   if characterProfession.skillLevel > 0 and characterProfession.skillLevel == characterProfession.skillMaxLevel then
@@ -204,18 +235,25 @@ local function buildConcentrationCell(character, characterProfession)
   end
   local currencyInfo = Data:GetCharacterCurrency(character, skillLineVariant.concentrationCurrencyID)
   if not currencyInfo then
+    ---@param cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    local function showMissingConcentrationTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+      GameTooltip:SetText("No data", 1, 1, 1);
+      GameTooltip:AddLine("Log in on this character to fetch concentration data.", nil, nil, nil, true);
+      GameTooltip:Show()
+    end
+
     ---@type LiqUI_TableDataCellExtended
     return {
       data = "-",
-      onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-        GameTooltip:SetText("No data", 1, 1, 1);
-        GameTooltip:AddLine("Log in on this character to fetch concentration data.", nil, nil, nil, true);
-        GameTooltip:Show()
-      end,
-      onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:Hide()
-      end,
+      onEnter = showMissingConcentrationTooltip,
+      onLeave = GameTooltip_Hide,
     }
   end
 
@@ -237,28 +275,35 @@ local function buildConcentrationCell(character, characterProfession)
 
   local displayText = maxQuantity > 0 and color:WrapTextInColorCode(format("%d / %d", estimatedQuantity, maxQuantity)) or ""
 
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showConcentrationCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+    GameTooltip:SetText(currencyInfo.name, 1, 1, 1);
+    if timeToMax > 0 then
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine("Estimated", 1, 1, 1, true)
+      GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Maxed at:", tostring(date("%c", currencyInfo.lastUpdated + timeToMax)), nil, nil, nil, 1, 1, 1)
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
+    end
+    GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", currencyInfo.quantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
+    GameTooltip:AddDoubleLine("Saved at:", tostring(date("%c", currencyInfo.lastUpdated)), nil, nil, nil, 1, 1, 1)
+    GameTooltip:Show()
+  end
+
   ---@type LiqUI_TableDataCellExtended
   return {
     data = displayText,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText(currencyInfo.name, 1, 1, 1);
-      if timeToMax > 0 then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("Estimated", 1, 1, 1, true)
-        GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
-        GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
-        GameTooltip:AddDoubleLine("Maxed at:", tostring(date("%c", currencyInfo.lastUpdated + timeToMax)), nil, nil, nil, 1, 1, 1)
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
-      end
-      GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", currencyInfo.quantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
-      GameTooltip:AddDoubleLine("Saved at:", tostring(date("%c", currencyInfo.lastUpdated)), nil, nil, nil, 1, 1, 1)
-      GameTooltip:Show()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
+    onEnter = showConcentrationCellTooltip,
+    onLeave = GameTooltip_Hide,
   }
 end
 
@@ -286,11 +331,15 @@ local function buildKnowledgeCell(characterProfession, skillLineVariantID)
     text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
   end
 
-  ---@type LiqUI_TableDataCellExtended
-  return {
-    data = text,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      local pointsSpentColor = LIGHTGRAY_FONT_COLOR
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showKnowledgeCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    local pointsSpentColor = LIGHTGRAY_FONT_COLOR
       local pointsSpentValue = "?"
       local pointsUnspentColor = LIGHTGRAY_FONT_COLOR
       local pointsUnspentValue = "?"
@@ -343,11 +392,14 @@ local function buildKnowledgeCell(characterProfession, skillLineVariantID)
         end)
       end
 
-      GameTooltip:Show()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
+    GameTooltip:Show()
+  end
+
+  ---@type LiqUI_TableDataCellExtended
+  return {
+    data = text,
+    onEnter = showKnowledgeCellTooltip,
+    onLeave = GameTooltip_Hide,
   }
 end
 
@@ -376,14 +428,18 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
     text = GREEN_FONT_COLOR:WrapTextInColorCode(text)
   end
 
-  ---@type LiqUI_TableDataCellExtended
-  return {
-    data = text,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      if not categoryProfessionProgress then
-        return
-      end
-      local showTooltip = function()
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showCategoryCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    if not categoryProfessionProgress then
+      return
+    end
+    local function showTooltip()
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText(objectiveCategory.name, 1, 1, 1)
 
@@ -448,18 +504,22 @@ local function buildCategoryCell(character, characterProfession, skillLineVarian
 
       if TableCount(categoryProfessionProgress.requirements) > 0 then
         TableForEach(categoryProfessionProgress.requirements, function(requirement)
-          if requirement.requirement.type == "item" then
-            Data.cache.items[requirement.requirement.id] = Item:CreateFromItemID(requirement.requirement.id)
-            Data.cache.items[requirement.requirement.id]:ContinueOnItemLoad(showTooltip)
+          local requirementID = requirement.requirement.id
+          if requirement.requirement.type == "item" and requirementID then
+            Data.cache.items[requirementID] = Item:CreateFromItemID(requirementID)
+            Data.cache.items[requirementID]:ContinueOnItemLoad(showTooltip)
           end
         end)
-      end
+    end
 
-      showTooltip()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
+    showTooltip()
+  end
+
+  ---@type LiqUI_TableDataCellExtended
+  return {
+    data = text,
+    onEnter = showCategoryCellTooltip,
+    onLeave = GameTooltip_Hide,
   }
 end
 

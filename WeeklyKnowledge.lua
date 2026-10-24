@@ -9,6 +9,28 @@ local LibDBIcon = addon.libs.LibDBIcon
 local LiqUI = addon.libs.LiqUI
 local TableForEach = LiqUI.Utils.TableForEach
 
+---@param _displayFrame Frame
+---@param buttonName string
+local function onLauncherClick(_displayFrame, buttonName)
+  if buttonName == "RightButton" then
+    addon.Checklist:ToggleWindow()
+  else
+    addon.Main:ToggleWindow()
+  end
+end
+
+---@param tooltip GameTooltip
+local function onLauncherTooltipShow(tooltip)
+  tooltip:SetText(addon.title, 1, 1, 1)
+  tooltip:AddLine("|cff00ff00Left click|r to open " .. addon.title .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+  tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+  local dragText = "|cff00ff00Drag|r to move this icon"
+  if Data.db.global.minimap.lock then
+    dragText = dragText .. " |cffff0000(locked)|r"
+  end
+  tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+end
+
 ---@class WK_Core
 local Core = LibAceAddon:NewAddon(addon.name, "AceConsole-3.0", "AceTimer-3.0", "AceEvent-3.0", "AceBucket-3.0")
 addon.Core = Core
@@ -21,6 +43,7 @@ function Core:Render()
 end
 
 function Core:HandleCommand(message)
+  ---@type string?
   local cmd = self:GetArgs(message, 1)
   if not cmd then
     addon.Main:ToggleWindow()
@@ -64,30 +87,16 @@ function Core:OnInitialize()
     self:Print("Weekly Reset: Good job! Progress of your characters have been reset for a new week.")
   end
 
-  local WKLDB = LibDataBroker:NewDataObject(addon.name, {
+  ---@type LibDataBroker.QuickLauncher
+  local libDataObject = {
     label = addon.title,
     type = "launcher",
     icon = "Interface/AddOns/WeeklyKnowledge/Media/Icon.blp",
-    OnClick = function(...)
-      local _, b = ...
-      if b and b == "RightButton" then
-        addon.Checklist:ToggleWindow()
-      else
-        addon.Main:ToggleWindow()
-      end
-    end,
-    OnTooltipShow = function(tooltip)
-      tooltip:SetText(addon.title, 1, 1, 1)
-      tooltip:AddLine("|cff00ff00Left click|r to open " .. addon.title .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      tooltip:AddLine("|cff00ff00Right click|r to open the Checklist.", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-      local dragText = "|cff00ff00Drag|r to move this icon"
-      if Data.db.global.minimap.lock then
-        dragText = dragText .. " |cffff0000(locked)|r"
-      end
-      tooltip:AddLine(dragText .. ".", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-    end,
-  })
-  LibDBIcon:Register(addon.name, WKLDB, Data.db.global.minimap)
+    OnClick = onLauncherClick,
+    OnTooltipShow = onLauncherTooltipShow,
+  }
+  local libDataObjectResult = LibDataBroker:NewDataObject(addon.name, libDataObject)
+  LibDBIcon:Register(addon.name, libDataObjectResult, Data.db.global.minimap)
   LibDBIcon:AddButtonToCompartment(addon.name)
 
   self:Render()

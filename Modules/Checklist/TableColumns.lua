@@ -87,6 +87,191 @@ local function compareChecklistObjective(rowA, rowB)
   return checklistObjectiveIdentityLess(objectiveA, objectiveB)
 end
 
+---@param rowData WK_TableRowData
+---@return string
+local function professionSortName(rowData)
+  local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+  if not variant then
+    return ""
+  end
+  local skillLine = Data:GetSkillLineByID(variant.skillLineID)
+  if not skillLine then
+    return ""
+  end
+  return skillLine.name:lower()
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareProfessionColumn(rowA, rowB)
+  local nameA = professionSortName(rowA)
+  local nameB = professionSortName(rowB)
+  if nameA ~= nameB then return nameA < nameB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param rowData WK_TableRowData
+---@return string
+local function expansionSortName(rowData)
+  local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+  if not variant then
+    return ""
+  end
+  local expansion = LiqUI.Data:GetExpansionByID(variant.expansionID)
+  if not expansion then
+    return ""
+  end
+  return expansion.name:lower()
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareExpansionColumn(rowA, rowB)
+  local nameA = expansionSortName(rowA)
+  local nameB = expansionSortName(rowB)
+  if nameA ~= nameB then return nameA < nameB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param rowData WK_TableRowData
+---@return string
+local function categorySortName(rowData)
+  local objective = rowData.objective
+  if not objective then
+    return ""
+  end
+  local objectiveCategory = Data:GetObjectiveCategoryByID(objective.categoryID)
+  if not objectiveCategory then
+    return ""
+  end
+  return objectiveCategory.name:lower()
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareCategoryColumn(rowA, rowB)
+  local nameA = categorySortName(rowA)
+  local nameB = categorySortName(rowB)
+  if nameA ~= nameB then return nameA < nameB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param row WK_TableRowData
+---@return number
+local function locationMapID(row)
+  local objective = row.objective
+  if not objective then
+    return 0
+  end
+  local loc = objective.loc
+  if not loc then
+    return 0
+  end
+  local mapID = loc.m
+  if not mapID then
+    return 0
+  end
+  return mapID
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareLocationColumn(rowA, rowB)
+  local mapIdA = locationMapID(rowA)
+  local mapIdB = locationMapID(rowB)
+  if mapIdA ~= mapIdB then return mapIdA < mapIdB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param rowData WK_TableRowData
+---@return string
+local function repeatableLabel(rowData)
+  local objective = rowData.objective
+  if not objective then
+    return ""
+  end
+  local objectiveCategory = Data:GetObjectiveCategoryByID(objective.categoryID)
+  if not objectiveCategory then
+    return ""
+  end
+  return objectiveCategory.repeatable or ""
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareRepeatableColumn(rowA, rowB)
+  local labelA = repeatableLabel(rowA)
+  local labelB = repeatableLabel(rowB)
+  if labelA ~= labelB then return labelA < labelB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param row WK_TableRowData
+---@return number
+local function questsCompletedForSort(row)
+  local progress = row.progress
+  if not progress then
+    return 0
+  end
+  return progress.questsCompleted or 0
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareProgressColumn(rowA, rowB)
+  local questsCompletedA = questsCompletedForSort(rowA)
+  local questsCompletedB = questsCompletedForSort(rowB)
+  if questsCompletedA ~= questsCompletedB then return questsCompletedA < questsCompletedB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
+---@param row WK_TableRowData
+---@return number
+local function pointsEarnedForSort(row)
+  local progress = row.progress
+  if not progress then
+    return 0
+  end
+  return progress.pointsEarned or 0
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function comparePointsColumn(rowA, rowB)
+  local pointsEarnedA = pointsEarnedForSort(rowA)
+  local pointsEarnedB = pointsEarnedForSort(rowB)
+  if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end
+  if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
+    return rowA.skillLineVariantID < rowB.skillLineVariantID
+  end
+  return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
+end
+
 ---@return LiqUI_TableOptionsColumn[]
 function TableColumns.GetDefinitions()
   ---@type LiqUI_TableOptionsColumn[]
@@ -107,19 +292,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local function skillLineNameLower(rowData)
-            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
-            local skillLine = variant and Data:GetSkillLineByID(variant.skillLineID or 0)
-            return skillLine and skillLine.name:lower() or ""
-          end
-          local nameA, nameB = skillLineNameLower(rowA), skillLineNameLower(rowB)
-          if nameA ~= nameB then return nameA < nameB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareProfessionColumn,
       },
     },
     {
@@ -129,19 +302,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local function expansionNameLower(rowData)
-            local variant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
-            local expansion = variant and LiqUI.Data:GetExpansionByID(variant.expansionID)
-            return expansion and expansion.name:lower() or ""
-          end
-          local nameA, nameB = expansionNameLower(rowA), expansionNameLower(rowB)
-          if nameA ~= nameB then return nameA < nameB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareExpansionColumn,
       },
     },
     {
@@ -151,18 +312,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local function categoryNameLower(rowData)
-            local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
-            return objectiveCategory and objectiveCategory.name:lower() or ""
-          end
-          local nameA, nameB = categoryNameLower(rowA), categoryNameLower(rowB)
-          if nameA ~= nameB then return nameA < nameB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareCategoryColumn,
       },
     },
     {
@@ -172,15 +322,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local mapIdA = rowA.objective.loc and rowA.objective.loc.m or 0
-          local mapIdB = rowB.objective.loc and rowB.objective.loc.m or 0
-          if mapIdA ~= mapIdB then return mapIdA < mapIdB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareLocationColumn,
       },
     },
     {
@@ -190,18 +332,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local function repeatableLabel(rowData)
-            local objectiveCategory = Data:GetObjectiveCategoryByID(rowData.objective.categoryID)
-            return objectiveCategory and objectiveCategory.repeatable or ""
-          end
-          local labelA, labelB = repeatableLabel(rowA), repeatableLabel(rowB)
-          if labelA ~= labelB then return labelA < labelB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareRepeatableColumn,
       },
     },
     {
@@ -212,15 +343,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local questsCompletedA = rowA.progress and (rowA.progress.questsCompleted or 0) or 0
-          local questsCompletedB = rowB.progress and (rowB.progress.questsCompleted or 0) or 0
-          if questsCompletedA ~= questsCompletedB then return questsCompletedA < questsCompletedB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = compareProgressColumn,
       },
     },
     {
@@ -231,15 +354,7 @@ function TableColumns.GetDefinitions()
       hideable = true,
       sorting = {
         enabled = true,
-        compare = function(rowA, rowB)
-          local pointsEarnedA = rowA.progress and (rowA.progress.pointsEarned or 0) or 0
-          local pointsEarnedB = rowB.progress and (rowB.progress.pointsEarned or 0) or 0
-          if pointsEarnedA ~= pointsEarnedB then return pointsEarnedA < pointsEarnedB end
-          if rowA.skillLineVariantID ~= rowB.skillLineVariantID then
-            return rowA.skillLineVariantID < rowB.skillLineVariantID
-          end
-          return Helpers:CompareCharacterNameRealm(rowA.character, rowB.character) < 0
-        end,
+        compare = comparePointsColumn,
       },
     },
     {

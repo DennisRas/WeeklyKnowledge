@@ -17,22 +17,76 @@ local TableFilter = LiqUI.Utils.TableFilter
 local TableForEach = LiqUI.Utils.TableForEach
 local TableToggle = LiqUI.Utils.TableToggle
 
+---@param tooltip GameTooltip
+---@param elementDescription ElementMenuDescriptionProxy
+local function showFullProfessionNameTooltip(tooltip, elementDescription)
+  GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+  GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
+end
+
+---@param tooltip GameTooltip
+---@param elementDescription ElementMenuDescriptionProxy
+local function showHideLowLevelProfessionsTooltip(tooltip, elementDescription)
+  GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+  GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.")
+end
+
+---@param tooltip GameTooltip
+---@param elementDescription ElementMenuDescriptionProxy
+local function showMinimapIconTooltip(tooltip, elementDescription)
+  GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+  GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.")
+end
+
+---@param tooltip GameTooltip
+---@param elementDescription ElementMenuDescriptionProxy
+local function showLockMinimapIconTooltip(tooltip, elementDescription)
+  GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
+  GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!")
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareMainDefault(rowA, rowB)
+  if not rowA or not rowB then return false end
+  local characterA, characterB = rowA.character, rowB.character
+  local lastUpdateA, lastUpdateB = characterA.lastUpdate, characterB.lastUpdate
+  if type(lastUpdateA) == "number" and type(lastUpdateB) == "number" then
+    if lastUpdateA ~= lastUpdateB then
+      return lastUpdateA > lastUpdateB
+    end
+  elseif type(lastUpdateA) == "number" then
+    return true
+  elseif type(lastUpdateB) == "number" then
+    return false
+  end
+  local identityCompare = Helpers:CompareCharacterNameRealm(characterA, characterB)
+  if identityCompare ~= 0 then return identityCompare < 0 end
+  return (rowA.skillLineVariantID or 0) < (rowB.skillLineVariantID or 0)
+end
+
 do
   local dialogName = "WEEKLYKNOWLEDGE_DELETE_CHARACTER"
-  StaticPopupDialogs[dialogName] = {
+  ---@param _dialog Frame
+  ---@param character WK_Character?
+  local function onDeleteCharacterAccept(_dialog, character)
+    if character then
+      Data:DeleteCharacter(character)
+      Main:Render()
+    end
+  end
+  ---@type WK_DeleteCharacterDialog
+  local dialog = {
     text = "Remove %s?\nThis cannot be undone.\nTo add this character again, log in on them.",
     button1 = YES,
     button2 = CANCEL,
-    OnAccept = function(_, character)
-      if character then
-        Data:DeleteCharacter(character)
-        Main:Render()
-      end
-    end,
+    OnAccept = onDeleteCharacterAccept,
     timeout = 0,
     whileDead = 1,
     hideOnEscape = 1,
   }
+  StaticPopupDialogs[dialogName] = dialog
 end
 
 function Main:ToggleWindow()
@@ -56,72 +110,171 @@ function Main:Render()
     local mediaPath = "Interface/AddOns/WeeklyKnowledge/Media/"
     local windows = Data.db.global.liqui.windows
     local tables = Data.db.global.liqui.tables
-    self.window = LiqUI:NewElement("Window", {
+
+    ---@param _window LiqUI_WindowInstance
+    ---@param rootMenu RootMenuDescriptionProxy
+    local function onMainSettingsMenu(_window, rootMenu)
+      ---@type ElementMenuDescriptionProxy
+      local showFullProfessionName = rootMenu:CreateCheckbox(
+        "Show full profession name",
+        function() return Data.db.global.showFullProfessionName == true end,
+        function()
+          Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
+          self:ApplyTableColumns()
+          self:Render()
+          Checklist:ApplyTableColumns()
+          Checklist:Render()
+        end
+      )
+      showFullProfessionName:SetTooltip(showFullProfessionNameTooltip)
+
+      ---@type ElementMenuDescriptionProxy
+      local hideLowLevelProfessions = rootMenu:CreateCheckbox(
+        "Hide low level professions",
+        function() return Data.db.global.main.hideLowLevelProfessions == true end,
+        function()
+          Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
+          self:Render()
+        end
+      )
+      hideLowLevelProfessions:SetTooltip(showHideLowLevelProfessionsTooltip)
+
+      ---@type ElementMenuDescriptionProxy
+      local showMinimapIcon = rootMenu:CreateCheckbox(
+        "Show the minimap button",
+        function() return not Data.db.global.minimap.hide end,
+        function()
+          Data.db.global.minimap.hide = not Data.db.global.minimap.hide
+          LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
+        end
+      )
+      showMinimapIcon:SetTooltip(showMinimapIconTooltip)
+
+      ---@type ElementMenuDescriptionProxy
+      local lockMinimapIcon = rootMenu:CreateCheckbox(
+        "Lock the minimap button",
+        function() return Data.db.global.minimap.lock end,
+        function()
+          Data.db.global.minimap.lock = not Data.db.global.minimap.lock
+          LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
+        end
+      )
+      lockMinimapIcon:SetTooltip(showLockMinimapIconTooltip)
+    end
+
+    ---@param _window LiqUI_WindowInstance
+    ---@param rootMenu RootMenuDescriptionProxy
+    local function onCharactersMenu(_window, rootMenu)
+      rootMenu:SetScrollMode(GetScreenHeight() - 20)
+      TableForEach(Data:GetCharacters(), function(character)
+        local name = character.name
+        if character.realmName then
+          name = format("%s - %s", character.name, character.realmName)
+        end
+        if character.classID then
+          local _, classFile = GetClassInfo(character.classID)
+          if classFile then
+            local color = C_ClassColor.GetClassColor(classFile)
+            if color then
+              name = color:WrapTextInColorCode(name)
+            end
+          end
+        end
+
+        ---@type ElementMenuDescriptionProxy
+        local characterButton = rootMenu:CreateButton(name)
+
+        if TableCount(character.professions) > 0 then
+          TableForEach(character.professions, function(characterProfession)
+            local variant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
+            local professionName = (variant and variant.name) or "?"
+            characterButton:CreateCheckbox(
+              professionName,
+              function() return characterProfession.enabled or false end,
+              function()
+                characterProfession.enabled = not characterProfession.enabled
+                self:Render()
+              end
+            )
+          end)
+        end
+        if character.GUID ~= UnitGUID("player") then
+          characterButton:CreateButton("Remove character", function()
+            local characterName = character.name
+            if character.realmName then
+              characterName = format("%s - %s", character.name, character.realmName)
+            end
+            StaticPopup_Show("WEEKLYKNOWLEDGE_DELETE_CHARACTER", characterName, nil, character)
+          end)
+        end
+      end)
+    end
+
+    ---@param _window LiqUI_WindowInstance
+    ---@param rootMenu RootMenuDescriptionProxy
+    local function onExpansionMenu(_window, rootMenu)
+      TableForEach(Data:GetExpansions(), function(expansion)
+        rootMenu:CreateCheckbox(
+          expansion.name,
+          function() return TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
+          function()
+            Data.db.global.main.selectedExpansions = TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
+            self:Render()
+          end,
+          expansion.id
+        )
+      end)
+    end
+
+    ---@param _window LiqUI_WindowInstance
+    ---@param rootMenu RootMenuDescriptionProxy
+    local function onColumnsMenu(_window, rootMenu)
+      local window = self.window
+      if not window then
+        return
+      end
+      local tableFrame = window.table
+      if not tableFrame then
+        return
+      end
+      local hidden = tableFrame.db.hiddenColumns
+      ---@param columnID string
+      local function toggleColumnHidden(columnID)
+        hidden[columnID] = not hidden[columnID]
+        self:Render()
+      end
+      TableForEach(self:GetColumnDefinitions(), function(column)
+        if not column.hideable then return end
+        local headerText = column.headerText
+        if not headerText then return end
+        rootMenu:CreateCheckbox(
+          headerText,
+          function() return not hidden[column.id] end,
+          toggleColumnHidden,
+          column.id
+        )
+      end)
+    end
+
+    local function renderMainWindow()
+      Main:Render()
+    end
+
+    local function openChecklist()
+      Checklist:ToggleWindow()
+      self:Render()
+    end
+
+    ---@type LiqUI_WindowOptions
+    local windowOptions = {
       name = addon.name .. "Main",
       storage = windows.Main,
       title = addon.name,
       icon = mediaPath .. "Icon.blp",
       border = 4,
       overlayFontObject = "SystemFont_Med1",
-      onShow = function()
-        Main:Render()
-      end,
-      onSettingsMenu = function(window, rootMenu)
-        local showFullProfessionName = rootMenu:CreateCheckbox(
-          "Show full profession name",
-          function() return Data.db.global.showFullProfessionName end,
-          function()
-            Data.db.global.showFullProfessionName = not Data.db.global.showFullProfessionName
-            self:ApplyTableColumns()
-            self:Render()
-            Checklist:ApplyTableColumns()
-            Checklist:Render()
-          end
-        )
-        showFullProfessionName:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "Show the full profession name with the expansion variant.")
-        end)
-
-        local hideLowLevelProfessions = rootMenu:CreateCheckbox(
-          "Hide low level professions",
-          function() return Data.db.global.main.hideLowLevelProfessions end,
-          function()
-            Data.db.global.main.hideLowLevelProfessions = not Data.db.global.main.hideLowLevelProfessions
-            self:Render()
-          end
-        )
-        hideLowLevelProfessions:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "Hide professions with a skill level below 25.")
-        end)
-
-        local showMinimapIcon = rootMenu:CreateCheckbox(
-          "Show the minimap button",
-          function() return not Data.db.global.minimap.hide end,
-          function()
-            Data.db.global.minimap.hide = not Data.db.global.minimap.hide
-            LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
-          end
-        )
-        showMinimapIcon:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "It does get crowded around the minimap sometimes.")
-        end)
-
-        local lockMinimapIcon = rootMenu:CreateCheckbox(
-          "Lock the minimap button",
-          function() return Data.db.global.minimap.lock end,
-          function()
-            Data.db.global.minimap.lock = not Data.db.global.minimap.lock
-            LibDBIcon:Refresh(addon.name, Data.db.global.minimap)
-          end
-        )
-        lockMinimapIcon:SetTooltip(function(tooltip, elementDescription)
-          GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription))
-          GameTooltip_AddNormalLine(tooltip, "No more moving the button around accidentally!")
-        end)
-      end,
+      onShow = renderMainWindow,
+      onSettingsMenu = onMainSettingsMenu,
       titlebarButtons = {
         {
           name = "Characters",
@@ -129,50 +282,7 @@ function Main:Render()
           iconSize = 14,
           tooltipTitle = "Characters",
           tooltipDescription = "Enable/Disable your characters.",
-          onMenu = function(_, rootMenu)
-            rootMenu:SetScrollMode(GetScreenHeight() - 20)
-            TableForEach(Data:GetCharacters(), function(character)
-              local name = character.name
-              if character.realmName then
-                name = format("%s - %s", character.name, character.realmName)
-              end
-              if character.classID then
-                local _, classFile = GetClassInfo(character.classID)
-                if classFile then
-                  local color = C_ClassColor.GetClassColor(classFile)
-                  if color then
-                    name = color:WrapTextInColorCode(name)
-                  end
-                end
-              end
-
-              local characterButton = rootMenu:CreateButton(name)
-
-              if TableCount(character.professions) > 0 then
-                TableForEach(character.professions, function(characterProfession)
-                  local variant = Data:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-                  local professionName = (variant and variant.name) or "?"
-                  characterButton:CreateCheckbox(
-                    professionName,
-                    function() return characterProfession.enabled or false end,
-                    function()
-                      characterProfession.enabled = not characterProfession.enabled
-                      self:Render()
-                    end
-                  )
-                end)
-              end
-              if character.GUID ~= UnitGUID("player") then
-                characterButton:CreateButton("Remove character", function()
-                  local characterName = character.name
-                  if character.realmName then
-                    characterName = format("%s - %s", character.name, character.realmName)
-                  end
-                  StaticPopup_Show("WEEKLYKNOWLEDGE_DELETE_CHARACTER", characterName, nil, character)
-                end)
-              end
-            end)
-          end,
+          onMenu = onCharactersMenu,
         },
         {
           name = "Expansion",
@@ -180,48 +290,14 @@ function Main:Render()
           iconSize = 14,
           tooltipTitle = "Expansion",
           tooltipDescription = "Filter rows by selected expansions.",
-          onMenu = function(_, rootMenu)
-            TableForEach(Data:GetExpansions(), function(expansion)
-              rootMenu:CreateCheckbox(
-                expansion.name,
-                function() return TableContains(Data.db.global.main.selectedExpansions, expansion.id) end,
-                function()
-                  Data.db.global.main.selectedExpansions = TableToggle(Data.db.global.main.selectedExpansions, expansion.id)
-                  self:Render()
-                end,
-                expansion.id
-              )
-            end)
-          end,
+          onMenu = onExpansionMenu,
         },
         {
           name = "Columns",
           icon = mediaPath .. "Icon_Columns.blp",
           tooltipTitle = "Columns",
           tooltipDescription = "Enable/Disable table columns.",
-          onMenu = function(_, rootMenu)
-            local window = self.window
-            if not window then
-              return
-            end
-            local tableFrame = window.table
-            if not tableFrame then
-              return
-            end
-            local hidden = tableFrame.db.hiddenColumns
-            TableForEach(self:GetColumnDefinitions(), function(column)
-              if not column.hideable then return end
-              rootMenu:CreateCheckbox(
-                column.headerText,
-                function() return not hidden[column.id] end,
-                function(id)
-                  hidden[id] = not hidden[id]
-                  self:Render()
-                end,
-                column.id
-              )
-            end)
-          end,
+          onMenu = onColumnsMenu,
         },
         {
           name = "Checklist",
@@ -229,13 +305,13 @@ function Main:Render()
           iconSize = 16,
           tooltipTitle = "Checklist",
           tooltipDescription = "Toggle the Checklist window",
-          onClick = function()
-            Checklist:ToggleWindow()
-            self:Render()
-          end,
+          onClick = openChecklist,
         },
       },
-    })
+    }
+    ---@type WK_Window
+    local mainWindow = LiqUI:NewElement("Window", windowOptions)
+    self.window = mainWindow
     self.window:SetFrameLevel(8000)
 
     ---@type LiqUI_TableOptions
@@ -258,23 +334,7 @@ function Main:Render()
       sorting = {
         enabled = true,
         defaultOrder = "desc",
-        defaultCompare = function(rowA, rowB)
-          if not rowA or not rowB then return false end
-          local characterA, characterB = rowA.character, rowB.character
-          local lastUpdateA, lastUpdateB = characterA.lastUpdate, characterB.lastUpdate
-          if type(lastUpdateA) == "number" and type(lastUpdateB) == "number" then
-            if lastUpdateA ~= lastUpdateB then
-              return lastUpdateA > lastUpdateB
-            end
-          elseif type(lastUpdateA) == "number" then
-            return true
-          elseif type(lastUpdateB) == "number" then
-            return false
-          end
-          local identityCompare = Helpers:CompareCharacterNameRealm(characterA, characterB)
-          if identityCompare ~= 0 then return identityCompare < 0 end
-          return (rowA.skillLineVariantID or 0) < (rowB.skillLineVariantID or 0)
-        end,
+        defaultCompare = compareMainDefault,
       },
       columns = self:GetColumnDefinitions(),
     }
