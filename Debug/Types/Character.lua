@@ -1,10 +1,3 @@
----@class WK_CharacterGuild
----@field isInGuild boolean
----@field name string
----@field rankName string
----@field rankIndex integer
----@field realm string
-
 ---@class WK_Character
 ---@field GUID string|WOWGUID
 ---@field name string
@@ -47,6 +40,13 @@
 ---@field id integer
 ---@field completed boolean
 
+---@class WK_CharacterGuild
+---@field isInGuild boolean
+---@field name string
+---@field rankName string
+---@field rankIndex integer
+---@field realm string
+
 ---@class WK_CharacterProfession
 ---@field enabled boolean
 ---@field skillLineVariantID integer
@@ -67,6 +67,15 @@
 ---@field configID integer
 ---@field knowledgeLevel integer
 ---@field knowledgeMaxLevel integer
+
+---@class WK_DeleteCharacterDialog
+---@field text string
+---@field button1 string?
+---@field button2 string?
+---@field OnAccept fun(dialog: Frame, character: WK_Character?)
+---@field timeout number
+---@field whileDead number
+---@field hideOnEscape number
 
 ---@class WK_LearnedProfession
 ---@field skillLineID number

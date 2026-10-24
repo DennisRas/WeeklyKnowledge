@@ -142,11 +142,13 @@ Data.expansionEnabled = {
 }
 
 function Data:InitDB()
-  self.db = LibAceDB:New(
+  ---@type WK_AceDB
+  local db = LibAceDB:New(
     "WeeklyKnowledgeDB",
     self.defaultDB,
     true
   )
+  self.db = db
 end
 
 function Data:MigrateDB()
@@ -190,15 +192,19 @@ function Data:MigrateDB()
         self.db.global.main.hiddenColumns = TableCopy(self.db.global.hiddenColumns)
         self.db.global.hiddenColumns = nil
       end
-      if self.db.global.windowScale then
-        self.db.global.main.windowScale = self.db.global.windowScale
-        self.db.global.checklist.windowScale = self.db.global.windowScale
-        self.db.global.windowScale = nil
+      ---@type WK_LegacyGlobal
+      local legacyGlobal = self.db.global
+      local legacyWindowScale = legacyGlobal.windowScale
+      if legacyWindowScale then
+        legacyGlobal.main.windowScale = legacyWindowScale
+        legacyGlobal.checklist.windowScale = legacyWindowScale
+        legacyGlobal.windowScale = nil
       end
-      if self.db.global.windowBackgroundColor then
-        self.db.global.main.windowBackgroundColor = self.db.global.windowBackgroundColor
-        self.db.global.checklist.windowBackgroundColor = self.db.global.windowBackgroundColor
-        self.db.global.windowBackgroundColor = nil
+      local legacyWindowBackgroundColor = legacyGlobal.windowBackgroundColor
+      if legacyWindowBackgroundColor then
+        legacyGlobal.main.windowBackgroundColor = legacyWindowBackgroundColor
+        legacyGlobal.checklist.windowBackgroundColor = legacyWindowBackgroundColor
+        legacyGlobal.windowBackgroundColor = nil
       end
     end
     -- Remove unused attributes and old/broken characters
@@ -266,7 +272,9 @@ function Data:MigrateDB()
           for _, characterProfession in pairs(character.professions) do
             local keep = true
             if not characterProfession.skillLineVariantID then
-              local catchupCurrencyInfo = characterProfession.catchUpCurrencyInfo
+              ---@type WK_LegacyCharacterProfession
+              local legacyProfession = characterProfession
+              local catchupCurrencyInfo = legacyProfession.catchUpCurrencyInfo
               if catchupCurrencyInfo and catchupCurrencyInfo.currencyID then
                 for _, skillLineVariant in pairs(self.SkillLineVariants) do
                   if skillLineVariant.catchUpCurrencyID == catchupCurrencyInfo.currencyID then
@@ -389,10 +397,15 @@ function Data:MigrateDB()
     end
     -- Migrate hiddenColumns from legacy keys (old column header / category name) to stable ids.
     if self.db.global.DBVersion == 19 then
-      local mainHidden = self.db.global.main and self.db.global.main.hiddenColumns
-      if type(mainHidden) ~= "table" then
-        self.db.global.main.hiddenColumns = {}
-        mainHidden = self.db.global.main.hiddenColumns
+      ---@type WK_LegacyGlobalMain
+      local legacyMain = self.db.global.main
+      local storedMainHidden = legacyMain.hiddenColumns
+      ---@type table<string, boolean>
+      local mainHidden = {}
+      if type(storedMainHidden) == "table" then
+        mainHidden = storedMainHidden
+      else
+        legacyMain.hiddenColumns = mainHidden
       end
       local checklistHidden = self.db.global.checklist and self.db.global.checklist.hiddenColumns
       if type(checklistHidden) ~= "table" then
@@ -689,26 +702,46 @@ function Data:ScanCalendar()
   Helpers:Debug("┌ ScanCalendar()")
   if self:IsInChatMessagingLockdown() then return end
   if not self.cache.calendarOpened then
-    local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
-    if currentCalendarTime and currentCalendarTime.month then
-      C_Calendar.SetAbsMonth(currentCalendarTime.month, currentCalendarTime.year)
+    local openCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
+    if not openCalendarTime then
+      return
+    end
+    local month = openCalendarTime.month
+    local year = openCalendarTime.year
+    if not canaccessvalue(month) or not canaccessvalue(year) then
+      return
+    end
+    if month and year then
+      C_Calendar.SetAbsMonth(month, year)
       C_Calendar.OpenCalendar()
       self.cache.calendarOpened = true
     end
   end
   local currentCalendarTime = C_DateAndTime.GetCurrentCalendarTime()
-  if not currentCalendarTime or not currentCalendarTime.monthDay then
+  if not currentCalendarTime then
     return
   end
   local today = currentCalendarTime.monthDay
+  if not canaccessvalue(today) then
+    return
+  end
+  if not today then
+    return
+  end
   local numEvents = C_Calendar.GetNumDayEvents(0, today)
   if not numEvents then
     return
   end
-  for i = 1, numEvents do
-    local event = C_Calendar.GetDayEvent(0, today, i)
-    if event and not Helpers:IsSecretValue(event.eventID) and event.eventID == 479 then
-      self.cache.isDarkmoonOpen = true
+  for eventIndex = 1, numEvents do
+    local event = C_Calendar.GetDayEvent(0, today, eventIndex)
+    if event then
+      local eventID = event.eventID
+      if not canaccessvalue(eventID) then
+        return
+      end
+      if eventID == 479 then
+        self.cache.isDarkmoonOpen = true
+      end
     end
   end
   Helpers:Debug("├ Darkmoon Faire is open: ", self.cache.isDarkmoonOpen and "Yes" or "No")
@@ -760,9 +793,12 @@ function Data:ScanProfessions()
     Helpers:Debug("├ Found Spellbook Profession: " .. (skillLineVariantName or skillLineName))
   end)
 
-  local learnedSkillLineIDs = TableMap(learnedProfessions, function(spellbookProfession)
+  ---@param spellbookProfession WK_LearnedProfession
+  ---@return number
+  local function learnedProfessionSkillLineID(spellbookProfession)
     return spellbookProfession.skillLineID
-  end)
+  end
+  local learnedSkillLineIDs = TableMap(learnedProfessions, learnedProfessionSkillLineID)
 
   -- Detect if an old character profession should be removed (not in spellbook)
   local professions = TableFilter(character.professions, function(characterProfession)
@@ -1048,8 +1084,9 @@ function Data:ScanItems()
     end
     if objective.requires and TableCount(objective.requires) > 0 then
       TableForEach(objective.requires, function(requirement)
-        if requirement.type == "item" then
-          table.insert(itemIDs, requirement.id)
+        local requirementID = requirement.id
+        if requirement.type == "item" and requirementID then
+          table.insert(itemIDs, requirementID)
         end
       end)
     end
@@ -1269,8 +1306,6 @@ function Data:GetObjectiveProgress(character, objective)
       ---@type WK_ObjectiveProgressRequirement
       local objectiveProgressRequirement = {
         requirement = requirement,
-        leftText = "-",
-        rightText = "-",
         isCompleted = false,
       }
       if requirement.type == "quest" then

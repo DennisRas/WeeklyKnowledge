@@ -9,15 +9,6 @@ local Constants = addon.Constants
 local LiqUI = addon.libs.LiqUI
 local TableFind = LiqUI.Utils.TableFind
 
----True if the value is a secret (WoW API); use before comparing/using API return values that may be secret.
----@param value any
----@return boolean
-function Helpers:IsSecretValue(value)
-  if issecretvalue == nil then return false end
-  ---@diagnostic disable-next-line: param-type-mismatch
-  return issecretvalue(value)
-end
-
 ---@param characterA table
 ---@param characterB table
 ---@return number

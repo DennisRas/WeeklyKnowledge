@@ -30,30 +30,47 @@ local function buildObjectiveCell(objective)
       text = format("|T%s:0|t %s", itemTexture, itemLink or text or "[Not Loaded]")
     end
 
+    ---@param cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    local function showItemObjectiveTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+      if link and strlen(link) > 0 then
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetHyperlink(link)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+        GameTooltip:Show()
+      end
+    end
+
+    ---@param _cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    ---@param _button string
+    local function linkItemObjective(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+      if link and strlen(link) > 0 then
+        if IsModifiedClick("CHATLINK") then
+          if not ChatEdit_InsertLink(link) then
+            ChatFrame_OpenChat(link);
+          end
+        end
+      end
+    end
+
     ---@type LiqUI_TableDataCellExtended
     return {
       data = text,
-      onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        if link and strlen(link) > 0 then
-          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-          GameTooltip:SetHyperlink(link)
-          GameTooltip:AddLine(" ")
-          GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-          GameTooltip:Show()
-        end
-      end,
-      onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:Hide()
-      end,
-      onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-        if link and strlen(link) > 0 then
-          if IsModifiedClick("CHATLINK") then
-            if not ChatEdit_InsertLink(link) then
-              ChatFrame_OpenChat(link);
-            end
-          end
-        end
-      end,
+      onEnter = showItemObjectiveTooltip,
+      onLeave = GameTooltip_Hide,
+      onClick = linkItemObjective,
     }
   end
 
@@ -81,33 +98,50 @@ local function buildObjectiveCell(objective)
       link = C_Spell.GetSpellLink(recipeInfo.recipeID or spellID)
       text = format("|T%s:0|t %s", recipeInfo.icon, recipeInfo.name)
     end
+    ---@param cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    local function showRecipeObjectiveTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+      if link and strlen(link) > 0 then
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetHyperlink(link)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+        GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+        GameTooltip:Show()
+      end
+    end
+
+    ---@param _cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    ---@param _button string
+    local function openRecipeObjective(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+      if link and strlen(link) > 0 then
+        if IsModifiedClick("CHATLINK") then
+          if not ChatEdit_InsertLink(link) then
+            ChatFrame_OpenChat(link);
+          end
+        else
+          C_TradeSkillUI.OpenRecipe(spellID)
+        end
+      end
+    end
+
     ---@type LiqUI_TableDataCellExtended
     return {
       data = text,
-      onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        if link and strlen(link) > 0 then
-          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-          GameTooltip:SetHyperlink(link)
-          GameTooltip:AddLine(" ")
-          GameTooltip:AddLine("<Click to open Recipe>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-          GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-          GameTooltip:Show()
-        end
-      end,
-      onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:Hide()
-      end,
-      onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-        if link and strlen(link) > 0 then
-          if IsModifiedClick("CHATLINK") then
-            if not ChatEdit_InsertLink(link) then
-              ChatFrame_OpenChat(link);
-            end
-          else
-            C_TradeSkillUI.OpenRecipe(spellID)
-          end
-        end
-      end,
+      onEnter = showRecipeObjectiveTooltip,
+      onLeave = GameTooltip_Hide,
+      onClick = openRecipeObjective,
     }
   end
 
@@ -118,30 +152,47 @@ local function buildObjectiveCell(objective)
     if questTooltipData and questTooltipData.lines and questTooltipData.lines[1] and questTooltipData.lines[1].leftText then
       text = WrapTextInColorCode(format("%s [%s]", CreateAtlasMarkup("questlog-questtypeicon-Recurring", 14, 14), questTooltipData.lines[1].leftText), "ffffff00")
     end
+    ---@param cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    local function showQuestObjectiveTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+      if link and strlen(link) > 0 then
+        GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+        GameTooltip:SetHyperlink(link)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+        GameTooltip:Show()
+      end
+    end
+
+    ---@param _cellFrame LiqUI_TableCellFrame
+    ---@param _rowFrame LiqUI_TableRowFrame
+    ---@param _rowIndex integer
+    ---@param _columnIndex integer
+    ---@param _columnId string|nil
+    ---@param _rowData LiqUI_TableDataRowExtended
+    ---@param _cellData LiqUI_TableDataCellExtended|nil
+    ---@param _button string
+    local function linkQuestObjective(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+      if link and strlen(link) > 0 then
+        if IsModifiedClick("CHATLINK") then
+          if not ChatEdit_InsertLink(link) then
+            ChatFrame_OpenChat(link);
+          end
+        end
+      end
+    end
+
     ---@type LiqUI_TableDataCellExtended
     return {
       data = text,
-      onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        if link and strlen(link) > 0 then
-          GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-          GameTooltip:SetHyperlink(link)
-          GameTooltip:AddLine(" ")
-          GameTooltip:AddLine("<Shift Click to Link to Chat>", GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-          GameTooltip:Show()
-        end
-      end,
-      onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-        GameTooltip:Hide()
-      end,
-      onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-        if link and strlen(link) > 0 then
-          if IsModifiedClick("CHATLINK") then
-            if not ChatEdit_InsertLink(link) then
-              ChatFrame_OpenChat(link);
-            end
-          end
-        end
-      end,
+      onEnter = showQuestObjectiveTooltip,
+      onLeave = GameTooltip_Hide,
+      onClick = linkQuestObjective,
     }
   end
 
@@ -169,21 +220,38 @@ local function buildProfessionCell(skillLineVariantID)
   if Data.db.global.showFullProfessionName then
     text = variant.name
   end
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showProfessionCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+    GameTooltip:SetText(text, 1, 1, 1);
+    GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
+    GameTooltip:Show()
+  end
+
+  ---@param _cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  ---@param _button string
+  local function openProfessionFromCell(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+    C_TradeSkillUI.OpenTradeSkill(skillLine.id)
+  end
+
   ---@type LiqUI_TableDataCellExtended
   return {
     data = text,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText(text, 1, 1, 1);
-      GameTooltip:AddLine(format("<Click to open profession>"), GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b)
-      GameTooltip:Show()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
-    onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-      C_TradeSkillUI.OpenTradeSkill(skillLine.id)
-    end,
+    onEnter = showProfessionCellTooltip,
+    onLeave = GameTooltip_Hide,
+    onClick = openProfessionFromCell,
   }
 end
 
@@ -208,18 +276,25 @@ local function buildCategoryCell(objective)
       data = "?",
     }
   end
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showCategoryCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+    GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
+    GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
+    GameTooltip:Show()
+  end
+
   ---@type LiqUI_TableDataCellExtended
   return {
     data = objectiveCategory.name,
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
-      GameTooltip:SetText(objectiveCategory.name, 1, 1, 1);
-      GameTooltip:AddLine(objectiveCategory.description, nil, nil, nil, true)
-      GameTooltip:Show()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
+    onEnter = showCategoryCellTooltip,
+    onLeave = GameTooltip_Hide,
   }
 end
 
@@ -299,6 +374,7 @@ end
 ---@param progress WK_ObjectiveProgress
 ---@return LiqUI_TableDataCellExtended
 local function buildWaypointCell(character, objective, progress)
+  ---@type WK_TomTom?
   local TomTomGlobal = _G["TomTom"]
   local loc = objective.loc
   local mapID = loc and loc.m
@@ -316,11 +392,15 @@ local function buildWaypointCell(character, objective, progress)
     end
   end
 
-  ---@type LiqUI_TableDataCellExtended
-  return {
-    data = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
-    onEnter = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      local showTooltip = function()
+  ---@param cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  local function showWaypointCellTooltip(cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData)
+    local function showTooltip()
         GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
         GameTooltip:SetText("Do you know de wey?", 1, 1, 1)
 
@@ -413,13 +493,19 @@ local function buildWaypointCell(character, objective, progress)
         end)
       end
 
-      showTooltip()
-    end,
-    onLeave = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData)
-      GameTooltip:Hide()
-    end,
-    onClick = function(cellFrame, rowFrame, rowIndex, columnIndex, columnId, rowData, cellData, button)
-      local pinMapID = mapID
+    showTooltip()
+  end
+
+  ---@param _cellFrame LiqUI_TableCellFrame
+  ---@param _rowFrame LiqUI_TableRowFrame
+  ---@param _rowIndex integer
+  ---@param _columnIndex integer
+  ---@param _columnId string|nil
+  ---@param _rowData LiqUI_TableDataRowExtended
+  ---@param _cellData LiqUI_TableDataCellExtended|nil
+  ---@param _button string
+  local function clickWaypointCell(_cellFrame, _rowFrame, _rowIndex, _columnIndex, _columnId, _rowData, _cellData, _button)
+    local pinMapID = mapID
       if not mapPoint then
         return
       end
@@ -434,21 +520,30 @@ local function buildWaypointCell(character, objective, progress)
       if not pinY then
         return
       end
-      if IsAltKeyDown() and TomTomGlobal then
-        local text = "Objective"
-        TomTomGlobal:AddWaypoint(pinMapID, pinX / 100, pinY / 100, {title = text, from = addon.name})
-      elseif C_Map.CanSetUserWaypointOnMap(pinMapID) then
-        if IsModifiedClick("CHATLINK") then
-          local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", pinMapID, pinX * 100, pinY * 100, MAP_PIN_HYPERLINK)
-          if not ChatEdit_InsertLink(hyperlink) then
-            ChatFrame_OpenChat(hyperlink);
-          end
-        else
-          C_Map.SetUserWaypoint(mapPoint)
-          C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+    if IsAltKeyDown() and TomTomGlobal then
+      local text = "Objective"
+      ---@type WK_TomTomWaypointOptions
+      local waypointOptions = {title = text, from = addon.name}
+      TomTomGlobal:AddWaypoint(pinMapID, pinX / 100, pinY / 100, waypointOptions)
+    elseif C_Map.CanSetUserWaypointOnMap(pinMapID) then
+      if IsModifiedClick("CHATLINK") then
+        local hyperlink = format("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r", pinMapID, pinX * 100, pinY * 100, MAP_PIN_HYPERLINK)
+        if not ChatEdit_InsertLink(hyperlink) then
+          ChatFrame_OpenChat(hyperlink);
         end
+      else
+        C_Map.SetUserWaypoint(mapPoint)
+        C_SuperTrack.SetSuperTrackedUserWaypoint(true)
       end
-    end,
+    end
+  end
+
+  ---@type LiqUI_TableDataCellExtended
+  return {
+    data = CreateAtlasMarkup("Waypoint-MapPin-Tracked", 20, 20, -4),
+    onEnter = showWaypointCellTooltip,
+    onLeave = GameTooltip_Hide,
+    onClick = clickWaypointCell,
   }
 end
 

@@ -1,3 +1,29 @@
+---@class WK_AceDB : AceDBObject-3.0
+---@field global WK_DefaultGlobal
+
+---@class WK_Data
+---@field db WK_AceDB
+---@field DBVersion number
+---@field defaultDB table
+---@field defaultCharacter WK_Character
+---@field MISSING_INFO number
+---@field cache WK_DataCache
+---@field Objectives WK_Objective[]
+---@field ObjectiveCategories WK_ObjectiveCategory[]
+---@field SkillLineVariants WK_SkillLineVariant[]
+---@field SkillLines WK_SkillLine[]
+---@field expansionEnabled table<Enum.ExpansionLevel, boolean>
+
+---@class WK_DataCache
+---@field calendarOpened boolean
+---@field isDarkmoonOpen boolean
+---@field inCombat boolean
+---@field items table<integer, ItemMixin>
+---@field mapInfo table<integer, UiMapDetails>
+---@field progressCache table<string, WK_ObjectiveProgress[]>
+---@field completedQuests table<integer, boolean>
+---@field tradeSkillRecipes TradeSkillRecipeInfo[]
+
 ---@class WK_DefaultGlobal
 ---@field DBVersion integer?
 ---@field weeklyReset integer?
@@ -7,12 +33,6 @@
 ---@field liqui LiqUI_DB
 ---@field main WK_DefaultGlobalMain
 ---@field checklist WK_DefaultGlobalChecklist
-
----@class WK_DefaultGlobalMain
----@field selectedExpansions Enum.ExpansionLevel[]?
----@field fontSize integer?
----@field checklistHelpTipClosed boolean?
----@field hideLowLevelProfessions boolean?
 
 ---@class WK_DefaultGlobalChecklist
 ---@field selectedExpansions Enum.ExpansionLevel[]?
@@ -26,25 +46,30 @@
 ---@field hideTable boolean
 ---@field hideTableHeader boolean
 
----@class WK_DataCache
----@field calendarOpened boolean
----@field isDarkmoonOpen boolean
----@field inCombat boolean
----@field items table<integer, ItemMixin>
----@field mapInfo table<integer, UiMapDetails>
----@field progressCache table<string, WK_ObjectiveProgress[]>
----@field completedQuests table<integer, boolean>
----@field tradeSkillRecipes TradeSkillRecipeInfo[]
+---@class WK_DefaultGlobalMain
+---@field selectedExpansions Enum.ExpansionLevel[]?
+---@field fontSize integer?
+---@field checklistHelpTipClosed boolean?
+---@field hideLowLevelProfessions boolean?
 
----@class WK_Data
----@field db { global: WK_DefaultGlobal }
----@field DBVersion number
----@field defaultDB table
----@field defaultCharacter WK_Character
----@field MISSING_INFO number
----@field cache WK_DataCache
----@field Objectives WK_Objective[]
----@field ObjectiveCategories WK_ObjectiveCategory[]
----@field SkillLineVariants WK_SkillLineVariant[]
----@field SkillLines WK_SkillLine[]
----@field expansionEnabled table<Enum.ExpansionLevel, boolean>
+---@class WK_LegacyCatchUpCurrency
+---@field currencyID integer
+
+---@class WK_LegacyCharacterProfession
+---@field catchUpCurrencyInfo WK_LegacyCatchUpCurrency?
+
+---@class WK_LegacyGlobal
+---@field windowScale number?
+---@field windowBackgroundColor ColorRGBAData?
+---@field main WK_LegacyGlobalMain
+---@field checklist WK_LegacyGlobalChecklist
+
+---@class WK_LegacyGlobalChecklist
+---@field windowScale number?
+---@field windowBackgroundColor ColorRGBAData?
+---@field hiddenColumns table<string, boolean>?
+
+---@class WK_LegacyGlobalMain
+---@field windowScale number?
+---@field windowBackgroundColor ColorRGBAData?
+---@field hiddenColumns table<string, boolean>?
