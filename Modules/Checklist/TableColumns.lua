@@ -2,6 +2,7 @@
 local addon = select(2, ...)
 
 local Constants = addon.Constants
+local L = addon.L
 
 ---@class WK_Checklist_TableColumns
 local TableColumns = {}
@@ -98,7 +99,7 @@ local function professionSortName(rowData)
   if not skillLine then
     return ""
   end
-  return skillLine.name:lower()
+  return Data:GetSkillLineDisplayName(skillLine):lower()
 end
 
 ---@param rowA WK_TableRowData
@@ -125,7 +126,7 @@ local function expansionSortName(rowData)
   if not expansion then
     return ""
   end
-  return expansion.name:lower()
+  return Data:GetExpansionDisplayName(expansion):lower()
 end
 
 ---@param rowA WK_TableRowData
@@ -210,7 +211,7 @@ local function repeatableLabel(rowData)
   if not objectiveCategory then
     return ""
   end
-  return objectiveCategory.repeatable or ""
+  return Data:GetRepeatableDisplayName(objectiveCategory.repeatable)
 end
 
 ---@param rowA WK_TableRowData
@@ -278,7 +279,7 @@ function TableColumns.GetDefinitions()
   local columns = {
     {
       id = "objective",
-      headerText = "Objective",
+      headerText = L["TABLE_HEADER_OBJECTIVE"],
       width = 260,
       sorting = {
         enabled = true,
@@ -287,7 +288,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "profession",
-      headerText = "Profession",
+      headerText = L["TABLE_HEADER_PROFESSION"],
       width = Data.db.global.showFullProfessionName and 160 or 100,
       hideable = true,
       sorting = {
@@ -297,7 +298,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "expansion",
-      headerText = "Expansion",
+      headerText = L["TABLE_HEADER_EXPANSION"],
       width = 120,
       hideable = true,
       sorting = {
@@ -307,7 +308,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "category",
-      headerText = "Category",
+      headerText = L["TABLE_HEADER_CATEGORY"],
       width = 80,
       hideable = true,
       sorting = {
@@ -317,7 +318,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "location",
-      headerText = "Location",
+      headerText = L["TABLE_HEADER_LOCATION"],
       width = 100,
       hideable = true,
       sorting = {
@@ -327,7 +328,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "repeatable",
-      headerText = "Repeat?",
+      headerText = L["TABLE_HEADER_REPEATABLE"],
       width = 60,
       hideable = true,
       sorting = {
@@ -337,7 +338,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "progress",
-      headerText = "Progress",
+      headerText = L["TABLE_HEADER_PROGRESS"],
       width = 70,
       align = "CENTER",
       hideable = true,
@@ -348,7 +349,7 @@ function TableColumns.GetDefinitions()
     },
     {
       id = "points",
-      headerText = "Points",
+      headerText = L["TABLE_HEADER_POINTS"],
       width = 70,
       align = "CENTER",
       hideable = true,
@@ -361,6 +362,8 @@ function TableColumns.GetDefinitions()
       id = "waypoint",
       headerText = "",
       width = 50,
+      minWidth = 40,
+      maxWidth = 60,
       align = "CENTER",
       sorting = {
         enabled = false,

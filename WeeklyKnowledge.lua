@@ -38,6 +38,8 @@ addon.Core = Core
 addon.debug = false
 
 function Core:Render()
+  addon.Main:ApplyTableColumns()
+  addon.Checklist:ApplyTableColumns()
   addon.Main:Render()
   addon.Checklist:Render()
 end

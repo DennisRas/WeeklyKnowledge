@@ -1,6 +1,7 @@
 ---@class WK_ObjectiveCategory
 ---@field id WK_ObjectiveCategoryId
 ---@field name string
+---@field legacyName string?
 ---@field description string
 ---@field type "item" | "quest" | "recipe"
 ---@field repeatable "No" | "Yes" | "Weekly" | "Monthly"

@@ -216,9 +216,9 @@ local function buildProfessionCell(skillLineVariantID)
     ---@type LiqUI_TableDataCellExtended
     return { data = "" }
   end
-  text = skillLine.name
+  text = Data:GetSkillLineDisplayName(skillLine)
   if Data.db.global.showFullProfessionName then
-    text = variant.name
+    text = Data:GetSkillLineVariantDisplayName(variant)
   end
   ---@param cellFrame LiqUI_TableCellFrame
   ---@param _rowFrame LiqUI_TableRowFrame
@@ -262,7 +262,7 @@ local function buildExpansionCell(skillLineVariantID)
   local expansion = skillLineVariant and LiqUI.Data:GetExpansionByID(skillLineVariant.expansionID)
   ---@type LiqUI_TableDataCellExtended
   return {
-    data = expansion and expansion.name or "",
+    data = Data:GetExpansionDisplayName(expansion),
   }
 end
 
@@ -339,7 +339,7 @@ local function buildRepeatableCell(objective)
   end
   ---@type LiqUI_TableDataCellExtended
   return {
-    data = objectiveCategory.repeatable or "",
+    data = Data:GetRepeatableDisplayName(objectiveCategory.repeatable),
   }
 end
 
