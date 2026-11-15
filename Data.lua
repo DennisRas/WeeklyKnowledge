@@ -810,20 +810,33 @@ function Data:ScanProfessions()
     return true
   end)
 
-  -- Detect if an invalid character profession should be removed (knowledge = 0/0)
+  -- Detect if an invalid or disabled-expansion character profession should be removed (knowledge = 0/0).
+  -- Skip removing an active spellbook variant from an enabled expansion that would immediately be re-added
+  -- below (e.g. while leveling a newly learned profession before its specialization trait tree initializes).
   character.professions = TableFilter(professions, function(characterProfession)
     local skillLineVariant = self:GetSkillLineVariantByID(characterProfession.skillLineVariantID)
-    if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
+    if not skillLineVariant or not self.expansionEnabled[skillLineVariant.expansionID] then
       addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant and skillLineVariant.name or "Unknown"))
       return false
+    end
+    if characterProfession.knowledgeLevel == 0 and characterProfession.knowledgeMaxLevel == 0 then
+      local isLearnedVariant = TableFind(learnedProfessions, function(learnedProfession)
+        return learnedProfession.skillLineVariant ~= nil and learnedProfession.skillLineVariant.id == characterProfession.skillLineVariantID
+      end)
+      if not isLearnedVariant then
+        addon.Core:Print(format("Removing invalid profession: %s", skillLineVariant.name or "Unknown"))
+        return false
+      end
     end
     return true
   end)
 
-  -- Add/update character professions based on the spellbook professions
+  -- Add/update character professions based on the spellbook professions.
+  -- Only add variants belonging to enabled expansions (matching filteredSkillLineIDs), otherwise
+  -- disabled-expansion tiers (such as Dragon Isles professions) stay at 0/0 and loop remove/add.
   TableForEach(learnedProfessions, function(learnedProfession)
     local skillLineVariant = learnedProfession.skillLineVariant
-    if not skillLineVariant then return end
+    if not skillLineVariant or not self.expansionEnabled[skillLineVariant.expansionID] then return end
     local characterProfession = TableFind(character.professions, function(profession)
       return profession.skillLineVariantID == skillLineVariant.id
     end)
