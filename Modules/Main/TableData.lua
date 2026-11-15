@@ -290,7 +290,10 @@ local function buildConcentrationCell(character, characterProfession)
       GameTooltip:AddLine("Estimated", 1, 1, 1, true)
       GameTooltip:AddDoubleLine("Concentration:", format("%d / %d", estimatedQuantity, currencyInfo.maxQuantity), nil, nil, nil, 1, 1, 1)
       GameTooltip:AddDoubleLine("Time to max:", SecondsToTime(timeToMax), nil, nil, nil, 1, 1, 1)
-      GameTooltip:AddDoubleLine("Maxed at:", tostring(date("%c", currencyInfo.lastUpdated + timeToMax)), nil, nil, nil, 1, 1, 1)
+      -- timeToMax is calculated from estimatedQuantity (which already accounts for regeneration
+      -- between currencyInfo.lastUpdated and GetServerTime()), so anchor the completion timestamp
+      -- to GetServerTime() rather than currencyInfo.lastUpdated.
+      GameTooltip:AddDoubleLine("Maxed at:", tostring(date("%c", GetServerTime() + timeToMax)), nil, nil, nil, 1, 1, 1)
       GameTooltip:AddLine(" ")
       GameTooltip:AddLine("Last Saved", 1, 1, 1, true)
     end
