@@ -264,7 +264,7 @@ function Data:MigrateDB()
         end
       end
     end
-    -- Fix professions without skillLine data. Look for the saved catchupCunrrecy or get rid of the profession if no catchup currency is found.
+    -- Fix professions without skillLine data. Look for the saved catchupCurrency or get rid of the profession if no catchup currency is found.
     if self.db.global.DBVersion == 11 then
       for _, character in pairs(self.db.global.characters) do
         if type(character.professions) == "table" then
@@ -430,6 +430,7 @@ function Data:MigrateDB()
         {"Skill",         "skill"},
         {"Concentration", "concentration"},
         {"Knowledge",     "knowledge"},
+        {"Moxie",         "moxie"},
       }
       for _, pair in ipairs(mainStatic) do
         migrateHiddenColumnKey(mainHidden, pair[1], pair[2])
@@ -667,6 +668,9 @@ function Data:ScanCurrencies()
     end
     if skillLineVariant.concentrationCurrencyID and skillLineVariant.concentrationCurrencyID > 0 then
       currencyIDs[skillLineVariant.concentrationCurrencyID] = true
+    end
+    if skillLineVariant.moxieCurrencyID then
+      currencyIDs[skillLineVariant.moxieCurrencyID] = true
     end
   end)
 

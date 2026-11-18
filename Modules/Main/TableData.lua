@@ -406,6 +406,28 @@ end
 ---@param character WK_Character
 ---@param characterProfession WK_CharacterProfession
 ---@param skillLineVariantID integer
+---@return LiqUI_TableDataCellExtended
+local function buildMoxieCell(character, characterProfession, skillLineVariantID)
+  local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
+  local text = skillLineVariant and skillLineVariant.moxieCurrencyID or "--"
+  local characterCurrency = Data:GetCharacterCurrency(character, skillLineVariant.moxieCurrencyID)
+  if characterCurrency then
+    if (characterCurrency.quantity or 0) >= 600 then
+      text = GREEN_FONT_COLOR:WrapTextInColorCode(characterCurrency.quantity or 0)
+    else
+      text = format("%d", characterCurrency.quantity or 0)
+    end
+  end
+
+  ---@type LiqUI_TableDataCellExtended
+  return {
+    data = text,
+  }
+end
+
+---@param character WK_Character
+---@param characterProfession WK_CharacterProfession
+---@param skillLineVariantID integer
 ---@param objectiveCategory WK_ObjectiveCategory
 ---@return LiqUI_TableDataCellExtended
 local function buildCategoryCell(character, characterProfession, skillLineVariantID, objectiveCategory)
@@ -539,6 +561,7 @@ function TableData.BuildRow(character, characterProfession)
     buildSkillCell(characterProfession),
     buildConcentrationCell(character, characterProfession),
     buildKnowledgeCell(characterProfession, skillLineVariantID),
+    buildMoxieCell(character, characterProfession, skillLineVariantID),
   }
 
   local objectiveCategories = Data:GetObjectiveCategories()
