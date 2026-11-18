@@ -404,10 +404,9 @@ local function buildKnowledgeCell(characterProfession, skillLineVariantID)
 end
 
 ---@param character WK_Character
----@param characterProfession WK_CharacterProfession
 ---@param skillLineVariantID integer
 ---@return LiqUI_TableDataCellExtended
-local function buildMoxieCell(character, characterProfession, skillLineVariantID)
+local function buildMoxieCell(character, skillLineVariantID)
   local skillLineVariant = Data:GetSkillLineVariantByID(skillLineVariantID)
   local text = skillLineVariant and skillLineVariant.moxieCurrencyID or "--"
   local characterCurrency = Data:GetCharacterCurrency(character, skillLineVariant.moxieCurrencyID)
@@ -561,7 +560,7 @@ function TableData.BuildRow(character, characterProfession)
     buildSkillCell(characterProfession),
     buildConcentrationCell(character, characterProfession),
     buildKnowledgeCell(characterProfession, skillLineVariantID),
-    buildMoxieCell(character, characterProfession, skillLineVariantID),
+    buildMoxieCell(character, skillLineVariantID),
   }
 
   local objectiveCategories = Data:GetObjectiveCategories()
