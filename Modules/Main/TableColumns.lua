@@ -101,6 +101,17 @@ local function showKnowledgeColumnTooltip(cellFrame, _columnIndex, _columnId, _c
   GameTooltip:Show()
 end
 
+---@param cellFrame Button
+---@param _columnIndex integer
+---@param _columnId string|nil
+---@param _column LiqUI_TableOptionsColumn
+local function showMoxieColumnTooltip(cellFrame, _columnIndex, _columnId, _column)
+  GameTooltip:SetOwner(cellFrame, "ANCHOR_RIGHT")
+  GameTooltip:SetText("Moxie Points", 1, 1, 1)
+  GameTooltip:AddLine("Current Moxie.")
+  GameTooltip:Show()
+end
+
 ---@param rowA WK_TableRowData
 ---@param rowB WK_TableRowData
 ---@return boolean
@@ -201,12 +212,33 @@ local function totalKnowledgePoints(rowData)
   return (rowData.characterProfession.knowledgeLevel or 0) + (rowData.characterProfession.knowledgeUnspent or 0)
 end
 
+---@param rowData WK_TableRowData
+---@return number
+local function totalMoxiePoints(rowData)
+  if not rowData.characterProfession then return 0 end
+  local skillLineVariant = Data:GetSkillLineVariantByID(rowData.skillLineVariantID)
+  if not skillLineVariant then return 0 end
+  local characterCurrency = Data:GetCharacterCurrency(rowData.character, skillLineVariant.moxieCurrencyID)
+  if not characterCurrency then return 0 end
+  return characterCurrency.quantity
+end
+
 ---@param rowA WK_TableRowData
 ---@param rowB WK_TableRowData
 ---@return boolean
 local function compareKnowledgeColumn(rowA, rowB)
   local totalA = totalKnowledgePoints(rowA)
   local totalB = totalKnowledgePoints(rowB)
+  if totalA ~= totalB then return totalA < totalB end
+  return rowA.skillLineVariantID < rowB.skillLineVariantID
+end
+
+---@param rowA WK_TableRowData
+---@param rowB WK_TableRowData
+---@return boolean
+local function compareMoxieColumn(rowA, rowB)
+  local totalA = totalMoxiePoints(rowA)
+  local totalB = totalMoxiePoints(rowB)
   if totalA ~= totalB then return totalA < totalB end
   return rowA.skillLineVariantID < rowB.skillLineVariantID
 end
@@ -314,6 +346,19 @@ function TableColumns.GetDefinitions()
       sorting = {
         enabled = true,
         compare = compareKnowledgeColumn,
+      },
+    },
+    {
+      id = "moxie",
+      headerText = "Moxie",
+      onEnter = showMoxieColumnTooltip,
+      onLeave = GameTooltip_Hide,
+      width = 100,
+      align = "CENTER",
+      hideable = true,
+      sorting = {
+        enabled = true,
+        compare = compareMoxieColumn,
       },
     },
   }
